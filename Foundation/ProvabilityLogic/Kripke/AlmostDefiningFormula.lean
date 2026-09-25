@@ -94,7 +94,33 @@ namespace RootedModel
 lemma graft.exists_forces_boxItr_bot {N : RootedModel κ α} [N.IsFiniteGL] {a : N.NonRoot}
     {z : (N.graft a ℕ).World} (hz : z ≠ (N.graft a ℕ).root) :
     ∃ n, z ⊩[(N.graft a ℕ).toModel] □^[n]⊥ := by
-  sorry
+  have : Fintype N.World := Fintype.ofFinite _;
+  have h₁ : ∀ k x, x ≠ N.root → x ⊩[N.toModel] □^[k]⊥ →
+      Sum.inl x ⊩[(N.graft a ℕ).toModel] □^[k]⊥ := by
+    intro k;
+    induction k with
+    | zero => exact fun _ _ h ↦ absurd h not_forces_bot;
+    | succ k ih =>
+      rintro x hx h;
+      apply forces_boxItr_succ.mpr;
+      rintro (y | i) R;
+      · exact ih y (fun h ↦ not_rel_root (h ▸ R)) (forces_boxItr_succ.mp h y R);
+      · exact absurd R hx;
+  have h₂ : ∀ x, x ≠ N.root → Sum.inl x ⊩[(N.graft a ℕ).toModel] □^[N.height + 1]⊥ :=
+    fun x hx ↦ h₁ _ x hx <| forces_boxItr_bot_iff.mpr <| Nat.lt_add_one_of_le rank_le_height;
+  have h₃ : ∀ i : ℕ, Sum.inr i ⊩[(N.graft a ℕ).toModel] □^[i + N.height + 2]⊥ := by
+    intro i;
+    induction i using Nat.strong_induction_on with
+    | _ i ih =>
+      apply forces_boxItr_succ.mpr;
+      rintro (y | j) R;
+      · apply forces_boxItr_bot_of_le (by omega) (h₂ y _);
+        rcases R with rfl | R;
+        exacts [a.2, fun h ↦ not_rel_root (h ▸ R)];
+      · exact forces_boxItr_bot_of_le (by grind) (ih j R);
+  rcases z with x | i;
+  · exact ⟨_, h₂ x fun h ↦ hz (h ▸ rfl)⟩;
+  · exact ⟨_, h₃ i⟩;
 
 variable [DecidableEq α] (P : Finset α) (M : RootedModel κ α) [Fintype M.World] [M.IsGL]
 
