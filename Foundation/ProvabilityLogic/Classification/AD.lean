@@ -87,8 +87,8 @@ it contains `𝐃`.
 - [AB05, Lemma 51, Corollary 52(ii)]
 -/
 theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
-    (h : 𝐀 ⊂ (T.provabilityLogicRelativeTo U : Logic α)) :
-    𝐃 ⊆ (T.provabilityLogicRelativeTo U : Logic α) := by
+    (h : 𝐀@α ⊂ T.provabilityLogicRelativeTo U) :
+    𝐃@α ⊆ T.provabilityLogicRelativeTo U := by
   obtain ⟨A, hAL, hAA⟩ := Set.exists_of_ssubset h;
   apply sumQuasiNormal_subset_provabilityLogic;
   rintro _ (rfl | ⟨B, C, rfl⟩);
@@ -102,8 +102,8 @@ theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U : Logic 
 -/
 theorem not_A_ssubset_provabilityLogic_ssubset_D
     (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ) :
-    ¬(𝐀 ⊂ (T.provabilityLogicRelativeTo U : Logic α) ∧
-      (T.provabilityLogicRelativeTo U : Logic α) ⊂ 𝐃) :=
+    ¬(𝐀@α ⊂ T.provabilityLogicRelativeTo U ∧
+      T.provabilityLogicRelativeTo U ⊂ 𝐃@α) :=
   fun ⟨h₁, h₂⟩ ↦ h₂.not_subset (D_subset_provabilityLogic hT h₁)
 
 end FFL.ProvabilityLogic
