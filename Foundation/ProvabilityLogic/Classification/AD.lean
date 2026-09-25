@@ -61,12 +61,12 @@ theorem exists_realization_sigma1_reflection_of_not_A (hA : 𝐀 ⊬ A)
     ∃ n, ∃ f : Realization α ℒₒᵣ,
       𝗜𝚺₁ ⊢ f T (∼□^[n]⊥ ⋏ A) 🡒 T.standardProvability σ 🡒 σ := by
   classical
-  obtain ⟨κ, _, M, _, v, hM, Rv, hv⟩ := Logic.A.exists_countermodel hA;
-  let X := StrongReflexiveCountermodel.ofReflexive M hM Rv hv;
-  have : Fintype X.World := Fintype.ofFinite _;
-  have : X.IsGL := inferInstanceAs (M.graft _ (Fin 1)).IsGL;
-  let S := Theory.standardProvability.modifiedSolovaySentences T X hσ;
-  use X.height, S.realization;
+  obtain ⟨κ, _, N, _, v, hN, Rv, hv⟩ := Logic.A.exists_countermodel hA;
+  let M := StrongReflexiveCountermodel.ofReflexive N hN Rv hv;
+  have : Fintype M.World := Fintype.ofFinite _;
+  have : M.IsGL := inferInstanceAs (N.graft _ (Fin 1)).IsGL;
+  let S := Theory.standardProvability.modifiedSolovaySentences T M hσ;
+  use M.height, S.realization;
   have h := S.reflection;
   simp only [Provability.conItr, standardInterpret, interpret, interpret_boxItr] at h ⊢;
   cl_prover [h];
