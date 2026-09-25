@@ -204,6 +204,7 @@ public import Foundation.ProvabilityLogic.Grz.Basic
 public import Foundation.ProvabilityLogic.Grz.Boxdot
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Basic
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Kripke
+public import Foundation.ProvabilityLogic.Kripke.AlmostDefiningFormula
 public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Foundation.ProvabilityLogic.Kripke.Bisimulation
 public import Foundation.ProvabilityLogic.Kripke.Cone
