@@ -1,6 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Classification.General
+public import Foundation.Vorspiel.List.ExactlyOne
 
 /-!
 # Truth provability logics
@@ -184,30 +185,25 @@ not sound and `PL(T, 𝗧𝗔) = 𝐃`; `T` is not `𝚺₁`-sound, `T` has char
 
 - [AB05, Corollary 41]
 -/
-theorem provabilityLogic_TA_classification :
-    ∃! i : Fin 4, ![
-      ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐒@α,
-      T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐃@α,
-      ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐀@α,
-      ∃ n : ℕ, T.height = n ∧
-        (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐆𝐋β⁻ {n}ᶜ (by simp)] i := by
-  apply existsUnique_of_exists_of_unique;
+theorem provabilityLogic_TA_classification : [
+    ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐒@α,
+    T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐃@α,
+    ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ ∧ T.provabilityLogicRelativeTo 𝗧𝗔 = 𝐀@α,
+    ∃ n : ℕ, T.height = n ∧ (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐆𝐋β⁻ {n}ᶜ (by simp)
+  ].ExactlyOne := by
+  have h₁ : ℕ↓[ℒₒᵣ] ⊧* T → T.SoundOnHierarchy 𝚺 1 := fun _ ↦ inferInstance;
+  have h₂ : T.SoundOnHierarchy 𝚺 1 → T.height = ⊤ :=
+    fun _ ↦ Arithmetic.height_eq_top_of_sigma1_sound T;
+  exactly_one;
   · by_cases hs : ℕ↓[ℒₒᵣ] ⊧* T;
-    · use 0;
-      simpa [hs] using Logic.S.eq_provabilityLogicRelativeTo_TA.symm;
+    · exact .inl ⟨hs, Logic.S.eq_provabilityLogicRelativeTo_TA.symm⟩;
     by_cases hs₁ : T.SoundOnHierarchy 𝚺 1;
-    · use 1;
-      simpa [hs, hs₁] using provabilityLogic_TA_eq_D_iff.mpr ⟨hs₁, hs⟩;
+    · exact .inr <| .inl ⟨hs₁, hs, provabilityLogic_TA_eq_D_iff.mpr ⟨hs₁, hs⟩⟩;
     by_cases h : T.height = ⊤;
-    · use 2;
-      simpa [hs₁, h] using provabilityLogic_TA_eq_A_iff.mpr ⟨hs₁, h⟩;
+    · exact .inr <| .inr <| .inl ⟨hs₁, h, provabilityLogic_TA_eq_A_iff.mpr ⟨hs₁, h⟩⟩;
     · obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp h;
-      use 3;
-      exact ⟨n, hn.symm, provabilityLogic_TA_eq_GLBetaMinus_iff.mpr hn.symm⟩;
-  · have h₁ : ℕ↓[ℒₒᵣ] ⊧* T → T.SoundOnHierarchy 𝚺 1 := fun _ ↦ inferInstance;
-    have h₂ : T.SoundOnHierarchy 𝚺 1 → T.height = ⊤ :=
-      fun _ ↦ Arithmetic.height_eq_top_of_sigma1_sound T;
-    simp +contextual [Fin.forall_fin_succ, h₁, h₂, mt h₁, mt h₂];
+      exact .inr <| .inr <| .inr ⟨n, hn.symm, provabilityLogic_TA_eq_GLBetaMinus_iff.mpr hn.symm⟩;
+  all_goals simp +contextual [h₁, h₂];
 
 end FFL.ProvabilityLogic
 
