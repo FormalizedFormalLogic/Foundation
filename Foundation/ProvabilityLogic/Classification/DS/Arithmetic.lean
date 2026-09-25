@@ -21,16 +21,16 @@ namespace FFL.ProvabilityLogic
 
 open Entailment FirstOrder Formula LetterlessFormula
 
-variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁]
+variable {α β : Type*} {T U : ArithmeticTheory} [T.Δ₁]
 
-lemma LetterlessFormula.lift_mem_provabilityLogic_iff {β : Type*} {A : LetterlessFormula} :
+lemma LetterlessFormula.lift_mem_provabilityLogic_iff {A : LetterlessFormula} :
     A.lift ∈ (T.provabilityLogicRelativeTo U : Logic α) ↔
       A.lift ∈ (T.provabilityLogicRelativeTo U : Logic β) := by
   constructor <;> intro h f <;> simpa only [standardInterpret, interpret_lift] using h ⟨fun _ ↦ ⊥⟩;
 
 variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 
-lemma A_subset_provabilityLogic_of_trace {β : Type*}
+lemma A_subset_provabilityLogic_of_trace
     (h : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ) :
     𝐀 ⊆ (T.provabilityLogicRelativeTo U : Logic β) :=
   sumQuasiNormal_subset_provabilityLogic <| by
