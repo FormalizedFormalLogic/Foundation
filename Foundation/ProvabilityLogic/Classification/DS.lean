@@ -191,7 +191,7 @@ variable {α β : Type*} {T U : ArithmeticTheory} [T.Δ₁]
          {A : Formula α} {σ : ArithmeticSentence}
 
 lemma LetterlessFormula.lift_mem_provabilityLogic_iff {A : LetterlessFormula} :
-  ↑A ∈ T.provabilityLogicRelativeTo U (α := α) ↔ ↑A ∈ T.provabilityLogicRelativeTo U  (α := β)
+  ↑A ∈ T.provabilityLogicRelativeTo U (α := α) ↔ ↑A ∈ T.provabilityLogicRelativeTo U (α := β)
   := by
   constructor <;> intro h f <;> simpa only [standardInterpret, interpret_lift] using h ⟨fun _ ↦ ⊥⟩;
 
