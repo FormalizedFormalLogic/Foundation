@@ -27,13 +27,13 @@ namespace Logic.GL
 variable {α : Type*} {X : LetterlessFormulaSet}
 
 theorem sumQuasiNormal_eq_GLAlpha (h : ∀ A ∈ X, (trace A).Finite) :
-    (𝐆𝐋 over α +ᴸ ↑X) = 𝐆𝐋α X.trace := by
+    (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋α X.trace := by
   rw [GLAlpha.eq_sumQuasiNormal_lift,
     sumQuasiNormal_eq_iff (.inr ⟨h, by rintro _ ⟨n, -, rfl⟩; simp⟩)];
   simp [LetterlessFormulaSet.trace];
 
 theorem sumQuasiNormal_eq_GLBetaMinus (h : ∃ B ∈ X, (spectrum B).Finite) :
-    ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 over α +ᴸ ↑X) = 𝐆𝐋β⁻ X.trace hX := by
+    ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋β⁻ X.trace hX := by
   obtain ⟨B, hB, hfin⟩ := h;
   have hX : X.traceᶜ.Finite := hfin.subset fun n hn ↦
     LetterlessFormulaSet.mem_spectrum.mp (by simpa [LetterlessFormulaSet.trace] using hn) B hB;
@@ -44,8 +44,8 @@ theorem sumQuasiNormal_eq_GLBetaMinus (h : ∃ B ∈ X, (spectrum B).Finite) :
 
 /-- - [Bek90] -/
 theorem sumQuasiNormal_eq_GLAlpha_or_GLBetaMinus :
-    ((∀ A ∈ X, (trace A).Finite) ∧ (𝐆𝐋 over α +ᴸ ↑X) = 𝐆𝐋α X.trace) ∨
-    ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 over α +ᴸ ↑X) = 𝐆𝐋β⁻ X.trace hX := by
+    ((∀ A ∈ X, (trace A).Finite) ∧ (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋α X.trace) ∨
+    ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋β⁻ X.trace hX := by
   by_cases h : ∀ A ∈ X, (trace A).Finite;
   · exact .inl ⟨h, sumQuasiNormal_eq_GLAlpha h⟩;
   · push Not at h;
@@ -69,7 +69,7 @@ def Regular (T : ArithmeticTheory) [T.Δ₁] (A : LetterlessFormula) : Prop :=
 lemma regular_neg : (∼A).Regular T ↔ ¬A.Regular T := by
   simp [Regular, Formula.interpret];
 
-lemma Regular.of_imp [𝗜𝚺₁ ⪯ T] (h : A 🡒 B ∈ 𝐆𝐋 over Empty) (hA : A.Regular T) :
+lemma Regular.of_imp [𝗜𝚺₁ ⪯ T] (h : A 🡒 B ∈ 𝐆𝐋) (hA : A.Regular T) :
     B.Regular T := by
   have : ℕ↓[ℒₒᵣ] ⊧ (A 🡒 B).interpret ⟨Empty.elim⟩ T.standardProvability :=
     models_of_provable inferInstance (Logic.GL.arithmetical_soundness h);
@@ -124,8 +124,8 @@ variable {α : Type*} {X : LetterlessFormulaSet}
 
 /-- - [Bek90] -/
 theorem sumQuasiNormal_classification :
-    (X.Regular T ∧ (𝐆𝐋 over α +ᴸ ↑X) = 𝐆𝐋α X.trace) ∨
-    (¬X.Regular T ∧ ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 over α +ᴸ ↑X) = 𝐆𝐋β⁻ X.trace hX) := by
+    (X.Regular T ∧ (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋α X.trace) ∨
+    (¬X.Regular T ∧ ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋β⁻ X.trace hX) := by
   have e : X.Regular T ↔ ∀ A ∈ X, (trace A).Finite := by
     simp [LetterlessFormulaSet.Regular, regular_iff_trace_finite];
   by_cases h : X.Regular T;
