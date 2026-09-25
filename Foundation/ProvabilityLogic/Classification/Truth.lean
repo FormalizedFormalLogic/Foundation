@@ -33,7 +33,8 @@ lemma soundOnHierarchy_iff_models_reflection :
     T.SoundOnHierarchy 𝚺 1 ↔
       ∀ σ : ArithmeticSentence, Arithmetic.Hierarchy 𝚺 1 σ →
         ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ 🡒 σ := by
-  sorry
+  simp only [Semantics.Imp.models_imply, models_standardProvability_iff];
+  exact ⟨fun _ σ hσ h ↦ T.soundOnHierarchy 𝚺 1 h hσ, fun h ↦ ⟨fun hσ hσ' ↦ h _ hσ' hσ⟩⟩
 
 variable [𝗜𝚺₁ ⪯ T] {n : ℕ}
 
