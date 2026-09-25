@@ -138,29 +138,39 @@ variable {P M}
 
 section Use
 
-variable {K : RootedModel κ' α} [K.IsGL] (hΦ : K.root ⊩[K.toModel] almostDefiningFormula P M)
+variable {K : RootedModel κ' α} (hΦ : K.root ⊩[K.toModel] almostDefiningFormula P M)
   {z : K.World}
 include hΦ
 
 lemma forces_dia_and_valuationConj_of_forces_almostDefiningFormula (hz : K.Rel K.root z)
     (h : z ⊮[K.toModel] □^[M.height + 1]⊥) :
     z ⊩[K.toModel]
-      ◇charFormulaUnder (M := M.toModel) P M.root ⋏ valuationConj (M := M.toModel) P M.root := by
-  sorry
+      ◇charFormulaUnder (M := M.toModel) P M.root ⋏ valuationConj (M := M.toModel) P M.root :=
+  (forces_and.mp hΦ).1 z hz h
 
 lemma exists_forces_charFormulaUnder_of_forces_boxItr (hz : K.Rel K.root z)
     (h : z ⊩[K.toModel] □^[M.height + 1]⊥) :
     ∃ y : M.World, z ⊩[K.toModel] y.charFormulaUnder P := by
-  sorry
+  obtain ⟨_, hB, hzB⟩ := forces_disj.mp <| (forces_and.mp hΦ).2 z hz h;
+  obtain ⟨y, -, rfl⟩ := Finset.mem_image.mp hB;
+  exact ⟨y, hzB⟩;
 
-lemma exists_rel_forces_charFormulaUnder (hz : K.Rel K.root z)
+lemma exists_rel_forces_charFormulaUnder [K.IsGL] (hz : K.Rel K.root z)
     (h : z ⊮[K.toModel] □^[M.height + 1]⊥) (x : M.World) :
     ∃ z', K.Rel z z' ∧ z' ⊩[K.toModel] x.charFormulaUnder P := by
-  sorry
+  obtain ⟨z₀, R₀, h₀⟩ := forces_dia.mp <|
+    (forces_and.mp <| forces_dia_and_valuationConj_of_forces_almostDefiningFormula hΦ hz h).1;
+  by_cases hx : x = M.root;
+  · exact ⟨z₀, R₀, hx ▸ h₀⟩;
+  · obtain ⟨z', R', h'⟩ := (forces_charFormulaUnder_iff.mp h₀).2.1 x (M.root_rel x hx);
+    exact ⟨z', IsTrans.trans _ _ _ R₀ R', h'⟩;
 
-lemma exists_root_rel_forces_charFormulaUnder (hr : K.root ⊮[K.toModel] □^[M.height + 2]⊥)
+lemma exists_root_rel_forces_charFormulaUnder [K.IsGL]
+    (hr : K.root ⊮[K.toModel] □^[M.height + 2]⊥)
     (x : M.World) : ∃ z', K.Rel K.root z' ∧ z' ⊩[K.toModel] x.charFormulaUnder P := by
-  sorry
+  obtain ⟨y, Ry, hy, -⟩ := exists_rel_depth hr;
+  obtain ⟨z', R', h'⟩ := exists_rel_forces_charFormulaUnder hΦ Ry hy x;
+  exact ⟨z', IsTrans.trans _ _ _ Ry R', h'⟩;
 
 end Use
 
