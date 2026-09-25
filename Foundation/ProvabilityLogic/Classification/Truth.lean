@@ -141,7 +141,23 @@ theorem provabilityLogic_TA_eq_S_iff :
 theorem provabilityLogic_TA_eq_D_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 : Logic α) = 𝐃 ↔
       T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T := by
-  sorry
+  inhabit α;
+  constructor;
+  · intro h;
+    and_intros;
+    · exact soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA (a := default)
+        (Set.eq_univ_of_forall fun _ ↦
+          mem_trace_provabilityLogic_iff.mpr <| h ▸ Logic.D.provable_TBB)
+        (h ▸ Logic.D.axiomD);
+    · exact fun hs ↦ Logic.D.ssubset_S.ne <| h.symm.trans <| provabilityLogic_TA_eq_S_iff.mpr hs;
+  · rintro ⟨_, hs⟩;
+    have hT := trace_provabilityLogic_TA_eq_univ_iff (α := α).mpr <|
+      Arithmetic.height_eq_top_of_sigma1_sound T;
+    rcases provabilityLogic_eq_A_or_eq_D_or_eq_S hT (provabilityLogic_TA_subset_S hT)
+      with h | h | h;
+    · exact absurd (h ▸ D_subset_provabilityLogic_TA) Logic.A.ssubset_D.not_subset;
+    · exact h;
+    · exact absurd (provabilityLogic_TA_eq_S_iff.mp h) hs;
 
 /-- - [AB05, Corollary 41(iii)] -/
 theorem provabilityLogic_TA_eq_A_iff :
