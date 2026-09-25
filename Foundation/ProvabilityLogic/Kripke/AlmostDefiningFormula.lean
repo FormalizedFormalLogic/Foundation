@@ -175,10 +175,17 @@ lemma exists_root_rel_forces_charFormulaUnder [K.IsGL]
 end Use
 
 lemma atoms_almostDefiningFormula : (almostDefiningFormula P M).atoms ⊆ P := by
-  sorry
+  have h : ∀ n, (□^[n]⊥ : Formula α).atoms = ∅ := fun n ↦ by induction n <;> simp_all;
+  have : (Finset.univ.image fun y : M.World ↦ y.charFormulaUnder P).disj.atoms ⊆ P :=
+    (FormulaFinset.atoms_disj_subset _).trans <| Finset.biUnion_subset.mpr <|
+      Finset.forall_mem_image.mpr fun y _ ↦ atoms_charFormulaUnder;
+  simpa [almostDefiningFormula, h] using
+    Finset.union_subset atoms_charFormulaUnder (Finset.union_subset atoms_valuationConj this);
 
 lemma modalized_almostDefiningFormula : (almostDefiningFormula P M).Modalized := by
-  sorry
+  intro p;
+  unfold almostDefiningFormula;
+  exact ⟨⟨trivial, trivial, trivial⟩, trivial⟩;
 
 lemma pseudoTail_forces_almostDefiningFormula (o : α → Prop) :
     Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] almostDefiningFormula P M := by
