@@ -35,11 +35,12 @@ instance [𝗜𝚺₁ ⪯ U] : 𝗜𝚺₁ ⪯ T.addTBB U N :=
 
 lemma provabilityLogic_subset_addTBB :
     (T.provabilityLogicRelativeTo U : Logic α) ⊆ T.provabilityLogicRelativeTo (T.addTBB U N) :=
-  sorry
+  fun _ hA f ↦ ArithmeticTheory.weakerThan_addTBB.pbl (hA f)
 
 lemma TBB_mem_provabilityLogic_addTBB {n : ℕ} (hn : n ∈ N) :
     (TBB n : Formula α) ∈ T.provabilityLogicRelativeTo (T.addTBB U N) :=
-  sorry
+  fun f ↦ by_axm <| Set.mem_union_right U
+    ⟨n, hn, by simpa using (interpret_lift (A := TBB n) (f := f)).symm⟩
 
 section
 
