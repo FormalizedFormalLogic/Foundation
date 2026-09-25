@@ -25,8 +25,9 @@ variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁]
 /-! ### Soundness and characteristic -/
 
 lemma models_standardProvability_iff {σ : ArithmeticSentence} :
-    ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ ↔ T ⊢ σ := by
-  sorry
+    ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ ↔ T ⊢ σ :=
+  ⟨T.standardProvability.sound_on,
+    fun h ↦ models_of_provable inferInstance (T.standardProvability.D1 h)⟩
 
 lemma soundOnHierarchy_iff_models_reflection :
     T.SoundOnHierarchy 𝚺 1 ↔
