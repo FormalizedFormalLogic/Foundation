@@ -231,7 +231,29 @@ end Kripke
 theorem Logic.S.not_provable_neg_of_forces_freeTail {M : Model κ α} [M.IsGL] {V : ℕ∞ → α → Prop}
     {C : Formula α} (hC : C.Modalized) (h : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] C) :
     𝐒 ⊬ ∼C := by
-  sorry
+  have key : ∀ C : Formula α, C.Modalized → ∃ k : ℕ, ∀ n ≥ k,
+      (Sum.inr (n : ℕ∞) ⊩[(M.toFreeTail V).toModel] C ↔
+        Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] C) := by
+    intro C hC;
+    induction C with
+    | atom a => exact (hC a rfl).elim;
+    | falsum => exact ⟨0, fun _ _ ↦ Iff.rfl⟩;
+    | imp A B ihA ihB =>
+      obtain ⟨k₁, h₁⟩ := ihA fun p ↦ (hC p).1;
+      obtain ⟨k₂, h₂⟩ := ihB fun p ↦ (hC p).2;
+      exact ⟨max k₁ k₂, fun n hn ↦ imp_congr (h₁ n (le_of_max_le_left hn))
+        (h₂ n (le_of_max_le_right hn))⟩;
+    | box D =>
+      by_cases hD : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] □D;
+      · exact ⟨0, fun n _ ↦ iff_of_true (toFreeTail.forces_box_of_root hD _) hD⟩;
+      · obtain ⟨z, R, hz⟩ := not_forces_box.mp hD;
+        obtain ⟨k, hk⟩ := toFreeTail.eventually_rel R;
+        exact ⟨k, fun n hn ↦ iff_of_false (fun h ↦ hz (h z (hk n hn))) hD⟩;
+  intro hC';
+  obtain ⟨k, hk⟩ := key C hC;
+  obtain ⟨i, hi⟩ := eventually_forces hC' (M.toFreeTail V).toModel (w := fun n ↦ .inr n)
+    fun n ↦ toFreeTail.rel_inr_inr.mpr (by exact_mod_cast n.lt_succ_self);
+  exact hi (max i k) (le_max_left _ _) ((hk _ (le_max_right _ _)).mpr h);
 
 end FFL.ProvabilityLogic
 
