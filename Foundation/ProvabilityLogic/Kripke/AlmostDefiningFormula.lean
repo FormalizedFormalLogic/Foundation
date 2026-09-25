@@ -17,7 +17,7 @@ public import Foundation.ProvabilityLogic.S.Basic
 
 namespace FFL.ProvabilityLogic
 
-open Kripke Kripke.Model Kripke.Model.World
+open Formula Kripke Kripke.Model Kripke.Model.World
 
 variable {κ κ' α : Type*} [Nonempty κ] [Nonempty κ']
 
@@ -58,16 +58,32 @@ section Depth
 
 variable {M : Model κ α} {x : M.World} {m n : ℕ}
 
+lemma forces_boxItr_succ {A : Formula α} :
+    x ⊩[M] □^[n + 1]A ↔ ∀ y, x ≺ y → y ⊩[M] □^[n]A := by
+  rw [boxItr_succ, forces_box];
+
 lemma forces_boxItr_bot_of_le (hmn : m ≤ n) (h : x ⊩[M] □^[m]⊥) : x ⊩[M] □^[n]⊥ := by
-  sorry
+  induction m generalizing x n with
+  | zero => exact absurd h not_forces_bot;
+  | succ m ih =>
+    obtain ⟨n, rfl⟩ := Nat.exists_eq_add_one.mpr (show 0 < n by omega);
+    exact forces_boxItr_succ.mpr fun y R ↦ ih (by omega) (forces_boxItr_succ.mp h y R);
 
 lemma exists_depth_of_forces_boxItr_bot (h : x ⊩[M] □^[n]⊥) :
     ∃ m, x ⊮[M] □^[m]⊥ ∧ x ⊩[M] □^[m + 1]⊥ := by
-  sorry
+  induction n with
+  | zero => exact absurd h not_forces_bot;
+  | succ n ih =>
+    by_cases hn : x ⊩[M] □^[n]⊥;
+    · exact ih hn;
+    · exact ⟨n, hn, h⟩;
 
 lemma exists_rel_depth [M.IsGL] (h : x ⊮[M] □^[n + 1]⊥) :
     ∃ y, x ≺ y ∧ y ⊮[M] □^[n]⊥ ∧ y ⊩[M] □^[n + 1]⊥ := by
-  sorry
+  obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp fun h' ↦ h (forces_boxItr_succ.mpr h');
+  obtain ⟨t, ⟨Rxt, ht⟩, hmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[M] □^[n]⊥} ⟨y, Rxy, hy⟩;
+  exact ⟨t, Rxt, ht, forces_boxItr_succ.mpr fun z Rtz ↦
+    by_contra fun hz ↦ hmax z ⟨IsTrans.trans _ _ _ Rxt Rtz, hz⟩ Rtz⟩;
 
 end Depth
 
