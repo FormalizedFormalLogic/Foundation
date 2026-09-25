@@ -100,11 +100,33 @@ end Transfer
 variable [DecidableEq α] {M : RootedModel κ α} [M.IsFiniteGL] [Fintype M.World] {o : α → Prop}
   {A : Formula α}
 
-lemma graft_root_forces_deltaPIff_imp (hA : Sum.inr ⊤ ⊮[(M.toPseudoTail o).toModel] A) (p : α)
-    (N : RootedModel κ' α) [N.IsFiniteGL] (a : N.NonRoot) :
-    (N.graft a ℕ).root ⊩[(N.graft a ℕ).toModel]
-      A.deltaPIff p 🡒 ∼almostDefiningFormula A.atoms M ⋎ (□#p 🡒 #p) := by
-  sorry
+lemma root_forces_deltaPIff_imp (hA : Sum.inr ⊤ ⊮[(M.toPseudoTail o).toModel] A) (p : α)
+    {K : RootedModel κ' α} [K.IsGL] (hr : ∀ n, K.root ⊮[K.toModel] □^[n]⊥)
+    (hK : ∀ z ≠ K.root, ∃ n, z ⊩[K.toModel] □^[n]⊥) :
+    K.root ⊩[K.toModel] A.deltaPIff p 🡒 ∼almostDefiningFormula A.atoms M ⋎ (□#p 🡒 #p) := by
+  classical
+  intro hδ hΦ hp;
+  by_contra hnp;
+  obtain ⟨γ, hγ₁, hγ₂⟩ : ∃ γ : Finset α,
+      γ ⊆ A.atoms ∧ ∀ q ∈ A.atoms, (q ∈ γ ↔ ¬(o q ↔ K.Val K.root q)) :=
+    ⟨A.atoms.filter fun q ↦ ¬(o q ↔ K.Val K.root q), Finset.filter_subset _ _,
+      fun q hq ↦ by simp [hq]⟩;
+  have hbox (z : K.World) (n : ℕ) :
+      z ⊩[K.toModel.subst (Substitution.pIffOn p γ)] □^[n]⊥ ↔ z ⊩[K.toModel] □^[n]⊥ := by
+    simpa using forces_subst (M := K.toModel) (x := z) (A := □^[n]⊥);
+  have hΦ' : K.root ⊩[K.toModel] almostDefiningFormula A.atoms M := of_not_not hΦ;
+  obtain ⟨Bi, hBi⟩ := exists_bisimulation_of_forces_almostDefiningFormula
+    (K := K.subst (Substitution.pIffOn p γ)) (P := A.atoms) (o := o)
+    (fun n h ↦ hr n ((hbox _ n).mp h)) (fun z hz ↦ (hK z hz).imp fun n ↦ (hbox z n).mpr)
+    ((forces_congr_of_modalized (K := K.toModel)
+      (K' := K.toModel.subst (Substitution.pIffOn p γ)) rfl (fun _ ↦ not_rel_root)
+      (fun z hz q ↦ (val_subst_pIffOn_of_ne hp hz).symm) modalized_almostDefiningFormula).mp hΦ')
+    (fun q hq ↦ (by
+      have := val_subst_pIffOn_root (γ := γ) (q := q) hnp;
+      grind : o q ↔ (K.subst (Substitution.pIffOn p γ)).Val K.root q));
+  have : K.root ⊩[K.toModel] A⟦Substitution.pIffOn p γ⟧ := forces_conj.mp hδ _ <|
+    Finset.mem_image_of_mem _ (Finset.mem_powerset.mpr hγ₁);
+  exact hA ((Bi.forces_iff hBi subset_rfl).mpr (forces_subst.mpr this));
 
 end Kripke.RootedModel
 
@@ -128,7 +150,8 @@ theorem exists_A_provable_deltaPIff_imp (hA : 𝐃 ⊬ A) (p : α) :
   · simpa using atoms_almostDefiningFormula;
   · exact S.not_provable_neg_of_forces_freeTail modalized_almostDefiningFormula
       (pseudoTail_forces_almostDefiningFormula o);
-  · exact Logic.A.iff_forces_graft.mpr fun N _ a ↦ graft_root_forces_deltaPIff_imp hM p N a;
+  · exact Logic.A.iff_forces_graft.mpr fun N _ a ↦ root_forces_deltaPIff_imp hM p
+      (graft.not_forces_boxItr_bot (a := a)) fun _ ↦ graft.exists_forces_boxItr_bot;
 
 /-- If `𝐃 ⊬ A`, there is a formula `B` over the atoms of `A` with `𝐒 ⊬ B` and
 `𝐀 +ᴸ {A} ⊢ B ⋎ (□#p 🡒 #p)`.
