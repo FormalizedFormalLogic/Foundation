@@ -104,6 +104,19 @@ lemma iff_eventually_forces_tail : 𝐒 ⊢ A ↔
 
 lemma iff_provable_GL : 𝐒 ⊢ A ↔ 𝐆𝐋 ⊢ A.rflSubfmls.conj 🡒 A := provability_TFAE.out 1 6
 
+/-- A formula outside `𝐒` is refuted at the root of a finite GL-model that is reflexive at the
+root for its boxed subformulas. -/
+lemma exists_countermodel (h : 𝐒 ⊬ A) :
+    ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
+      M.root ⊮[M.toModel] A ∧ ∀ B, □B ∈ A.subfmls → M.root ⊩[M.toModel] □B 🡒 B := by
+  obtain ⟨κ, _, M, _, hM⟩ :
+      ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
+        M.root ⊮[M.toModel] A.rflSubfmls.conj 🡒 A := by
+    simpa using GL.iff_root_forces.not.mp (iff_provable_GL.not.mp h);
+  obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hM;
+  exact ⟨κ, inferInstance, M, inferInstance, h₂,
+    fun B hB ↦ forces_conj.mp h₁ _ (Finset.mem_image.mpr ⟨B, by simpa using hB, rfl⟩)⟩;
+
 omit [DecidableEq α] in
 lemma consistent : (𝐒 : Logic α) ⊬ ⊥ := by
   classical
