@@ -181,7 +181,9 @@ lemma provable_subst {β : Type*} {A : Formula β} {s : Substitution β α} (h :
 
 omit [DecidableEq α] in
 lemma not_provable_subst_some (h : 𝐃 ⊬ A) : 𝐃 ⊬ A⟦fun a ↦ #(some a)⟧ := by
-  sorry
+  have e (B : Formula α) : (B⟦fun a ↦ #(some a)⟧)⟦fun a : Option α ↦ a.elim ⊥ (#·)⟧ = B := by
+    induction B <;> simp_all;
+  exact fun h' ↦ h (e A ▸ provable_subst h');
 
 end Logic.D
 
