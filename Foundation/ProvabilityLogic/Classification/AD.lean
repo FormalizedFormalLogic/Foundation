@@ -20,8 +20,7 @@ So no such provability logic lies strictly between `𝐀` and `𝐃`.
 
 namespace FFL.ProvabilityLogic
 
-open Entailment FirstOrder FirstOrder.ProvabilityAbstraction Kripke Kripke.Model Kripke.Model.World
-open Kripke.RootedModel Formula
+open Entailment FirstOrder ProvabilityAbstraction Kripke Model Model.World RootedModel Formula
 
 namespace Kripke.StrongReflexiveCountermodel
 
@@ -55,9 +54,10 @@ end Kripke.StrongReflexiveCountermodel
 universe u
 
 variable {α : Type u} {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Formula α}
+  {σ : ArithmeticSentence}
 
 theorem exists_realization_sigma1_reflection_of_not_A (hA : 𝐀 ⊬ A)
-    {σ : ArithmeticSentence} (hσ : Arithmetic.Hierarchy 𝚺 1 σ) :
+    (hσ : Arithmetic.Hierarchy 𝚺 1 σ) :
     ∃ n, ∃ f : Realization α ℒₒᵣ,
       𝗜𝚺₁ ⊢ f T (∼□^[n]⊥ ⋏ A) 🡒 T.standardProvability σ 🡒 σ := by
   classical
@@ -65,7 +65,7 @@ theorem exists_realization_sigma1_reflection_of_not_A (hA : 𝐀 ⊬ A)
   let M := StrongReflexiveCountermodel.ofReflexive N hN Rv hv;
   have : Fintype M.World := Fintype.ofFinite _;
   have : M.IsGL := inferInstanceAs (N.graft _ (Fin 1)).IsGL;
-  let S := Theory.standardProvability.modifiedSolovaySentences T M hσ;
+  let S := standardModifiedSolovaySentences T M hσ;
   use M.height, S.realization;
   have h := S.reflection;
   simp only [Provability.conItr, standardInterpret, interpret, interpret_boxItr] at h ⊢;
@@ -75,8 +75,7 @@ variable [𝗜𝚺₁ ⪯ U]
 
 theorem provable_sigma1_reflection_of_mem_of_not_A
     (hT : (T.provabilityLogicRelativeTo U : Logic α).trace = .univ)
-    (hAL : A ∈ T.provabilityLogicRelativeTo U) (hAA : 𝐀 ⊬ A)
-    {σ : ArithmeticSentence} (hσ : Arithmetic.Hierarchy 𝚺 1 σ) :
+    (hAL : A ∈ T.provabilityLogicRelativeTo U) (hAA : 𝐀 ⊬ A) (hσ : Arithmetic.Hierarchy 𝚺 1 σ) :
     U ⊢ T.standardProvability σ 🡒 σ := by
   obtain ⟨n, f, hf⟩ := exists_realization_sigma1_reflection_of_not_A (T := T) hAA hσ;
   exact WeakerThan.pbl hf ⨀ provabilityLogic_mdp (provabilityLogic_mdp (provabilityLogic_of_GL and₃)

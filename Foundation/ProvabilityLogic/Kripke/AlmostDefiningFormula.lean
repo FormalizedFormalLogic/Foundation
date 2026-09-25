@@ -21,15 +21,11 @@ the root is given. A modalized formula forced at the root of a free tail is not 
 
 namespace FFL.ProvabilityLogic
 
-open Formula Kripke Kripke.Model Kripke.Model.World
+open Formula Kripke Model Model.World
 
 variable {κ κ' α : Type*} [Nonempty κ] [Nonempty κ']
 
-namespace Kripke
-
-namespace Model
-
-section Modalized
+namespace Kripke.Model
 
 variable {K K' : Model κ α} {r : K.World} (hR : K.Rel' = K'.Rel') (hr : ∀ x, ¬K.Rel' x r)
   (hV : ∀ x ≠ r, ∀ a, K.Val x a ↔ K'.Val x a)
@@ -54,47 +50,9 @@ lemma forces_congr_of_modalized {C : Formula α} (hC : C.Modalized) : r ⊩[K] C
     exact hR ▸ forall_congr' fun y ↦ imp_congr_right fun R ↦
       forces_congr_of_ne hR hr hV fun h ↦ hr r <| by subst h; exact R;
 
-end Modalized
+end Kripke.Model
 
-section Depth
-
-variable {M : Model κ α} {x : M.World} {m n : ℕ}
-
-lemma forces_boxItr_succ {A : Formula α} :
-    x ⊩[M] □^[n + 1]A ↔ ∀ y, x ≺ y → y ⊩[M] □^[n]A :=
-  boxItr_succ ▸ forces_box
-
-lemma forces_boxItr_bot_of_le (hmn : m ≤ n) (h : x ⊩[M] □^[m]⊥) : x ⊩[M] □^[n]⊥ := by
-  induction m generalizing x n with
-  | zero => exact absurd h not_forces_bot;
-  | succ m ih =>
-    obtain ⟨n, rfl⟩ := Nat.exists_eq_add_one.mpr (show 0 < n by omega);
-    exact forces_boxItr_succ.mpr fun y R ↦ ih (by omega) (forces_boxItr_succ.mp h y R);
-
-lemma not_forces_boxItr_bot_of_le (hmn : m ≤ n) (h : x ⊮[M] □^[n]⊥) : x ⊮[M] □^[m]⊥ :=
-  fun h' ↦ h (forces_boxItr_bot_of_le hmn h')
-
-lemma exists_depth_of_forces_boxItr_bot (h : x ⊩[M] □^[n]⊥) :
-    ∃ m, x ⊮[M] □^[m]⊥ ∧ x ⊩[M] □^[m + 1]⊥ := by
-  induction n with
-  | zero => exact absurd h not_forces_bot;
-  | succ n ih =>
-    by_cases hn : x ⊩[M] □^[n]⊥;
-    · exact ih hn;
-    · exact ⟨n, hn, h⟩;
-
-lemma exists_rel_depth [M.IsGL] (h : x ⊮[M] □^[n + 1]⊥) :
-    ∃ y, x ≺ y ∧ y ⊮[M] □^[n]⊥ ∧ y ⊩[M] □^[n + 1]⊥ := by
-  obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp fun h' ↦ h (forces_boxItr_succ.mpr h');
-  obtain ⟨t, ⟨Rxt, ht⟩, hmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[M] □^[n]⊥} ⟨y, Rxy, hy⟩;
-  exact ⟨t, Rxt, ht, forces_boxItr_succ.mpr fun z Rtz ↦
-    by_contra fun hz ↦ hmax z ⟨IsTrans.trans _ _ _ Rxt Rtz, hz⟩ Rtz⟩;
-
-end Depth
-
-end Model
-
-namespace RootedModel
+namespace Kripke.RootedModel
 
 lemma graft.exists_forces_boxItr_bot {N : RootedModel κ α} [N.IsFiniteGL] {a : N.NonRoot}
     {z : (N.graft a ℕ).World} (hz : z ≠ (N.graft a ℕ).root) :
@@ -174,81 +132,6 @@ lemma pseudoTail_forces_almostDefiningFormula (o : α → Prop) :
     · exact absurd (toFreeTail.forces_inl.mp <| forces_boxItr_succ.mp hi (.inl M.root) trivial)
         fun h' ↦ lt_irrefl _ (root_forces_boxItr_bot_iff.mp h');
 
-section Bisimulation
-
-variable {o : α → Prop} {K : RootedModel κ' α}
-
-variable (P M o K) in
-private def almostBisimRel : (M.toPseudoTail o).toModel.World → K.World → Prop
-  | .inl x, z => z ⊩[K.toModel] charFormulaUnder (M := M.toModel) P x
-  | .inr i, z => i = ⊤ ∧ z = K.root ∨ ∃ m : ℕ, i = m ∧
-      z ⊮[K.toModel] □^[m + M.height + 1]⊥ ∧ z ⊩[K.toModel] □^[m + M.height + 2]⊥
-
-variable (hr : ∀ n, K.root ⊮[K.toModel] □^[n]⊥)
-  (hΦ : K.root ⊩[K.toModel] almostDefiningFormula P M)
-include hr hΦ
-
-private lemma almostBisimRel.atomic (ho : ∀ a ∈ P, (o a ↔ K.Val K.root a))
-    {x : (M.toPseudoTail o).toModel.World} {z : K.World} {a : α} (ha : a ∈ P)
-    (h : almostBisimRel P M o K x z) : (M.toPseudoTail o).toModel.Val x a ↔ K.Val z a := by
-  rcases x with x | i;
-  · exact (forces_charFormulaUnder_iff.mp h).1 a ha;
-  · rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, h₂⟩;
-    · simpa [Model.Val, toFreeTail] using ho a ha;
-    · have := forces_and.mp <| (forces_and.mp hΦ).1 z (K.root_rel _ fun h ↦ hr _ (h ▸ h₂))
-        (not_forces_boxItr_bot_of_le (by omega) h₁);
-      simpa [Model.Val, toFreeTail] using forces_valuationConj.mp this.2 a ha;
-
-private lemma almostBisimRel.forth [K.IsGL] {x y : (M.toPseudoTail o).toModel.World} {z : K.World}
-    (h : almostBisimRel P M o K x z) (R : x ≺ y) : ∃ z', almostBisimRel P M o K y z' ∧ z ≺ z' := by
-  rcases x with x | i <;> rcases y with y | j;
-  · exact ((forces_charFormulaUnder_iff.mp h).2.1 y R).imp fun _ ↦ And.symm;
-  · exact absurd R toFreeTail.not_rel_inl_inr;
-  · rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, h₂⟩;
-    · obtain ⟨z₀, R₀, h₀, -⟩ := exists_rel_depth (hr (M.height + 2));
-      obtain ⟨z', R', h'⟩ := exists_rel_forces_charFormulaUnder hΦ R₀ h₀ y;
-      exact ⟨z', h', IsTrans.trans _ _ _ R₀ R'⟩;
-    · exact (exists_rel_forces_charFormulaUnder hΦ (K.root_rel _ fun h ↦ hr _ (h ▸ h₂))
-        (not_forces_boxItr_bot_of_le (by omega) h₁) y).imp fun _ ↦ And.symm;
-  · obtain ⟨m', rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt R);
-    have : z ⊮[K.toModel] □^[m' + M.height + 2]⊥ := by
-      rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, -⟩;
-      · exact hr _;
-      · have : m' < m := by exact_mod_cast toFreeTail.rel_inr_inr.mp R;
-        exact not_forces_boxItr_bot_of_le (by omega) h₁;
-    obtain ⟨z', R', h₁', h₂'⟩ := exists_rel_depth this;
-    exact ⟨z', .inr ⟨m', rfl, h₁', h₂'⟩, R'⟩;
-
-private lemma almostBisimRel.back [K.IsGL] (hK : ∀ z ≠ K.root, ∃ n, z ⊩[K.toModel] □^[n]⊥)
-    {x : (M.toPseudoTail o).toModel.World} {z z' : K.World}
-    (h : almostBisimRel P M o K x z) (R : z ≺ z') : ∃ y, almostBisimRel P M o K y z' ∧ x ≺ y := by
-  rcases x with x | i;
-  · obtain ⟨y, R', h'⟩ := (forces_charFormulaUnder_iff.mp h).2.2 z' R;
-    exact ⟨.inl y, h', R'⟩;
-  · have hz' : K.root ≺ z' := by
-      rcases h with ⟨-, rfl⟩ | ⟨m, rfl, -, h₂⟩;
-      · exact R;
-      · exact IsTrans.trans _ _ _ (K.root_rel _ fun h ↦ hr _ (h ▸ h₂)) R;
-    obtain ⟨k, hk⟩ := hK z' fun h ↦ not_rel_root (h ▸ hz');
-    obtain ⟨m', h₁', h₂'⟩ := exists_depth_of_forces_boxItr_bot hk;
-    by_cases hm : m' < M.height + 1;
-    · obtain ⟨_, hB, hy⟩ := forces_disj.mp <|
-        (forces_and.mp hΦ).2 z' hz' (forces_boxItr_bot_of_le (by omega) h₂');
-      obtain ⟨y, -, rfl⟩ := Finset.mem_image.mp hB;
-      exact ⟨.inl y, hy, trivial⟩;
-    · obtain ⟨m, rfl⟩ : ∃ m, m' = m + M.height + 1 := ⟨m' - (M.height + 1), by omega⟩;
-      use .inr m;
-      and_intros;
-      · exact .inr ⟨m, rfl, h₁', h₂'⟩;
-      · rcases h with ⟨rfl, -⟩ | ⟨i, rfl, -, h₂⟩;
-        · exact toFreeTail.rel_inr_inr.mpr (ENat.natCast_lt_top _);
-        · have : m < i := by
-            by_contra;
-            exact h₁' (forces_boxItr_bot_of_le (by omega) (forces_boxItr_succ.mp h₂ z' R));
-          exact toFreeTail.rel_inr_inr.mpr (by exact_mod_cast this);
-
-end Bisimulation
-
 /-- Let `K` be a rooted GL-model whose root forces no `□^[n]⊥` and whose other points each force
 some `□^[n]⊥`. If its root forces the almost defining formula of `M` and agrees with `o` on `P`,
 it is `P`-bisimilar to the root of the pseudo-tail of `M` with root valuation `o`.
@@ -260,15 +143,69 @@ theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ'
     (hK : ∀ z ≠ K.root, ∃ n, z ⊩[K.toModel] □^[n]⊥)
     (hΦ : K.root ⊩[K.toModel] almostDefiningFormula P M) {o : α → Prop}
     (ho : ∀ a ∈ P, (o a ↔ K.Val K.root a)) :
-    ∃ Bi : (M.toPseudoTail o).toModel ⇄[P] K.toModel, Bi (.inr ⊤) K.root :=
-  ⟨{ toRel := almostBisimRel P M o K
-     atomic := almostBisimRel.atomic hr hΦ ho
-     forth := almostBisimRel.forth hr hΦ
-     back := almostBisimRel.back hr hΦ hK }, .inl ⟨rfl, rfl⟩⟩
+    ∃ Bi : (M.toPseudoTail o).toModel ⇄[P] K.toModel, Bi (.inr ⊤) K.root := by
+  let R : (M.toPseudoTail o).toModel.World → K.World → Prop
+    | .inl x, z => z ⊩[K.toModel] charFormulaUnder (M := M.toModel) P x
+    | .inr i, z => i = ⊤ ∧ z = K.root ∨ ∃ m : ℕ, i = m ∧
+        z ⊮[K.toModel] □^[m + M.height + 1]⊥ ∧ z ⊩[K.toModel] □^[m + M.height + 2]⊥
+  have hroot {z : K.World} {m : ℕ} (h : z ⊩[K.toModel] □^[m]⊥) : K.root ≺ z :=
+    K.root_rel _ fun e ↦ hr _ (e ▸ h)
+  use
+    { toRel := R
+      atomic {x z a} ha h := by
+        rcases x with x | i;
+        · exact (forces_charFormulaUnder_iff.mp h).1 a ha;
+        · rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, h₂⟩;
+          · simpa [Model.Val, toFreeTail] using ho a ha;
+          · have := forces_and.mp <| (forces_and.mp hΦ).1 z (hroot h₂)
+              (not_forces_boxItr_bot_of_le (by omega) h₁);
+            simpa [Model.Val, toFreeTail] using forces_valuationConj.mp this.2 a ha;
+      forth {x y z} h R' := by
+        rcases x with x | i <;> rcases y with y | j;
+        · exact ((forces_charFormulaUnder_iff.mp h).2.1 y R').imp fun _ ↦ And.symm;
+        · exact absurd R' toFreeTail.not_rel_inl_inr;
+        · rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, h₂⟩;
+          · obtain ⟨z₀, R₀, h₀, -⟩ := exists_rel_depth (hr (M.height + 2));
+            obtain ⟨z', R₁, h'⟩ := exists_rel_forces_charFormulaUnder hΦ R₀ h₀ y;
+            exact ⟨z', h', IsTrans.trans _ _ _ R₀ R₁⟩;
+          · exact (exists_rel_forces_charFormulaUnder hΦ (hroot h₂)
+              (not_forces_boxItr_bot_of_le (by omega) h₁) y).imp fun _ ↦ And.symm;
+        · obtain ⟨m', rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt R');
+          have : z ⊮[K.toModel] □^[m' + M.height + 2]⊥ := by
+            rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, -⟩;
+            · exact hr _;
+            · have : m' < m := by exact_mod_cast toFreeTail.rel_inr_inr.mp R';
+              exact not_forces_boxItr_bot_of_le (by omega) h₁;
+          obtain ⟨z', R₁, h₁', h₂'⟩ := exists_rel_depth this;
+          exact ⟨z', .inr ⟨m', rfl, h₁', h₂'⟩, R₁⟩;
+      back {x z z'} h R' := by
+        rcases x with x | i;
+        · obtain ⟨y, R₁, h'⟩ := (forces_charFormulaUnder_iff.mp h).2.2 z' R';
+          exact ⟨.inl y, h', R₁⟩;
+        · have hz' : K.root ≺ z' := by
+            rcases h with ⟨-, rfl⟩ | ⟨m, rfl, -, h₂⟩;
+            · exact R';
+            · exact IsTrans.trans _ _ _ (hroot h₂) R';
+          obtain ⟨k, hk⟩ := hK z' fun h ↦ not_rel_root (h ▸ hz');
+          obtain ⟨m', h₁', h₂'⟩ := exists_depth_of_forces_boxItr_bot hk;
+          by_cases hm : m' < M.height + 1;
+          · obtain ⟨_, hB, hy⟩ := forces_disj.mp <|
+              (forces_and.mp hΦ).2 z' hz' (forces_boxItr_bot_of_le (by omega) h₂');
+            obtain ⟨y, -, rfl⟩ := Finset.mem_image.mp hB;
+            exact ⟨.inl y, hy, trivial⟩;
+          · obtain ⟨m, rfl⟩ : ∃ m, m' = m + M.height + 1 := ⟨m' - (M.height + 1), by omega⟩;
+            use .inr m;
+            and_intros;
+            · exact .inr ⟨m, rfl, h₁', h₂'⟩;
+            · rcases h with ⟨rfl, -⟩ | ⟨i, rfl, -, h₂⟩;
+              · exact toFreeTail.rel_inr_inr.mpr (ENat.natCast_lt_top _);
+              · have : m < i := by
+                  by_contra;
+                  exact h₁' (forces_boxItr_bot_of_le (by omega) (forces_boxItr_succ.mp h₂ z' R'));
+                exact toFreeTail.rel_inr_inr.mpr (by exact_mod_cast this); }
+  exact .inl ⟨rfl, rfl⟩
 
-end RootedModel
-
-end Kripke
+end Kripke.RootedModel
 
 /-- A modalized formula forced at the root of a free tail is not refuted by `𝐒`.
 

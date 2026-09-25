@@ -20,7 +20,7 @@ If `𝐃 ⊬ A`, there is a formula `B` over the atoms of `A` with `𝐒 ⊬ B` 
 
 namespace FFL.ProvabilityLogic
 
-open Entailment Formula Kripke Kripke.Model Kripke.Model.World Kripke.RootedModel
+open Entailment Formula Kripke Model Model.World RootedModel
 
 universe u
 
@@ -59,11 +59,16 @@ lemma atoms_deltaPIff_subset {A : Formula α} {p : α} :
 
 end Formula
 
-lemma Logic.A.provable_deltaPIff {α : Type*} [DecidableEq α] {A : Formula α} {p : α} :
-    𝐀 +ᴸ {A} ⊢ A.deltaPIff p :=
+namespace Logic.A
+
+variable {α : Type*} [DecidableEq α] {A : Formula α} {p : α}
+
+lemma provable_deltaPIff : 𝐀 +ᴸ {A} ⊢ A.deltaPIff p :=
   FConj_iff_forall_provable.mpr fun B hB ↦ by
     obtain ⟨S, -, rfl⟩ := Finset.mem_image.mp hB;
     exact sumQuasiNormal.subst (sumQuasiNormal.mem₂ rfl);
+
+end Logic.A
 
 namespace Kripke.RootedModel
 
@@ -130,10 +135,9 @@ end Kripke.RootedModel
 
 namespace Logic.D
 
-variable {α : Type u} {A : Formula α}
+variable {α : Type u} {β : Type*} {A : Formula α}
 
-lemma provable_subst {β : Type*} {A : Formula β} {s : Substitution β α} (h : 𝐃 ⊢ A) :
-    𝐃 ⊢ A⟦s⟧ := by
+lemma provable_subst {B : Formula β} {s : Substitution β α} (h : 𝐃 ⊢ B) : 𝐃 ⊢ B⟦s⟧ := by
   classical
   apply (provability_TFAE.out 1 3).mpr;
   intro κ _ M _ V;
