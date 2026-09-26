@@ -26,16 +26,10 @@ structure IsInterpolant (Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α) (C : Formul
   right : ⊢ᴳ[𝐆𝐋] insert C Γ₂ ⟹ Δ₂
   atoms : C.atoms ⊆ (Γ₁ ∪ Δ₁).atoms ∩ (Γ₂ ∪ Δ₂).atoms
 
-lemma IsInterpolant.swap (h : IsInterpolant Γ₂ Γ₁ Δ₂ Δ₁ C) :
-    IsInterpolant Γ₁ Γ₂ Δ₁ Δ₂ (∼C) where
-  left := negR h.right
-  right := negL h.left
-  atoms := by simpa [Finset.inter_comm] using h.atoms
-
 lemma exists_interpolant_of_swap (h : ∃ C, IsInterpolant Γ₂ Γ₁ Δ₂ Δ₁ C) :
     ∃ C, IsInterpolant Γ₁ Γ₂ Δ₁ Δ₂ C := by
   obtain ⟨C, hC⟩ := h;
-  exact ⟨_, hC.swap⟩;
+  exact ⟨∼C, negR hC.right, negL hC.left, by simpa [Finset.inter_comm] using hC.atoms⟩;
 
 /-- - [SV82] -/
 theorem exists_interpolant (h : ⊢ᴳ[𝐆𝐋] S) (hΓ : S.ant ⊆ Γ₁ ∪ Γ₂) (hΔ : S.suc ⊆ Δ₁ ∪ Δ₂) :
@@ -69,7 +63,6 @@ theorem exists_interpolant (h : ⊢ᴳ[𝐆𝐋] S) (hΓ : S.ant ⊆ Γ₁ ∪ �
       ih₁ (Γ₁ := Γ₁) (Γ₂ := Γ₂) (Δ₁ := insert A Δ₁) (Δ₂ := Δ₂) (by grind) (by grind);
     obtain ⟨C₂, hC₂⟩ :=
       ih₂ (Γ₁ := insert B Γ₁) (Γ₂ := Γ₂) (Δ₁ := Δ₁) (Δ₂ := Δ₂) (by grind) (by grind);
-    clear ih₁ ih₂;
     have h₁ : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ insert A (insert (C₁ ⋎ C₂) Δ₁) :=
       wkR (orR (wkR (Δ' := insert C₁ (insert C₂ (insert A Δ₁))) hC₁.left));
     have h₂ : ⊢ᴳ[𝐆𝐋] insert B Γ₁ ⟹ insert (C₁ ⋎ C₂) Δ₁ :=
@@ -91,7 +84,6 @@ theorem exists_interpolant (h : ⊢ᴳ[𝐆𝐋] S) (hΓ : S.ant ⊆ Γ₁ ∪ �
         this (by rwa [Finset.union_comm]) (by rwa [Finset.union_comm]) h';
     obtain ⟨C, hC⟩ :=
       ih (Γ₁ := insert A Γ₁) (Γ₂ := Γ₂) (Δ₁ := insert B Δ₁) (Δ₂ := Δ₂) (by grind) (by grind);
-    clear ih;
     have h₁ := hC.atoms;
     have h₂ := FormulaFinset.atoms_subset_of_mem h;
     use C;
@@ -103,8 +95,7 @@ theorem exists_interpolant (h : ⊢ᴳ[𝐆𝐋] S) (hΓ : S.ant ⊆ Γ₁ ∪ �
   | @boxGL Γ A _ ih =>
     dsimp only at hΓ hΔ ih;
     wlog h : □A ∈ Δ₂ generalizing Γ₁ Γ₂ Δ₁ Δ₂;
-    · clear ih;
-      exact exists_interpolant_of_swap <|
+    · exact exists_interpolant_of_swap <|
         this (by rwa [Finset.union_comm]) (by rwa [Finset.union_comm]) (by grind);
     have hΓ' : ∀ B ∈ Γ, □B ∈ Γ₁ ∨ □B ∈ Γ₂ :=
       fun B hB ↦ Finset.mem_union.mp (hΓ (Finset.mem_image_of_mem _ hB));
@@ -112,7 +103,6 @@ theorem exists_interpolant (h : ⊢ᴳ[𝐆𝐋] S) (hΓ : S.ant ⊆ Γ₁ ∪ �
       (Γ₂ := insert (□A) (Γ₂.prebox ∪ Γ₂.prebox.box)) (Δ₁ := ∅) (Δ₂ := {A})
       (by intro B; simp only [Finset.mem_insert, Finset.mem_union, Finset.mem_image]; grind)
       (by simp);
-    clear ih;
     have h₁ : ⊢ᴳ[𝐆𝐋] Γ₁.prebox.box ⟹ {□C} := boxGL (wkL hC.left);
     have h₂ : ⊢ᴳ[𝐆𝐋] (insert C Γ₂.prebox).box ⟹ {□A} := boxGL (wkL hC.right);
     have h₃ := hC.atoms;

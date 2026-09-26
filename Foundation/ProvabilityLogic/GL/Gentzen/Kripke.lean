@@ -20,7 +20,7 @@ open Formula Kripke Kripke.Model Kripke.Model.World
 namespace Kripke
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {M : Model κ α}
-         {Γ Δ : FormulaFinset α} {A B : Formula α}
+         {Γ : FormulaFinset α} {A : Formula α}
 
 @[grind →]
 lemma Model.validateSequent_boxGL [M.IsGL] (h : M ⊧ (insert (□A) (Γ ∪ Γ.box) ⟹ {A})) :
@@ -74,7 +74,7 @@ structure SaturatedSequent (BS : Sequent α) extends Sequent α where
 
 namespace SaturatedSequent
 
-variable {BS : Sequent α} {S : SaturatedSequent BS} {A B : Formula α}
+variable {BS : Sequent α} {S : SaturatedSequent BS} {A : Formula α}
 
 @[grind .]
 lemma not_mem_both : ¬(A ∈ S.ant ∧ A ∈ S.suc) := fun h ↦ S.unprovable (Gentzen.union' _ h.1 h.2)
@@ -189,7 +189,7 @@ theorem complete
   obtain ⟨D, hD, hxD⟩ := h (countermodel S) x (fun C hC ↦ countermodel.truthlemma.1 (hS₀.ant hC));
   exact countermodel.truthlemma.2 (hS₀.suc hD) hxD;
 
-theorem iff_valid : ⊢ᴳ[𝐆𝐋] S ↔
+lemma iff_valid : ⊢ᴳ[𝐆𝐋] S ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → M ⊧ S :=
   ⟨fun h _ _ M _ ↦ sound M h, complete⟩
 

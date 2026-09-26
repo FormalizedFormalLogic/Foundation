@@ -48,7 +48,6 @@ variable {α : Type u} {A : Formula α}
 /-- Solovay's arithmetical completeness theorem for theories of infinite height. -/
 theorem arithmetical_completeness_of_height_eq_top (height : T.height = ⊤) :
     (∀ f : Realization α ℒₒᵣ, T ⊢ f T A) → 𝐆𝐋 ⊢ A := by
-  classical
   contrapose!;
   intro hA;
   obtain ⟨κ, _, M, _, hA⟩ :
@@ -61,7 +60,6 @@ theorem arithmetical_completeness_of_height_eq_top (height : T.height = ⊤) :
 /-- Solovay's arithmetical completeness theorem for theories of finite height. -/
 theorem arithmetical_completeness_of_le_height {n : ℕ} (height : n ≤ T.height) :
     (∀ f : Realization α ℒₒᵣ, T ⊢ f T A) → 𝐆𝐋 ⊢ □^[n]⊥ 🡒 A := by
-  classical
   contrapose!;
   intro hA;
   obtain ⟨κ, _, M, _, hA⟩ :

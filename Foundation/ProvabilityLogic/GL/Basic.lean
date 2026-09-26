@@ -30,28 +30,16 @@ variable {α : Type*} {A : Formula α}
 
 /-! ### Kripke soundness -/
 
-section
-
-variable {κ : Type*} [Nonempty κ] {M : Model κ α}
-
-lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩ □(□A 🡒 A) 🡒 □A := by
-  intro hx;
-  by_contra hA;
-  obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp hA;
-  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮ A} ⟨y, Rxy, hy⟩;
-  apply ht;
-  apply hx t Rxt;
-  intro z Rtz;
-  by_contra hz;
-  exact tmax z ⟨IsTrans.trans _ _ _ Rxt Rtz, hz⟩ Rtz;
-
-theorem sound (M : Model κ α) [M.IsGL] (h : 𝐆𝐋 ⊢ A) : M ⊧ A := by
+theorem sound {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (h : 𝐆𝐋 ⊢ A) : M ⊧ A := by
+  classical
   apply normalOf.sound _ h;
   rintro _ (⟨B, rfl⟩ | ⟨B, rfl⟩) x;
   · exact fun h y Rxy z Ryz ↦ h z (IsTrans.trans _ _ _ Rxy Ryz);
-  · exact forces_axiomL;
-
-end
+  · intro hx;
+    have : ⊢ᴳ[𝐆𝐋] {□(□B 🡒 B)} ⟹ {□B} := by
+      simpa using Gentzen.boxGL (Γ := {□B 🡒 B}) <| Gentzen.wkL (Γ := insert (□B 🡒 B) {□B}) <|
+        Gentzen.impL (Gentzen.union (□B)) (Gentzen.union B);
+    exact validateSequent_singleton_iff.mp (Gentzen.sound M this) x (by simpa);
 
 instance : Consistent (𝐆𝐋 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ sound (pointModel fun _ ↦ False) h 0
@@ -93,7 +81,6 @@ lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[𝐆𝐋] S) : �
 
 /-! ### Quasi-normal extensions -/
 
-/-- A quasi-normal extension of `GL` proves `A` if it proves `Γ` and `𝐆𝐋 ⊢ Γ.conj 🡒 A`. -/
 lemma sumQuasiNormal_of_conj [DecidableEq α] {L : Logic α} {Γ : FormulaFinset α}
     (hΓ : ∀ B ∈ Γ, 𝐆𝐋 +ᴸ L ⊢ B) (h : 𝐆𝐋 ⊢ Γ.conj 🡒 A) : 𝐆𝐋 +ᴸ L ⊢ A :=
   sumQuasiNormal.of_left h ⨀ FConj_iff_forall_provable.mpr hΓ
@@ -120,16 +107,16 @@ theorem provability_TFAE : [
   tfae_have 4 → 3 := fun h _ _ M _ x ↦ Model.forces_cone.mp <| h (M.cone x);
   tfae_finish;
 
-theorem iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A} := provability_TFAE.out 1 2
+lemma iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A} := provability_TFAE.out 1 2
 
 omit [DecidableEq α] in
-theorem iff_valid_finite :
+lemma iff_valid_finite :
     𝐆𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
   classical
   exact provability_TFAE.out 1 3
 
 omit [DecidableEq α] in
-theorem iff_root_forces : 𝐆𝐋 ⊢ A ↔
+lemma iff_root_forces : 𝐆𝐋 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩ A := by
   classical
   exact provability_TFAE.out 1 4
