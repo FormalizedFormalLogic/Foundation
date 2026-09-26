@@ -189,7 +189,6 @@ public import Foundation.ProvabilityLogic.Classification.AD
 public import Foundation.ProvabilityLogic.Classification.DS
 public import Foundation.ProvabilityLogic.Classification.General
 public import Foundation.ProvabilityLogic.Classification.Letterless
-public import Foundation.ProvabilityLogic.Classification.ProvabilityLogicTrace
 public import Foundation.ProvabilityLogic.Classification.Truth
 public import Foundation.ProvabilityLogic.D.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Basic

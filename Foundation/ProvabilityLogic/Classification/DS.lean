@@ -2,7 +2,7 @@ module
 
 public import Foundation.ProvabilityLogic.A.Basic
 public import Foundation.ProvabilityLogic.Kripke.AlmostDefiningFormula
-public import Foundation.ProvabilityLogic.Classification.ProvabilityLogicTrace
+public import Foundation.ProvabilityLogic.Trace
 
 /-!
 # Provability logics between `𝐃` and `𝐒`

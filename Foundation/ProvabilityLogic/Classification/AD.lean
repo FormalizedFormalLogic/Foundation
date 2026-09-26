@@ -1,7 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Arithmetic.ModifiedSolovaySentences
-public import Foundation.ProvabilityLogic.Classification.ProvabilityLogicTrace
+public import Foundation.ProvabilityLogic.Trace
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflection
 
 /-!
