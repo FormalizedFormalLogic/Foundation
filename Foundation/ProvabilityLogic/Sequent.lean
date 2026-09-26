@@ -222,7 +222,6 @@ theorem exists_saturated_within (hD : IsImpClosed D) {P Q : FormulaFinset α}
   · exact hsQ;
   · exact fun hbox _ h ↦ h₃ hbox (hl (Finset.mem_union_left _ (hsP h))) h;
 
-/-- `exists_saturated_within` for the subformulas of `BS` on both sides. -/
 theorem exists_saturated (hD : IsImpClosed D) {BS S₀ : Sequent α} (h₀ : ¬D S₀)
     (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls) :
     ∃ S, S₀ ⊆ S ∧ ¬D S ∧ S.Saturated ∧ S.ant ∪ S.suc ⊆ BS.subfmls ∧

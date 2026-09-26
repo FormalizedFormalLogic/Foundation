@@ -8,14 +8,8 @@ public import Foundation.ProvabilityLogic.S.Arithmetic
 /-!
 # Traces of formulas and logics
 
-The trace of a formula is the set of heights of finite rooted `GL` models whose root refutes it,
-and the trace of a logic is the union of the traces of its members. On letterless formulas it
-agrees with `LetterlessFormula.trace`. A logic is bounded above by `GLα` or `GLβ` of its trace,
-according as the complement of its trace is infinite or finite.
-
-The provability logic of `T` relative to `U` contains `alpha n` for every `n` in its trace. Hence it
-is `GLα` of its trace when the complement of its trace is infinite, and `GLβ` of its trace when
-it is not contained in `S`.
+The provability logic of `T` relative to `U` is `GLα` of its trace when the complement of its trace
+is infinite, and `GLβ` of its trace when it is not contained in `S`.
 
 ## References
 
@@ -117,7 +111,6 @@ namespace Logic
 
 variable {α : Type u} {L : Logic α} {A : Formula α}
 
-/-- The trace of a logic: the union of the traces of its members. -/
 def trace (L : Logic α) : Set ℕ := ⋃ A ∈ L, A.trace
 
 lemma trace_subset_of_mem (h : A ∈ L) : A.trace ⊆ L.trace := Set.subset_biUnion_of_mem h
@@ -282,7 +275,6 @@ section
 
 variable [𝗜𝚺₁ ⪯ T] {A : Formula α}
 
-/-- - [AB05, Lemma 46] -/
 lemma exists_realization_provable_imp_alpha {κ : Type*} [Nonempty κ] (M : RootedModel κ α)
     [Fintype M.World] [M.IsGL] (hA : M.root ⊮ A) :
     ∃ f : Realization α ℒₒᵣ, 𝗜𝚺₁ ⊢ f T (A 🡒 alpha M.height) := by
@@ -304,7 +296,6 @@ lemma exists_realization_provable_imp_alpha {κ : Type*} [Nonempty κ] (M : Root
       · exact fun _ ↦ forces_alpha_iff.mpr (rank_lt_height (M.root_rel x hx)).ne;
   cl_prover [left_Udisj_intro _ h, S.SC4];
 
-/-- - [AB05, Lemma 49] -/
 lemma exists_realization_provable_neg_of_not_S (hA : 𝐒 ⊬ A) :
     ∃ n, ∃ f : Realization α ℒₒᵣ,
       𝗜𝚺₁ ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range n, alpha i)) := by
