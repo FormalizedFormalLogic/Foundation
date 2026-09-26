@@ -59,8 +59,6 @@ variable {M : Model κ α}
 -/
 def IsReflexiveOf (X : FormulaFinset α) (x : M.World) : Prop := ∀ A ∈ X, x ⊩ □A 🡒 A
 
-/-- Along `≺`, `□B 🡒 B` fails at most once: it holds at every successor of a world where it
-fails. -/
 lemma forces_axiomT_of_rel {y z : M.World} {B : Formula α} (Ryz : y ≺ z) (hy : y ⊮ □B 🡒 B) :
     z ⊩ □B 🡒 B := fun _ ↦ (not_forces_imp.mp hy).1 z Ryz
 

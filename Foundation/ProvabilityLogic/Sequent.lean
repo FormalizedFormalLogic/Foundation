@@ -115,7 +115,6 @@ lemma saturateStep_imp :
   have h₁ : A ≠ A 🡒 B := fun h ↦ by simpa using congrArg Formula.complexity h;
   have h₂ : B ≠ A 🡒 B := fun h ↦ by simpa using congrArg Formula.complexity h;
   have := h₁.symm;
-  have := h₂.symm;
   have := fun h₁ h₂ ↦ hS (hD.union (A := A 🡒 B) h₁ h₂);
   simp only [saturateStep];
   split_ifs <;> simp_all;

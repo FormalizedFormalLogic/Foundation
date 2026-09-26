@@ -103,7 +103,6 @@ lemma not_rel_root {x : (M.toFreeTail V).World} : ¬(M.toFreeTail V).Rel x (.inr
   · exact not_rel_inl_inr;
   · exact not_top_lt;
 
-/-- Every point of the chain sees everything below the root from some point on. -/
 lemma eventually_rel {y : (M.toFreeTail V).World} (h : (M.toFreeTail V).Rel (.inr ⊤) y) :
     ∃ k : ℕ, ∀ n ≥ k, (M.toFreeTail V).Rel (.inr n) y := by
   rcases y with y | j;
@@ -138,8 +137,6 @@ lemma forces_inr_box_iff {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
     · obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt (rel_inr_inr.mp Rix));
       exact (h m).mpr (hroot hA);
 
-/-- If the finite points of the chain carry the valuation of the root of `M`, and the root of
-`M` forces `□B 🡒 B` for all `□B ∈ X`, then they agree with the root of `M` on `X`. -/
 lemma forces_inr_iff [DecidableEq α] {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
     (hV : ∀ n : ℕ, V n = M M.root) {X : FormulaFinset α}
     (hX : ∀ B ∈ X, B.subfmls ⊆ X) (hroot : ∀ B, □B ∈ X → M.root ⊩[M.toModel] □B 🡒 B)
