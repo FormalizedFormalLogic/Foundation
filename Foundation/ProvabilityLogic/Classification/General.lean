@@ -110,7 +110,7 @@ lemma provabilityLogic_addTBB_subset_S (h : T.provabilityLogicRelativeTo U (α :
     Logic.GLAlpha.subset_S <| Logic.GLAlpha.mem_iff.mpr
       ⟨by simpa [LetterlessFormula.trace] using hL.biUnion fun _ _ ↦ Set.finite_singleton _,
         Set.subset_univ _⟩;
-  exact Logic.S.consistent <| h (imp_mem_provabilityLogic_of_mem_addTBB hL <|
+  exact Logic.unprovable_bot <| h (imp_mem_provabilityLogic_of_mem_addTBB hL <|
     (provabilityLogic_eq_GLBetaMinus h₁).symm.subset <| Logic.GLBetaMinus.mem_iff.mpr <| by
       simp [trace_provabilityLogic_addTBB]) ⨀ h₂;
 

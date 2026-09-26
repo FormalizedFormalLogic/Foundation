@@ -30,6 +30,9 @@ lemma provable_iff_mem : L ⊢ A ↔ A ∈ L := Iff.rfl
 
 lemma weakerThan_iff : L₁ ⪯ L₂ ↔ L₁ ⊆ L₂ := ⟨fun h ↦ h.subset, fun h ↦ ⟨h⟩⟩
 
+lemma unprovable_bot [ModusPonens L] [HasAxiomEFQ L] [Consistent L] : L ⊬ ⊥ := fun h ↦
+  have ⟨_, hA⟩ := Consistent.exists_unprovable ‹_›; hA (of_O h)
+
 end Logic
 
 /-! ### Quasi-normal sums -/

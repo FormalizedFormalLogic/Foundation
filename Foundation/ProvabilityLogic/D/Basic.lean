@@ -213,7 +213,7 @@ lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A := by
 omit [DecidableEq α] in
 lemma consistent : 𝐃 ⊬ (⊥ : Formula α) := by
   classical
-  exact fun h ↦ S.consistent (subset_S h)
+  exact fun h ↦ unprovable_bot (L := 𝐒) (subset_S h)
 
 end Logic.D
 

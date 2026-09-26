@@ -87,7 +87,7 @@ theorem provabilityLogic_TA_eq_GLBetaMinus_iff :
       Arithmetic.TA.provable_iff.mpr <| by
         simp [standardInterpret, interpret, models_TBB_iff f, hn];
     have hS : ¬T.provabilityLogicRelativeTo 𝗧𝗔 ⊆ 𝐒 :=
-      fun hS ↦ Logic.S.consistent <| hS h ⨀ Logic.S.provable_TBB;
+      fun hS ↦ Logic.unprovable_bot <| hS h ⨀ Logic.S.provable_TBB;
     exact (provabilityLogic_eq_GLBetaMinus hS).trans <| by
       congr 1; exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
 

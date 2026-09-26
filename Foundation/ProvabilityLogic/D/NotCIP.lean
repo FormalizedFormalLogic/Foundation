@@ -32,7 +32,7 @@ lemma Logic.S.not_iff_atom [DecidableEq α] (hab : a ≠ b) (hC : C.ModalizedIn 
     simpa only [subst_iff, subst_atom, Substitution.single_apply, ite_true] using
       show 𝐒 ⊢ (C 🡘 #a)⟦a ↦ E⟧ from sumQuasiNormal.subst h;
   have h₂ : 𝐒 ⊢ ∼C⟦a ↦ E⟧ 🡘 E := S.of_GL hE;
-  exact S.consistent <| by cl_prover [h₁, h₂];
+  exact unprovable_bot (L := 𝐒) <| by cl_prover [h₁, h₂];
 
 namespace Logic.D
 

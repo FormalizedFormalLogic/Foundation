@@ -60,8 +60,7 @@ end RelItr
 
 abbrev Val {M : Model κ α} : M.World → α → Prop := M.Val'
 
-instance : CoeFun (Model κ α) (λ M => M.World → α → Prop) := ⟨λ M => M.Val⟩
-
+instance : CoeFun (Model κ α) (fun M ↦ M.World → α → Prop) := ⟨fun M ↦ M.Val⟩
 
 class IsGL (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel
 

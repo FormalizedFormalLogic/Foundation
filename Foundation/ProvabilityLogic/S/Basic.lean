@@ -51,6 +51,8 @@ lemma eventually_forces (h : 𝐒 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model �
     obtain ⟨i, hi⟩ := ih (M.subst s) hw;
     exact ⟨i, fun j hj ↦ forces_subst.mp (hi j hj)⟩;
 
+section
+
 universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
@@ -118,7 +120,10 @@ lemma exists_countermodel (h : 𝐒 ⊬ A) :
   exact ⟨κ, inferInstance, M, inferInstance, h₂,
     fun B hB ↦ forces_conj.mp h₁ _ (Finset.mem_image.mpr ⟨B, by simpa using hB, rfl⟩)⟩;
 
+end
+
 instance : Entailment.Consistent (𝐒 : Logic α) := by
+  classical
   apply consistent_iff_exists_unprovable.mpr;
   use ⊥;
   by_contra! h;
