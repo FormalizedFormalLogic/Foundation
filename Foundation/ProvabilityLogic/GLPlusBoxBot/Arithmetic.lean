@@ -61,6 +61,9 @@ theorem eq_provabilityLogic : GLPlusBoxBot T.height = T.provabilityLogic (α := 
   ext A;
   exact arithmetical_completeness_iff;
 
+lemma equiv_provabilityLogic : GLPlusBoxBot T.height ≊ T.provabilityLogic (α := α) :=
+  equiv_iff.mpr eq_provabilityLogic
+
 end Logic.GLPlusBoxBot
 
 end FFL.ProvabilityLogic
