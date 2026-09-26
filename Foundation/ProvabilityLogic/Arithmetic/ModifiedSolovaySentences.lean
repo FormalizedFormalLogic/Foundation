@@ -8,14 +8,8 @@ public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 # Modified Solovay sentences
 
 Solovay sentences for the root extension of a strong reflexive countermodel of `A` in which the
-traveler can move from the old root to the reflexive world `u` by paying a witness of `σ` as the
-toll, and the reflection principle for `σ` that they yield.
-
-For a `𝚫₁`-axiomatized `T` extending `𝗜𝚺₁` and a `𝚺₁` sentence `σ`, they are constructed as the
-arithmetical fixed points `T.modifiedSolovay M σ θ`. A traveler starts at the root `none` of
-`M.extendRoot` and moves along transitions `x ⇝ z`. The toll of the gate into `z` is a proof of
-`∼Λ z`, except that the gate into `u`, reachable only from the old root, takes a witness of `σ`.
-At each world the traveler passes the gate with the cheapest toll.
+toll of the gate into the reflexive world `u` is a witness of a `𝚺₁` sentence `σ`, and the
+reflection principle for `σ` that they yield.
 
 ## References
 
@@ -58,8 +52,8 @@ variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} [T₀ ⪯ T]
 
 open Classical in
 /-- Sentences `Λ x` ("the traveler's final stop is `x`") indexed by the worlds of `M.extendRoot`,
-satisfying the Solovay conditions SC1–SC7 of the construction in which the gate into `u` is
-reachable only from the old root and its toll is a witness of `σ`.
+satisfying the Solovay conditions for the construction in which the toll of the gate into `u` is a
+witness of `σ`.
 
 - [Bek90, §6 Lemma 1]
 -/
@@ -157,10 +151,7 @@ theorem mainlemma_neg (hi : i ≠ none) {B : ProvabilityLogic.Formula α} (hB : 
     i ⊮ B → T₀ ⊢ S i 🡒 ∼B.interpret S.realization 𝔅 :=
   (S.mainlemma_aux hi hB).2
 
-/-- Provably in `T₀`, the `M.height`-times iterated consistency and the realization of `A` yield
-the reflection instance `𝔅 σ 🡒 σ`.
-
-- [Bek90, §6 Theorem 2]
+/-- - [Bek90, §6 Theorem 2]
 - [AB05, Lemma 51]
 -/
 theorem reflection :
@@ -623,10 +614,7 @@ open FirstOrder Arithmetic Bootstrapping ModifiedSolovaySentences Kripke
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : Formula α}
 
-/-- Modified Solovay sentences for the standard provability predicate of `T` and a `𝚺₁`
-sentence `σ`.
-
-- [Bek90, §6 Theorem 2]
+/-- - [Bek90, §6 Theorem 2]
 - [AB05, Lemma 51]
 -/
 def standardModifiedSolovaySentences

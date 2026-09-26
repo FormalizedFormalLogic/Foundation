@@ -108,12 +108,7 @@ section
 variable {M : RootedModel κ α} [Fintype M.World] [M.IsGL] [DecidableEq α]
          {S : SolovaySentences 𝔅 M.extendRoot}
 
-/-- If the root of `M` forces `□B 🡒 B` for every subformula `□B` of `A`, then the Solovay
-sentence of the new root of `M.extendRoot` decides the realizations of the subformulas of `A`
-as the root of `M` decides them.
-
-- [AB05, Lemma 49]
--/
+/-- - [AB05, Lemma 49] -/
 theorem rfl_mainlemma (ha : ∀ B, □B ∈ A.subfmls → M.root ⊩ □B 🡒 B)
     {B : ProvabilityLogic.Formula α}
     (hB : B ∈ A.subfmls) :
@@ -179,7 +174,6 @@ section model
 
 variable (T) {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-- A proof of the negation of `φ` appears no later than any proof of the negation of `ψ`. -/
 def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonLE (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
 lemma NegativeSuccessor.quote_iff_provabilityComparisonLE {φ ψ : ArithmeticSentence} :
@@ -522,7 +516,6 @@ open Kripke Kripke.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {A : Formula α}
 
-/-- Solovay sentences for the standard provability predicate. -/
 noncomputable def standardSolovaySentences (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
     (M : RootedModel κ α) [Fintype M.World] [M.IsGL] :
     T.standardProvability.SolovaySentences M where
