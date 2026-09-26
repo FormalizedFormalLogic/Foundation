@@ -43,7 +43,7 @@ PRs (title and body) are written in English.
   ```
 - If you added entries to `references.bib`, format it:
   ```shell
-  bibtool -r .bibtoolrsc -i references.bib -o references.bib
+  just format-references
   ```
 - 🤖 No development-time artifacts survive in the code — plan references, issue numbers, step numbers, stale skeleton-era comments. See [style.md](./style.md#stale-comments-and-planning-artifacts).
 

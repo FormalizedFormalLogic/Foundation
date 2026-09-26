@@ -2,8 +2,8 @@
 
 #set page(width: auto, height: auto, margin: 24pt)
 
-#let Logic(L) = $bold(#L)$
-#let PL(T, U) = $sans("PL")(#T, #U)$
+#let Logic(L) = $sans(#L)$
+#let PL(T, U) = $upright("PL")(#T, #U)$
 #let PA = $Theory("PA")$
 #let TA = $Theory("TA")$
 
