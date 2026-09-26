@@ -82,7 +82,8 @@ lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
   case hExs =>
     intro n ψ _ ih h;
     cases Hierarchy.zero_iff_delta_zero.mp h with
-    | bexs ht hφ =>
+    | bexs hR ht hφ =>
+      obtain rfl := Set.mem_singleton_iff.mp hR
       rcases Rew.positive_iff.mp ht with ⟨t, rfl⟩;
       exact (primrecPred_bexs ε t
         (ih (Hierarchy.and_iff.mpr ⟨by simp, Hierarchy.bounded _ _ _ hφ⟩))).of_eq fun v ↦ by simp;
@@ -451,12 +452,12 @@ theorem computablePred_iff_delta1 {p : ℕ → Prop} : ComputablePred p ↔ 𝚫
   constructor
   · intro hp
     change 𝚫₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0))
-    rw [HierarchySymbol.Definable.delta_iff_sigma_and_pi]
+    apply Bounding.HierarchySymbol.Definable.delta_iff_sigma_and_pi.mpr
     rcases ComputablePred.computable_iff_re_compl_re'.mp hp with ⟨hp, hnp⟩
     exact ⟨(rePred_iff_sigma1.mp hnp).notSigma.of_iff (by intro v; simp), rePred_iff_sigma1.mp hp⟩
   · intro h
     change 𝚫₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0)) at h
-    rw [HierarchySymbol.Definable.delta_iff_sigma_and_pi] at h
+    have h := Bounding.HierarchySymbol.Definable.delta_iff_sigma_and_pi.mp h
     exact ComputablePred.computable_iff_re_compl_re'.mpr
       ⟨rePred_iff_sigma1.mpr h.2, rePred_iff_sigma1.mpr h.1.notPi⟩
 

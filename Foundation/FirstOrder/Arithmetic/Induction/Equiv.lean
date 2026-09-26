@@ -73,10 +73,10 @@ private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)
   have key : ∀ x, x ≤ a → P (a - x) := by
     refine succ_induction_forall_sigma (s := s) (P := fun x ↦ x ≤ a → P (a - x))
       (Q := fun x w ↦ x ≤ a → Q (a - x) w) ?_ ?_ ?_ ?_;
-    · apply HierarchySymbol.Definable.imp;
-      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability);
-      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability);
-    · intro x;
+    · apply Bounding.HierarchySymbol.Definable.imp
+      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
+      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
+    · intro x
       rw [imp_congr_right fun _ ↦ hPQ (a - x)];
       exact imp_forall_iff;
     · intro _; simpa using ha;
@@ -105,7 +105,7 @@ lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡�
     exact InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚺 (s + 1))
       ⟨f, _, (StrictHierarchy.ofAlt (Γ := 𝚺) (hχ.rew _)).exs, hP⟩ zero succ;
   · have h := neg_succ_induction (P := fun x ↦ ¬P x) (Q := fun x w ↦ ¬Q x w)
-      (HierarchySymbol.Definable.not (Γ := 𝚺) hQ) (fun x ↦ by simp [hPQ x])
+      (Bounding.HierarchySymbol.Definable.not (Γ := 𝚺) hQ) (fun x ↦ by simp [hPQ x])
       (by simpa using zero) (fun x hx ↦ by simpa using succ x (by simpa using hx));
     intro x;
     simpa using h x;
@@ -125,12 +125,12 @@ lemma exists_bound_of_definable_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜�
       (HierarchySymbol.Definable.bexs' (P := fun v u ↦ R (v 0) u) h₁
         (#2 : ArithmeticSemiterm V 3)).of_iff (by intro w; simp);
     have hlt : 𝚺-[s].Definable fun w : Fin 3 → V ↦ w 0 < a :=
-      HierarchySymbol.Definable.of_iff
-        (HierarchySymbol.Definable.retractiont 3
+      Bounding.HierarchySymbol.Definable.of_iff
+        (Bounding.HierarchySymbol.Definable.retractiont (n := 3)
           (inferInstance : 𝚺-[s].DefinableRel (LT.lt : V → V → Prop)) ![#0, &a])
         (by intro w; simp);
     have h₃ : 𝚷-[s].Definable fun w : Fin 3 → V ↦ w 0 < a → ∃ u ≤ w 2, R (w 0) u :=
-      HierarchySymbol.Definable.imp hlt h₂;
+      Bounding.HierarchySymbol.Definable.imp hlt h₂
     exact (HierarchySymbol.Definable.ball (P := fun v x ↦ x < a → ∃ u ≤ v 1, R x u) h₃
       (#0 : ArithmeticSemiterm V 2)).of_iff (by intro v; simp);
   have key : ∀ y : V, ∃ w, ∀ x < y, x < a → ∃ u ≤ w, R x u := by

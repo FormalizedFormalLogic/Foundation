@@ -250,9 +250,12 @@ lemma WitnessLE.not_witnessLT [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : WitnessLE P Q
 lemma exists_cheapest [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finite ι] (P : ι → V → Prop)
     (hP : ∀ i, 𝚺₁-Predicate (P i)) (o : ι → ℕ) (h : ∃ i w, P i w) :
     ∃ j, (∀ i, o i < o j → WitnessLT (P j) (P i)) ∧ ∀ i, o j ≤ o i → WitnessLE (P j) (P i) := by
+  classical
+  let := Fintype.ofFinite ι
   obtain ⟨i₀, w₀, h₀⟩ := h;
   obtain ⟨w, ⟨i₁, h₁⟩, hw⟩ : ∃ w, (∃ i, P i w) ∧ ∀ v < w, ¬∃ i, P i v :=
-    InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (HierarchySymbol.Definable.fintype_exs hP)
+    InductionOnBroadHierarchy.least_number_sigma 𝚺 1
+      (Bounding.HierarchySymbol.Definable.fintype_exs hP)
       ⟨i₀, h₀⟩;
   obtain ⟨j, hj, hmin⟩ := (InvImage.wf o wellFounded_lt).has_min {i | P i w} ⟨i₁, h₁⟩;
   use j;
@@ -505,7 +508,7 @@ lemma payable_iff_exists_toll (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val
   exacts [hθσ, .rfl];
 
 lemma toll_definable (z : M.extendRoot.World) : 𝚺₁-Predicate (Toll T M σ θ V z) :=
-  HierarchySymbol.Defined.to_definable
+  Bounding.HierarchySymbol.Defined.to_definable
     (.mkSigma ((tollSigma T M θ z).val/[#0, ⌜T.modifiedSolovay M σ θ z⌝])) (.mk fun v ↦ by simp)
 
 lemma Move.exists_toll (h : Move T M σ θ V x y) : ∃ w, Toll T M σ θ V y w :=

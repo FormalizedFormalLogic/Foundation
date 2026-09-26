@@ -148,8 +148,8 @@ variable (c v)
 open Classical in
 lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
   induction l using ISigma1.sigma1_succ_induction
-  · apply HierarchySymbol.Definable.exs
-    apply HierarchySymbol.Definable.and
+  · apply Bounding.HierarchySymbol.Definable.exs
+    apply Bounding.HierarchySymbol.Definable.and
     · exact ⟨p.cseqDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
          intro w; simpa [Matrix.comp_vecCons''] using! c.cseq_defined_iff (w 0 :> v)⟩
     · definability

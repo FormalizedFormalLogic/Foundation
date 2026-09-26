@@ -567,7 +567,7 @@ noncomputable def provabilityPred' (σ : Sentence L) : 𝚺₁.Sentence := .mkSi
 @[simp] lemma provabilityPred'_val (σ : Sentence L) :
     (provabilityPred' T σ).val = provabilityPred T σ := by
   unfold provabilityPred' provabilityPred
-  simp only [HierarchySymbol.Semiformula.val_mkSigma]
+  simp only [Bounding.HierarchySymbol.Semiformula.val_mkSigma]
 
 variable {T}
 
@@ -884,10 +884,10 @@ lemma disjDistr (ps s : V) (d : Derivable T (vecToSet ps ∪ s)) :
       (∀ i < len ps - k, ps.[i] ∈ s') → Derivable T (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
     intro k hk
     induction k using ISigma1.sigma1_succ_induction
-    · apply HierarchySymbol.Definable.imp (by definability)
+    · apply Bounding.HierarchySymbol.Definable.imp (by definability)
       apply HierarchySymbol.Definable.ball_le (by definability)
-      apply HierarchySymbol.Definable.imp (by definability)
-      apply HierarchySymbol.Definable.imp (by definability)
+      apply Bounding.HierarchySymbol.Definable.imp (by definability)
+      apply Bounding.HierarchySymbol.Definable.imp (by definability)
       definability
     case zero =>
       intro s' _ ss hs'

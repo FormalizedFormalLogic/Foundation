@@ -120,7 +120,7 @@ lemma find_minimal_proof_fintype {ι : Type*} [Finite ι] (φ : ι → V) {i : �
   have : ∃ z, (∃ j, Proof T z (φ j)) ∧ ∀ w < z, ∀ x, ¬Proof T w (φ x) := by
     simpa using
       InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, Proof T z (φ j))
-        (HierarchySymbol.Definable.fintype_exs fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
+        (Bounding.HierarchySymbol.Definable.fintype_exs fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
   rcases this with ⟨z, ⟨j, hj⟩, H⟩
   exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩
 

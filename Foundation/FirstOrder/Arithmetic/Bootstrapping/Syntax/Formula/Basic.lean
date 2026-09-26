@@ -490,7 +490,7 @@ lemma IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation 
   by rintro n p ⟨h, rfl⟩; exact this p h (fstIdx p) (by simp) rfl
   apply IsUFormula.induction (P := fun p ↦ ∀ n ≤ p, fstIdx p = n → P n p) Γ
   · apply HierarchySymbol.Definable.ball_le (by definability)
-    apply HierarchySymbol.Definable.imp (by definability)
+    apply Bounding.HierarchySymbol.Definable.imp (by definability)
     simp; exact hP
   · rintro n k r v hr hv _ _ rfl; simpa using hrel n k r v hr hv
   · rintro n k r v hr hv _ _ rfl; simpa using hnrel n k r v hr hv
@@ -1149,13 +1149,14 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
   have hf : 𝚺₁-Function₂ f := by definability
   intro param p
   apply bounded_all_sigma1_order_induction hf ?_ ?_ p param
-  · apply HierarchySymbol.Definable.imp
-      (HierarchySymbol.Definable.comp₁ (HierarchySymbol.DefinableFunction.var _))
-      (HierarchySymbol.Definable.comp₃
-        (HierarchySymbol.DefinableFunction.var _)
-        (HierarchySymbol.DefinableFunction.var _)
-        (HierarchySymbol.DefinableFunction₂.comp (HierarchySymbol.DefinableFunction.var _)
-          (HierarchySymbol.DefinableFunction.var _)))
+  · apply Bounding.HierarchySymbol.Definable.imp
+      (Bounding.HierarchySymbol.Definable.comp₁ (Bounding.HierarchySymbol.DefinableFunction.var _))
+      (Bounding.HierarchySymbol.Definable.comp₃
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+        (HierarchySymbol.DefinableFunction₂.comp
+          (Bounding.HierarchySymbol.DefinableFunction.var _)
+            (Bounding.HierarchySymbol.DefinableFunction.var _)))
   intro p param ih hp
   rcases hp.case with
     (⟨k, r, v, hkr, hv, rfl⟩ | ⟨k, r, v, hkr, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁,
@@ -1298,8 +1299,8 @@ section
 instance IsSemiformula.defined : 𝚫₁-Relation IsSemiformula (V := V) L via isSemiformula L := .mk <|
   by
   constructor
-  · intro v; simp [isSemiformula, HierarchySymbol.Semiformula.val_sigma, bv.defined.iff]
-  · intro v; simp [isSemiformula, HierarchySymbol.Semiformula.val_sigma, bv.defined.iff,
+  · intro v; simp [isSemiformula, Bounding.HierarchySymbol.Semiformula.val_sigma, bv.defined.iff]
+  · intro v; simp [isSemiformula, Bounding.HierarchySymbol.Semiformula.val_sigma, bv.defined.iff,
     isSemiformula_iff]
 
 instance IsSemiformula.definable : 𝚫₁-Relation IsSemiformula (V := V) L :=
@@ -1456,13 +1457,13 @@ lemma IsSemiformula.sigma1_structural_induction {P : V → V → Prop} (hP : �
     IsSemiformula L n p → P n p := by
   have : 𝚺₁-Function₂ (fun _ (n : V) ↦ n + 1) := by definability
   apply bounded_all_sigma1_order_induction this ?_ ?_ p n
-  · apply HierarchySymbol.Definable.imp
-    · apply (HierarchySymbol.Definable.comp₂
-        (HierarchySymbol.DefinableFunction.var _)
-        (HierarchySymbol.DefinableFunction.var _))
-    · apply (HierarchySymbol.Definable.comp₂
-        (HierarchySymbol.DefinableFunction.var _)
-        (HierarchySymbol.DefinableFunction.var _))
+  · apply Bounding.HierarchySymbol.Definable.imp
+    · exact Bounding.HierarchySymbol.Definable.comp₂
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+    · exact Bounding.HierarchySymbol.Definable.comp₂
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
   intro p n ih hp
   rcases IsSemiformula.case_iff.mp hp with
     (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂,
@@ -1568,17 +1569,17 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
   have hg : 𝚺₁-Function₃ g := by definability
   intro param n p
   apply bounded_all_sigma1_order_induction₂ hf hg ?_ ?_ p param n
-  · apply HierarchySymbol.Definable.imp
-    · apply (HierarchySymbol.Definable.comp₂
-        (HierarchySymbol.DefinableFunction.var _)
-        (HierarchySymbol.DefinableFunction.var _))
-    · apply HierarchySymbol.Definable.comp₄
-        (HierarchySymbol.DefinableFunction.var _)
-        (HierarchySymbol.DefinableFunction.var _)
-        (HierarchySymbol.DefinableFunction.var _)
-      apply (HierarchySymbol.DefinableFunction₂.comp
-        (HierarchySymbol.DefinableFunction.var _)
-        (HierarchySymbol.DefinableFunction.var _))
+  · apply Bounding.HierarchySymbol.Definable.imp
+    · exact Bounding.HierarchySymbol.Definable.comp₂
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+    · apply (Bounding.HierarchySymbol.Definable.comp₄
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+        (Bounding.HierarchySymbol.DefinableFunction.var _))
+      apply HierarchySymbol.DefinableFunction₂.comp
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+          (Bounding.HierarchySymbol.DefinableFunction.var _)
   intro p param n ih hp
   rcases IsSemiformula.case_iff.mp hp with
     (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂,

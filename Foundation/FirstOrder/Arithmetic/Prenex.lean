@@ -124,7 +124,7 @@ lemma val_pi {φ : Prenex 𝚺 s ξ (n + 1)} : φ.pi.val = ∀¹ φ.val := by
 @[simp, grind .]
 lemma val_sigmaInv {φ : Prenex 𝚺 (s + 1) ξ n} : φ.val = ∃¹ φ.sigmaInv.val := by
   unfold val sigmaInv
-  simp only [HierarchySymbol.Semiformula.val_rew]
+  simp only [Bounding.HierarchySymbol.Semiformula.val_rew]
   rw [← Polarity.quant_sigma, ← Polarity.alt_sigma, ← Rewriting.quantItr_succ_smul_castLE,
     ← TransitiveRewriting.comp_app]
   simp
@@ -134,7 +134,7 @@ lemma val_sigmaInv {φ : Prenex 𝚺 (s + 1) ξ n} : φ.val = ∃¹ φ.sigmaInv.
 @[simp, grind .]
 lemma val_piInv {φ : Prenex 𝚷 (s + 1) ξ n} : φ.val = ∀¹ φ.piInv.val := by
   unfold val piInv
-  simp only [HierarchySymbol.Semiformula.val_rew]
+  simp only [Bounding.HierarchySymbol.Semiformula.val_rew]
   rw [← Polarity.quant_pi, ← Polarity.alt_pi, ← Rewriting.quantItr_succ_smul_castLE,
     ← TransitiveRewriting.comp_app]
   simp
@@ -617,7 +617,8 @@ theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSem
     use φ' ⋎ ψ';
     intro V _ _ e f;
     grind [models_or φ' ψ' e, LogicalConnective.Prop.or_eq];
-  | ball pos _ ih =>
+  | ball hR pos _ ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
     obtain ⟨φ', hφ'⟩ := ih;
     use ∀'[u] φ';
@@ -625,7 +626,8 @@ theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSem
     rw [models_ball u φ' e];
     simp only [Semiformula.eval_ball];
     exact forall_congr' fun x => (imp_congr Iff.rfl (hφ' V (x :> e) f)).trans (by simp);
-  | bexs pos _ ih =>
+  | bexs hR pos _ ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos;
     obtain ⟨φ', hφ'⟩ := ih;
     use ∃'[u] φ';

@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
+public import Foundation.FirstOrder.Tarski.Monotone
 
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic
@@ -158,12 +159,14 @@ lemma of_polybounded_of_definable (f : (Fin k → V) → V) [hb : Bounded f]
     DefinableBoundedFunction₃ f := ⟨hb, hf⟩
 
 lemma retraction {f : (Fin k → V) → V} (hf : DefinableBoundedFunction f) (e : Fin k → Fin n) :
-    DefinableBoundedFunction fun v ↦ f (fun i ↦ v (e i)) :=
-  ⟨hf.bounded.retraction e, hf.definable.retraction e⟩
+    DefinableBoundedFunction fun v ↦ f (fun i ↦ v (e i)) := ⟨hf.bounded.retraction e,
+      Bounding.HierarchySymbol.DefinableFunction.retraction hf.definable e⟩
 
 end DefinableBoundedFunction
 
 namespace HierarchySymbol.Definable
+
+open Bounding.HierarchySymbol.Definable
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
@@ -174,7 +177,7 @@ lemma ball_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Definable fun v ↦ ∀ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : ℌ.Definable fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∀ y < x, P v y := by
-    apply bexs'; apply and
+    apply bexs'; apply Bounding.HierarchySymbol.Definable.and
     · exact hf.definable
     · suffices ℌ.Definable fun x ↦
           ∀ y < (#0).val (L := ℒₒᵣ) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
@@ -187,7 +190,7 @@ lemma bexs_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Definable fun v ↦ ∃ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : ℌ.Definable fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∃ y < x, P v y := by
-    apply bexs'; apply and
+    apply bexs'; apply Bounding.HierarchySymbol.Definable.and
     · exact hf.definable
     · suffices ℌ.Definable fun x ↦
           ∃ y < (#0).val (L := ℒₒᵣ) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
@@ -200,7 +203,7 @@ lemma ball_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Definable fun v ↦ ∀ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : ℌ.Definable fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∀ y ≤ x, P v y := by
-    apply bexs'; apply and
+    apply bexs'; apply Bounding.HierarchySymbol.Definable.and
     · exact hf.definable
     · suffices ℌ.Definable fun x ↦
           ∀ y ≤ (#0).val (L := ℒₒᵣ) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
@@ -213,7 +216,7 @@ lemma bexs_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Definable fun v ↦ ∃ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : ℌ.Definable fun v ↦ ∃ x ≤ bf.val v id, x = f v ∧ ∃ y ≤ x, P v y := by
-    apply bexs'; apply and
+    apply bexs'; apply Bounding.HierarchySymbol.Definable.and
     · exact hf.definable
     · suffices ℌ.Definable fun x ↦
           ∃ y ≤ (#0).val (L := ℒₒᵣ) x id, P (fun x_1 ↦ x x_1.succ) y by simpa
@@ -267,7 +270,7 @@ lemma substitution_boldfaceBoundedFunction {f : Fin k → (Fin l → V) → V}
     ℌ.Definable fun z ↦ P (f · z) := by
   have : ℌ.Definable fun v ↦ ∃ w ≤ (f · v), (∀ i, w i = f i v) ∧ P w := by
     apply bexs_vec_le_boldfaceBoundedFunction hf
-    apply and
+    apply Bounding.HierarchySymbol.Definable.and
     · apply fintype_all; intro i
       simpa using retraction (.of_zero (hf i).2) (i.natAdd l :> Fin.castAdd k)
     · apply retraction hP
@@ -304,6 +307,8 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 end DefinableBoundedFunction
 
 namespace HierarchySymbol.Definable
+
+open Bounding.HierarchySymbol.Definable
 
 open DefinableBoundedFunction
 
