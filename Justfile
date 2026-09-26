@@ -19,11 +19,14 @@ import-graph:
     lake exe graph --to Foundation import_graph.png import_graph.pdf import_graph.html
 
 zoo:
-    lake build zoo_arithmetic
+    lake build zoo_arithmetic zoo_provability_logic
     lake exe zoo_arithmetic Zoo/arithmetic.json
+    lake exe zoo_provability_logic Zoo/provability_logic.json
     mkdir -p pages/zoo
     typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.png
     typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.pdf
+    typst compile Zoo/provability_logic.typ pages/zoo/provability_logic.png
+    typst compile Zoo/provability_logic.typ pages/zoo/provability_logic.pdf
 
 mk-all:
     lake exe mk_all --module --lib Foundation

@@ -84,6 +84,10 @@ regenerate them locally.
 
 <a href="https://formalizedformallogic.github.io/Foundation/zoo/arithmetic.png"><img alt="Arithmetic Theory Zoo" src="https://formalizedformallogic.github.io/Foundation/zoo/arithmetic.png" height="600"></a>
 
+#### Provability Logic Zoo
+
+<a href="https://formalizedformallogic.github.io/Foundation/zoo/provability_logic.png"><img alt="Provability Logic Zoo" src="https://formalizedformallogic.github.io/Foundation/zoo/provability_logic.png" height="300"></a>
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for the contribution flow.
