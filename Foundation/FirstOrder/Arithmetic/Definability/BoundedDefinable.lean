@@ -6,13 +6,14 @@ public import Foundation.FirstOrder.Tarski.Monotone
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Arithmetic
 open PeanoMinus
 
 variable {ξ : Type*} {n k l : ℕ}
 
 variable {V : Type*} [ORingStructure V]
 
-variable {ℌ : HierarchySymbol} {Γ Γ' : SigmaPiDelta}
+variable {ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]} {Γ Γ' : SigmaPiDelta}
 
 variable (ℌ)
 
@@ -105,7 +106,8 @@ instance hMul : Bounded₂ (HMul.hMul : V → V → V) where
 
 end Bounded₂
 
-def DefinableBoundedFunction {k} (f : (Fin k → V) → V) := Bounded f ∧ 𝚺₀.DefinableFunction f
+def DefinableBoundedFunction {k} (f : (Fin k → V) → V) :=
+  Bounded f ∧ 𝚺ᴬ₀.DefinableFunction f
 
 abbrev DefinableBoundedFunction₁ (f : V → V) : Prop :=
   DefinableBoundedFunction (k := 1) (fun v => f (v 0))
@@ -143,19 +145,19 @@ lemma DefinableBoundedFunction₃.definable {f : V → V → V → V} (h : Defin
 namespace DefinableBoundedFunction
 
 lemma of_polybounded_of_definable (f : (Fin k → V) → V) [hb : Bounded f]
-    [hf : 𝚺₀.DefinableFunction f] :
+    [hf : 𝚺ᴬ₀.DefinableFunction f] :
     DefinableBoundedFunction f := ⟨hb, hf⟩
 
 @[simp] lemma of_polybounded_of_definable₁ (f : V → V) [hb : Bounded₁ f]
-    [hf : 𝚺₀.DefinableFunction₁ f] :
+    [hf : 𝚺ᴬ₀.DefinableFunction₁ f] :
     DefinableBoundedFunction₁ f := ⟨hb, hf⟩
 
 @[simp] lemma of_polybounded_of_definable₂ (f : V → V → V) [hb : Bounded₂ f]
-    [hf : 𝚺₀.DefinableFunction₂ f] :
+    [hf : 𝚺ᴬ₀.DefinableFunction₂ f] :
     DefinableBoundedFunction₂ f := ⟨hb, hf⟩
 
 @[simp] lemma of_polybounded_of_definable₃ (f : V → V → V → V) [hb : Bounded₃ f]
-    [hf : 𝚺₀.DefinableFunction₃ f] :
+    [hf : 𝚺ᴬ₀.DefinableFunction₃ f] :
     DefinableBoundedFunction₃ f := ⟨hb, hf⟩
 
 lemma retraction {f : (Fin k → V) → V} (hf : DefinableBoundedFunction f) (e : Fin k → Fin n) :
@@ -164,10 +166,17 @@ lemma retraction {f : (Fin k → V) → V} (hf : DefinableBoundedFunction f) (e 
 
 end DefinableBoundedFunction
 
-namespace HierarchySymbol.Definable
+end FFL.FirstOrder.Arithmetic
 
+namespace FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical.Definable
+
+open scoped FFL.FirstOrder.Arithmetic
+open FFL.FirstOrder.Arithmetic
 open Bounding.HierarchySymbol.Definable
 
+variable {ξ : Type*} {n k l : ℕ}
+variable {V : Type*} [ORingStructure V]
+variable {ℌ : HierarchySymbol ℬ[<, ℒₒᵣ]} {Γ Γ' : SigmaPiDelta}
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 variable {P Q : (Fin k → V) → Prop}
@@ -225,20 +234,20 @@ lemma bexs_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
 lemma ball_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction f) (h : Γ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable fun v ↦ ∀ x < f v, P v x := ball_blt hf h
+    (hf : DefinableBoundedFunction f) (h : Γᴬ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ-[0].Definable fun v ↦ ∀ x < f v, P v x := ball_blt hf h
 
 lemma bexs_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction f) (h : Γ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable fun v ↦ ∃ x < f v, P v x := bexs_blt hf h
+    (hf : DefinableBoundedFunction f) (h : Γᴬ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ-[0].Definable fun v ↦ ∃ x < f v, P v x := bexs_blt hf h
 
 lemma ball_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction f) (h : Γ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable fun v ↦ ∀ x ≤ f v, P v x := ball_ble hf h
+    (hf : DefinableBoundedFunction f) (h : Γᴬ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ-[0].Definable fun v ↦ ∀ x ≤ f v, P v x := ball_ble hf h
 
 lemma bexs_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction f) (h : Γ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Definable fun v ↦ ∃ x ≤ f v, P v x := bexs_ble hf h
+    (hf : DefinableBoundedFunction f) (h : Γᴬ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ-[0].Definable fun v ↦ ∃ x ≤ f v, P v x := bexs_ble hf h
 
 lemma bexs_vec_le_boldfaceBoundedFunction {k} {φ : Fin l → (Fin k → V) → V}
     {P : (Fin k → V) → (Fin l → V) → Prop}
@@ -281,8 +290,16 @@ lemma substitution_boldfaceBoundedFunction {f : Fin k → (Fin l → V) → V}
       rcases funext e
       exact h
 
-end HierarchySymbol.Definable
+end FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical.Definable
 
+namespace FFL.FirstOrder.Arithmetic
+
+open scoped FFL.FirstOrder.Arithmetic
+open PeanoMinus
+
+variable {ξ : Type*} {n k l : ℕ}
+variable {V : Type*} [ORingStructure V]
+variable {ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]} {Γ Γ' : SigmaPiDelta}
 namespace DefinableBoundedFunction
 
 lemma of_iff {f g : (Fin k → V) → V} (H : DefinableBoundedFunction f) (h : ∀ v, f v = g v) :
@@ -306,12 +323,18 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 end DefinableBoundedFunction
 
-namespace HierarchySymbol.Definable
+end FFL.FirstOrder.Arithmetic
 
+namespace FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical.Definable
+
+open scoped FFL.FirstOrder.Arithmetic
+open FFL.FirstOrder.Arithmetic
 open Bounding.HierarchySymbol.Definable
-
 open DefinableBoundedFunction
 
+variable {ξ : Type*} {n k l : ℕ}
+variable {V : Type*} [ORingStructure V]
+variable {ℌ : HierarchySymbol ℬ[<, ℒₒᵣ]} {Γ Γ' : SigmaPiDelta}
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 lemma bcomp₁ {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : ℌ.DefinablePred P]
@@ -339,99 +362,141 @@ lemma bcomp₄ {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fi
   substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃, f₄]) hR
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
-lemma bcomp₁_zero {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : Γ-[0].DefinablePred P]
+lemma bcomp₁_zero {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : Γᴬ-[0].DefinablePred P]
     (hf : DefinableBoundedFunction f) :
-    Γ-[0].Definable fun v ↦ P (f v) :=
+    Γᴬ-[0].Definable fun v ↦ P (f v) :=
   substitution_boldfaceBoundedFunction (f := ![f]) hP (by simp [*])
 
-lemma bcomp₂_zero {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V} [hR : Γ-[0].DefinableRel R]
+lemma bcomp₂_zero {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V}
+    [hR : Γᴬ-[0].DefinableRel R]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂) :
-    Γ-[0].Definable fun v ↦ R (f₁ v) (f₂ v) :=
+    Γᴬ-[0].Definable fun v ↦ R (f₁ v) (f₂ v) :=
   substitution_boldfaceBoundedFunction (f := ![f₁, f₂]) hR
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma bcomp₃_zero {k} {R : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V}
-    [hR : Γ-[0].DefinableRel₃ R]
+    [hR : Γᴬ-[0].DefinableRel₃ R]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) :
-    Γ-[0].Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
+    Γᴬ-[0].Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
   substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃]) hR
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma bcomp₄_zero {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fin k → V) → V}
-    [hR : Γ-[0].DefinableRel₄ R]
+    [hR : Γᴬ-[0].DefinableRel₄ R]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) (hf₄ : DefinableBoundedFunction f₄) :
-    Γ-[0].Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
+    Γᴬ-[0].Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
   substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃, f₄]) hR
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
-end HierarchySymbol.Definable
+end FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical.Definable
 
+namespace FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical
+
+open scoped FFL.FirstOrder.Arithmetic
+open FFL.FirstOrder.Arithmetic
+
+variable {n k l : ℕ}
+variable {V : Type*} [ORingStructure V]
+variable {ℌ : HierarchySymbol ℬ[<, ℒₒᵣ]}
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
-lemma HierarchySymbol.DefinableFunction.bcomp {k} {F : (Fin l → V) → V}
+namespace DefinableFunction
+
+lemma bcomp {k} {F : (Fin l → V) → V}
     {f : Fin l → (Fin k → V) → V}
     (hF : ℌ.DefinableFunction F) (hf : ∀ i, DefinableBoundedFunction (f i)) :
     ℌ.DefinableFunction (fun v ↦ F (f · v)) := by
   simpa using
-    Definable.substitution_boldfaceBoundedFunction
+    Bounding.HierarchySymbol.Arithmetical.Definable.substitution_boldfaceBoundedFunction
       (f := (· 0) :> fun i w ↦ f i (w ·.succ)) hF <| by
     intro i
     cases i using Fin.cases with
     | zero => simp
     | succ i => simpa using DefinableBoundedFunction.retraction (hf i) Fin.succ
 
-lemma HierarchySymbol.DefinableFunction₁.bcomp {k} {F : V → V} {f : (Fin k → V) → V}
+end DefinableFunction
+
+namespace DefinableFunction₁
+
+lemma bcomp {k} {F : V → V} {f : (Fin k → V) → V}
     (hF : ℌ.DefinableFunction₁ F) (hf : DefinableBoundedFunction f) :
     ℌ.DefinableFunction (fun v ↦ F (f v)) :=
-  HierarchySymbol.DefinableFunction.bcomp (f := ![f]) hF (by simp [*])
+  Bounding.HierarchySymbol.Arithmetical.DefinableFunction.bcomp (f := ![f]) hF (by simp [*])
 
-lemma HierarchySymbol.DefinableFunction₂.bcomp {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
+end DefinableFunction₁
+
+namespace DefinableFunction₂
+
+lemma bcomp {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
     (hF : ℌ.DefinableFunction₂ F)
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂) :
     ℌ.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v)) :=
-  HierarchySymbol.DefinableFunction.bcomp (f := ![f₁, f₂]) hF
+  Bounding.HierarchySymbol.Arithmetical.DefinableFunction.bcomp (f := ![f₁, f₂]) hF
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
-lemma HierarchySymbol.DefinableFunction₃.bcomp {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
+end DefinableFunction₂
+
+namespace DefinableFunction₃
+
+lemma bcomp {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
     (hF : ℌ.DefinableFunction₃ F)
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) :
     ℌ.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
-  HierarchySymbol.DefinableFunction.bcomp (f := ![f₁, f₂, f₃]) hF
+  Bounding.HierarchySymbol.Arithmetical.DefinableFunction.bcomp (f := ![f₁, f₂, f₃]) hF
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+
+end DefinableFunction₃
+
+end FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical
+namespace FFL.FirstOrder.Arithmetic
+
+open scoped FFL.FirstOrder.Arithmetic
+open PeanoMinus
+open Bounding.HierarchySymbol
+
+variable {ξ : Type*} {n k l : ℕ}
+variable {V : Type*} [ORingStructure V]
+variable {ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]} {Γ Γ' : SigmaPiDelta}
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 lemma DefinableBoundedFunction₁.comp {k} {F : V → V} {f : (Fin k → V) → V}
     (hF : DefinableBoundedFunction₁ F) (hf : DefinableBoundedFunction f) :
     DefinableBoundedFunction (fun v ↦ F (f v)) :=
-  ⟨hF.bounded.comp hf.bounded, hF.definable.bcomp hf⟩
+  ⟨hF.bounded.comp hf.bounded,
+    Bounding.HierarchySymbol.Arithmetical.DefinableFunction₁.bcomp hF.definable hf⟩
 
 lemma DefinableBoundedFunction₂.comp {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
     (hF : DefinableBoundedFunction₂ F)
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂) :
     DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v)) :=
-  ⟨hF.bounded.comp hf₁.bounded hf₂.bounded, hF.definable.bcomp hf₁ hf₂⟩
+  ⟨hF.bounded.comp hf₁.bounded hf₂.bounded,
+    Bounding.HierarchySymbol.Arithmetical.DefinableFunction₂.bcomp hF.definable hf₁ hf₂⟩
 
 lemma DefinableBoundedFunction₃.comp {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
     (hF : DefinableBoundedFunction₃ F)
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) :
     DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
-  ⟨hF.bounded.comp hf₁.bounded hf₂.bounded hf₃.bounded, hF.definable.bcomp hf₁ hf₂ hf₃⟩
+  ⟨hF.bounded.comp hf₁.bounded hf₂.bounded hf₃.bounded,
+    Bounding.HierarchySymbol.Arithmetical.DefinableFunction₃.bcomp hF.definable
+      hf₁ hf₂ hf₃⟩
 
 lemma DefinableBoundedFunction.comp₁ {k} {F : V → V} {f : (Fin k → V) → V}
-    [hFb : Bounded₁ F] [hFd : 𝚺₀.DefinableFunction₁ F] (hf : DefinableBoundedFunction f) :
+    [hFb : Bounded₁ F] [hFd : 𝚺ᴬ₀.DefinableFunction₁ F]
+    (hf : DefinableBoundedFunction f) :
     DefinableBoundedFunction (fun v ↦ F (f v)) := DefinableBoundedFunction₁.comp ⟨hFb, hFd⟩ hf
 
 lemma DefinableBoundedFunction.comp₂ {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
-    [hFb : Bounded₂ F] [hFd : 𝚺₀.DefinableFunction₂ F]
+    [hFb : Bounded₂ F] [hFd : 𝚺ᴬ₀.DefinableFunction₂ F]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂) :
     DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v)) :=
   DefinableBoundedFunction₂.comp ⟨hFb, hFd⟩ hf₁ hf₂
 
 lemma DefinableBoundedFunction.comp₃ {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
-    [hFb : Bounded₃ F] [hFd : 𝚺₀.DefinableFunction₃ F]
+    [hFb : Bounded₃ F] [hFd : 𝚺ᴬ₀.DefinableFunction₃ F]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) :
     DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
@@ -439,7 +504,7 @@ lemma DefinableBoundedFunction.comp₃ {k} {F : V → V → V → V} {f₁ f₂ 
 
 section
 
-open HierarchySymbol
+open Bounding.HierarchySymbol
 
 attribute [aesop (rule_sets := [Definability]) norm]
   sq
@@ -452,25 +517,25 @@ attribute [aesop 5 (rule_sets := [Definability]) safe]
   DefinableBoundedFunction.comp₃
 
 attribute [aesop 6 (rule_sets := [Definability]) safe]
-  Definable.bcomp₁_zero
-  Definable.bcomp₂_zero
-  Definable.bcomp₃_zero
-  Definable.bcomp₄_zero
+  Arithmetical.Definable.bcomp₁_zero
+  Arithmetical.Definable.bcomp₂_zero
+  Arithmetical.Definable.bcomp₃_zero
+  Arithmetical.Definable.bcomp₄_zero
 
 attribute [aesop 8 (rule_sets := [Definability]) safe]
-  Definable.ball_blt_zero
-  Definable.ball_ble_zero
-  Definable.bexs_blt_zero
-  Definable.bexs_ble_zero
+  Arithmetical.Definable.ball_blt_zero
+  Arithmetical.Definable.ball_ble_zero
+  Arithmetical.Definable.bexs_blt_zero
+  Arithmetical.Definable.bexs_ble_zero
 
 example (c : V) : DefinableBoundedFunction₂ (fun x _ : V ↦ c + 2 * x^2) := by definability
 
-example {ex : V → V} [h : 𝚫₁.DefinableFunction₁ ex] :
-    𝚺₁.DefinableRel (fun x y : V ↦ ∃ z, x < y ↔ ex (ex (ex (ex x))) = z) := by
+example {ex : V → V} [h : 𝚫ᴬ₁.DefinableFunction₁ ex] :
+    𝚺ᴬ₁.DefinableRel (fun x y : V ↦ ∃ z, x < y ↔ ex (ex (ex (ex x))) = z) := by
   definability
 
-example {ex : V → V} [h : 𝚺₁.DefinableFunction₁ ex] :
-    𝚺₁.DefinableRel (fun x y : V ↦ ∀ z < ex y, x < y ↔ ex (ex x) = z) := by
+example {ex : V → V} [h : 𝚺ᴬ₁.DefinableFunction₁ ex] :
+    𝚺ᴬ₁.DefinableRel (fun x y : V ↦ ∀ z < ex y, x < y ↔ ex (ex x) = z) := by
   definability
 
 end
