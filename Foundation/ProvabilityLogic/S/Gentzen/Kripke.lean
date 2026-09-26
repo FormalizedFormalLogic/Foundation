@@ -89,8 +89,6 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
-/-- A saturated sequent `t` closed under `□A ↦ A` on the left is true at the finite points of a
-tail below the cone of `t` in the countermodel. -/
 lemma truthlemma_freeTail {BS : Sequent α} [Fact (⊬ᴳ[𝐆𝐋] BS)] {t : GL.SaturatedSequent BS}
     (hbox : ∀ {A}, □A ∈ t.ant → A ∈ t.ant) {V : ℕ∞ → α → Prop}
     (hV : ∀ n : ℕ, V n = fun a ↦ #a ∈ t.ant) (A : Formula α) (n : ℕ) :
@@ -171,10 +169,7 @@ lemma iff_eventually_forces : ⊢ᴳ[𝐒] Γ ⟹[1] Δ ↔
 
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
-/-- Cut is admissible.
-
-- [KK23, Theorem 3.1]
--/
+/-- - [KK23, Theorem 3.1] -/
 theorem cut : {ℓ : Fin 2} → ⊢ᴳ[𝐒] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[𝐒] insert A Γ₂ ⟹[ℓ] Δ₂ →
     ⊢ᴳ[𝐒] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
   | 0, h₁, h₂ => iff_GL.mpr (GL.Gentzen.cut (iff_GL.mp h₁) (iff_GL.mp h₂))

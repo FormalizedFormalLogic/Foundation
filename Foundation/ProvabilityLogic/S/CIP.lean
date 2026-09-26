@@ -38,9 +38,7 @@ lemma provable_fconj_rflSubfmls (A : Formula α) : 𝐒 ⊢ A.rflSubfmls.conj :=
     obtain ⟨C, -, rfl⟩ := Finset.mem_image.mp hφ;
     exact axiomT;
 
-/-- **Craig interpolation property** of `𝐒`.
-
-- [Bek87, Theorem 2] -/
+/-- - [Bek87, Theorem 2] -/
 theorem CIP (h : 𝐒 ⊢ A 🡒 B) :
     ∃ C, 𝐒 ⊢ A 🡒 C ∧ 𝐒 ⊢ C 🡒 B ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by
   have h' : 𝐆𝐋 ⊢ A.rflSubfmls.conj ⋏ B.rflSubfmls.conj 🡒 A 🡒 B :=
