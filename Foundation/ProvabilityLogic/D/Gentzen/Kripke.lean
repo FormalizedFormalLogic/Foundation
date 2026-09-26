@@ -21,14 +21,17 @@ namespace D.Gentzen
 
 variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
-theorem sound_aux {T : LayeredSequent 3 α} (h : ⊢ᴳ[𝐃] T) : T.level = 2 →
-    ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (V : ℕ∞ → α → Prop),
-      Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] T.toSequent := by
+/-- - [KKIM25, Theorem 5.8] -/
+theorem sound (h : ⊢ᴳ[𝐃] Γ ⟹[2] Δ) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
+    (V : ℕ∞ → α → Prop) : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] (Γ ⟹ Δ) := by
+  suffices ∀ {T : LayeredSequent 3 α}, ⊢ᴳ[𝐃] T → T.level = 2 →
+      Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] T.toSequent from this h rfl;
+  intro T h;
   induction h with
-  | axm | botL | wkL | wkR | impL | impR => intro hl _ _ M _ V; grind;
+  | axm | botL | wkL | wkR | impL | impR => grind;
   | boxGL | liftUp₀₁ | boxL => nofun;
   | @liftUp₁₂ Γ Δ h _ =>
-    intro _ κ _ M _ V hΓ;
+    intro _ hΓ;
     obtain ⟨X, hX⟩ := S.Gentzen.sound (h.toS rfl);
     obtain ⟨i, hi⟩ := eventually_isReflexiveOf (M := (M.toFreeTail V).toModel)
       (w := fun n : ℕ ↦ Sum.inr (n : ℕ∞))
@@ -45,11 +48,6 @@ theorem sound_aux {T : LayeredSequent 3 α} (h : ⊢ᴳ[𝐃] T) : T.level = 2 �
       exact toFreeTail.forces_box_of_root (hΓ _ hC) _;
     obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hE;
     exact hk D hD _ ((Finset.le_sup hD).trans (le_max_right _ _)) hnE;
-
-/-- - [KKIM25, Theorem 5.8] -/
-theorem sound (h : ⊢ᴳ[𝐃] Γ ⟹[2] Δ) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
-    (V : ℕ∞ → α → Prop) : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] (Γ ⟹ Δ) :=
-  sound_aux h rfl M V
 
 universe u
 

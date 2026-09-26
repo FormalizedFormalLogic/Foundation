@@ -24,22 +24,7 @@ universe u
 
 variable {α : Type u} {a b c : α} {C : Formula α}
 
-lemma Logic.S.not_iff_atom [DecidableEq α] (hab : a ≠ b) (hC : C.ModalizedIn a)
-    (hb : b ∉ C.atoms) : 𝐒 ⊬ C 🡘 #a := by
-  intro h;
-  obtain ⟨E, -, hE⟩ := Logic.GL.exists_fixpoint (A := ∼C) hab ⟨hC, trivial⟩ (by simpa using hb);
-  have h₁ : 𝐒 ⊢ C⟦a ↦ E⟧ 🡘 E := by
-    simpa only [subst_iff, subst_atom, Substitution.single_apply, ite_true] using
-      show 𝐒 ⊢ (C 🡘 #a)⟦a ↦ E⟧ from sumQuasiNormal.subst h;
-  have h₂ : 𝐒 ⊢ ∼C⟦a ↦ E⟧ 🡘 E := S.of_GL hE;
-  exact unprovable_bot (L := 𝐒) <| by cl_prover [h₁, h₂];
-
 namespace Logic.D
-
-lemma provable_counterexample : 𝐃 ⊢ ∼(□(□#b ⋎ #a) 🡒 □#b) 🡒 □(#a 🡒 □#c) 🡒 □#c := by
-  have h : 𝐆𝐋 ⊢ □(□#b ⋎ #a) ⋏ □(#a 🡒 □#c) 🡒 □(□#b ⋎ □#c) :=
-    C_trans normalOf.box_and (normalOf.box_mono (by cl_prover));
-  cl_prover [of_GL h, axiomD (A := #b) (B := #c)];
 
 variable [DecidableEq α]
 
@@ -99,12 +84,22 @@ lemma S_modalize_iff_of_interpolant (hab : a ≠ b) (hac : a ≠ c)
 theorem not_CIP (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) :
     ¬∀ A B : Formula α, 𝐃 ⊢ A 🡒 B →
       ∃ C, 𝐃 ⊢ A 🡒 C ∧ 𝐃 ⊢ C 🡒 B ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by
-  by_contra!;
-  obtain ⟨C, h₁, h₂, hC⟩ := this _ _ (provable_counterexample (a := a) (b := b) (c := c));
-  have hC : C.atoms ⊆ {a} := hC.trans (by intro; simp; grind);
-  exact S.not_iff_atom hab modalizedIn_modalize
-    (fun h ↦ by simpa [hab.symm] using hC <| atoms_modalize_subset h)
-    (S_modalize_iff_of_interpolant hab hac h₁ h₂ hC);
+  by_contra! h;
+  have : 𝐆𝐋 ⊢ □(□#b ⋎ #a) ⋏ □(#a 🡒 □#c) 🡒 □(□#b ⋎ □#c) :=
+    C_trans normalOf.box_and (normalOf.box_mono (by cl_prover));
+  obtain ⟨C, h₁, h₂, hC⟩ := h (∼(□(□#b ⋎ #a) 🡒 □#b)) (□(#a 🡒 □#c) 🡒 □#c)
+    (by cl_prover [of_GL this, axiomD (A := #b) (B := #c)]);
+  replace hC : C.atoms ⊆ {a} := hC.trans (by intro; simp; grind);
+  have hb : b ∉ C.modalize.atoms := fun h ↦ by
+    simpa [hab.symm] using hC <| atoms_modalize_subset h;
+  obtain ⟨E, -, hE⟩ := GL.exists_fixpoint (A := ∼C.modalize) hab ⟨modalizedIn_modalize, trivial⟩
+    (by simpa using hb);
+  have : 𝐒 ⊢ C.modalize⟦a ↦ E⟧ 🡘 E := by
+    simpa only [subst_iff, subst_atom, Substitution.single_apply, ite_true] using
+      show 𝐒 ⊢ (C.modalize 🡘 #a)⟦a ↦ E⟧ from
+        sumQuasiNormal.subst (S_modalize_iff_of_interpolant hab hac h₁ h₂ hC);
+  exact unprovable_bot (L := 𝐒) <|
+    by cl_prover [this, (S.of_GL hE : 𝐒 ⊢ ∼C.modalize⟦a ↦ E⟧ 🡘 E)];
 
 end Logic.D
 
