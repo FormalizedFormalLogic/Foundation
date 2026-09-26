@@ -90,15 +90,15 @@ section Transfer
 
 variable [DecidableEq α] {K : RootedModel κ α} {p q : α} {γ : Finset α}
 
-lemma val_subst_pIffOn_of_ne (hp : K.root ⊩[_] □#p) {z : K.World} (hz : z ≠ K.root) :
+lemma val_subst_pIffOn_of_ne (hp : K.root ⊩ □#p) {z : K.World} (hz : z ≠ K.root) :
     (K.subst (Substitution.pIffOn p γ)) z q ↔ K z q := by
   have := hp z (K.root_rel z hz);
-  change z ⊩[_] (if q ∈ γ then #p 🡘 #q else #q) ↔ _;
+  change z ⊩ (if q ∈ γ then #p 🡘 #q else #q) ↔ _;
   grind;
 
-lemma val_subst_pIffOn_root (hnp : K.root ⊮[_] #p) :
+lemma val_subst_pIffOn_root (hnp : K.root ⊮ #p) :
     (K.subst (Substitution.pIffOn p γ)) K.root q ↔ (q ∈ γ ↔ ¬K K.root q) := by
-  change K.root ⊩[_] (if q ∈ γ then #p 🡘 #q else #q) ↔ _;
+  change K.root ⊩ (if q ∈ γ then #p 🡘 #q else #q) ↔ _;
   grind;
 
 end Transfer

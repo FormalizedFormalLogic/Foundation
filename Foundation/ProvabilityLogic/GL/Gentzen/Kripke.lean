@@ -27,10 +27,10 @@ lemma Model.validateSequent_boxGL [M.IsGL] (h : M ⊧ (insert (□A) (Γ ∪ Γ.
     M ⊧ (Γ.box ⟹ {□A}) := by
   apply validateSequent_singleton_iff.mpr;
   intro x hx;
-  have hΓ : ∀ C ∈ Γ, x ⊩[_] □C := fun C hC ↦ hx _ (Finset.mem_image_of_mem _ hC);
+  have hΓ : ∀ C ∈ Γ, x ⊩ □C := fun C hC ↦ hx _ (Finset.mem_image_of_mem _ hC);
   by_contra hA;
   obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp hA;
-  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[_] A} ⟨y, Rxy, hy⟩;
+  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮ A} ⟨y, Rxy, hy⟩;
   apply ht;
   apply validateSequent_singleton_iff.mp h t;
   simp only [Finset.mem_insert, Finset.mem_union, Finset.mem_image];
@@ -123,7 +123,7 @@ instance : (countermodel BS).IsFiniteGL where
     exact ⟨h₁.trans h₃, h₁.subset.trans h₄⟩;
   irrefl x h := h.1.ne rfl
 
-lemma truthlemma : (A ∈ x.ant → x ⊩[_] A) ∧ (A ∈ x.suc → x ⊮[_] A) := by
+lemma truthlemma : (A ∈ x.ant → x ⊩ A) ∧ (A ∈ x.suc → x ⊮ A) := by
   induction A generalizing x with
   | atom a => exact ⟨id, fun h hf ↦ not_mem_both ⟨hf, h⟩⟩;
   | falsum => exact ⟨fun h ↦ absurd h bot_not_mem_ant, fun _ ↦ id⟩;

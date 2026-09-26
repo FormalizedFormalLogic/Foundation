@@ -40,7 +40,7 @@ root.
 -/
 structure StrongReflexiveCountermodel (κ : Type*) [Nonempty κ] {α : Type*} [DecidableEq α]
     (A : Formula α) extends RootedModel κ α where
-  root_not_forces : root ⊮[_] A
+  root_not_forces : root ⊮ A
   u : toModel.World
   root_rel_u : root ≺ u
   isReflexiveOf_u : u.IsReflexiveOf A.subfmls.prebox
@@ -90,14 +90,14 @@ variable (S : 𝔅.ModifiedSolovaySentences M σ)
 
 open Classical in
 noncomputable def realization : Realization α L :=
-  ⟨fun a ↦ ⩖ i ∈ { i : M.extendRoot.World | i ⊩[_] #a }, S i⟩
+  ⟨fun a ↦ ⩖ i ∈ { i : M.extendRoot.World | i ⊩ #a }, S i⟩
 
 variable [M.IsGL] {i : M.extendRoot.World}
 
 private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
     (hB : B ∈ A.subfmls) :
-    (i ⊩[_] B → T₀ ⊢ S i 🡒 B.interpret S.realization 𝔅) ∧
-    (i ⊮[_] B → T₀ ⊢ S i 🡒 ∼B.interpret S.realization 𝔅) := by
+    (i ⊩ B → T₀ ⊢ S i 🡒 B.interpret S.realization 𝔅) ∧
+    (i ⊮ B → T₀ ⊢ S i 🡒 ∼B.interpret S.realization 𝔅) := by
   classical
   induction B generalizing i with
   | falsum => simp [Formula.interpret];
@@ -121,7 +121,7 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
   | box B ih =>
     replace ih := fun {j} (hj : j ≠ none) ↦ ih hj (Formula.subfmls_trans hB (by grind));
     have hne {j : M.extendRoot.World} (Rij : i ≺ j) : j ≠ none := by rintro rfl; simp_all;
-    have hu : some M.u ⊩[_] □B → some M.u ⊩[_] B :=
+    have hu : some M.u ⊩ □B → some M.u ⊩ B :=
       fun h ↦ extendRoot.forces_some.mpr <|
         M.isReflexiveOf_u B (FormulaFinset.mem_prebox.mpr hB) (extendRoot.forces_some.mp h);
     constructor;
@@ -135,7 +135,7 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
     · intro h;
       obtain ⟨j, Rij, hj⟩ := not_forces_box.mp h;
       obtain ⟨y, ⟨Riy, hy⟩, hymax⟩ :=
-        M.extendRoot.terminalOf { y | i ≺ y ∧ y ⊮[_] B } ⟨j, Rij, hj⟩;
+        M.extendRoot.terminalOf { y | i ≺ y ∧ y ⊮ B } ⟨j, Rij, hj⟩;
       have hyu : y ≠ some M.u := by
         rintro rfl;
         exact hy <| hu fun z Ryz ↦ of_not_not fun hz ↦
@@ -147,14 +147,14 @@ private lemma mainlemma_aux (hi : i ≠ none) {B : ProvabilityLogic.Formula α}
 - [AB05, Lemma 53]
 -/
 theorem mainlemma (hi : i ≠ none) {B : ProvabilityLogic.Formula α} (hB : B ∈ A.subfmls) :
-    i ⊩[_] B → T₀ ⊢ S i 🡒 B.interpret S.realization 𝔅 :=
+    i ⊩ B → T₀ ⊢ S i 🡒 B.interpret S.realization 𝔅 :=
   (S.mainlemma_aux hi hB).1
 
 /-- - [Bek90, §6 Lemma 2]
 - [AB05, Lemma 53]
 -/
 theorem mainlemma_neg (hi : i ≠ none) {B : ProvabilityLogic.Formula α} (hB : B ∈ A.subfmls) :
-    i ⊮[_] B → T₀ ⊢ S i 🡒 ∼B.interpret S.realization 𝔅 :=
+    i ⊮ B → T₀ ⊢ S i 🡒 ∼B.interpret S.realization 𝔅 :=
   (S.mainlemma_aux hi hB).2
 
 lemma provable_boxItr_bot_of_ne {z : M.World}

@@ -35,11 +35,11 @@ section
 
 variable {κ : Type*} [Nonempty κ] {M : Model κ α}
 
-lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩[_] □(□A 🡒 A) 🡒 □A := by
+lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩ □(□A 🡒 A) 🡒 □A := by
   intro hx;
   by_contra hA;
   obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp hA;
-  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[_] A} ⟨y, Rxy, hy⟩;
+  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮ A} ⟨y, Rxy, hy⟩;
   apply ht;
   apply hx t Rxt;
   intro z Rtz;
@@ -109,9 +109,9 @@ theorem provability_TFAE : [
     𝐆𝐋 ⊢ A,
     ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[_] A,
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩ A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
-      M.root ⊩[_] A
+      M.root ⊩ A
   ].TFAE := by
   tfae_have 1 → 3 := fun h _ _ M _ ↦ sound M h;
   tfae_have 3 → 2 := fun h ↦ Gentzen.complete fun M _ x _ ↦ ⟨A, by simp, h M x⟩;
@@ -131,7 +131,7 @@ theorem iff_valid_finite :
 
 omit [DecidableEq α] in
 theorem iff_root_forces : 𝐆𝐋 ⊢ A ↔
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[_] A := by
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩ A := by
   classical
   exact provability_TFAE.out 1 4
 
@@ -141,7 +141,7 @@ omit [DecidableEq α] in
 - [CZ97] -/
 theorem iff_tree_root_forces : 𝐆𝐋 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
-      M.root ⊩[_] A := by
+      M.root ⊩ A := by
   classical
   exact provability_TFAE.out 1 5
 

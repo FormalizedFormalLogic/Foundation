@@ -44,11 +44,11 @@ variable {M : RootedModel κ α} [Fintype M.World] [M.IsGL] {i : M.World}
 
 open Classical in
 noncomputable def realization : Realization α L :=
-  ⟨fun a ↦ ⩖ i ∈ { i : M.World | i ⊩[_] (.atom a) }, S.σ i⟩
+  ⟨fun a ↦ ⩖ i ∈ { i : M.World | i ⊩ (.atom a) }, S.σ i⟩
 
 private lemma mainlemma_aux (hri : M.root ≠ i)
-  : (i ⊩[_] A → T₀ ⊢ S.σ i 🡒 A.interpret S.realization 𝔅) ∧
-  (i ⊮[_] A → T₀ ⊢ S.σ i 🡒 ∼(A.interpret S.realization 𝔅)) := by
+  : (i ⊩ A → T₀ ⊢ S.σ i 🡒 A.interpret S.realization 𝔅) ∧
+  (i ⊮ A → T₀ ⊢ S.σ i 🡒 ∼(A.interpret S.realization 𝔅)) := by
   classical
   induction A generalizing i with
   | falsum => simp [Formula.interpret];
@@ -98,10 +98,10 @@ private lemma mainlemma_aux (hri : M.root ≠ i)
       exact C_trans (S.SC2 i j Rij) this;
 
 theorem mainlemma (hri : M.root ≠ i) :
-  i ⊩[_] A → T₀ ⊢ S.σ i 🡒 A.interpret S.realization 𝔅 := (mainlemma_aux hri).1
+  i ⊩ A → T₀ ⊢ S.σ i 🡒 A.interpret S.realization 𝔅 := (mainlemma_aux hri).1
 
 theorem mainlemma_neg (hri : M.root ≠ i) :
-  i ⊮[_] A → T₀ ⊢ S.σ i 🡒 ∼(A.interpret S.realization 𝔅) := (mainlemma_aux hri).2
+  i ⊮ A → T₀ ⊢ S.σ i 🡒 ∼(A.interpret S.realization 𝔅) := (mainlemma_aux hri).2
 
 lemma root_of_iterated_inconsistency : T₀ ⊢ (∼𝔅^[M.height] ⊥) 🡒 (S.σ M.root) := by
   classical
@@ -120,11 +120,11 @@ lemma root_of_iterated_inconsistency : T₀ ⊢ (∼𝔅^[M.height] ⊥) 🡒 (S
           <| M.root_rel i hir;
     cl_prover [this];
 
-lemma theory_height (hSound : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ) (h : M.root ⊩[_] ◇(∼A))
+lemma theory_height (hSound : ∀ {σ}, T₀ ⊢ 𝔅 σ → T ⊢ σ) (h : M.root ⊩ ◇(∼A))
   (b : T ⊢ A.interpret S.realization 𝔅) : 𝔅.height < M.height := by
   classical
   apply 𝔅.height_lt_pos_of_boxBot hSound (n := M.height) (Model.rank_pos_of_forces_dia h);
-  obtain ⟨i, hi, hiA⟩ : ∃ i : M.World, M.root ≺ i ∧ i ⊮[_] A := by
+  obtain ⟨i, hi, hiA⟩ : ∃ i : M.World, M.root ≺ i ∧ i ⊮ A := by
     obtain ⟨i, hi, hiA⟩ := forces_dia.mp h;
     exact ⟨i, hi, forces_neg.mp hiA⟩;
   have hri : M.root ≠ i := by
@@ -148,11 +148,11 @@ as the root of `M` decides them.
 
 - [AB05, Lemma 49]
 -/
-lemma rfl_mainlemma (ha : ∀ B, □B ∈ A.subfmls → M.root ⊩[_] □B 🡒 B)
+lemma rfl_mainlemma (ha : ∀ B, □B ∈ A.subfmls → M.root ⊩ □B 🡒 B)
     {B : ProvabilityLogic.Formula α}
     (hB : B ∈ A.subfmls) :
-    (M.root ⊩[_] B → T₀ ⊢ S.σ none 🡒 B.interpret S.realization 𝔅) ∧
-    (M.root ⊮[_] B → T₀ ⊢ S.σ none 🡒 ∼B.interpret S.realization 𝔅) := by
+    (M.root ⊩ B → T₀ ⊢ S.σ none 🡒 B.interpret S.realization 𝔅) ∧
+    (M.root ⊮ B → T₀ ⊢ S.σ none 🡒 ∼B.interpret S.realization 𝔅) := by
   classical
   induction B with
   | falsum =>
@@ -188,7 +188,7 @@ lemma rfl_mainlemma (ha : ∀ B, □B ∈ A.subfmls → M.root ⊩[_] □B 🡒 
     replace ihB := ihB (Formula.subfmls_trans hB (by grind));
     constructor;
     · intro h;
-      have hB' : M.root ⊩[_] B := ha B hB h;
+      have hB' : M.root ⊩ B := ha B hB h;
       have h₁ : ∀ i, T₀ ⊢ S.σ i 🡒 B.interpret S.realization 𝔅 := by
         rintro (_ | x);
         · exact ihB.1 hB';
@@ -660,7 +660,7 @@ noncomputable def standardSolovaySentences (T : ArithmeticTheory) [T.Δ₁] [�
 
 theorem unprovable_realization_exists (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
     (M : RootedModel κ α) [Fintype M.World] [M.IsGL]
-    (hA : M.root ⊮[_] A) (h : M.height < T.height) :
+    (hA : M.root ⊮ A) (h : M.height < T.height) :
     ∃ f : Realization α ℒₒᵣ, T ⊬ f T A := by
   let S := standardSolovaySentences T M.extendRoot;
   use S.realization;

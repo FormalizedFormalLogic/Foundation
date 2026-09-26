@@ -24,7 +24,7 @@ namespace LetterlessFormula
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} [Fintype M.World] [M.IsGL] {x : M.World}
          {A : LetterlessFormula}
 
-lemma forces_lift_iff : x ⊩[_] ↑A ↔ x.rank ∈ spectrum A := by
+lemma forces_lift_iff : x ⊩ ↑A ↔ x.rank ∈ spectrum A := by
   induction A using Formula.rec' generalizing x with
   | atom a => exact a.elim;
   | falsum => simp;
@@ -65,7 +65,7 @@ lemma mem_iff_spectrum_eq_univ : A ∈ 𝐆𝐋 ↔ spectrum A = Set.univ := by
 lemma exists_finset_of_mem_sumQuasiNormal {B : Formula α} (h : B ∈ 𝐆𝐋 +ᴸ X.lift) :
     ∃ Y : Finset LetterlessFormula, ↑Y ⊆ X ∧
       ∀ {κ : Type} [Nonempty κ] (M : Model κ α) [Fintype M.World] [M.IsGL] (x : M.World),
-        (∀ C ∈ Y, x.rank ∈ spectrum C) → x ⊩[_] B := by
+        (∀ C ∈ Y, x.rank ∈ spectrum C) → x ⊩ B := by
   classical
   induction h with
   | mem₁ h => exact ⟨∅, by simp, fun M _ _ x _ ↦ Logic.GL.sound M h x⟩;
@@ -106,7 +106,7 @@ theorem lift_mem_sumQuasiNormal_iff (h : (∃ B ∈ X, (spectrum B).Finite) ∨ 
     · apply iff_valid_finite.mpr;
       intro _ _ M _ x hx;
       have : Fintype M.World := Fintype.ofFinite _;
-      have hx : ∀ C ∈ Y, x ⊩[_] ↑C :=
+      have hx : ∀ C ∈ Y, x ⊩ ↑C :=
         fun C hC ↦ forces_conj.mp hx _ (Finset.mem_image_of_mem _ hC);
       exact forces_lift_iff.mpr <| hA _ fun C hC ↦ forces_lift_iff.mp (hx C hC);
 

@@ -56,7 +56,7 @@ namespace Kripke.RootedModel
 
 lemma graft.exists_forces_boxItr_bot {N : RootedModel κ α} [N.IsFiniteGL] {a : N.NonRoot}
     {z : (N.graft a ℕ).World} (hz : z ≠ (N.graft a ℕ).root) :
-    ∃ n, z ⊩[_] □^[n]⊥ := by
+    ∃ n, z ⊩ □^[n]⊥ := by
   have : Fintype N.World := Fintype.ofFinite _;
   have h₁ (k : ℕ) : ∀ x, x ≠ N.root → x ⊩[N.toModel] □^[k]⊥ →
       Sum.inl x ⊩[(N.graft a ℕ).toModel] □^[k]⊥ := by
@@ -95,9 +95,9 @@ noncomputable def almostDefiningFormula : Formula α :=
 variable {P M}
 
 lemma exists_rel_forces_charFormulaUnder {K : RootedModel κ' α} [K.IsGL]
-    (hΦ : K.root ⊩[_] almostDefiningFormula P M) {z : K.World} (hz : K.root ≺ z)
-    (h : z ⊮[_] □^[M.height + 1]⊥) (x : M.World) :
-    ∃ z', z ≺ z' ∧ z' ⊩[_] x.charFormulaUnder P := by
+    (hΦ : K.root ⊩ almostDefiningFormula P M) {z : K.World} (hz : K.root ≺ z)
+    (h : z ⊮ □^[M.height + 1]⊥) (x : M.World) :
+    ∃ z', z ≺ z' ∧ z' ⊩ x.charFormulaUnder P := by
   obtain ⟨z₀, R₀, h₀⟩ := forces_dia.mp (forces_and.mp <| (forces_and.mp hΦ).1 z hz h).1;
   by_cases hx : x = M.root;
   · exact ⟨z₀, R₀, hx ▸ h₀⟩;
@@ -139,16 +139,16 @@ it is `P`-bisimilar to the root of the pseudo-tail of `M` with root valuation `o
 - [Bek90, §4 Lemma 9, Remark 2]
 -/
 theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ' α} [K.IsGL]
-    (hr : ∀ n, K.root ⊮[_] □^[n]⊥)
-    (hK : ∀ z ≠ K.root, ∃ n, z ⊩[_] □^[n]⊥)
-    (hΦ : K.root ⊩[_] almostDefiningFormula P M) {o : α → Prop}
+    (hr : ∀ n, K.root ⊮ □^[n]⊥)
+    (hK : ∀ z ≠ K.root, ∃ n, z ⊩ □^[n]⊥)
+    (hΦ : K.root ⊩ almostDefiningFormula P M) {o : α → Prop}
     (ho : ∀ a ∈ P, (o a ↔ K K.root a)) :
     ∃ Bi : (M.toPseudoTail o).toModel ⇄[P] K.toModel, Bi (.inr ⊤) K.root := by
   let R : (M.toPseudoTail o).toModel.World → K.World → Prop
-    | .inl x, z => z ⊩[_] charFormulaUnder (M := M.toModel) P x
+    | .inl x, z => z ⊩ charFormulaUnder (M := M.toModel) P x
     | .inr i, z => i = ⊤ ∧ z = K.root ∨ ∃ m : ℕ, i = m ∧
-        z ⊮[_] □^[m + M.height + 1]⊥ ∧ z ⊩[_] □^[m + M.height + 2]⊥
-  have hroot {z : K.World} {m : ℕ} (h : z ⊩[_] □^[m]⊥) : K.root ≺ z :=
+        z ⊮ □^[m + M.height + 1]⊥ ∧ z ⊩ □^[m + M.height + 2]⊥
+  have hroot {z : K.World} {m : ℕ} (h : z ⊩ □^[m]⊥) : K.root ≺ z :=
     K.root_rel _ fun e ↦ hr _ (e ▸ h)
   use
     { toRel := R
@@ -171,7 +171,7 @@ theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ'
           · exact (exists_rel_forces_charFormulaUnder hΦ (hroot h₂)
               (not_forces_boxItr_bot_of_le (by omega) h₁) y).imp fun _ ↦ And.symm;
         · obtain ⟨m', rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt R');
-          have : z ⊮[_] □^[m' + M.height + 2]⊥ := by
+          have : z ⊮ □^[m' + M.height + 2]⊥ := by
             rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, -⟩;
             · exact hr _;
             · have : m' < m := by exact_mod_cast toFreeTail.rel_inr_inr.mp R';

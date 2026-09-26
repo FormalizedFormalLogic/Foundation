@@ -112,7 +112,7 @@ lemma eventually_rel {y : (M.toFreeTail V).World} (h : (M.toFreeTail V).Rel (.in
     exact ⟨m + 1, fun n hn ↦ rel_inr_inr.mpr (by exact_mod_cast Nat.lt_of_succ_le hn)⟩;
 
 lemma forces_box_of_root (h : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] □A)
-    (x : (M.toFreeTail V).World) : x ⊩[_] □A :=
+    (x : (M.toFreeTail V).World) : x ⊩ □A :=
   fun y Rxy ↦ h y ((M.toFreeTail V).root_rel y fun hy ↦ by subst hy; exact not_rel_root Rxy)
 
 lemma forces_root_box_iff : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] □A ↔

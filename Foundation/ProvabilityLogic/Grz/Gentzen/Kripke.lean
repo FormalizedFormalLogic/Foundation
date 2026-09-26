@@ -38,7 +38,7 @@ lemma Model.validateSequent_boxGrz [M.IsGrz] (h : M ⊧ (insert (□(A 🡒 □A
   intro x hx y Rxy;
   by_contra hy;
   obtain ⟨v, ⟨Rxv, hv⟩, hmax⟩ := WeaklyConverseWellFounded.has_max (r := M.Rel)
-    {z | x ≺ z ∧ z ⊮[_] □A} ⟨y, Rxy, fun h ↦ hy (h y (Std.Refl.refl y))⟩;
+    {z | x ≺ z ∧ z ⊮ □A} ⟨y, Rxy, fun h ↦ hy (h y (Std.Refl.refl y))⟩;
   obtain ⟨w, Rvw, hw⟩ := not_forces_box.mp hv;
   obtain rfl : v = w :=
     hmax w ⟨IsTrans.trans _ _ _ Rxv Rvw, fun h ↦ hw (h w (Std.Refl.refl w))⟩ Rvw;
@@ -318,7 +318,7 @@ instance : (countermodel BS).IsFiniteGrz where
     exact Ryz.2 h;
   antisymm _ _ Rxy Ryx := Rxy.2 Ryx.1
 
-lemma truthlemma : (A ∈ x.ant → x ⊩[_] A) ∧ (A ∈ x.suc → x ⊮[_] A) := by
+lemma truthlemma : (A ∈ x.ant → x ⊩ A) ∧ (A ∈ x.suc → x ⊮ A) := by
   induction A generalizing x with
   | atom a => exact ⟨id, fun h hf ↦ not_mem_both ⟨hf, h⟩⟩;
   | falsum => exact ⟨fun h ↦ absurd h bot_not_mem_ant, fun _ ↦ id⟩;

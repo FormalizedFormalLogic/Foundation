@@ -53,7 +53,7 @@ theorem arithmetical_completeness_of_height_eq_top (height : T.height = ⊤) :
   intro hA;
   obtain ⟨κ, _, M, _, hA⟩ :
       ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-        M.root ⊮[_] A := by
+        M.root ⊮ A := by
     simpa using iff_root_forces.not.mp hA;
   have : Fintype M.World := Fintype.ofFinite _;
   exact unprovable_realization_exists T M hA (by simp [height]);
@@ -66,7 +66,7 @@ theorem arithmetical_completeness_of_le_height {n : ℕ} (height : n ≤ T.heigh
   intro hA;
   obtain ⟨κ, _, M, _, hA⟩ :
       ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-        M.root ⊮[_] □^[n]⊥ 🡒 A := by
+        M.root ⊮ □^[n]⊥ 🡒 A := by
     simpa using iff_root_forces.not.mp hA;
   obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hA;
   have : Fintype M.World := Fintype.ofFinite _;

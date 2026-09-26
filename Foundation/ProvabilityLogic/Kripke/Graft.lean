@@ -151,7 +151,7 @@ lemma forces_iff [DecidableEq α] {X : FormulaFinset α} (hX : ∀ B ∈ X, B.su
           · exact (ih₁ y).mpr (h y Ray);
         · exact (ih₂ j).mpr (ha B hA h);
 
-lemma not_forces_boxItr_bot (n : ℕ) : (M.graft a ℕ).root ⊮[_] □^[n]⊥ := by
+lemma not_forces_boxItr_bot (n : ℕ) : (M.graft a ℕ).root ⊮ □^[n]⊥ := by
   have h : ∀ m : ℕ, (M.graft a ℕ).RelItr m (.inr m) (.inr 0) := by
     intro m;
     induction m with

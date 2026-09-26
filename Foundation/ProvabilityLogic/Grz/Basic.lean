@@ -38,7 +38,7 @@ section
 variable {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 open Classical in
-lemma forces_axiomGrz [M.IsGrz] {x : M.World} : x ⊩[_] □(□(A 🡒 □A) 🡒 A) 🡒 A := by
+lemma forces_axiomGrz [M.IsGrz] {x : M.World} : x ⊩ □(□(A 🡒 □A) 🡒 A) 🡒 A := by
   intro hx;
   have : ⊢ᴳ[𝐆𝐫𝐳] {□(□(A 🡒 □A) 🡒 A)} ⟹ {□A} := by
     simpa using Gentzen.boxGrz (Γ := {□(A 🡒 □A) 🡒 A}) <|
@@ -104,7 +104,7 @@ theorem provability_TFAE : [
     𝐆𝐫𝐳 ⊢ A,
     ⊢ᴳ[𝐆𝐫𝐳] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGrz] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩[_] A
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩ A
   ].TFAE := by
   tfae_have 1 → 3 := fun h _ _ M _ ↦ sound M h;
   tfae_have 3 → 2 := fun h ↦ Gentzen.complete fun M _ x _ ↦ ⟨A, by simp, h M x⟩;
@@ -123,7 +123,7 @@ theorem iff_valid_finite :
 
 omit [DecidableEq α] in
 theorem iff_root_forces : 𝐆𝐫𝐳 ⊢ A ↔
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩[_] A := by
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩ A := by
   classical
   exact provability_TFAE.out 1 4
 

@@ -36,7 +36,7 @@ lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐒 ⊢ A := sumQuasiNormal.of_left h
 lemma axiomT : 𝐒 ⊢ □A 🡒 A := sumQuasiNormal.mem₂ ⟨A, rfl⟩
 
 lemma eventually_forces (h : 𝐒 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
-    {w : ℕ → M.World} (hw : ∀ n, w (n + 1) ≺ w n) : ∃ i, ∀ j ≥ i, w j ⊩[_] A := by
+    {w : ℕ → M.World} (hw : ∀ n, w (n + 1) ≺ w n) : ∃ i, ∀ j ≥ i, w j ⊩ A := by
   induction h generalizing κ with
   | mem₁ h => exact ⟨0, fun j _ ↦ GL.sound M h (w j)⟩;
   | mem₂ h =>
@@ -79,7 +79,7 @@ theorem provability_TFAE : [
   tfae_have 4 → 5 := by
     intro h _ _ M _ hΓ;
     obtain ⟨i, hi⟩ := h M;
-    have hroot : ∀ B, □B ∈ A.subfmls → M.root ⊩[_] □B 🡒 B :=
+    have hroot : ∀ B, □B ∈ A.subfmls → M.root ⊩ □B 🡒 B :=
       fun B hB ↦ forces_conj.mp hΓ _
         (Finset.mem_image.mpr ⟨B, FormulaFinset.mem_prebox.mpr hB, rfl⟩);
     exact (Model.toFreeTail.forces_inr_iff (fun _ ↦ rfl) (fun _ hB ↦ Formula.subfmls_trans hB) hroot
@@ -93,7 +93,7 @@ lemma iff_provable_gentzen : 𝐒 ⊢ A ↔ ⊢ᴳ[𝐒] ∅ ⟹[1] {A} := prova
 omit [DecidableEq α] in
 lemma iff_eventually_forces : 𝐒 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[_] A := by
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩ A := by
   classical
   exact provability_TFAE.out 1 3
 
@@ -110,11 +110,11 @@ lemma iff_provable_GL : 𝐒 ⊢ A ↔ 𝐆𝐋 ⊢ A.rflSubfmls.conj 🡒 A := 
 root for its boxed subformulas. -/
 lemma exists_countermodel (h : 𝐒 ⊬ A) :
     ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-      M.root ⊮[_] A ∧
-      ∀ B, □B ∈ A.subfmls → M.root ⊩[_] □B 🡒 B := by
+      M.root ⊮ A ∧
+      ∀ B, □B ∈ A.subfmls → M.root ⊩ □B 🡒 B := by
   obtain ⟨κ, _, M, _, hM⟩ :
       ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-        M.root ⊮[_] A.rflSubfmls.conj 🡒 A := by
+        M.root ⊮ A.rflSubfmls.conj 🡒 A := by
     simpa using GL.iff_root_forces.not.mp (iff_provable_GL.not.mp h);
   obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hM;
   exact ⟨κ, inferInstance, M, inferInstance, h₂,
