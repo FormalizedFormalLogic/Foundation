@@ -20,7 +20,7 @@ variable {α : Type*} [DecidableEq α]
 
 /-- The three-layered cut-free sequent calculus of `D`: the layers `0` and `1` are those of `S`.
 
-- [KKIM25, §3]
+- [KKIM25, Section 3]
 -/
 inductive Gentzen : LayeredSequent 3 α → Prop
   | axm (ℓ) (A) : Gentzen ({A} ⟹[ℓ] {A})
