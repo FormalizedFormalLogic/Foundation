@@ -18,8 +18,8 @@ variable {V : Type*} [ORingStructure V]
 abbrev IsDefinedBy (R : (Fin k → V) → Prop) {ℌ : HierarchySymbol} (φ : ℌ.Semisentence k) : Prop :=
   Bounding.HierarchySymbol.IsDefinedBy R φ
 
-abbrev IsDefinedByWithParam (R : (Fin k → V) → Prop) {ℌ : HierarchySymbol} (φ :
-  ℌ.Semiformula V k) : Prop :=
+abbrev IsDefinedByWithParam (R : (Fin k → V) → Prop) {ℌ : HierarchySymbol}
+    (φ : ℌ.Semiformula V k) : Prop :=
   Bounding.HierarchySymbol.IsDefinedByWithParam R φ
 
 abbrev Defined (R : (Fin k → V) → Prop) {ℌ : HierarchySymbol} (φ : ℌ.Semisentence k) :=
@@ -48,6 +48,16 @@ variable {ℌ}
 
 abbrev DefinedFunction {k} (f : (Fin k → V) → V) (φ : ℌ.Semisentence (k + 1)) : Prop :=
   Bounding.HierarchySymbol.DefinedFunction f φ
+
+namespace DefinedFunction
+
+lemma graph_delta [Semiformula.Operator.Eq ℒₒᵣ] [Tarski.Structure.Eq ℒₒᵣ V]
+    {k} {f : (Fin k → V) → V} {m} {φ : 𝚺-[m].Semisentence (k + 1)}
+    (h : DefinedFunction (ℌ := 𝚺-[m]) f φ) :
+    DefinedFunction (ℌ := 𝚫-[m]) f φ.graphDelta :=
+  Bounding.HierarchySymbol.DefinedFunction.graph_delta (ℬ := ℬ[<, ℒₒᵣ]) h
+
+end DefinedFunction
 
 variable (ℌ)
 

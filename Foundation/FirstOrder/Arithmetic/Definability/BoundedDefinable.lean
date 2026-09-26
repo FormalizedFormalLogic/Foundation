@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
+public import Foundation.FirstOrder.Tarski.Monotone
 
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic

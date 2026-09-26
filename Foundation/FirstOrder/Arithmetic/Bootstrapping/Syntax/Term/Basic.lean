@@ -404,9 +404,12 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
     constructor
     · intro v
       simp [Blueprint.blueprint,
-        c.bvar_defined.iff, c.bvar_defined.graph_delta.iff_delta_pi,
-        c.fvar_defined.iff, c.fvar_defined.graph_delta.iff_delta_pi,
-        c.func_defined.iff, c.func_defined.graph_delta.iff_delta_pi]
+        c.bvar_defined.iff,
+        c.bvar_defined.graph_delta.iff_delta_pi,
+        c.fvar_defined.iff,
+        c.fvar_defined.graph_delta.iff_delta_pi,
+        c.func_defined.iff,
+        c.func_defined.graph_delta.iff_delta_pi]
     · intro v
       symm
       simpa [Blueprint.blueprint, c.bvar_defined.iff, c.fvar_defined.iff, c.func_defined.iff]

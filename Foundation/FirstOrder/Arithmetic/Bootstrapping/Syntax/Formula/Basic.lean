@@ -712,33 +712,17 @@ private lemma phi_iff (C pr : V) :
 def construction : Fixpoint.Construction V (β.blueprint L) where
   Φ := fun _ ↦ c.Phi L
   defined := .mk <| by
-    have hrel : Bounding.HierarchySymbol.DefinedFunction
-        (fun v : Fin 4 → V ↦ c.rel (v 0) (v 1) (v 2) (v 3)) β.rel := c.rel_defined
-    have hnrel : Bounding.HierarchySymbol.DefinedFunction
-        (fun v : Fin 4 → V ↦ c.nrel (v 0) (v 1) (v 2) (v 3)) β.nrel := c.nrel_defined
-    have hverum : Bounding.HierarchySymbol.DefinedFunction
-        (fun v : Fin 1 → V ↦ c.verum (v 0)) β.verum := c.verum_defined
-    have hfalsum : Bounding.HierarchySymbol.DefinedFunction
-        (fun v : Fin 1 → V ↦ c.falsum (v 0)) β.falsum := c.falsum_defined
-    have hand : Bounding.HierarchySymbol.DefinedFunction
-        (fun v : Fin 5 → V ↦ c.and (v 0) (v 1) (v 2) (v 3) (v 4)) β.and := c.and_defined
-    have hor : Bounding.HierarchySymbol.DefinedFunction
-        (fun v : Fin 5 → V ↦ c.or (v 0) (v 1) (v 2) (v 3) (v 4)) β.or := c.or_defined
-    have hall : Bounding.HierarchySymbol.DefinedFunction
-        (fun v : Fin 3 → V ↦ c.all (v 0) (v 1) (v 2)) β.all := c.all_defined
-    have hexs : Bounding.HierarchySymbol.DefinedFunction
-        (fun v : Fin 3 → V ↦ c.exs (v 0) (v 1) (v 2)) β.exs := c.exs_defined
     constructor
     · intro v
       simp [Blueprint.blueprint,
-        c.rel_defined.iff, hrel.graph_delta.proper.iff',
-        c.nrel_defined.iff, hnrel.graph_delta.proper.iff',
-        c.verum_defined.iff, hverum.graph_delta.proper.iff',
-        c.falsum_defined.iff, hfalsum.graph_delta.proper.iff',
-        c.and_defined.iff, hand.graph_delta.proper.iff',
-        c.or_defined.iff, hor.graph_delta.proper.iff',
-        c.all_defined.iff, hall.graph_delta.proper.iff',
-        c.exs_defined.iff, hexs.graph_delta.proper.iff',
+        c.rel_defined.iff, c.rel_defined.graph_delta.proper.iff',
+        c.nrel_defined.iff, c.nrel_defined.graph_delta.proper.iff',
+        c.verum_defined.iff, c.verum_defined.graph_delta.proper.iff',
+        c.falsum_defined.iff, c.falsum_defined.graph_delta.proper.iff',
+        c.and_defined.iff, c.and_defined.graph_delta.proper.iff',
+        c.or_defined.iff, c.or_defined.graph_delta.proper.iff',
+        c.all_defined.iff, c.all_defined.graph_delta.proper.iff',
+        c.exs_defined.iff, c.exs_defined.graph_delta.proper.iff',
         c.allChanges_defined.iff,
         c.exChanges_defined.iff]
     · intro v

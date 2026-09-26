@@ -458,8 +458,8 @@ lemma equal' [L.Eq] [Tarski.Structure.Eq L V] (i j : Fin k) : ℌ.Definable ℬ 
   ↦ v i = v j := by
   simpa using retraction DefinableRel.eq ![i, j]
 
-lemma of_sigma [L.Eq] [Tarski.Structure.Eq L V] {f : (Fin k → V) → V} (h :
-  𝚺-[m].DefinableFunction ℬ f) {Γ} : Γ-[m].DefinableFunction ℬ f := by
+lemma of_sigma [L.Eq] [Tarski.Structure.Eq L V] {f : (Fin k → V) → V}
+    (h : 𝚺-[m].DefinableFunction ℬ f) {Γ} : Γ-[m].DefinableFunction ℬ f := by
   cases m with
   | zero => exact of_zero h
   | succ m =>
@@ -616,8 +616,8 @@ lemma comp₂ {k} {P : V → V → Prop} {f g : (Fin k → V) → V}
 
 lemma comp₃ {k} {P : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V}
     [Γ-[m + 1].DefinableRel₃ ℬ P]
-    (hf₁ : 𝚺-[m + 1].DefinableFunction ℬ f₁) (hf₂ : 𝚺-[m + 1].DefinableFunction ℬ f₂) (hf₃ :
-      𝚺-[m + 1].DefinableFunction ℬ f₃) :
+    (hf₁ : 𝚺-[m + 1].DefinableFunction ℬ f₁) (hf₂ : 𝚺-[m + 1].DefinableFunction ℬ f₂)
+    (hf₃ : 𝚺-[m + 1].DefinableFunction ℬ f₃) :
     Γ-[m + 1].Definable ℬ (fun v ↦ P (f₁ v) (f₂ v) (f₃ v)) :=
   DefinableRel₃.comp inferInstance hf₁ hf₂ hf₃
 
@@ -909,8 +909,8 @@ variable {V : Type*} [Tarski.Structure L V] {Γ : Polarity} {s k : ℕ}
 
 variable {ξ : Type*}
 
-lemma definable_of_hierarchy {φ : FirstOrder.Semiformula L ξ k} (hφ : ℬ.Hierarchy Γ s φ) (e :
-  ξ → V) :
+lemma definable_of_hierarchy {φ : FirstOrder.Semiformula L ξ k} (hφ : ℬ.Hierarchy Γ s φ)
+    (e : ξ → V) :
     Γ-[s].Definable ℬ fun v ↦ φ.Eval v e :=
   .mkPolarity (Rew.rewriteMap e ▹ φ) (hφ.rew _) fun _ ↦ by simp [Semiformula.eval_rewriteMap]
 
