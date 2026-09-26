@@ -82,9 +82,7 @@ theorem exists_fixpoint (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.ato
       exists_eq_left] at h₄ h₅;
     exact forces_iff.mpr ⟨fun h ↦ h₄ ⟨h, h₃⟩, fun h ↦ h₅ ⟨h, h₃⟩⟩;
 
-/-- The de Jongh–Sambin fixed point theorem for `GL`.
-
-- [SV82, Lemma 4.3, Theorem 4.4] -/
+/-- - [SV82, Lemma 4.3, Theorem 4.4] -/
 theorem fixpoint_theorem (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.atoms) :
     ∃ D, D.atoms ⊆ A.atoms.erase p ∧ 𝐆𝐋 ⊢ A⟦p ↦ D⟧ 🡘 D ∧
       ∀ E, 𝐆𝐋 ⊢ A⟦p ↦ E⟧ 🡘 E → 𝐆𝐋 ⊢ D 🡘 E := by

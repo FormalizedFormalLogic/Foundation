@@ -94,7 +94,6 @@ instance : Finite (SaturatedSequent BS) :=
               ⟨S.suc, Finset.mem_powerset.mpr (by grind [S.subset_subfmls])⟩))
     (fun S T h ↦ by simp only [Prod.mk.injEq, Subtype.mk.injEq] at h; exact ext h.1 h.2)
 
-/-- The Lindenbaum lemma. -/
 lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐆𝐋] S₀) (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls) :
     ∃ S : SaturatedSequent BS, S₀ ⊆ S.toSequent := by
   obtain ⟨S, h₁, h₂, h₃, h₄, -⟩ := Sequent.exists_saturated
@@ -195,7 +194,6 @@ lemma iff_valid : ⊢ᴳ[𝐆𝐋] S ↔
 
 variable {Γ Γ₁ Γ₂ Δ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
-/-- Cut is admissible. -/
 theorem cut (h₁ : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[𝐆𝐋] insert A Γ₂ ⟹ Δ₂) :
     ⊢ᴳ[𝐆𝐋] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ :=
   complete fun M _ x ↦ forcesSequent_cut (sound M h₁ x) (sound M h₂ x)

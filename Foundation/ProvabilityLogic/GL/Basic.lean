@@ -134,9 +134,7 @@ lemma iff_root_forces : 𝐆𝐋 ⊢ A ↔
   exact provability_TFAE.out 1 4
 
 omit [DecidableEq α] in
-/-- `𝐆𝐋` is complete for finite trees.
-
-- [CZ97] -/
+/-- - [CZ97] -/
 theorem iff_tree_root_forces : 𝐆𝐋 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
       M.root ⊩ A := by

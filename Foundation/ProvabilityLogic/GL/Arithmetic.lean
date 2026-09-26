@@ -26,7 +26,6 @@ variable {α : Type*} {L : Language} [L.ReferenceableBy L] [L.DecidableEq]
          {T U : Theory L} [Diagonalization T] [T ⪯ U]
          {𝔅 : Provability T U} [𝔅.HBL] {f : Realization α L} {A : Formula α}
 
-/-- Arithmetical soundness of `GL`. -/
 theorem arithmetical_soundness (h : 𝐆𝐋 ⊢ A) : T ⊢ A.interpret f 𝔅 := by
   induction h with
   | axm hA =>
@@ -45,7 +44,6 @@ universe u
 variable {α : Type u} {A : Formula α}
          {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
-/-- Solovay's arithmetical completeness theorem for theories of infinite height. -/
 theorem arithmetical_completeness_of_height_eq_top (height : T.height = ⊤) :
     (∀ f : Realization α ℒₒᵣ, T ⊢ f T A) → 𝐆𝐋 ⊢ A := by
   contrapose!;
@@ -57,7 +55,6 @@ theorem arithmetical_completeness_of_height_eq_top (height : T.height = ⊤) :
   have : Fintype M.World := Fintype.ofFinite _;
   exact unprovable_realization_exists T M hA (by simp [height]);
 
-/-- Solovay's arithmetical completeness theorem for theories of finite height. -/
 theorem arithmetical_completeness_of_le_height {n : ℕ} (height : n ≤ T.height) :
     (∀ f : Realization α ℒₒᵣ, T ⊢ f T A) → 𝐆𝐋 ⊢ □^[n]⊥ 🡒 A := by
   contrapose!;
@@ -71,7 +68,7 @@ theorem arithmetical_completeness_of_le_height {n : ℕ} (height : n ≤ T.heigh
   exact unprovable_realization_exists T M h₂ <|
     lt_of_lt_of_le (Nat.cast_lt.mpr <| RootedModel.root_forces_boxItr_bot_iff.mp h₁) height;
 
-/-- Solovay's arithmetical completeness theorem. -/
+/-- - [Sol76] -/
 theorem arithmetical_completeness_iff [T.SoundOnHierarchy 𝚺 1] :
     𝐆𝐋 ⊢ A ↔ ∀ f : Realization α ℒₒᵣ, T ⊢ f T A :=
   ⟨fun h _ ↦ WeakerThan.pbl (arithmetical_soundness h),
