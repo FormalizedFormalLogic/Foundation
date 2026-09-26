@@ -13,7 +13,7 @@ and the trace of a logic is the union of the traces of its members. On letterles
 agrees with `LetterlessFormula.trace`. A logic is bounded above by `GLα` or `GLβ` of its trace,
 according as the complement of its trace is infinite or finite.
 
-The provability logic of `T` relative to `U` contains `TBB n` for every `n` in its trace. Hence it
+The provability logic of `T` relative to `U` contains `alpha n` for every `n` in its trace. Hence it
 is `GLα` of its trace when the complement of its trace is infinite, and `GLβ` of its trace when
 it is not contained in `S`.
 
@@ -31,9 +31,9 @@ open Entailment Formula Kripke Kripke.Model Kripke.Model.World
 
 universe u
 
-lemma Kripke.Model.forces_TBB_iff {κ α : Type*} [Nonempty κ] {M : Model κ α} [Fintype M.World]
-    [M.IsGL] {x : M.World} {n : ℕ} : x ⊩ TBB n ↔ x.rank ≠ n := by
-  grind [TBB, forces_boxItr_bot_iff];
+lemma Kripke.Model.forces_alpha_iff {κ α : Type*} [Nonempty κ] {M : Model κ α} [Fintype M.World]
+    [M.IsGL] {x : M.World} {n : ℕ} : x ⊩ alpha n ↔ x.rank ≠ n := by
+  grind [alpha, forces_boxItr_bot_iff];
 
 namespace Formula
 
@@ -63,7 +63,7 @@ lemma GL_imp_of_height_not_mem_trace
     exact h (LetterlessFormula.forces_lift_iff.mpr hB);
   · intro hn;
     by_contra hn';
-    have h : LetterlessFormula.lift (α := α) (∼TBB n 🡒 B) ∈ 𝐆𝐋 :=
+    have h : LetterlessFormula.lift (α := α) (∼alpha n 🡒 B) ∈ 𝐆𝐋 :=
       GL_imp_of_height_not_mem_trace fun M _ _ hM ↦ by
         simp_all [LetterlessFormula.forces_lift_iff, RootedModel.height];
     exact hn <| by simpa using Set.eq_univ_iff_forall.mp (Logic.GL.lift_mem_iff.mp h) n;
@@ -74,8 +74,11 @@ lemma GL_imp_of_height_not_mem_trace
 @[simp] lemma trace_bot : (⊥ : Formula α).trace = Set.univ := by
   simpa [LetterlessFormula.trace] using trace_lift ⊥;
 
-@[simp] lemma trace_TBB : (TBB n : Formula α).trace = {n} := by
-  simpa using trace_lift (TBB n);
+@[simp] lemma trace_alpha : (alpha n : Formula α).trace = {n} := by
+  simpa using trace_lift (alpha n);
+
+@[simp] lemma trace_beta {X : Set ℕ} {hX : Xᶜ.Finite} : (beta X hX : Formula α).trace = X := by
+  simpa using trace_lift (beta X hX);
 
 @[simp] lemma trace_and : (A ⋏ B).trace = A.trace ∪ B.trace := by
   ext n;
@@ -168,9 +171,9 @@ theorem mem_iff : A ∈ 𝐆𝐋α X ↔ A.trace.Finite ∧ A.trace ⊆ X := by
     exact ⟨(Y.finite_toSet.biUnion fun B hB ↦ (h' B hB).1).subset hA,
       hA.trans <| Set.iUnion₂_subset fun B hB ↦ (h' B hB).2⟩;
   · rintro ⟨hfin, hX⟩;
-    apply GL.sumQuasiNormal_of_conj (Γ := hfin.toFinset.image TBB);
+    apply GL.sumQuasiNormal_of_conj (Γ := hfin.toFinset.image alpha);
     · exact Finset.forall_mem_image.mpr fun n hn ↦ .mem₂ ⟨n, hX (hfin.mem_toFinset.mp hn), rfl⟩;
-    · exact Formula.GL_imp_of_height_not_mem_trace fun _ _ _ hM hn ↦ forces_TBB_iff.mp
+    · exact Formula.GL_imp_of_height_not_mem_trace fun _ _ _ hM hn ↦ forces_alpha_iff.mp
         (forces_conj.mp hM _ <| Finset.mem_image_of_mem _ <| hfin.mem_toFinset.mpr hn) rfl;
 
 @[simp] lemma trace_eq : (𝐆𝐋α X : Logic α).trace = X :=
@@ -181,7 +184,7 @@ lemma mono (h : X ⊆ Y) : (𝐆𝐋α X : Logic α) ⪯ 𝐆𝐋α Y :=
 
 instance : (𝐆𝐋α X : Logic α) ⪯ 𝐒 :=
   weakerThan_iff.mpr <| sumQuasiNormal.subset_iff.mpr fun _ ⟨n, _, e⟩ ↦
-    e ▸ .mem₂ ⟨□^[n]⊥, by simp [TBB]⟩
+    e ▸ .mem₂ ⟨□^[n]⊥, by simp [alpha]⟩
 
 instance : Consistent (𝐆𝐋α X : Logic α) := .of_le (𝓢 := 𝐒) inferInstance inferInstance
 
@@ -198,9 +201,10 @@ theorem mem_iff : A ∈ 𝐆𝐋β X hX ↔ A.trace ⊆ X := by
   constructor;
   · exact fun h ↦ (trace_subset_of_mem h).trans_eq trace_eq;
   · intro h;
-    have : 𝐆𝐋 ⊢ (LetterlessFormula.betaMinus X hX).lift 🡒 A :=
-      Formula.GL_imp_of_height_not_mem_trace fun _ _ _ hM hn ↦
-        absurd (h hn) (by simpa [RootedModel.height] using LetterlessFormula.forces_lift_iff.mp hM);
+    have : 𝐆𝐋 ⊢ beta X hX 🡒 A :=
+      Formula.GL_imp_of_height_not_mem_trace fun _ _ _ hM hn ↦ absurd (h hn) <| by
+        simpa [RootedModel.height] using
+          LetterlessFormula.forces_lift_iff (A := beta X hX) |>.mp (by simpa using hM);
     exact sumQuasiNormal.mdp (.mem₁ this) (.mem₂ rfl);
 
 /-- - [AB05, Lemma 49] -/
@@ -279,38 +283,38 @@ section
 variable [𝗜𝚺₁ ⪯ T] {A : Formula α}
 
 /-- - [AB05, Lemma 46] -/
-lemma exists_realization_provable_imp_TBB {κ : Type*} [Nonempty κ] (M : RootedModel κ α)
+lemma exists_realization_provable_imp_alpha {κ : Type*} [Nonempty κ] (M : RootedModel κ α)
     [Fintype M.World] [M.IsGL] (hA : M.root ⊮ A) :
-    ∃ f : Realization α ℒₒᵣ, 𝗜𝚺₁ ⊢ f T (A 🡒 TBB M.height) := by
+    ∃ f : Realization α ℒₒᵣ, 𝗜𝚺₁ ⊢ f T (A 🡒 alpha M.height) := by
   let S := standardSolovaySentences T M.extendRoot;
   use S.realization;
-  have h : ∀ i, 𝗜𝚺₁ ⊢ S.σ i 🡒 S.realization T (A 🡒 TBB M.height) := by
+  have h : ∀ i, 𝗜𝚺₁ ⊢ S.σ i 🡒 S.realization T (A 🡒 alpha M.height) := by
     rintro (_ | x);
     · have h₁ : 𝗜𝚺₁ ⊢ S.σ (some M.root) 🡒 ∼S.realization T (□^[M.height]⊥) :=
         S.mainlemma_neg (Option.some_ne_none _).symm <|
           extendRoot.forces_some.not.mpr <| by simp [root_forces_boxItr_bot_iff];
       have h₂ := contra <| T.standardProvability.mono' <| CN_of_CN_right h₁;
-      simp only [standardInterpret, interpret, TBB, interpret_boxItr,
+      simp only [standardInterpret, interpret, alpha, interpret_boxItr,
         Function.iterate_succ_apply'] at h₂ ⊢;
       cl_prover [S.SC2 none (some M.root) trivial, h₂];
     · apply S.mainlemma (Option.some_ne_none x).symm;
       apply extendRoot.forces_some.mpr;
       by_cases hx : x = M.root;
       · exact hx ▸ fun h ↦ absurd h hA;
-      · exact fun _ ↦ forces_TBB_iff.mpr (rank_lt_height (M.root_rel x hx)).ne;
+      · exact fun _ ↦ forces_alpha_iff.mpr (rank_lt_height (M.root_rel x hx)).ne;
   cl_prover [left_Udisj_intro _ h, S.SC4];
 
 /-- - [AB05, Lemma 49] -/
 lemma exists_realization_provable_neg_of_not_S (hA : 𝐒 ⊬ A) :
     ∃ n, ∃ f : Realization α ℒₒᵣ,
-      𝗜𝚺₁ ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range n, TBB i)) := by
+      𝗜𝚺₁ ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range n, alpha i)) := by
   classical
   obtain ⟨κ, _, M, _, h₁, h₂⟩ := Logic.S.exists_countermodel hA;
   have : Fintype M.World := Fintype.ofFinite _;
   let S := standardSolovaySentences T M.extendRoot;
   use M.height, S.realization;
   have h : ∀ i, 𝗜𝚺₁ ⊢ S.σ i 🡒
-      ∼S.realization T (A ⋏ lift (⩕ i ∈ Finset.range M.height, TBB i)) := by
+      ∼S.realization T (A ⋏ lift (⩕ i ∈ Finset.range M.height, alpha i)) := by
     rintro (_ | x);
     · have := (S.rfl_mainlemma h₂ mem_subfmls_self).2 h₁;
       simp only [standardInterpret, interpret] at this ⊢;
@@ -334,19 +338,19 @@ section
 variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] {n : ℕ}
 
 /-- - [AB05, Lemma 46, Corollary 47] -/
-theorem TBB_mem_provabilityLogic_of_mem_trace
+theorem alpha_mem_provabilityLogic_of_mem_trace
     (h : n ∈ (T.provabilityLogicRelativeTo U (α := α)).trace) :
-    TBB n ∈ T.provabilityLogicRelativeTo U (α := α) := by
+    alpha n ∈ T.provabilityLogicRelativeTo U (α := α) := by
   obtain ⟨A, hA, κ, _, M, _, _, rfl, hM⟩ := Set.mem_iUnion₂.mp h;
-  obtain ⟨f, hf⟩ := exists_realization_provable_imp_TBB (T := T) M hM;
-  simpa using lift_mem_provabilityLogic (A := TBB M.height) f
+  obtain ⟨f, hf⟩ := exists_realization_provable_imp_alpha (T := T) M hM;
+  simpa using lift_mem_provabilityLogic (A := alpha M.height) f
     (by simpa using WeakerThan.pbl hf ⨀ hA f);
 
 /-- - [AB05, Corollary 47] -/
 theorem mem_trace_provabilityLogic_iff :
     n ∈ (T.provabilityLogicRelativeTo U (α := α)).trace ↔
-      TBB n ∈ T.provabilityLogicRelativeTo U (α := α) :=
-  ⟨TBB_mem_provabilityLogic_of_mem_trace, fun h ↦ Logic.trace_subset_of_mem h (by simp)⟩
+      alpha n ∈ T.provabilityLogicRelativeTo U (α := α) :=
+  ⟨alpha_mem_provabilityLogic_of_mem_trace, fun h ↦ Logic.trace_subset_of_mem h (by simp)⟩
 
 /-- - [AB05, Corollary 48] -/
 theorem provabilityLogic_eq_GLAlpha
@@ -356,17 +360,17 @@ theorem provabilityLogic_eq_GLAlpha
   Logic.weakerThan_antisymm (Logic.weakerThan_GLAlpha_trace h) <|
     sumQuasiNormal_weakerThan_provabilityLogic <| by
     rintro _ ⟨n, hn, rfl⟩;
-    exact TBB_mem_provabilityLogic_of_mem_trace hn
+    exact alpha_mem_provabilityLogic_of_mem_trace hn
 
-lemma exists_neg_conj_TBB_mem_provabilityLogic
+lemma exists_neg_conj_alpha_mem_provabilityLogic
     (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
-    ∃ m, lift (∼⩕ i ∈ Finset.range m, TBB i) ∈
+    ∃ m, lift (∼⩕ i ∈ Finset.range m, alpha i) ∈
       T.provabilityLogicRelativeTo U (α := α) := by
   obtain ⟨A, hA, hAS⟩ := not_weakerThan_iff.mp h;
   obtain ⟨m, f, hf⟩ := exists_realization_provable_neg_of_not_S (T := T) hAS;
   use m;
   apply lift_mem_provabilityLogic f;
-  have h₁ : U ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range m, TBB i)) := WeakerThan.pbl hf;
+  have h₁ : U ⊢ ∼f T (A ⋏ lift (⩕ i ∈ Finset.range m, alpha i)) := WeakerThan.pbl hf;
   have h₂ := hA f;
   simp only [standardInterpret, interpret] at h₁ h₂ ⊢;
   cl_prover [h₁, h₂];
@@ -375,7 +379,7 @@ lemma exists_neg_conj_TBB_mem_provabilityLogic
 theorem provabilityLogic_trace_compl_finite
     (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
     (T.provabilityLogicRelativeTo U (α := α)).traceᶜ.Finite := by
-  obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
+  obtain ⟨m, hm⟩ := exists_neg_conj_alpha_mem_provabilityLogic h;
   exact (Set.finite_Iio m).subset fun n hn ↦
     not_le.mp fun hnm ↦ hn <| Logic.trace_subset_of_mem hm <| by simpa using hnm;
 
@@ -385,23 +389,23 @@ theorem provabilityLogic_eq_GLBeta (h : ¬T.provabilityLogicRelativeTo U (α := 
       𝐆𝐋β (T.provabilityLogicRelativeTo U).trace
         (provabilityLogic_trace_compl_finite h) := by
   classical
-  suffices (betaMinus _ (provabilityLogic_trace_compl_finite h)).lift ∈
+  suffices beta _ (provabilityLogic_trace_compl_finite h) ∈
       T.provabilityLogicRelativeTo U (α := α) from
     Logic.weakerThan_antisymm (Logic.weakerThan_GLBeta_trace _) <|
       sumQuasiNormal_weakerThan_provabilityLogic <| Set.singleton_subset_iff.mpr this;
-  obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
-  apply provabilityLogic_mdp (A := Finset.conj <| insert (lift (∼⩕ i ∈ Finset.range m, TBB i)) <|
-    ((Finset.range m).filter (· ∈ (T.provabilityLogicRelativeTo U).trace)).image TBB);
+  obtain ⟨m, hm⟩ := exists_neg_conj_alpha_mem_provabilityLogic h;
+  apply provabilityLogic_mdp (A := Finset.conj <| insert (lift (∼⩕ i ∈ Finset.range m, alpha i)) <|
+    ((Finset.range m).filter (· ∈ (T.provabilityLogicRelativeTo U).trace)).image alpha);
   · apply provabilityLogic_of_GL;
     apply GL_imp_of_height_not_mem_trace;
     intro κ _ M _ _ hM hn;
     have h₁ : M.height < m := by
       simpa [height] using forces_lift_iff.mp (forces_conj.mp hM _ (Finset.mem_insert_self _ _));
-    exact forces_TBB_iff.mp (forces_conj.mp hM (TBB M.height) <| Finset.mem_insert_of_mem <|
+    exact forces_alpha_iff.mp (forces_conj.mp hM (alpha M.height) <| Finset.mem_insert_of_mem <|
       Finset.mem_image_of_mem _ <| Finset.mem_filter.mpr ⟨by simpa, by simpa using hn⟩) rfl;
   · exact provabilityLogic_conj <| Finset.forall_mem_insert _ _ _ |>.mpr ⟨hm,
       Finset.forall_mem_image.mpr fun _ hi ↦
-        TBB_mem_provabilityLogic_of_mem_trace (Finset.mem_filter.mp hi).2⟩;
+        alpha_mem_provabilityLogic_of_mem_trace (Finset.mem_filter.mp hi).2⟩;
 
 /-- - [AB05, Corollary 50] -/
 theorem A_weakerThan_provabilityLogic
@@ -409,7 +413,7 @@ theorem A_weakerThan_provabilityLogic
     𝐀 ⪯ T.provabilityLogicRelativeTo U (α := α) :=
   sumQuasiNormal_weakerThan_provabilityLogic <| by
     rintro _ ⟨n, -, rfl⟩;
-    exact TBB_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ n)
+    exact alpha_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ n)
 
 end
 

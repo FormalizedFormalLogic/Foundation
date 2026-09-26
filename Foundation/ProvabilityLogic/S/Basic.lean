@@ -36,8 +36,8 @@ lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐒 ⊢ A := sumQuasiNormal.of_left h
 
 lemma axiomT : 𝐒 ⊢ □A 🡒 A := sumQuasiNormal.mem₂ ⟨A, rfl⟩
 
-lemma provable_TBB {n : ℕ} : 𝐒 ⊢ Formula.TBB n (α := α) := by
-  simpa [Formula.TBB] using axiomT;
+lemma provable_alpha {n : ℕ} : 𝐒 ⊢ Formula.alpha n (α := α) := by
+  simpa [Formula.alpha] using axiomT;
 
 lemma eventually_forces (h : 𝐒 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
     {w : ℕ → M.World} (hw : ∀ n, w (n + 1) ≺ w n) : ∃ i, ∀ j ≥ i, w j ⊩ A := by

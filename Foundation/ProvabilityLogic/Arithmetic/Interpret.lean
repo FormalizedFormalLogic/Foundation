@@ -73,9 +73,9 @@ section
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {n : ℕ}
 
-lemma models_TBB_iff (f : Realization α ℒₒᵣ) : ℕ↓[ℒₒᵣ] ⊧ f T (TBB n) ↔ T.height ≠ n := by
+lemma models_alpha_iff (f : Realization α ℒₒᵣ) : ℕ↓[ℒₒᵣ] ⊧ f T (alpha n) ↔ T.height ≠ n := by
   suffices T.height ≤ n → ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n] ⊥ ↔ T.height ≠ n by
-    simpa only [TBB, standardInterpret, interpret, interpret_boxItr, Semantics.Imp.models_imply,
+    simpa only [alpha, standardInterpret, interpret, interpret_boxItr, Semantics.Imp.models_imply,
       Arithmetic.models_boxBot_iff];
   rcases n with _ | n;
   · cases T.height using ENat.recTopCoe <;> simp [ENat.natCast_le_natCast, ENat.natCast_inj];

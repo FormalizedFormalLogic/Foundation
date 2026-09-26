@@ -101,11 +101,11 @@ lemma axiomD_disj {Γ : FormulaFinset α} : 𝐃 ⊢ □Γ.box.disj 🡒 Γ.box.
     exact of_GL (by cl_prover [h₃, h₄]) ⨀ axiomD ⨀ ih;
 
 omit [DecidableEq α] in
-lemma provable_TBB {n : ℕ} : 𝐃 ⊢ Formula.TBB n (α := α) := by
+lemma provable_alpha {n : ℕ} : 𝐃 ⊢ Formula.alpha n (α := α) := by
   classical
   cases n with
   | zero => exact axiomP;
-  | succ n => simpa [Formula.TBB] using axiomD_disj (Γ := {□^[n]⊥});
+  | succ n => simpa [Formula.alpha] using axiomD_disj (Γ := {□^[n]⊥});
 
 open Classical in
 /-- - [KKIM25, Proposition 3.6] -/

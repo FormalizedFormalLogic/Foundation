@@ -156,8 +156,8 @@ lemma A_weakerThan_provabilityLogic_of_trace
     𝐀 ⪯ T.provabilityLogicRelativeTo U (α := β) :=
   sumQuasiNormal_weakerThan_provabilityLogic <| by
     rintro _ ⟨i, -, rfl⟩;
-    simpa using (lift_mem_provabilityLogic_iff (A := TBB i)).mp <| by
-      simpa using TBB_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ i)
+    simpa using (lift_mem_provabilityLogic_iff (A := alpha i)).mp <| by
+      simpa using alpha_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ i)
 
 /-- If the provability logic of `T` relative to `U` has trace `ω` and contains a formula outside
 `𝐃`, then `U` proves `Pr_T(σ) 🡒 σ` for every sentence `σ`.
@@ -186,16 +186,16 @@ theorem provable_reflection_of_not_D (hT : (T.provabilityLogicRelativeTo U (α :
     exact hAD (e A ▸ Logic.D.provable_subst h);
   obtain ⟨B, hBS, hB, hB₂⟩ := Logic.D.exists_A_add_provable_or_boxImp h₂ none;
   obtain ⟨n, f, hf⟩ := exists_realization_provable_neg_of_not_S (T := T) hBS;
-  have h₃ : U ⊢ f T (lift (⩕ i ∈ Finset.range n, TBB i)) :=
+  have h₃ : U ⊢ f T (lift (⩕ i ∈ Finset.range n, alpha i)) :=
     (lift_mem_provabilityLogic_iff (β := Empty)).mpr (by
       simpa [Logic.provable_iff_mem] using (A_weakerThan_provabilityLogic_of_trace hT).wk <|
-        FConj'_iff_forall_provable.mpr fun _ _ ↦ Logic.A.provable_TBB) f;
+        FConj'_iff_forall_provable.mpr fun _ _ ↦ Logic.A.provable_alpha) f;
   have h₄ : U ⊢ (⟨Function.update f.val none σ⟩ : Realization _ _) T (B ⋎ (□#none 🡒 #none)) :=
     h₁ hB₂ _;
   have e : (⟨Function.update f.val none σ⟩ : Realization _ _) T B = f T B :=
     interpret_congr_atoms fun a ha ↦
       Function.update_of_ne (by grind [atoms_subst_subset (hB ha)]) _ _;
-  have h₅ : U ⊢ ∼f T (B ⋏ lift (⩕ i ∈ Finset.range n, TBB i)) := WeakerThan.pbl hf;
+  have h₅ : U ⊢ ∼f T (B ⋏ lift (⩕ i ∈ Finset.range n, alpha i)) := WeakerThan.pbl hf;
   simp only [standardInterpret, interpret, e] at h₄ h₅;
   cl_prover [h₃, h₄, h₅];
 

@@ -25,14 +25,14 @@ variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {n : 
 
 /-! ### Truth provability logics -/
 
-lemma TBB_mem_provabilityLogic_TA_iff :
-    TBB n ∈ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ↔ T.height ≠ n :=
-  ⟨fun h ↦ (models_TBB_iff ⟨fun _ ↦ ⊥⟩).mp <| Arithmetic.TA.provable_iff.mp <| h _,
-    fun h f ↦ Arithmetic.TA.provable_iff.mpr <| (models_TBB_iff f).mpr h⟩
+lemma alpha_mem_provabilityLogic_TA_iff :
+    alpha n ∈ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ↔ T.height ≠ n :=
+  ⟨fun h ↦ (models_alpha_iff ⟨fun _ ↦ ⊥⟩).mp <| Arithmetic.TA.provable_iff.mp <| h _,
+    fun h f ↦ Arithmetic.TA.provable_iff.mpr <| (models_alpha_iff f).mpr h⟩
 
 lemma mem_trace_provabilityLogic_TA_iff :
     n ∈ (T.provabilityLogicRelativeTo 𝗧𝗔 (α := α)).trace ↔ T.height ≠ n :=
-  mem_trace_provabilityLogic_iff.trans TBB_mem_provabilityLogic_TA_iff
+  mem_trace_provabilityLogic_iff.trans alpha_mem_provabilityLogic_TA_iff
 
 lemma trace_provabilityLogic_TA_eq_univ_iff :
     (T.provabilityLogicRelativeTo 𝗧𝗔 (α := α)).trace = .univ ↔ T.height = ⊤ := by
@@ -79,11 +79,11 @@ theorem provabilityLogic_TA_eq_GLBeta_iff :
   · exact fun h ↦ trace_provabilityLogic_TA_eq_compl_singleton_iff.mp <|
       h ▸ Logic.GLBeta.trace_eq;
   · intro hn;
-    have h : ∼TBB n ∈ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) := fun f ↦
+    have h : ∼alpha n ∈ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) := fun f ↦
       Arithmetic.TA.provable_iff.mpr <| by
-        simp [standardInterpret, interpret, models_TBB_iff f, hn];
+        simp [standardInterpret, interpret, models_alpha_iff f, hn];
     have hS : ¬T.provabilityLogicRelativeTo 𝗧𝗔 ⪯ 𝐒 :=
-      fun hS ↦ unprovable_bot <| hS.wk h ⨀ Logic.S.provable_TBB;
+      fun hS ↦ unprovable_bot <| hS.wk h ⨀ Logic.S.provable_alpha;
     exact (provabilityLogic_eq_GLBeta hS).trans <| by
       congr 1; exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
 
@@ -112,7 +112,7 @@ theorem provabilityLogic_TA_eq_D_iff :
     and_intros;
     · exact soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA (a := default)
         (Set.eq_univ_of_forall fun _ ↦
-          mem_trace_provabilityLogic_iff.mpr <| h ▸ Logic.D.provable_TBB)
+          mem_trace_provabilityLogic_iff.mpr <| h ▸ Logic.D.provable_alpha)
         (h ▸ Logic.D.axiomD);
     · exact fun hs ↦ (Logic.strictlyWeakerThan_iff.mp inferInstance).ne <|
         h.symm.trans <| provabilityLogic_TA_eq_S_iff.mpr hs;
@@ -135,7 +135,7 @@ theorem provabilityLogic_TA_eq_A_iff :
     and_intros;
     · exact fun _ ↦ StrictlyWeakerThan.notWT <| h ▸ D_weakerThan_provabilityLogic_TA;
     · exact ENat.eq_top_iff_forall_ne.mpr fun _ ↦
-        (TBB_mem_provabilityLogic_TA_iff.mp <| h ▸ Logic.A.provable_TBB).symm;
+        (alpha_mem_provabilityLogic_TA_iff.mp <| h ▸ Logic.A.provable_alpha).symm;
   · rintro ⟨hs₁, hT⟩;
     replace hT := trace_provabilityLogic_TA_eq_univ_iff (α := α).mpr hT;
     rcases provabilityLogic_eq_A_or_eq_D_or_eq_S hT (provabilityLogic_TA_weakerThan_S hT)
