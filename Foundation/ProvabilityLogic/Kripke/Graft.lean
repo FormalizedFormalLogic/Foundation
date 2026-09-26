@@ -123,9 +123,9 @@ subformula-closed set on whose boxes `a` is reflexive.
 - [Bek90, Lemma 5]
 -/
 theorem forces_iff [DecidableEq α] {X : FormulaFinset α} (hX : ∀ B ∈ X, B.subfmls ⊆ X)
-    (ha : ∀ B, □B ∈ X → a.1 ⊩[M.toModel] □B 🡒 B) {A : Formula α} (hA : A ∈ X) :
+    (ha : ∀ B, □B ∈ X → a.1 ⊩ □B 🡒 B) {A : Formula α} (hA : A ∈ X) :
     (∀ x, Sum.inl x ⊩[(M.graft a ι).toModel] A ↔ x ⊩[M.toModel] A) ∧
-    (∀ i, Sum.inr i ⊩[(M.graft a ι).toModel] A ↔ a.1 ⊩[M.toModel] A) := by
+    (∀ i, Sum.inr i ⊩[(M.graft a ι).toModel] A ↔ a.1 ⊩ A) := by
   induction A with
   | atom | falsum => exact ⟨fun _ ↦ Iff.rfl, fun _ ↦ Iff.rfl⟩;
   | imp B C ihB ihC =>

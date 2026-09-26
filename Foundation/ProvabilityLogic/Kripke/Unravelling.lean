@@ -103,7 +103,7 @@ def tipMap [IsTrans _ M.Rel] : M.unravelling.toModel →ₚ M.toModel where
   atomic := Iff.rfl
 
 lemma forces_root_iff [IsTrans _ M.Rel] {A : Formula α} :
-    M.unravelling.root ⊩ A ↔ M.root ⊩[M.toModel] A :=
+    M.unravelling.root ⊩ A ↔ M.root ⊩ A :=
   tipMap.forces_iff
 
 end unravelling

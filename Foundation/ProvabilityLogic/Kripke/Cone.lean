@@ -40,7 +40,7 @@ instance [M.IsFiniteGrz] : (M.cone r).IsFiniteGrz where
   antisymm x y h₁ h₂ := Subtype.ext <| Std.Antisymm.antisymm (r := M.Rel) x.1 y.1 h₁ h₂
   finite := Subtype.finite
 
-lemma forces_cone [IsTrans _ M.Rel] {x : (M.cone r).World} : x ⊩ A ↔ x.1 ⊩[M] A := by
+lemma forces_cone [IsTrans _ M.Rel] {x : (M.cone r).World} : x ⊩ A ↔ x.1 ⊩ A := by
   induction A generalizing x with
   | atom | falsum => rfl;
   | imp A B ihA ihB => exact imp_congr ihA ihB;

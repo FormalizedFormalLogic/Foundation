@@ -86,7 +86,7 @@ instance [IsConverseWellFounded _ M.Rel] : IsConverseWellFounded _ (M.toFreeTail
 
 instance [M.IsGL] : (M.toFreeTail V).IsGL where
 
-lemma forces_inl : Sum.inl x ⊩[(M.toFreeTail V).toModel] A ↔ x ⊩[M] A := by
+lemma forces_inl : Sum.inl x ⊩[(M.toFreeTail V).toModel] A ↔ x ⊩ A := by
   induction A generalizing x with
   | atom | falsum => rfl;
   | imp A B ihA ihB => exact imp_congr ihA ihB;
@@ -124,9 +124,9 @@ lemma forces_root_box_iff : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] □A ↔
       exact h₂ n;
 
 lemma forces_inr_box_iff {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
-    (h : ∀ n : ℕ, Sum.inr (n : ℕ∞) ⊩[(M.toModel.toFreeTail V).toModel] A ↔ M.root ⊩[M.toModel] A)
-    (hroot : M.root ⊩[M.toModel] □A 🡒 A) (i : ℕ∞) :
-    Sum.inr i ⊩[(M.toModel.toFreeTail V).toModel] □A ↔ M.root ⊩[M.toModel] □A := by
+    (h : ∀ n : ℕ, Sum.inr (n : ℕ∞) ⊩[(M.toModel.toFreeTail V).toModel] A ↔ M.root ⊩ A)
+    (hroot : M.root ⊩ □A 🡒 A) (i : ℕ∞) :
+    Sum.inr i ⊩[(M.toModel.toFreeTail V).toModel] □A ↔ M.root ⊩ □A := by
   constructor;
   · exact fun hA x _ ↦ forces_inl.mp (hA (.inl x) trivial);
   · rintro hA (x | j) Rix;
@@ -139,9 +139,9 @@ lemma forces_inr_box_iff {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
 
 lemma forces_inr_iff [DecidableEq α] {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
     (hV : ∀ n : ℕ, V n = M M.root) {X : FormulaFinset α}
-    (hX : ∀ B ∈ X, B.subfmls ⊆ X) (hroot : ∀ B, □B ∈ X → M.root ⊩[M.toModel] □B 🡒 B)
+    (hX : ∀ B ∈ X, B.subfmls ⊆ X) (hroot : ∀ B, □B ∈ X → M.root ⊩ □B 🡒 B)
     (hA : A ∈ X) (n : ℕ) :
-    Sum.inr (n : ℕ∞) ⊩[(M.toModel.toFreeTail V).toModel] A ↔ M.root ⊩[M.toModel] A := by
+    Sum.inr (n : ℕ∞) ⊩[(M.toModel.toFreeTail V).toModel] A ↔ M.root ⊩ A := by
   induction A generalizing n with
   | atom a => exact iff_of_eq (congrFun (hV n) a);
   | falsum => rfl;
@@ -177,7 +177,7 @@ open Model.toFreeTail
 variable {M} {A : Formula α}
 
 lemma forces_inr_boxdotTranslate_iff (n : ℕ) :
-    Sum.inr (n : ℕ∞) ⊩[M.toTail.toModel] Aᵇ ↔ M.root ⊩[M.toModel] Aᵇ := by
+    Sum.inr (n : ℕ∞) ⊩[M.toTail.toModel] Aᵇ ↔ M.root ⊩ Aᵇ := by
   induction A generalizing n with
   | atom | falsum => rfl;
   | imp B C ihB ihC => exact imp_congr (ihB n) (ihC n);

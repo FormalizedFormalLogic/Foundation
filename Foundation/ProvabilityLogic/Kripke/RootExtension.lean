@@ -80,7 +80,7 @@ instance [M.IsGL] : M.extendRoot.IsGL where
 
 instance [Fintype M.World] : Fintype M.extendRoot.World := inferInstanceAs (Fintype (Option κ))
 
-lemma forces_some : some x ⊩[M.extendRoot.toModel] A ↔ x ⊩[M.toModel] A := by
+lemma forces_some : some x ⊩[M.extendRoot.toModel] A ↔ x ⊩ A := by
   induction A generalizing x with
   | atom | falsum => rfl;
   | imp A B ihA ihB => exact imp_congr ihA ihB;
