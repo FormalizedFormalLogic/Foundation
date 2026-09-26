@@ -45,23 +45,19 @@ lemma trace_provabilityLogic_TA_eq_compl_singleton_iff :
     simpa only [Set.ext_iff, mem_trace_provabilityLogic_TA_iff, Set.mem_compl_singleton_iff];
   exact ⟨fun h ↦ by simpa using h n, fun h m ↦ by simp [h, eq_comm]⟩
 
-omit [𝗜𝚺₁ ⪯ T] in
-lemma bot_notMem_provabilityLogic_TA : ⊥ ∉ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
-  fun h ↦ by
-    simpa [standardInterpret, interpret] using Arithmetic.TA.provable_iff.mp <| h ⟨fun _ ↦ ⊥⟩
-
 lemma provabilityLogic_TA_weakerThan_S
     (h : (T.provabilityLogicRelativeTo 𝗧𝗔 (α := α)).trace = .univ) :
     T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ⪯ 𝐒 := by
   by_contra hS;
-  exact bot_notMem_provabilityLogic_TA <| (provabilityLogic_eq_GLBetaMinus hS).symm.subset <|
-    Logic.GLBetaMinus.mem_iff.mpr <| by simp [h];
+  have h₁ : ⊥ ∈ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
+    (provabilityLogic_eq_GLBetaMinus hS).symm.subset <|
+      Logic.GLBetaMinus.mem_iff.mpr <| by simp [h];
+  simpa [standardInterpret, interpret] using Arithmetic.TA.provable_iff.mp <| h₁ ⟨fun _ ↦ ⊥⟩;
 
 /-- - [AB05, Corollary 41(ii)] -/
 theorem D_weakerThan_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
     𝐃 ⪯ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) := by
-  have h := Arithmetic.soundOnHierarchy_iff_models_reflection.mp
-    (inferInstance : T.SoundOnHierarchy 𝚺 1);
+  have h := Arithmetic.soundOnHierarchy_iff_models_reflection.mp ‹T.SoundOnHierarchy 𝚺 1›;
   apply sumQuasiNormal_weakerThan_provabilityLogic;
   rintro _ (rfl | ⟨B, C, rfl⟩) f <;> apply Arithmetic.TA.provable_iff.mpr;
   · simpa [standardInterpret, interpret] using h ⊥ (by simp);
