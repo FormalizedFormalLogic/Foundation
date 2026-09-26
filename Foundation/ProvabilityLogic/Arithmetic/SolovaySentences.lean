@@ -302,7 +302,6 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 @[simp] lemma val_twoPoint (i j : M.World) :
     V ⊧/![] (twoPoint T M i j) ↔
       ∀ k, i ≺ k → NegativeSuccessor (V := V) T ⌜T.solovay M j⌝ ⌜T.solovay M k⌝ := by
-  classical
   simp [twoPoint, twoPointAux];
 
 variable (V)
