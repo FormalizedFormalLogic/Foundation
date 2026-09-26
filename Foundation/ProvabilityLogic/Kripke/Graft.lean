@@ -101,9 +101,8 @@ instance [M.IsGL] [WellFoundedLT ι] : IsConverseWellFounded _ (M.graft a ι).Re
         · exact ih j h;
     constructor;
     rintro (x | i);
-    · by_cases hx : x = M.root;
-      · subst hx;
-        constructor;
+    · rcases eq_or_ne x M.root with rfl | hx;
+      · constructor;
         rintro (y | j) h;
         · exact hinl y (by rintro rfl; exact not_rel_root h);
         · exact hinr j;
@@ -123,7 +122,7 @@ subformula-closed set on whose boxes `a` is reflexive.
 - [AB05, Lemma 12]
 - [Bek90, Lemma 5]
 -/
-lemma forces_iff [DecidableEq α] {X : FormulaFinset α} (hX : ∀ B ∈ X, B.subfmls ⊆ X)
+theorem forces_iff [DecidableEq α] {X : FormulaFinset α} (hX : ∀ B ∈ X, B.subfmls ⊆ X)
     (ha : ∀ B, □B ∈ X → a.1 ⊩[M.toModel] □B 🡒 B) {A : Formula α} (hA : A ∈ X) :
     (∀ x, Sum.inl x ⊩[(M.graft a ι).toModel] A ↔ x ⊩[M.toModel] A) ∧
     (∀ i, Sum.inr i ⊩[(M.graft a ι).toModel] A ↔ a.1 ⊩[M.toModel] A) := by

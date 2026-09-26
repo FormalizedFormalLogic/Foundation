@@ -40,10 +40,8 @@ namespace unravelling.World
 
 variable {M} (x : unravelling.World M)
 
-lemma ne_nil : x.1 ≠ [] := fun h ↦ by simpa [h] using x.2.1
-
 /-- The last point of the chain. -/
-def tip : M.World := x.1.head x.ne_nil
+def tip : M.World := x.1.head fun h ↦ by simpa [h] using x.2.1
 
 end unravelling.World
 

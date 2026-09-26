@@ -31,16 +31,15 @@ variable {K K' : Model κ α} {r : K.World} (hR : K.Rel' = K'.Rel') (hr : ∀ x,
   (hV : ∀ x ≠ r, ∀ a, K x a ↔ K' x a)
 include hR hr hV
 
-lemma forces_congr_of_ne {z : K.World} (hz : z ≠ r) {C : Formula α} : z ⊩[K] C ↔ z ⊩[K'] C := by
-  induction C generalizing z with
-  | atom a => exact hV z hz a;
-  | falsum => rfl;
-  | imp A B ihA ihB => exact imp_congr (ihA hz) (ihB hz);
-  | box A ih =>
-    change (∀ y, K.Rel' z y → _) ↔ (∀ y, K'.Rel' z y → _);
-    exact hR ▸ forall_congr' fun y ↦ imp_congr_right fun R ↦ ih fun h ↦ hr z (h ▸ R);
-
 lemma forces_congr_of_modalized {C : Formula α} (hC : C.Modalized) : r ⊩[K] C ↔ r ⊩[K'] C := by
+  have h {z : K.World} (hz : z ≠ r) {C : Formula α} : z ⊩[K] C ↔ z ⊩[K'] C := by
+    induction C generalizing z with
+    | atom a => exact hV z hz a;
+    | falsum => rfl;
+    | imp A B ihA ihB => exact imp_congr (ihA hz) (ihB hz);
+    | box A ih =>
+      change (∀ y, K.Rel' z y → _) ↔ (∀ y, K'.Rel' z y → _);
+      exact hR ▸ forall_congr' fun y ↦ imp_congr_right fun R ↦ ih fun h ↦ hr z (h ▸ R);
   induction C with
   | atom a => exact (hC a rfl).elim;
   | falsum => rfl;
@@ -48,7 +47,7 @@ lemma forces_congr_of_modalized {C : Formula α} (hC : C.Modalized) : r ⊩[K] C
   | box A =>
     change (∀ y, K.Rel' r y → _) ↔ (∀ y, K'.Rel' r y → _);
     exact hR ▸ forall_congr' fun y ↦ imp_congr_right fun R ↦
-      forces_congr_of_ne hR hr hV fun h ↦ hr r <| by subst h; exact R;
+      h fun e ↦ hr r <| by subst e; exact R;
 
 end Kripke.Model
 
@@ -230,7 +229,7 @@ theorem Logic.S.not_provable_neg_of_forces_freeTail {M : Model κ α} [M.IsGL] {
       · obtain ⟨z, R, hz⟩ := not_forces_box.mp hD;
         obtain ⟨k, hk⟩ := toFreeTail.eventually_rel R;
         exact ⟨k, fun n hn ↦ iff_of_false (fun h ↦ hz (h z (hk n hn))) hD⟩;
-  intro hC';
+  by_contra hC';
   obtain ⟨k, hk⟩ := key C hC;
   obtain ⟨i, hi⟩ := eventually_forces hC' (M.toFreeTail V).toModel (w := fun n ↦ .inr n)
     fun n ↦ toFreeTail.rel_inr_inr.mpr (by exact_mod_cast n.lt_succ_self);

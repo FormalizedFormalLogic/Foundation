@@ -92,10 +92,10 @@ lemma forces_boxItr_bot_iff : x ⊩ □^[n]⊥ ↔ x.rank < n := by
 
 lemma rank_pos_of_forces_dia {A : Formula α} (h : x ⊩ ◇A) : 0 < x.rank := by
   obtain ⟨y, Rxy, -⟩ := forces_dia.mp h;
-  exact lt_of_le_of_lt (Nat.zero_le _) (rank_lt_of_rel Rxy);
+  exact Nat.zero_lt_of_lt (rank_lt_of_rel Rxy);
 
 /-- - [AB05, Lemma 26] -/
-lemma exists_isReflexiveOf_of_card_lt_rank {X : FormulaFinset α} (h : X.card < x.rank) :
+theorem exists_isReflexiveOf_of_card_lt_rank {X : FormulaFinset α} (h : X.card < x.rank) :
     ∃ y, x ≺ y ∧ y.IsReflexiveOf X := by
   classical
   obtain ⟨y, hxy⟩ : ∃ y, x ≺^[x.rank] y := by simpa using rank_lt_iff.not.mp (lt_irrefl _);
@@ -137,8 +137,8 @@ lemma rank_lt_height (h : M.root ≺ x) : Model.World.rank (M := M.toModel) x < 
   Model.rank_lt_of_rel h
 
 lemma rank_le_height : Model.World.rank (M := M.toModel) x ≤ M.height := by
-  by_cases hx : x = M.root;
-  · subst hx; rfl;
+  rcases eq_or_ne x M.root with rfl | hx;
+  · rfl;
   · exact (rank_lt_height (M.root_rel x hx)).le;
 
 lemma root_forces_boxItr_bot_iff : M.root ⊩ □^[n]⊥ ↔ M.height < n :=

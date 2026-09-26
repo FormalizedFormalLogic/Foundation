@@ -49,12 +49,11 @@ lemma forces_cone [IsTrans _ M.Rel] {x : (M.cone r).World} : x ⊩ A ↔ x.1 ⊩
     constructor;
     · intro h y Rxy;
       have hy : y = r ∨ r ≺ y := by
+        right;
         rcases hx with rfl | hx;
-        · exact .inr Rxy;
-        · exact .inr (IsTrans.trans _ _ _ hx Rxy);
+        exacts [Rxy, IsTrans.trans _ _ _ hx Rxy];
       exact ih.mp (h ⟨y, hy⟩ Rxy);
-    · intro h y Rxy;
-      exact ih.mpr (h y.1 Rxy);
+    · exact fun h y Rxy ↦ ih.mpr (h y.1 Rxy);
 
 end Model
 

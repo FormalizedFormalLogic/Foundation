@@ -36,10 +36,8 @@ lemma rank_eq (x : (finiteLineModel n α).World) : x.rank = x := by
       exact (ih l h hl).trans_lt h;
     · rcases k with _ | k;
       · simp;
-      · have h : (finiteLineModel n α).Rel ⟨k + 1, hk⟩ ⟨k, by omega⟩ := Nat.lt_add_one k;
-        have := rank_lt_of_rel h;
-        rw [ih k (by omega) (by omega)] at this;
-        exact this;
+      · have R : (finiteLineModel n α).Rel ⟨k + 1, hk⟩ ⟨k, by omega⟩ := Nat.lt_add_one k;
+        exact (ih k (by omega) (by omega)).ge.trans_lt (rank_lt_of_rel R);
 
 end finiteLineModel
 
