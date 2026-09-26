@@ -15,7 +15,8 @@ variable {V : Type*} [ORingStructure V] {k : ℕ}
 
 variable (Γ : Polarity) (s : ℕ)
 
-structure IsStrictDefinedBy (R : (Fin k → V) → Prop) (φ : ArithmeticSemisentence k) : Prop where
+structure IsStrictDefinedBy (R : (Fin k → V) → Prop)
+    (φ : ArithmeticSemisentence k) : Prop where
   strictHierarchy : StrictHierarchy Γ s φ
   defined : FirstOrder.IsDefinedBy R φ
 
@@ -24,7 +25,8 @@ structure IsStrictDefinedByWithParam (R : (Fin k → V) → Prop) (φ : Arithmet
   strictHierarchy : StrictHierarchy Γ s φ
   defined : FirstOrder.IsDefinedByWithParam R φ
 
-abbrev StrictDefinable {k} (P : (Fin k → V) → Prop) := ∃ φ, IsStrictDefinedByWithParam Γ s P φ
+abbrev StrictDefinable {k} (P : (Fin k → V) → Prop) :=
+  ∃ φ, IsStrictDefinedByWithParam Γ s P φ
 
 abbrev StrictDefinablePred (P : V → Prop) : Prop :=
   StrictDefinable Γ s (k := 1) fun v ↦ P (v 0)
@@ -46,7 +48,8 @@ lemma of_iff {P Q : (Fin k → V) → Prop} (h : StrictDefinable Γ s Q) (H : �
     StrictDefinable Γ s P := by
   rwa [show P = Q from by funext v; simp [H]];
 
-lemma definable {P : (Fin k → V) → Prop} (h : StrictDefinable Γ s P) : Γ-[s].Definable P := by
+lemma definable {P : (Fin k → V) → Prop} (h : StrictDefinable Γ s P) :
+    Γᴬ-[s].Definable P := by
   obtain ⟨φ, hs, hφ⟩ := h;
   exact .mkPolarity φ hs.hierarchy fun v ↦ (hφ v).symm;
 

@@ -15,7 +15,7 @@ absolute.
 
 namespace FFL.FirstOrder.Bounding
 
-open scoped Bounding
+open scoped _root_.FFL.FirstOrder.Bounding
 open Tarski.Structure
 
 variable {L : Language} {ℬ : Bounding L}
@@ -119,22 +119,22 @@ lemma pi_one_downward {n} {φ : Semiformula L ξ n} (hφ : ℬ.Hierarchy 𝚷 1 
   have h₁ : ¬φ.Eval e ε → ¬φ.Eval (ι ∘ e) (ι ∘ ε) := by simpa using h
   exact not_imp_not.mp h₁
 
-lemma shigmaZero_absolute {k} (φ : 𝚺₀.Semisentence ℬ k) (v : Fin k → M) :
+lemma shigmaZero_absolute {k} (φ : 𝚺-[ℬ, 0].Semisentence k) (v : Fin k → M) :
     φ.val.Evalb v ↔ φ.val.Evalb (ι ∘ v) := by
   simpa [Semiformula.Evalb, Function.comp_def, Empty.eq_elim] using
     bounded_absolute ι (Hierarchy.zero_iff_bounded.mp φ.sigma_prop) v Empty.elim
 
-lemma sigmaOne_upward_absolute {k} (φ : 𝚺₁.Semisentence ℬ k) (v : Fin k → M) :
+lemma sigmaOne_upward_absolute {k} (φ : 𝚺-[ℬ, 1].Semisentence k) (v : Fin k → M) :
     φ.val.Evalb v → φ.val.Evalb (ι ∘ v) := by
   simpa [Semiformula.Evalb, Function.comp_def, Empty.eq_elim] using
     sigma_one_upward ι φ.sigma_prop v Empty.elim
 
-lemma piOne_downward_absolute {k} (φ : 𝚷₁.Semisentence ℬ k) (v : Fin k → M) :
+lemma piOne_downward_absolute {k} (φ : 𝚷-[ℬ, 1].Semisentence k) (v : Fin k → M) :
     φ.val.Evalb (ι ∘ v) → φ.val.Evalb v := by
   simpa [Semiformula.Evalb, Function.comp_def, Empty.eq_elim] using
     pi_one_downward ι φ.pi_prop v Empty.elim
 
-lemma deltaOne_absolute {k} (φ : 𝚫₁.Semisentence ℬ k)
+lemma deltaOne_absolute {k} (φ : 𝚫-[ℬ, 1].Semisentence k)
     (properM : φ.ProperOn M) (properN : φ.ProperOn N) (v : Fin k → M) :
     φ.val.Evalb v ↔ φ.val.Evalb (ι ∘ v) :=
   ⟨by simpa [HierarchySymbol.Semiformula.val_sigma] using
@@ -143,27 +143,27 @@ lemma deltaOne_absolute {k} (φ : 𝚫₁.Semisentence ℬ k)
       piOne_downward_absolute ι φ.pi v⟩
 
 lemma HierarchySymbol.Defined.shigmaZero_absolute {k}
-    {R : (Fin k → M) → Prop} {R' : (Fin k → N) → Prop} {φ : 𝚺₀.Semisentence ℬ k}
-    (hR : 𝚺₀.Defined R φ) (hR' : 𝚺₀.Defined R' φ) (v : Fin k → M) :
+    {R : (Fin k → M) → Prop} {R' : (Fin k → N) → Prop} {φ : 𝚺-[ℬ, 0].Semisentence k}
+    (hR : 𝚺-[ℬ, 0].Defined R φ) (hR' : 𝚺-[ℬ, 0].Defined R' φ) (v : Fin k → M) :
     R v ↔ R' (ι ∘ v) := by
   simpa [hR.iff, hR'.iff] using Bounding.shigmaZero_absolute ι φ v
 
 lemma HierarchySymbol.DefinedFunction.shigmaZero_absolute_func {k}
-    {f : (Fin k → M) → M} {f' : (Fin k → N) → N} {φ : 𝚺₀.Semisentence ℬ (k + 1)}
-    (hf : 𝚺₀.DefinedFunction f φ) (hf' : 𝚺₀.DefinedFunction f' φ) (v : Fin k → M) :
+    {f : (Fin k → M) → M} {f' : (Fin k → N) → N} {φ : 𝚺-[ℬ, 0].Semisentence (k + 1)}
+    (hf : 𝚺-[ℬ, 0].DefinedFunction f φ) (hf' : 𝚺-[ℬ, 0].DefinedFunction f' φ) (v : Fin k → M) :
     ι (f v) = f' (ι ∘ v) := by
   simpa [Function.comp_def] using
     HierarchySymbol.Defined.shigmaZero_absolute ι hf hf' (f v :> v)
 
 lemma HierarchySymbol.Defined.shigmaOne_absolute {k}
-    {R : (Fin k → M) → Prop} {R' : (Fin k → N) → Prop} {φ : 𝚫₁.Semisentence ℬ k}
-    (hR : 𝚫₁.Defined R φ) (hR' : 𝚫₁.Defined R' φ) (v : Fin k → M) :
+    {R : (Fin k → M) → Prop} {R' : (Fin k → N) → Prop} {φ : 𝚫-[ℬ, 1].Semisentence k}
+    (hR : 𝚫-[ℬ, 1].Defined R φ) (hR' : 𝚫-[ℬ, 1].Defined R' φ) (v : Fin k → M) :
     R v ↔ R' (ι ∘ v) := by
   simpa using deltaOne_absolute ι φ hR.proper hR'.proper v
 
 lemma HierarchySymbol.DefinedFunction.shigmaOne_absolute_func {k}
-    {f : (Fin k → M) → M} {f' : (Fin k → N) → N} {φ : 𝚺₁.Semisentence ℬ (k + 1)}
-    (hf : 𝚺₁.DefinedFunction f φ) (hf' : 𝚺₁.DefinedFunction f' φ) (v : Fin k → M) :
+    {f : (Fin k → M) → M} {f' : (Fin k → N) → N} {φ : 𝚺-[ℬ, 1].Semisentence (k + 1)}
+    (hf : 𝚺-[ℬ, 1].DefinedFunction f φ) (hf' : 𝚺-[ℬ, 1].DefinedFunction f' φ) (v : Fin k → M) :
     ι (f v) = f' (ι ∘ v) := by
   have h := sigmaOne_upward_absolute ι φ (f v :> v)
   simpa [hf.iff, hf'.iff, Function.comp_def] using h
@@ -174,7 +174,7 @@ lemma models_iff_of_Sigma0 {n} {σ : Semisentence L n}
   simpa [Semiformula.Evalb, Function.comp_def, Empty.eq_elim] using
     (bounded_absolute ι (Hierarchy.zero_iff_bounded.mp hσ) e Empty.elim).symm
 
-lemma models_iff_of_Delta1 {n} {σ : 𝚫₁.Semisentence ℬ n}
+lemma models_iff_of_Delta1 {n} {σ : 𝚫-[ℬ, 1].Semisentence n}
     (hσ : σ.ProperOn M) (hσN : σ.ProperOn N) {e : Fin n → M} :
     σ.val.Evalb (ι ∘ e) ↔ σ.val.Evalb e :=
   (deltaOne_absolute ι σ hσ hσN e).symm
