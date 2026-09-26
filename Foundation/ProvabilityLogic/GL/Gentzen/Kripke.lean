@@ -1,7 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
-public import Foundation.ProvabilityLogic.Kripke.Sequent
+public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Mathlib.Data.Finset.Powerset
 public import Mathlib.Basic.Finite.Prod
 

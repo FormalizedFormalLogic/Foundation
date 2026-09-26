@@ -49,7 +49,7 @@ lemma forces_pseudoTail_interpolant_iff (hab : a ≠ b) (hac : a ≠ c)
     Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] C ↔ M M.root a := by
   let V x p := if p = a then M x a else x ≠ M.root;
   let N : RootedModel κ α := ⟨M.toModel.overwrite V, M.root, M.root_rel⟩;
-  have : N.IsFiniteGL := inferInstanceAs (M.toModel.overwrite V).IsFiniteGL;
+  have : N.IsFiniteGL := Model.overwrite.isFiniteGL (M := M.toModel);
   have e : Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] C ↔
       Sum.inr ⊤ ⊩[(N.toPseudoTail o).toModel] C := by
     apply forces_congr_of_atoms (by rfl);

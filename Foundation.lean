@@ -218,12 +218,9 @@ public import Foundation.ProvabilityLogic.Kripke.Cone
 public import Foundation.ProvabilityLogic.Kripke.DefiningFormula
 public import Foundation.ProvabilityLogic.Kripke.FiniteLineModel
 public import Foundation.ProvabilityLogic.Kripke.Graft
-public import Foundation.ProvabilityLogic.Kripke.Overwrite
 public import Foundation.ProvabilityLogic.Kripke.Rank
 public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.ProvabilityLogic.Kripke.RootedModel
-public import Foundation.ProvabilityLogic.Kripke.Sequent
-public import Foundation.ProvabilityLogic.Kripke.Soundness
 public import Foundation.ProvabilityLogic.Kripke.Tail
 public import Foundation.ProvabilityLogic.Kripke.Unravelling
 public import Foundation.ProvabilityLogic.Letterless

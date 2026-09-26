@@ -2,7 +2,6 @@ module
 
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Kripke.Cone
-public import Foundation.ProvabilityLogic.Kripke.Soundness
 
 /-!
 # The logic `Grz`

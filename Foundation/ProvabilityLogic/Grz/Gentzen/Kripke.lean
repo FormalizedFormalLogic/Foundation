@@ -1,7 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Basic
-public import Foundation.ProvabilityLogic.Kripke.Sequent
+public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Mathlib.Data.Finset.Powerset
 public import Mathlib.Basic.Finite.Prod
 
@@ -151,7 +151,6 @@ def SaturatedAt (S : Sequent α) : Formula α → Prop
   | □A => □A ∈ S.ant → A ∈ S.ant
   | _ => True
 
-omit [DecidableEq α] in
 lemma SaturatedAt.mono {S T : Sequent α} {E : Formula α} (h : SaturatedAt S E) (hST : S ⊆ T)
     (hant : ∀ F ∈ T.ant, F ∈ S.ant ∨ F.complexity < E.complexity)
     (hsuc : ∀ F ∈ T.suc, F ∈ S.suc ∨ F.complexity < E.complexity) : SaturatedAt T E := by

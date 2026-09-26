@@ -1,7 +1,6 @@
 module
 
 public import Foundation.ProvabilityLogic.GL.CIP
-public import Foundation.ProvabilityLogic.Kripke.Overwrite
 
 /-!
 # The de Jongh–Sambin fixed point theorem for `GL`
@@ -58,6 +57,7 @@ lemma subst (s : Substitution α α) (h : ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ) :
     ⊢ᴳ[𝐆𝐋] Γ.image (·⟦s⟧) ⟹ Δ.image (·⟦s⟧) := by
   apply complete;
   intro _ _ M _ x hx;
+  have := Kripke.Model.overwrite.isFiniteGL (M := M) (V := fun y a ↦ y ⊩ s a);
   obtain ⟨D, hD, hxD⟩ := sound (M.overwrite fun y a ↦ y ⊩ s a) h x
     fun C hC ↦ forces_overwrite_subst.mpr (hx _ (Finset.mem_image_of_mem _ hC));
   exact ⟨_, Finset.mem_image_of_mem _ hD, forces_overwrite_subst.mp hxD⟩;

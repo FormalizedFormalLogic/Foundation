@@ -2,7 +2,6 @@ module
 
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Kripke.Cone
-public import Foundation.ProvabilityLogic.Kripke.Soundness
 public import Foundation.ProvabilityLogic.Kripke.Unravelling
 
 /-!
