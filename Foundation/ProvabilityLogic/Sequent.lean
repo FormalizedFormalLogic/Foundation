@@ -99,10 +99,8 @@ lemma subset_saturateStep : S.1 ⊆ (saturateStep hD x S).1 := by
   cases x <;> simp only [saturateStep] <;> (try split_ifs) <;> simp [Finset.subset_insert];
 
 lemma saturateStep_new :
-    (C ∈ (saturateStep hD x S).1.ant →
-      C ∈ S.1.ant ∨ C ∈ x.subfmls ∧ C.complexity < x.complexity) ∧
-    (C ∈ (saturateStep hD x S).1.suc →
-      C ∈ S.1.suc ∨ C ∈ x.subfmls ∧ C.complexity < x.complexity) := by
+    (C ∈ (saturateStep hD x S).1.ant → C ∈ S.1.ant ∨ C.complexity < x.complexity) ∧
+    (C ∈ (saturateStep hD x S).1.suc → C ∈ S.1.suc ∨ C.complexity < x.complexity) := by
   obtain ⟨S, hS⟩ := S;
   cases x <;> simp only [saturateStep] <;> (try split_ifs) <;> (try simp) <;> grind;
 
@@ -129,6 +127,29 @@ lemma saturateStep_box (hbox : ∀ {Γ Δ A}, D (insert A Γ ⟹ Δ) → D (inse
     by_contra hA';
     exact hS <| by simpa [Finset.insert_eq_of_mem hA] using hbox (not_and.mp h hA |> not_not.mp);
 
+section
+
+/-! The saturation steps keep the antecedent within `P` and the succedent within `Q`. -/
+
+variable {P Q : FormulaFinset α} (hP : ∀ {A B}, A 🡒 B ∈ P → A ∈ Q ∧ B ∈ P)
+  (hQ : ∀ {A B}, A 🡒 B ∈ Q → A ∈ P ∧ B ∈ Q) (hPbox : ∀ {A}, □A ∈ P → A ∈ P)
+include hP hQ hPbox
+
+lemma saturateStep_subset (h : S.1.ant ⊆ P ∧ S.1.suc ⊆ Q) :
+    (saturateStep hD x S).1.ant ⊆ P ∧ (saturateStep hD x S).1.suc ⊆ Q := by
+  obtain ⟨S, hS⟩ := S;
+  cases x <;> simp only [saturateStep] <;> (try split_ifs) <;> grind [Finset.insert_subset_iff];
+
+variable {S₀ : Sequent α} {h₀ : ¬D S₀} {l : List (Formula α)}
+
+lemma saturate_subset (h : S₀.ant ⊆ P ∧ S₀.suc ⊆ Q) :
+    (saturate hD S₀ h₀ l).1.ant ⊆ P ∧ (saturate hD S₀ h₀ l).1.suc ⊆ Q := by
+  induction l with
+  | nil => exact h;
+  | cons x l ih => exact saturateStep_subset (hD := hD) hP hQ hPbox ih;
+
+end
+
 variable {S₀ : Sequent α} {h₀ : ¬D S₀} {l : List (Formula α)}
 
 lemma subset_saturate : S₀ ⊆ (saturate hD S₀ h₀ l).1 := by
@@ -137,24 +158,6 @@ lemma subset_saturate : S₀ ⊆ (saturate hD S₀ h₀ l).1 := by
   | cons x l ih =>
     have h := subset_saturateStep (hD := hD) (x := x) (S := saturate hD S₀ h₀ l);
     exact ⟨ih.ant.trans h.ant, ih.suc.trans h.suc⟩;
-
-lemma saturate_subset_subfmls {BS : Sequent α} (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls)
-    (hl : ∀ C ∈ l, C ∈ BS.subfmls) :
-    (saturate hD S₀ h₀ l).1.ant ∪ (saturate hD S₀ h₀ l).1.suc ⊆ BS.subfmls := by
-  induction l with
-  | nil => exact hS₀;
-  | cons x l ih =>
-    have ih := ih (fun C hC ↦ hl C (by simp [hC]));
-    have hx := hl x (by simp);
-    have h := fun {C} ↦ saturateStep_new (hD := hD) (x := x) (S := saturate hD S₀ h₀ l) (C := C);
-    intro C hC;
-    rcases Finset.mem_union.mp hC with hC | hC;
-    · rcases h.1 hC with hC | ⟨hC, -⟩;
-      · exact ih (Finset.mem_union_left _ hC);
-      · exact mem_subfmls_subfmls hx hC;
-    · rcases h.2 hC with hC | ⟨hC, -⟩;
-      · exact ih (Finset.mem_union_right _ hC);
-      · exact mem_subfmls_subfmls hx hC;
 
 lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
     (∀ {A B}, A 🡒 B ∈ l → A 🡒 B ∈ (saturate hD S₀ h₀ l).1.ant →
@@ -176,8 +179,8 @@ lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
         (C ∈ (saturate hD S₀ h₀ (x :: l)).1.suc → C ∈ (saturate hD S₀ h₀ l).1.suc) := by
       intro C hC;
       have := hx C hC;
-      exact ⟨fun h ↦ (hnew.1 h).resolve_right fun h' ↦ absurd h'.2 (by omega),
-        fun h ↦ (hnew.2 h).resolve_right fun h' ↦ absurd h'.2 (by omega)⟩;
+      exact ⟨fun h ↦ (hnew.1 h).resolve_right (by omega),
+        fun h ↦ (hnew.2 h).resolve_right (by omega)⟩;
     and_intros;
     · intro A B hAB h;
       rcases List.mem_cons.mp hAB with rfl | hAB;
@@ -192,31 +195,46 @@ lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
       · exact saturateStep_box (hD := hD) hbox h;
       · exact hsub.ant (ih₃ hbox hA ((old hA).1 h));
 
-/-- The subformulas of `BS`, sorted by complexity. -/
-noncomputable abbrev sortedSubfmls (BS : Sequent α) : List (Formula α) :=
-  BS.subfmls.toList.insertionSort (·.complexity ≤ ·.complexity)
+/-- Every sequent on which `D` fails extends to a saturated one with antecedent within `P` and
+succedent within `Q`, which is moreover closed under `□A ↦ A` on the left if `D` is closed under
+that rule. -/
+theorem exists_saturated_within (hD : IsImpClosed D) {P Q : FormulaFinset α}
+    (hP : ∀ {A B}, A 🡒 B ∈ P → A ∈ Q ∧ B ∈ P) (hQ : ∀ {A B}, A 🡒 B ∈ Q → A ∈ P ∧ B ∈ Q)
+    (hPbox : ∀ {A}, □A ∈ P → A ∈ P) {S₀ : Sequent α} (h₀ : ¬D S₀) (hant : S₀.ant ⊆ P)
+    (hsuc : S₀.suc ⊆ Q) :
+    ∃ S, S₀ ⊆ S ∧ ¬D S ∧ S.Saturated ∧ S.ant ⊆ P ∧ S.suc ⊆ Q ∧
+      ((∀ {Γ Δ A}, D (insert A Γ ⟹ Δ) → D (insert (□A) Γ ⟹ Δ)) →
+        ∀ {A}, □A ∈ S.ant → A ∈ S.ant) := by
+  let l := (P ∪ Q).toList.insertionSort (·.complexity ≤ ·.complexity);
+  have hl : ∀ {C}, C ∈ P ∪ Q → C ∈ l := by simp [l, List.mem_insertionSort];
+  obtain ⟨hsP, hsQ⟩ := saturate_subset (hD := hD) (h₀ := h₀) (l := l) hP hQ hPbox ⟨hant, hsuc⟩;
+  have : Std.Total (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ ↦ le_total _ _⟩;
+  have : IsTrans _ (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ _ ↦ le_trans⟩;
+  obtain ⟨h₁, h₂, h₃⟩ :=
+    saturate_saturated (hD := hD) (h₀ := h₀) (List.pairwise_insertionSort _ (P ∪ Q).toList);
+  use (saturate hD S₀ h₀ l).1;
+  and_intros;
+  · exact subset_saturate;
+  · exact (saturate hD S₀ h₀ l).2;
+  · exact ⟨fun h ↦ h₁ (hl (Finset.mem_union_left _ (hsP h))) h,
+      fun h ↦ h₂ (hl (Finset.mem_union_right _ (hsQ h))) h⟩;
+  · exact hsP;
+  · exact hsQ;
+  · exact fun hbox _ h ↦ h₃ hbox (hl (Finset.mem_union_left _ (hsP h))) h;
 
-/-- Every sequent on which `D` fails extends to a saturated one within the subformulas of `BS`,
-which is moreover closed under `□A ↦ A` on the left if `D` is closed under that rule. -/
+/-- `exists_saturated_within` for the subformulas of `BS` on both sides. -/
 theorem exists_saturated (hD : IsImpClosed D) {BS S₀ : Sequent α} (h₀ : ¬D S₀)
     (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls) :
     ∃ S, S₀ ⊆ S ∧ ¬D S ∧ S.Saturated ∧ S.ant ∪ S.suc ⊆ BS.subfmls ∧
       ((∀ {Γ Δ A}, D (insert A Γ ⟹ Δ) → D (insert (□A) Γ ⟹ Δ)) →
         ∀ {A}, □A ∈ S.ant → A ∈ S.ant) := by
-  have hl : ∀ {C}, C ∈ sortedSubfmls BS ↔ C ∈ BS.subfmls := by simp [List.mem_insertionSort];
-  have hsub := saturate_subset_subfmls (hD := hD) (h₀ := h₀) hS₀ fun _ ↦ hl.mp;
-  have : Std.Total (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ ↦ le_total _ _⟩;
-  have : IsTrans _ (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ _ ↦ le_trans⟩;
-  obtain ⟨h₁, h₂, h₃⟩ :=
-    saturate_saturated (hD := hD) (h₀ := h₀) (List.pairwise_insertionSort _ BS.subfmls.toList);
-  use (saturate hD S₀ h₀ (sortedSubfmls BS)).1;
-  and_intros;
-  · exact subset_saturate;
-  · exact (saturate hD S₀ h₀ (sortedSubfmls BS)).2;
-  · exact ⟨fun h ↦ h₁ (hl.mpr (hsub (Finset.mem_union_left _ h))) h,
-      fun h ↦ h₂ (hl.mpr (hsub (Finset.mem_union_right _ h))) h⟩;
-  · exact hsub;
-  · exact fun hbox _ h ↦ h₃ hbox (hl.mpr (hsub (Finset.mem_union_left _ h))) h;
+  have hmem {B C} (hB : B ∈ BS.subfmls) (hC : C ∈ B.subfmls) : C ∈ BS.subfmls :=
+    mem_subfmls_subfmls hB hC;
+  obtain ⟨S, h₁, h₂, h₃, h₄, h₅, h₆⟩ := exists_saturated_within hD (P := BS.subfmls)
+    (fun h ↦ ⟨hmem h Formula.mem_subfmls_imp_left, hmem h Formula.mem_subfmls_imp_right⟩)
+    (fun h ↦ ⟨hmem h Formula.mem_subfmls_imp_left, hmem h Formula.mem_subfmls_imp_right⟩)
+    (fun h ↦ hmem h Formula.mem_subfmls_box) h₀ (by grind) (by grind);
+  exact ⟨S, h₁, h₂, h₃, Finset.union_subset h₄ h₅, h₆⟩
 
 end Sequent
 
