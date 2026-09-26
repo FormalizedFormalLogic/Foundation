@@ -116,6 +116,8 @@ lemma exists_countermodel [DecidableEq α] (h : 𝐀 ⊬ A) :
 instance : (𝐀 : Logic α) ⪯ 𝐃 :=
   Logic.weakerThan_iff.mpr <| sumQuasiNormal.subset_iff.mpr fun _ ⟨_, _, h⟩ ↦ h ▸ D.provable_TBB
 
+instance : Consistent (𝐀 : Logic α) := .of_le (𝓢 := 𝐃) inferInstance inferInstance
+
 lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a := by
   intro h;
   obtain ⟨n, h⟩ := iff_provable_GL.mp h;

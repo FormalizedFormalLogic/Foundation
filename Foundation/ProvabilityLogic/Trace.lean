@@ -181,6 +181,8 @@ instance : (𝐆𝐋α X : Logic α) ⪯ 𝐒 :=
   weakerThan_iff.mpr <| sumQuasiNormal.subset_iff.mpr fun _ ⟨n, _, e⟩ ↦
     e ▸ .mem₂ ⟨□^[n]⊥, by simp [TBB]⟩
 
+instance : Consistent (𝐆𝐋α X : Logic α) := .of_le (𝓢 := 𝐒) inferInstance inferInstance
+
 end GLAlpha
 
 namespace GLBetaMinus

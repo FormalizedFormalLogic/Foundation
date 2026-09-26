@@ -44,6 +44,8 @@ instance : (𝐃 : Logic α) ⪯ 𝐒 := by
   | mdp _ _ ih₁ ih₂ => exact sumQuasiNormal.mdp ih₁ ih₂;
   | subst _ ih => exact sumQuasiNormal.subst ih;
 
+instance : Consistent (𝐃 : Logic α) := .of_le (𝓢 := 𝐒) inferInstance inferInstance
+
 /-- - [KKIM25, Theorem 5.8] -/
 lemma sound_freeTail (h : 𝐃 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
     (V : ℕ∞ → α → Prop) : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] A := by
@@ -210,12 +212,6 @@ lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A := by
     exact GL.iff_valid_finite.mpr fun M _ x ↦
       toFreeTail.forces_inl.mp (sound_freeTail h M (fun _ _ ↦ True) (.inl x) trivial);
   · exact fun h ↦ of_GL (normalOf.nec h);
-
-omit [DecidableEq α] in
-lemma consistent : 𝐃 ⊬ (⊥ : Formula α) := by
-  classical
-  exact fun h ↦ unprovable_bot (L := 𝐒) (WeakerThan.pbl h)
-
 end Logic.D
 
 end FFL.ProvabilityLogic

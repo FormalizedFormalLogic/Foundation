@@ -54,6 +54,9 @@ theorem sound (M : Model κ α) [M.IsGL] (h : 𝐆𝐋 ⊢ A) : M ⊧ A := by
 
 end
 
+instance : Consistent (𝐆𝐋 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ sound (pointModel fun _ ↦ False) h 0
+
 /-! ### From the sequent calculus -/
 
 lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[𝐆𝐋] S) : 𝐆𝐋 ⊢ S.ant.conj 🡒 S.suc.disj := by

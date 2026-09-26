@@ -105,6 +105,10 @@ theorem iff_boxdotTranslate_S : 𝐆𝐫𝐳 ⊢ A ↔ 𝐒 ⊢ Aᵇ :=
 
 end Logic.Grz
 
+instance {α : Type*} : Consistent (𝐆𝐫𝐳 : Logic α) := by
+  classical
+  exact .of_unprovable (φ := ⊥) fun h ↦ Logic.unprovable_bot (Logic.Grz.iff_boxdotTranslate_GL.mp h)
+
 end FFL.ProvabilityLogic
 
 end
