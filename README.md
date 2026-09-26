@@ -1,6 +1,5 @@
 [Docs]: https://FormalizedFormalLogic.github.io/Foundation/docs
 [Catalogue]: https://FormalizedFormalLogic.github.io/Catalogue
-[ProvabilityLogic]: https://github.com/FormalizedFormalLogic/ProvabilityLogic
 [FFL]: https://github.com/FormalizedFormalLogic
 
 # Foundation
@@ -17,6 +16,7 @@ Main results of this repository. More detailed explanations are provided in [Doc
 - `Logic`: Fundamental notions shared by all logics (entailment, semantics, calculi, Lindenbaum algebras, …).
 - `Propositional`: Propositional logic (classical and intuitionistic).
   - [Completeness of Tait calculus][prop:completeness]
+  - [Heyting algebra semantics of intuitionistic logic][prop:heyting]
 - `FirstOrder`: [First-order logic][first_order]
   - [Completeness theorem][first_order:completeness]
   - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:hauptsatz]
@@ -31,14 +31,23 @@ Main results of this repository. More detailed explanations are provided in [Doc
     - [Löb's theorem][arith:loeb]
     - [Tarski's undefinability of truth][arith:tarski]
     - [Church's theorem and undecidability of first-order logic][arith:church]
+    - [Local][arith:local_reflection] and [uniform][arith:uniform_reflection] reflection principles
   - [Set theory][set_theory]: $\mathsf{Z}$, $\mathsf{ZF}$, $\mathsf{ZFC}$ and their models.
     - [Consistency of ZFC][set_theory:zfc_consistent] (relative to Lean's type theory)
     - [Downward Löwenheim–Skolem theorem for models of set theory][set_theory:loewenheim_skolem]
+- `ProvabilityLogic`: [Provability logic][provability_logic]: modal logics describing the provability predicates of arithmetic.
+  - Solovay's arithmetical completeness theorems: [$\mathsf{GL}$][pl:gl_arith] is the provability logic of $\mathsf{PA}$ (and of every $\Sigma_1$-sound theory), and [$\mathsf{S}$][pl:s_arith] is its provability logic relative to true arithmetic.
+  - Arithmetical completeness of [$\mathsf{Grz}$][pl:grz_arith] and of [$\mathsf{GL} + \Box^n \bot$][pl:glboxbot_arith].
+  - [Classification of provability logics][pl:classification] _(Artemov–Beklemishev)_: every provability logic is $\mathsf{GL}_\alpha$, $\mathsf{GL}_\beta$, $\mathsf{D} \cap \mathsf{GL}_\beta$, or $\mathsf{S} \cap \mathsf{GL}_\beta$; in particular, the [provability logics relative to true arithmetic][pl:classification_truth] are exactly $\mathsf{S}$, $\mathsf{D}$, $\mathsf{A}$, and $\mathsf{GL} + \lnot (\Box^{n+1} \bot \to \Box^n \bot)$.
+  - [de Jongh–Sambin fixed-point theorem][pl:fixedpoint] and Craig interpolation of [$\mathsf{GL}$][pl:gl_cip] and [$\mathsf{S}$][pl:s_cip]; [$\mathsf{D}$ lacks it][pl:d_not_cip].
+  - [Provability Logic Zoo](#provability-logic-zoo)
 - `SecondOrder`: Syntax, semantics, and derivations of second-order logic.
+- `Syntax`: Languages, terms, and rewriting shared by first-order and second-order logic.
 - `Meta`: Proof automation.
 - `Vorspiel`: Supplemental definitions and theorems for Mathlib.
 
 [prop:completeness]: ./Foundation/Propositional/Boolean/Tait.lean
+[prop:heyting]: ./Foundation/Propositional/Heyting/Semantics.lean
 [first_order]: ./Foundation/FirstOrder
 [first_order:completeness]: ./Foundation/FirstOrder/LK/Completeness/CounterModel.lean
 [first_order:hauptsatz]: ./Foundation/FirstOrder/LK/Hauptsatz.lean
@@ -53,28 +62,34 @@ Main results of this repository. More detailed explanations are provided in [Doc
 [arith:loeb]: ./Foundation/FirstOrder/Incompleteness/Löb.lean
 [arith:tarski]: ./Foundation/FirstOrder/Incompleteness/Tarski.lean
 [arith:church]: ./Foundation/FirstOrder/Incompleteness/Church.lean
+[arith:local_reflection]: ./Foundation/FirstOrder/Incompleteness/Reflection/Local.lean
+[arith:uniform_reflection]: ./Foundation/FirstOrder/Incompleteness/Reflection/Uniform.lean
 [set_theory]: ./Foundation/FirstOrder/SetTheory
 [set_theory:zfc_consistent]: ./Foundation/FirstOrder/SetTheory/Universe.lean
 [set_theory:loewenheim_skolem]: ./Foundation/FirstOrder/SetTheory/LoewenheimSkolem.lean
-
-### Further Results
-
-Results that depend on Foundation but are developed in their own repositories under the [Formalized Formal Logic][FFL] organization:
-
-- [ProvabilityLogic]: provability logics ($\mathsf{GL}$ and its relatives), their Kripke semantics, and arithmetical completeness via the provability predicates formalized here.
-
-See the [organization page][FFL] for the other repositories.
+[provability_logic]: ./Foundation/ProvabilityLogic
+[pl:gl_arith]: ./Foundation/ProvabilityLogic/GL/Arithmetic.lean
+[pl:s_arith]: ./Foundation/ProvabilityLogic/S/Arithmetic.lean
+[pl:grz_arith]: ./Foundation/ProvabilityLogic/Grz/Arithmetic.lean
+[pl:glboxbot_arith]: ./Foundation/ProvabilityLogic/GLPlusBoxBot/Arithmetic.lean
+[pl:classification]: ./Foundation/ProvabilityLogic/Classification/General.lean
+[pl:classification_truth]: ./Foundation/ProvabilityLogic/Classification/Truth.lean
+[pl:fixedpoint]: ./Foundation/ProvabilityLogic/GL/Fixedpoint.lean
+[pl:gl_cip]: ./Foundation/ProvabilityLogic/GL/CIP.lean
+[pl:s_cip]: ./Foundation/ProvabilityLogic/S/CIP.lean
+[pl:d_not_cip]: ./Foundation/ProvabilityLogic/D/NotCIP.lean
 
 ### Documents
 
 - [Docs]: catalogue of definitions and theorems, _generated by [doc-gen4](https://github.com/leanprover/doc-gen4)_.
 - [Catalogue]: an overview of the formalized results across the organization.
+- [Formalized Formal Logic][FFL]: the organization, with other repositories developed on top of Foundation.
 
 ### Zoo
 
-Diagrams "Zoo" illustrate the Lean 4-verified interrelationships among theories.
-They are generated from the environment by [`Zoo/`](./Zoo) on every build; run `just zoo` to
-regenerate them locally.
+Diagrams "Zoo" illustrate the Lean 4-verified interrelationships among theories and among logics.
+They are generated from the environment by [`Zoo/`](./Zoo) on every commit on `master`: every `⪯`, `⪱` and `≊` stated between two of them is collected, and the transitive reduction is drawn.
+Run `just zoo` to regenerate them locally.
 
 - A solid arrow $\mathsf{A} \leftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
 - A dashed arrow $\mathsf{A} \dashleftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
@@ -95,11 +110,20 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for the contribution flow.
 ### Building
 
 Foundation is a [Lake](https://github.com/leanprover/lean4/tree/master/src/lake) project depending on [Mathlib](https://github.com/leanprover-community/mathlib4); the Lean version is pinned in [`lean-toolchain`](./lean-toolchain).
+Install [elan](https://github.com/leanprover/elan), which provides that toolchain, and [just](https://github.com/casey/just), which runs the recipes of the [`Justfile`](./Justfile).
 
 ```shell
-lake exe cache get   # fetch prebuilt Mathlib oleans
+just cache   # fetch prebuilt oleans of Mathlib and of Foundation
 lake build
 ```
+
+`just cache` fetches Mathlib with `lake exe cache get`, then restores Foundation's own oleans from the remote cache that CI publishes for every commit on `master` (see [`lake-cache.toml`](./lake-cache.toml)); `lake build` compiles whatever it missed.
+
+Run `just` to list the other recipes. The main ones:
+
+- `just check`: the checks CI runs on every pull request — `lake build Foundation --wfail`, the axiom audit `just forgive`, and whether `Foundation.lean` imports every module (`just mk-all` regenerates it).
+- `just zoo`: draw the [zoo diagrams](#zoo) into `pages/zoo` (requires [Typst](https://typst.app)).
+- `just docs`: generate the [Docs] into `.lake/build/doc`.
 
 ### Developers
 
