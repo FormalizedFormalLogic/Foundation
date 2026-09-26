@@ -174,11 +174,12 @@ theorem mem_iff : A ∈ 𝐆𝐋α X ↔ A.trace.Finite ∧ A.trace ⊆ X := by
 @[simp] theorem trace_eq : (𝐆𝐋α X : Logic α).trace = X :=
   (GL.trace_sumQuasiNormal _).trans <| by simp [trace]
 
-lemma mono (h : X ⊆ Y) : (𝐆𝐋α X : Logic α) ⊆ 𝐆𝐋α Y :=
-  sumQuasiNormal.subset_iff.mpr fun _ ⟨n, hn, e⟩ ↦ .mem₂ ⟨n, h hn, e⟩
+lemma mono (h : X ⊆ Y) : (𝐆𝐋α X : Logic α) ⪯ 𝐆𝐋α Y :=
+  weakerThan_iff.mpr <| sumQuasiNormal.subset_iff.mpr fun _ ⟨n, hn, e⟩ ↦ .mem₂ ⟨n, h hn, e⟩
 
-lemma subset_S : (𝐆𝐋α X : Logic α) ⊆ 𝐒 :=
-  sumQuasiNormal.subset_iff.mpr fun _ ⟨n, _, e⟩ ↦ e ▸ .mem₂ ⟨□^[n]⊥, by simp [TBB]⟩
+instance : (𝐆𝐋α X : Logic α) ⪯ 𝐒 :=
+  weakerThan_iff.mpr <| sumQuasiNormal.subset_iff.mpr fun _ ⟨n, _, e⟩ ↦
+    e ▸ .mem₂ ⟨□^[n]⊥, by simp [TBB]⟩
 
 end GLAlpha
 
@@ -208,8 +209,8 @@ namespace GLAlpha
 
 variable {X : Set ℕ} (hX : Xᶜ.Finite)
 
-lemma subset_GLBetaMinus : (𝐆𝐋α X : Logic α) ⊆ 𝐆𝐋β⁻ X hX :=
-  fun _ h ↦ GLBetaMinus.mem_iff.mpr (mem_iff.mp h).2
+instance : (𝐆𝐋α X : Logic α) ⪯ 𝐆𝐋β⁻ X hX :=
+  ⟨fun _ h ↦ GLBetaMinus.mem_iff.mpr (mem_iff.mp h).2⟩
 
 theorem eq_inter_GLBetaMinus : (𝐆𝐋α X : Logic α) = 𝐆𝐋α Set.univ ∩ 𝐆𝐋β⁻ X hX := by
   ext A;
@@ -218,15 +219,16 @@ theorem eq_inter_GLBetaMinus : (𝐆𝐋α X : Logic α) = 𝐆𝐋α Set.univ �
 end GLAlpha
 
 /-- - [AB05, Lemma 45] -/
-theorem subset_GLAlpha_trace (hL : L.traceᶜ.Infinite) : L ⊆ 𝐆𝐋α L.trace := by
+theorem weakerThan_GLAlpha_trace (hL : L.traceᶜ.Infinite) : L ⪯ 𝐆𝐋α L.trace := by
+  apply weakerThan_iff.mpr;
   intro A hA;
   have h := trace_subset_of_mem hA;
   exact GLAlpha.mem_iff.mpr ⟨A.trace_finite_or_compl_finite.resolve_right fun hA ↦
     hL <| hA.subset <| Set.compl_subset_compl.mpr h, h⟩;
 
 /-- - [AB05, Lemma 45] -/
-theorem subset_GLBetaMinus_trace (hL : L.traceᶜ.Finite) : L ⊆ 𝐆𝐋β⁻ L.trace hL :=
-  fun _ hA ↦ GLBetaMinus.mem_iff.mpr (trace_subset_of_mem hA)
+theorem weakerThan_GLBetaMinus_trace (hL : L.traceᶜ.Finite) : L ⪯ 𝐆𝐋β⁻ L.trace hL :=
+  ⟨fun _ hA ↦ GLBetaMinus.mem_iff.mpr (trace_subset_of_mem hA)⟩
 
 end Logic
 

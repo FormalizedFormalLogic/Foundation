@@ -50,19 +50,19 @@ lemma bot_notMem_provabilityLogic_TA : ⊥ ∉ T.provabilityLogicRelativeTo 𝗧
   fun h ↦ by
     simpa [standardInterpret, interpret] using Arithmetic.TA.provable_iff.mp <| h ⟨fun _ ↦ ⊥⟩
 
-lemma provabilityLogic_TA_subset_S
+lemma provabilityLogic_TA_weakerThan_S
     (h : (T.provabilityLogicRelativeTo 𝗧𝗔 (α := α)).trace = .univ) :
-    T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ⊆ 𝐒 := by
+    T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ⪯ 𝐒 := by
   by_contra hS;
   exact bot_notMem_provabilityLogic_TA <| (provabilityLogic_eq_GLBetaMinus hS).symm.subset <|
     Logic.GLBetaMinus.mem_iff.mpr <| by simp [h];
 
 /-- - [AB05, Corollary 41(ii)] -/
-theorem D_subset_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
-    𝐃 ⊆ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) := by
+theorem D_weakerThan_provabilityLogic_TA [T.SoundOnHierarchy 𝚺 1] :
+    𝐃 ⪯ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) := by
   have h := Arithmetic.soundOnHierarchy_iff_models_reflection.mp
     (inferInstance : T.SoundOnHierarchy 𝚺 1);
-  apply sumQuasiNormal_subset_provabilityLogic;
+  apply sumQuasiNormal_weakerThan_provabilityLogic;
   rintro _ (rfl | ⟨B, C, rfl⟩) f <;> apply Arithmetic.TA.provable_iff.mpr;
   · simpa [standardInterpret, interpret] using h ⊥ (by simp);
   · exact h _ <| by simp [interpret, Arithmetic.standardProvability_def];
@@ -86,8 +86,8 @@ theorem provabilityLogic_TA_eq_GLBetaMinus_iff :
     have h : ∼TBB n ∈ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) := fun f ↦
       Arithmetic.TA.provable_iff.mpr <| by
         simp [standardInterpret, interpret, models_TBB_iff f, hn];
-    have hS : ¬T.provabilityLogicRelativeTo 𝗧𝗔 ⊆ 𝐒 :=
-      fun hS ↦ Logic.unprovable_bot <| hS h ⨀ Logic.S.provable_TBB;
+    have hS : ¬T.provabilityLogicRelativeTo 𝗧𝗔 ⪯ 𝐒 :=
+      fun hS ↦ Logic.unprovable_bot <| hS.wk h ⨀ Logic.S.provable_TBB;
     exact (provabilityLogic_eq_GLBetaMinus hS).trans <| by
       congr 1; exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
 
@@ -118,13 +118,14 @@ theorem provabilityLogic_TA_eq_D_iff :
         (Set.eq_univ_of_forall fun _ ↦
           mem_trace_provabilityLogic_iff.mpr <| h ▸ Logic.D.provable_TBB)
         (h ▸ Logic.D.axiomD);
-    · exact fun hs ↦ Logic.D.ssubset_S.ne <| h.symm.trans <| provabilityLogic_TA_eq_S_iff.mpr hs;
+    · exact fun hs ↦ (Logic.strictlyWeakerThan_iff.mp inferInstance).ne <|
+        h.symm.trans <| provabilityLogic_TA_eq_S_iff.mpr hs;
   · rintro ⟨_, hs⟩;
     have hT := trace_provabilityLogic_TA_eq_univ_iff (α := α).mpr <|
       Arithmetic.height_eq_top_of_sigma1_sound T;
-    rcases provabilityLogic_eq_A_or_eq_D_or_eq_S hT (provabilityLogic_TA_subset_S hT)
+    rcases provabilityLogic_eq_A_or_eq_D_or_eq_S hT (provabilityLogic_TA_weakerThan_S hT)
       with h | h | h;
-    · exact absurd (h ▸ D_subset_provabilityLogic_TA) Logic.A.ssubset_D.not_subset;
+    · exact absurd (h ▸ D_weakerThan_provabilityLogic_TA) StrictlyWeakerThan.notWT;
     · exact h;
     · exact absurd (provabilityLogic_TA_eq_S_iff.mp h) hs;
 
@@ -136,12 +137,12 @@ theorem provabilityLogic_TA_eq_A_iff :
   constructor;
   · intro h;
     and_intros;
-    · exact fun _ ↦ Logic.A.ssubset_D.not_subset <| h ▸ D_subset_provabilityLogic_TA;
+    · exact fun _ ↦ StrictlyWeakerThan.notWT <| h ▸ D_weakerThan_provabilityLogic_TA;
     · exact ENat.eq_top_iff_forall_ne.mpr fun _ ↦
         (TBB_mem_provabilityLogic_TA_iff.mp <| h ▸ Logic.A.provable_TBB).symm;
   · rintro ⟨hs₁, hT⟩;
     replace hT := trace_provabilityLogic_TA_eq_univ_iff (α := α).mpr hT;
-    rcases provabilityLogic_eq_A_or_eq_D_or_eq_S hT (provabilityLogic_TA_subset_S hT)
+    rcases provabilityLogic_eq_A_or_eq_D_or_eq_S hT (provabilityLogic_TA_weakerThan_S hT)
       with h | h | h;
     · exact h;
     · exact absurd (soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA (a := default) hT

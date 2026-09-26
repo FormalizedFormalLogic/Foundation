@@ -34,8 +34,9 @@ variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] {A : Formula α} {X : Logic α}
 lemma provabilityLogic_of_GL (h : 𝐆𝐋 ⊢ A) : A ∈ T.provabilityLogicRelativeTo U :=
   fun _ ↦ WeakerThan.pbl (Logic.GL.arithmetical_soundness h)
 
-lemma sumQuasiNormal_subset_provabilityLogic (h : X ⊆ T.provabilityLogicRelativeTo U) :
-    (𝐆𝐋 +ᴸ X) ⊆ T.provabilityLogicRelativeTo U := by
+lemma sumQuasiNormal_weakerThan_provabilityLogic (h : X ⊆ T.provabilityLogicRelativeTo U) :
+    (𝐆𝐋 +ᴸ X) ⪯ T.provabilityLogicRelativeTo U := by
+  apply Logic.weakerThan_iff.mpr;
   intro A hA;
   induction hA with
   | mem₁ hA => exact provabilityLogic_of_GL hA;
@@ -45,7 +46,7 @@ lemma sumQuasiNormal_subset_provabilityLogic (h : X ⊆ T.provabilityLogicRelati
 
 lemma provabilityLogic_conj [DecidableEq α] {Γ : FormulaFinset α}
     (h : ∀ B ∈ Γ, B ∈ T.provabilityLogicRelativeTo U) : Γ.conj ∈ T.provabilityLogicRelativeTo U :=
-  sumQuasiNormal_subset_provabilityLogic h <|
+  (sumQuasiNormal_weakerThan_provabilityLogic h).wk <|
     (FConj_iff_forall_provable (𝓢 := 𝐆𝐋 +ᴸ (Γ : Logic α))).mpr fun _ ↦ .mem₂
 
 end
@@ -135,15 +136,16 @@ theorem provabilityLogic_eq_GLAlpha
     (h : (T.provabilityLogicRelativeTo U (α := α)).traceᶜ.Infinite) :
     T.provabilityLogicRelativeTo U (α := α) =
       𝐆𝐋α (T.provabilityLogicRelativeTo U (α := α)).trace :=
-  subset_antisymm (Logic.subset_GLAlpha_trace h) <| sumQuasiNormal_subset_provabilityLogic <| by
+  Logic.weakerThan_antisymm (Logic.weakerThan_GLAlpha_trace h) <|
+    sumQuasiNormal_weakerThan_provabilityLogic <| by
     rintro _ ⟨n, hn, rfl⟩;
     exact TBB_mem_provabilityLogic_of_mem_trace hn
 
 lemma exists_neg_conj_TBB_mem_provabilityLogic
-    (h : ¬T.provabilityLogicRelativeTo U (α := α) ⊆ 𝐒) :
+    (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
     ∃ m, lift (∼⩕ i ∈ Finset.range m, TBB i) ∈
       T.provabilityLogicRelativeTo U (α := α) := by
-  obtain ⟨A, hA, hAS⟩ := Set.not_subset.mp h;
+  obtain ⟨A, hA, hAS⟩ := not_weakerThan_iff.mp h;
   obtain ⟨m, f, hf⟩ := exists_realization_provable_neg_of_not_S (T := T) hAS;
   use m;
   apply lift_mem_provabilityLogic f;
@@ -154,14 +156,14 @@ lemma exists_neg_conj_TBB_mem_provabilityLogic
 
 /-- - [AB05, Lemma 49] -/
 theorem provabilityLogic_trace_compl_finite
-    (h : ¬T.provabilityLogicRelativeTo U (α := α) ⊆ 𝐒) :
+    (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
     (T.provabilityLogicRelativeTo U (α := α)).traceᶜ.Finite := by
   obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
   exact (Set.finite_Iio m).subset fun n hn ↦
     not_le.mp fun hnm ↦ hn <| Logic.trace_subset_of_mem hm <| by simpa using hnm;
 
 /-- - [AB05, Lemma 49] -/
-theorem betaMinus_mem_provabilityLogic (h : ¬T.provabilityLogicRelativeTo U (α := α) ⊆ 𝐒) :
+theorem betaMinus_mem_provabilityLogic (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
     (betaMinus _ (provabilityLogic_trace_compl_finite h)).lift ∈
       T.provabilityLogicRelativeTo U (α := α) := by
   classical
@@ -180,17 +182,19 @@ theorem betaMinus_mem_provabilityLogic (h : ¬T.provabilityLogicRelativeTo U (α
         TBB_mem_provabilityLogic_of_mem_trace (Finset.mem_filter.mp hi).2⟩;
 
 /-- - [AB05, Lemma 49] -/
-theorem provabilityLogic_eq_GLBetaMinus (h : ¬T.provabilityLogicRelativeTo U (α := α) ⊆ 𝐒) :
+theorem provabilityLogic_eq_GLBetaMinus (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
     T.provabilityLogicRelativeTo U (α := α) =
       𝐆𝐋β⁻ (T.provabilityLogicRelativeTo U).trace
         (provabilityLogic_trace_compl_finite h) :=
-  subset_antisymm (Logic.subset_GLBetaMinus_trace _) <| sumQuasiNormal_subset_provabilityLogic <|
-    Set.singleton_subset_iff.mpr (betaMinus_mem_provabilityLogic h)
+  Logic.weakerThan_antisymm (Logic.weakerThan_GLBetaMinus_trace _) <|
+    sumQuasiNormal_weakerThan_provabilityLogic <|
+      Set.singleton_subset_iff.mpr (betaMinus_mem_provabilityLogic h)
 
 /-- - [AB05, Corollary 50] -/
-theorem A_subset_provabilityLogic (h : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ) :
-    𝐀 ⊆ T.provabilityLogicRelativeTo U (α := α) :=
-  sumQuasiNormal_subset_provabilityLogic <| by
+theorem A_weakerThan_provabilityLogic
+    (h : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ) :
+    𝐀 ⪯ T.provabilityLogicRelativeTo U (α := α) :=
+  sumQuasiNormal_weakerThan_provabilityLogic <| by
     rintro _ ⟨n, -, rfl⟩;
     exact TBB_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ n)
 

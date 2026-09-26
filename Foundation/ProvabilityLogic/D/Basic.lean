@@ -35,7 +35,8 @@ lemma axiomP : 𝐃 ⊢ ∼□(⊥ : Formula α) := sumQuasiNormal.mem₂ (Set.m
 
 lemma axiomD : 𝐃 ⊢ □(□A ⋎ □B) 🡒 □A ⋎ □B := sumQuasiNormal.mem₂ (Set.mem_insert_of_mem _ ⟨A, B, rfl⟩)
 
-lemma subset_S : (𝐃 : Logic α) ⊆ 𝐒 := by
+instance : (𝐃 : Logic α) ⪯ 𝐒 := by
+  apply Logic.weakerThan_iff.mpr;
   intro A h;
   induction h with
   | mem₁ h => exact S.of_GL h;
@@ -77,12 +78,12 @@ lemma not_axiomT {a : α} : 𝐃 ⊬ □#a 🡒 #a := fun h ↦
   sound_freeTail h (pointModel fun _ ↦ True) (fun i _ ↦ i ≠ ⊤)
     (by rintro (_ | i) R; exacts [trivial, ne_top_of_lt R]) rfl
 
-lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐃 :=
-  ⟨fun _ ↦ of_GL, fun h ↦
-    GL.sound (pointModel (α := α) fun _ ↦ True) (h axiomP) 0 fun _ h ↦ h.elim⟩
+instance : (𝐆𝐋 : Logic α) ⪱ 𝐃 :=
+  .of_unprovable_provable (φ := ∼□⊥)
+    (fun h ↦ GL.sound (pointModel fun _ ↦ True) h 0 fun _ h ↦ h.elim) axiomP
 
-lemma ssubset_S [Inhabited α] : (𝐃 : Logic α) ⊂ 𝐒 :=
-  ⟨subset_S, fun h ↦ not_axiomT (a := default) (h S.axiomT)⟩
+instance [Inhabited α] : (𝐃 : Logic α) ⪱ 𝐒 :=
+  .of_unprovable_provable (not_axiomT (a := default)) S.axiomT
 
 variable [DecidableEq α]
 
@@ -213,7 +214,7 @@ lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A := by
 omit [DecidableEq α] in
 lemma consistent : 𝐃 ⊬ (⊥ : Formula α) := by
   classical
-  exact fun h ↦ unprovable_bot (L := 𝐒) (subset_S h)
+  exact fun h ↦ unprovable_bot (L := 𝐒) (WeakerThan.pbl h)
 
 end Logic.D
 

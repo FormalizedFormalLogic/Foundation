@@ -197,10 +197,10 @@ lemma LetterlessFormula.lift_mem_provabilityLogic_iff {A : LetterlessFormula} :
 
 variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 
-lemma A_subset_provabilityLogic_of_trace
+lemma A_weakerThan_provabilityLogic_of_trace
   (h : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ) :
-  𝐀 ⊆ (T.provabilityLogicRelativeTo U (α := β)) :=
-  sumQuasiNormal_subset_provabilityLogic <| by
+  𝐀 ⪯ T.provabilityLogicRelativeTo U (α := β) :=
+  sumQuasiNormal_weakerThan_provabilityLogic <| by
     rintro _ ⟨i, -, rfl⟩;
     simpa using (lift_mem_provabilityLogic_iff (A := TBB i)).mp <| by
       simpa using TBB_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ i)
@@ -218,7 +218,7 @@ theorem provable_reflection_of_not_D (hT : (T.provabilityLogicRelativeTo U (α :
   have h₁ : (𝐀 +ᴸ {A⟦fun a ↦ #(some a)⟧}) ⊆ T.provabilityLogicRelativeTo U := by
     intro C hC;
     induction hC with
-    | mem₁ hC => exact A_subset_provabilityLogic_of_trace hT hC;
+    | mem₁ hC => exact (A_weakerThan_provabilityLogic_of_trace hT).wk hC;
     | mem₂ hC =>
       obtain rfl := hC;
       intro g;
@@ -230,7 +230,7 @@ theorem provable_reflection_of_not_D (hT : (T.provabilityLogicRelativeTo U (α :
   obtain ⟨n, f, hf⟩ := exists_realization_provable_neg_of_not_S (T := T) hBS;
   have h₂ : U ⊢ f T (lift (⩕ i ∈ Finset.range n, TBB i)) :=
     (lift_mem_provabilityLogic_iff (β := Empty)).mpr (by
-      simpa using A_subset_provabilityLogic_of_trace hT <|
+      simpa [Logic.provable_iff_mem] using (A_weakerThan_provabilityLogic_of_trace hT).wk <|
         FConj'_iff_forall_provable.mpr fun _ _ ↦ Logic.A.provable_TBB) f;
   have h₃ : U ⊢ (⟨Function.update f.val none σ⟩ : Realization _ _) T (B ⋎ (□#none 🡒 #none)) :=
     h₁ hB₂ _;
@@ -246,11 +246,12 @@ theorem provable_reflection_of_not_D (hT : (T.provabilityLogicRelativeTo U (α :
 - [Bek90, Assertion 1]
 - [AB05, Lemma 56, Lemma 57]
 -/
-theorem S_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
-  (h : 𝐃 ⊂ T.provabilityLogicRelativeTo U (α := α)) :
-  𝐒 ⊆ T.provabilityLogicRelativeTo U (α := α) := by
-  obtain ⟨A, hA, hAD⟩ := Set.exists_of_ssubset h;
-  apply sumQuasiNormal_subset_provabilityLogic;
+theorem S_weakerThan_provabilityLogic
+  (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
+  (h : 𝐃 ⪱ T.provabilityLogicRelativeTo U (α := α)) :
+  𝐒 ⪯ T.provabilityLogicRelativeTo U (α := α) := by
+  obtain ⟨-, A, hAD, hA⟩ := strictlyWeakerThan_iff.mp h;
+  apply sumQuasiNormal_weakerThan_provabilityLogic;
   rintro _ ⟨C, rfl⟩ _;
   exact provable_reflection_of_not_D hT hA hAD;
 
@@ -258,11 +259,10 @@ theorem S_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U (α := �
 
 - [AB05, Corollary 58]
 -/
-theorem not_D_ssubset_provabilityLogic_ssubset_S
+theorem not_D_strictlyWeakerThan_provabilityLogic_strictlyWeakerThan_S
   (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ) :
-  ¬(𝐃 ⊂ T.provabilityLogicRelativeTo U (α := α) ∧ T.provabilityLogicRelativeTo U (α := α) ⊂ 𝐒) := by
-  by_contra! ⟨h₁, h₂⟩;
-  exact h₂.not_subset <| S_subset_provabilityLogic hT h₁;
+  ¬(𝐃 ⪱ T.provabilityLogicRelativeTo U (α := α) ∧ T.provabilityLogicRelativeTo U (α := α) ⪱ 𝐒) :=
+  fun ⟨h₁, h₂⟩ ↦ h₂.notWT (S_weakerThan_provabilityLogic hT h₁)
 
 end FFL.ProvabilityLogic
 

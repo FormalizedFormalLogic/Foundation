@@ -30,6 +30,16 @@ lemma provable_iff_mem : L ⊢ A ↔ A ∈ L := Iff.rfl
 
 lemma weakerThan_iff : L₁ ⪯ L₂ ↔ L₁ ⊆ L₂ := ⟨fun h ↦ h.subset, fun h ↦ ⟨h⟩⟩
 
+lemma strictlyWeakerThan_iff : L₁ ⪱ L₂ ↔ L₁ ⊂ L₂ :=
+  ⟨fun h ↦ ⟨weakerThan_iff.mp h.weakerThan, fun h' ↦ h.notWT (weakerThan_iff.mpr h')⟩,
+    fun h ↦ ⟨weakerThan_iff.mpr h.1, fun h' ↦ h.2 (weakerThan_iff.mp h')⟩⟩
+
+lemma weakerThan_antisymm (h₁ : L₁ ⪯ L₂) (h₂ : L₂ ⪯ L₁) : L₁ = L₂ :=
+  subset_antisymm h₁.subset h₂.subset
+
+lemma eq_or_strictlyWeakerThan (h : L₁ ⪯ L₂) : L₁ = L₂ ∨ L₁ ⪱ L₂ :=
+  (weakerThan_iff.mp h).eq_or_ssubset.imp_right strictlyWeakerThan_iff.mpr
+
 lemma unprovable_bot [ModusPonens L] [HasAxiomEFQ L] [Consistent L] : L ⊬ ⊥ := fun h ↦
   have ⟨_, hA⟩ := Consistent.exists_unprovable ‹_›; hA (of_O h)
 
@@ -53,6 +63,8 @@ variable {L₁ L₂ X Y : Logic α} {A : Formula α}
 @[grind .] lemma subset_left : L₁ ⊆ (L₁ +ᴸ L₂) := fun _ ↦ mem₁
 
 @[grind .] lemma subset_right : L₂ ⊆ (L₁ +ᴸ L₂) := fun _ ↦ mem₂
+
+instance : L₁ ⪯ L₁ +ᴸ L₂ := ⟨subset_left⟩
 
 lemma subset_iff : (L₁ +ᴸ X) ⊆ (L₁ +ᴸ Y) ↔ X ⊆ (L₁ +ᴸ Y) := by
   constructor;

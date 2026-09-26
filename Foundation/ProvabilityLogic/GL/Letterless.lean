@@ -112,10 +112,10 @@ theorem lift_mem_sumQuasiNormal_iff (h : (∃ B ∈ X, (spectrum B).Finite) ∨ 
 
 variable {Y : LetterlessFormulaSet}
 
-theorem sumQuasiNormal_subset_iff
+theorem sumQuasiNormal_weakerThan_iff
     (h : (∃ B ∈ Y, (spectrum B).Finite) ∨ ∀ A ∈ X, (trace A).Finite) :
-    (𝐆𝐋 +ᴸ X.lift (α := α)) ⊆ (𝐆𝐋 +ᴸ ↑Y) ↔ Y.spectrum ⊆ X.spectrum := by
-  rw [sumQuasiNormal.subset_iff];
+    (𝐆𝐋 +ᴸ X.lift (α := α)) ⪯ (𝐆𝐋 +ᴸ Y.lift (α := α)) ↔ Y.spectrum ⊆ X.spectrum := by
+  rw [Logic.weakerThan_iff, sumQuasiNormal.subset_iff];
   constructor;
   · intro hs n hn;
     exact LetterlessFormulaSet.mem_spectrum.mpr fun A hA ↦
@@ -128,9 +128,9 @@ theorem sumQuasiNormal_eq_iff
     (h : ((∃ B ∈ X, (spectrum B).Finite) ∧ ∃ B ∈ Y, (spectrum B).Finite) ∨
       ((∀ A ∈ X, (trace A).Finite) ∧ ∀ A ∈ Y, (trace A).Finite)) :
     (𝐆𝐋 +ᴸ X.lift (α := α)) = (𝐆𝐋 +ᴸ Y.lift) ↔ X.spectrum = Y.spectrum := by
-  rw [Set.Subset.antisymm_iff, Set.Subset.antisymm_iff,
-    sumQuasiNormal_subset_iff (h.imp And.right And.left),
-    sumQuasiNormal_subset_iff (h.imp And.left And.right)];
+  rw [Set.Subset.antisymm_iff, Set.Subset.antisymm_iff, ← Logic.weakerThan_iff,
+    ← Logic.weakerThan_iff, sumQuasiNormal_weakerThan_iff (h.imp And.right And.left),
+    sumQuasiNormal_weakerThan_iff (h.imp And.left And.right)];
   tauto;
 
 end Logic.GL

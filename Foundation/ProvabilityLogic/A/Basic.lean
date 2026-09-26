@@ -113,8 +113,8 @@ lemma exists_countermodel [DecidableEq α] (h : 𝐀 ⊬ A) :
     not_lt.mp fun h ↦ h₁ <| forces_boxItr_bot_iff.mpr h;
   exact ⟨κ, inferInstance, M, inferInstance, u, h₂, Ru, hu⟩;
 
-lemma subset_D : (𝐀 : Logic α) ⊆ 𝐃 :=
-  sumQuasiNormal.subset_iff.mpr fun _ ⟨_, _, h⟩ ↦ h ▸ D.provable_TBB
+instance : (𝐀 : Logic α) ⪯ 𝐃 :=
+  Logic.weakerThan_iff.mpr <| sumQuasiNormal.subset_iff.mpr fun _ ⟨_, _, h⟩ ↦ h ▸ D.provable_TBB
 
 lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a := by
   intro h;
@@ -131,12 +131,12 @@ lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a :
   rw [subst_imp, subst_neg, subst_boxItr] at this;
   exact h₃ (this h₁ h₂);
 
-lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐀 :=
-  ⟨fun _ ↦ of_GL, fun h ↦
-    GL.sound (pointModel fun _ ↦ True) (h (provable_TBB (n := 0))) 0 fun _ h ↦ h.elim⟩
+instance : (𝐆𝐋 : Logic α) ⪱ 𝐀 :=
+  .of_unprovable_provable (φ := TBB 0)
+    (fun h ↦ GL.sound (pointModel fun _ ↦ True) h 0 fun _ h ↦ h.elim) provable_TBB
 
-lemma ssubset_D [Inhabited α] : (𝐀 : Logic α) ⊂ 𝐃 :=
-  ⟨subset_D, fun h ↦ not_axiomD (a := default) (h D.axiomD)⟩
+instance [Inhabited α] : (𝐀 : Logic α) ⪱ 𝐃 :=
+  .of_unprovable_provable (not_axiomD (a := default)) D.axiomD
 
 end Logic.A
 

@@ -75,7 +75,7 @@ theorem provable_sigma1_reflection_of_mem_of_not_A
     simp only [Provability.conItr, standardInterpret, interpret, interpret_boxItr] at h ⊢;
     cl_prover [h];
   exact WeakerThan.pbl hf ⨀ provabilityLogic_mdp (provabilityLogic_mdp (provabilityLogic_of_GL and₃)
-    (A_subset_provabilityLogic hT Logic.A.neg_boxItr_bot)) hAL S.realization;
+    ((A_weakerThan_provabilityLogic hT).wk Logic.A.neg_boxItr_bot)) hAL S.realization;
 
 lemma provable_localReflectionOn_sigma1_of_mem_of_not_A
     (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
@@ -89,13 +89,14 @@ it contains `𝐃`.
 
 - [AB05, Lemma 51, Corollary 52(ii)]
 -/
-theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
-    (h : 𝐀 ⊂ T.provabilityLogicRelativeTo U (α := α)) :
-    𝐃 ⊆ T.provabilityLogicRelativeTo U (α := α) := by
-  obtain ⟨A, hAL, hAA⟩ := Set.exists_of_ssubset h;
-  apply sumQuasiNormal_subset_provabilityLogic;
+theorem D_weakerThan_provabilityLogic
+    (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
+    (h : 𝐀 ⪱ T.provabilityLogicRelativeTo U (α := α)) :
+    𝐃 ⪯ T.provabilityLogicRelativeTo U (α := α) := by
+  obtain ⟨-, A, hAA, hAL⟩ := strictlyWeakerThan_iff.mp h;
+  apply sumQuasiNormal_weakerThan_provabilityLogic;
   rintro _ (rfl | ⟨B, C, rfl⟩);
-  · exact A_subset_provabilityLogic hT (Logic.A.neg_boxItr_bot (n := 1));
+  · exact (A_weakerThan_provabilityLogic hT).wk (Logic.A.neg_boxItr_bot (n := 1));
   · exact fun f ↦ provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA <| by
       simp [interpret, Arithmetic.standardProvability_def]
 
@@ -103,10 +104,10 @@ theorem D_subset_provabilityLogic (hT : (T.provabilityLogicRelativeTo U (α := �
 
 - [AB05, Corollary 55]
 -/
-theorem not_A_ssubset_provabilityLogic_ssubset_D
+theorem not_A_strictlyWeakerThan_provabilityLogic_strictlyWeakerThan_D
     (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ) :
-    ¬(𝐀 ⊂ T.provabilityLogicRelativeTo U (α := α) ∧ T.provabilityLogicRelativeTo U (α := α) ⊂ 𝐃) :=
-  fun ⟨h₁, h₂⟩ ↦ h₂.not_subset (D_subset_provabilityLogic hT h₁)
+    ¬(𝐀 ⪱ T.provabilityLogicRelativeTo U (α := α) ∧ T.provabilityLogicRelativeTo U (α := α) ⪱ 𝐃) :=
+  fun ⟨h₁, h₂⟩ ↦ h₂.notWT (D_weakerThan_provabilityLogic hT h₁)
 
 end FFL.ProvabilityLogic
 
