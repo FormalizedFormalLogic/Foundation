@@ -239,7 +239,7 @@ theorem complete
   obtain ⟨D, hD, hxD⟩ := h (countermodel S) x (fun C hC ↦ countermodel.truthlemma.1 (hS₀.ant hC));
   exact countermodel.truthlemma.2 (hS₀.suc hD) hxD;
 
-theorem iff_valid : ⊢ᴳ[𝐆𝐫𝐳] S ↔
+lemma iff_valid : ⊢ᴳ[𝐆𝐫𝐳] S ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGrz] → M ⊧ S :=
   ⟨fun h _ _ M _ ↦ sound M h, complete⟩
 

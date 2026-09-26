@@ -32,27 +32,18 @@ variable {α : Type*} {A : Formula α}
 
 /-! ### Kripke soundness -/
 
-section
-
-variable {κ : Type*} [Nonempty κ] {M : Model κ α}
-
-open Classical in
-lemma forces_axiomGrz [M.IsGrz] {x : M.World} : x ⊩ □(□(A 🡒 □A) 🡒 A) 🡒 A := by
-  intro hx;
-  have : ⊢ᴳ[𝐆𝐫𝐳] {□(□(A 🡒 □A) 🡒 A)} ⟹ {□A} := by
-    simpa using Gentzen.boxGrz (Γ := {□(A 🡒 □A) 🡒 A}) <|
-      Gentzen.wkL (Γ := insert (□(□(A 🡒 □A) 🡒 A)) {□(A 🡒 □A)}) <|
-      Gentzen.boxT <| Gentzen.impL (Gentzen.union (□(A 🡒 □A))) (Gentzen.union A);
-  exact validateSequent_singleton_iff.mp (Gentzen.sound M this) x (by simpa) x (Std.Refl.refl x);
-
-theorem sound (M : Model κ α) [M.IsGrz] (h : 𝐆𝐫𝐳 ⊢ A) : M ⊧ A := by
+theorem sound {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGrz] (h : 𝐆𝐫𝐳 ⊢ A) : M ⊧ A := by
+  classical
   apply normalOf.sound _ h;
   rintro _ ((⟨B, rfl⟩ | ⟨B, rfl⟩) | ⟨B, rfl⟩) x;
   · exact fun h y Rxy z Ryz ↦ h z (IsTrans.trans _ _ _ Rxy Ryz);
   · exact fun h ↦ h x (Std.Refl.refl x);
-  · exact forces_axiomGrz;
-
-end
+  · intro hx;
+    have : ⊢ᴳ[𝐆𝐫𝐳] {□(□(B 🡒 □B) 🡒 B)} ⟹ {□B} := by
+      simpa using Gentzen.boxGrz (Γ := {□(B 🡒 □B) 🡒 B}) <|
+        Gentzen.wkL (Γ := insert (□(□(B 🡒 □B) 🡒 B)) {□(B 🡒 □B)}) <|
+        Gentzen.boxT <| Gentzen.impL (Gentzen.union (□(B 🡒 □B))) (Gentzen.union B);
+    exact validateSequent_singleton_iff.mp (Gentzen.sound M this) x (by simpa) x (Std.Refl.refl x);
 
 /-! ### From the sequent calculus -/
 
@@ -112,16 +103,16 @@ theorem provability_TFAE : [
   tfae_have 4 → 3 := fun h _ _ M _ x ↦ Model.forces_cone.mp <| h (M.cone x);
   tfae_finish;
 
-theorem iff_provable_gentzen : 𝐆𝐫𝐳 ⊢ A ↔ ⊢ᴳ[𝐆𝐫𝐳] ∅ ⟹ {A} := provability_TFAE.out 1 2
+lemma iff_provable_gentzen : 𝐆𝐫𝐳 ⊢ A ↔ ⊢ᴳ[𝐆𝐫𝐳] ∅ ⟹ {A} := provability_TFAE.out 1 2
 
 omit [DecidableEq α] in
-theorem iff_valid_finite :
+lemma iff_valid_finite :
     𝐆𝐫𝐳 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGrz] → M ⊧ A := by
   classical
   exact provability_TFAE.out 1 3
 
 omit [DecidableEq α] in
-theorem iff_root_forces : 𝐆𝐫𝐳 ⊢ A ↔
+lemma iff_root_forces : 𝐆𝐫𝐳 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩ A := by
   classical
   exact provability_TFAE.out 1 4
