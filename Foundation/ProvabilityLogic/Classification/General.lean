@@ -7,8 +7,8 @@ public import Foundation.ProvabilityLogic.Classification.DS
 # Classification of provability logics
 
 A provability logic of trace `ω` contained in `𝐒` is one of `𝐀`, `𝐃`, and `𝐒`. In general, the
-provability logic of `T` relative to `U` is one of `GLα X`, `GLβ⁻ X`, `D ∩ GLβ⁻ X`, and
-`S ∩ GLβ⁻ X`, where `X` is its trace.
+provability logic of `T` relative to `U` is one of `GLα X`, `GLβ X`, `D ∩ GLβ X`, and
+`S ∩ GLβ X`, where `X` is its trace.
 
 ## References
 
@@ -93,8 +93,8 @@ lemma trace_provabilityLogic_addTBB :
     · exact fun f ↦ by_axm <| Set.mem_union_right U
         ⟨n, hn, by simpa using (interpret_lift (A := TBB n)).symm⟩;
 
-/-- The provability logic of `T` relative to `U` is one of `GLα X`, `GLβ⁻ X`, `D ∩ GLβ⁻ X`, and
-`S ∩ GLβ⁻ X`, where `X` is its trace.
+/-- The provability logic of `T` relative to `U` is one of `GLα X`, `GLβ X`, `D ∩ GLβ X`, and
+`S ∩ GLβ X`, where `X` is its trace.
 
 - [AB05, Theorem 40]
 - [Bek90, Assertion 6]
@@ -103,9 +103,9 @@ theorem provabilityLogic_classification :
     T.provabilityLogicRelativeTo U (α := α) =
         𝐆𝐋α (T.provabilityLogicRelativeTo U (α := α)).trace ∨
       ∃ hL : (T.provabilityLogicRelativeTo U (α := α)).traceᶜ.Finite,
-        T.provabilityLogicRelativeTo U (α := α) = 𝐆𝐋β⁻ _ hL ∨
-        T.provabilityLogicRelativeTo U (α := α) = 𝐃 ∩ 𝐆𝐋β⁻ _ hL ∨
-        T.provabilityLogicRelativeTo U (α := α) = 𝐒 ∩ 𝐆𝐋β⁻ _ hL := by
+        T.provabilityLogicRelativeTo U (α := α) = 𝐆𝐋β _ hL ∨
+        T.provabilityLogicRelativeTo U (α := α) = 𝐃 ∩ 𝐆𝐋β _ hL ∨
+        T.provabilityLogicRelativeTo U (α := α) = 𝐒 ∩ 𝐆𝐋β _ hL := by
   rcases (T.provabilityLogicRelativeTo U (α := α)).traceᶜ.finite_or_infinite with hL | hL;
   · by_cases h : T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒;
     · let V := T.addTBB U (T.provabilityLogicRelativeTo U (α := α)).traceᶜ;
@@ -116,24 +116,24 @@ theorem provabilityLogic_classification :
             ⟨by simpa [LetterlessFormula.trace] using hL.biUnion fun _ _ ↦ Set.finite_singleton _,
               Set.subset_univ _⟩;
         exact unprovable_bot <| h.wk (imp_mem_provabilityLogic_of_mem_addTBB hL <|
-          (provabilityLogic_eq_GLBetaMinus h₁).symm.subset <| Logic.GLBetaMinus.mem_iff.mpr <| by
+          (provabilityLogic_eq_GLBeta h₁).symm.subset <| Logic.GLBeta.mem_iff.mpr <| by
             simp [V, trace_provabilityLogic_addTBB]) ⨀ h₂;
       have h₂ : T.provabilityLogicRelativeTo U (α := α) =
-          T.provabilityLogicRelativeTo V ∩ 𝐆𝐋β⁻ _ hL := by
+          T.provabilityLogicRelativeTo V ∩ 𝐆𝐋β _ hL := by
         apply subset_antisymm;
         · exact Set.subset_inter provabilityLogic_weakerThan_addTBB.subset
-            (Logic.weakerThan_GLBetaMinus_trace hL).subset;
+            (Logic.weakerThan_GLBeta_trace hL).subset;
         · rintro A ⟨hA₁, hA₂⟩;
           have h₃ : 𝐆𝐋 ⊢ ∼(⩕ n ∈ hL.toFinset, TBB n : LetterlessFormula).lift 🡒 A :=
             GL_imp_of_height_not_mem_trace fun _ _ _ hM hn ↦
-              absurd (Logic.GLBetaMinus.mem_iff.mp hA₂ hn)
+              absurd (Logic.GLBeta.mem_iff.mp hA₂ hn)
                 (by simpa [Kripke.RootedModel.height] using forces_lift_iff (A := ∼_) |>.mp hM);
           exact provabilityLogic_mdp (provabilityLogic_of_GL <| by cl_prover [h₃])
             (imp_mem_provabilityLogic_of_mem_addTBB hL hA₁);
       rcases provabilityLogic_eq_A_or_eq_D_or_eq_S trace_provabilityLogic_addTBB h₁
         with h | h | h <;>
-      grind [Logic.GLAlpha.eq_inter_GLBetaMinus hL];
-    · grind [provabilityLogic_eq_GLBetaMinus h];
+      grind [Logic.GLAlpha.eq_inter_GLBeta hL];
+    · grind [provabilityLogic_eq_GLBeta h];
   · grind [provabilityLogic_eq_GLAlpha hL];
 
 end

@@ -204,7 +204,7 @@ public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.GL.Gentzen.Maehara
 public import Foundation.ProvabilityLogic.GL.Letterless
 public import Foundation.ProvabilityLogic.GLAlpha.Basic
-public import Foundation.ProvabilityLogic.GLBetaMinus.Basic
+public import Foundation.ProvabilityLogic.GLBeta.Basic
 public import Foundation.ProvabilityLogic.Grz.Arithmetic
 public import Foundation.ProvabilityLogic.Grz.Basic
 public import Foundation.ProvabilityLogic.Grz.Boxdot

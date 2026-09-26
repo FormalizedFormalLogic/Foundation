@@ -3,7 +3,7 @@ module
 public import Foundation.ProvabilityLogic.GL.Letterless
 
 /-!
-# The logics `GLβ⁻`
+# The logics `GLβ`
 
 ## References
 
@@ -21,10 +21,10 @@ open Formula LetterlessFormula
 noncomputable def LetterlessFormula.betaMinus (X : Set ℕ) (hX : Xᶜ.Finite) : LetterlessFormula :=
   ∼(⩕ n ∈ hX.toFinset, TBB n)
 
-noncomputable abbrev Logic.GLBetaMinus {α : Type*} (X : Set ℕ) (hX : Xᶜ.Finite) : Logic α :=
+noncomputable abbrev Logic.GLBeta {α : Type*} (X : Set ℕ) (hX : Xᶜ.Finite) : Logic α :=
   𝐆𝐋 +ᴸ {(betaMinus X hX).lift}
 
-notation "𝐆𝐋β⁻" => Logic.GLBetaMinus
+notation "𝐆𝐋β" => Logic.GLBeta
 
 variable {α : Type*} {X : Set ℕ} {hX : Xᶜ.Finite}
 
@@ -41,8 +41,8 @@ lemma trace_betaMinus : trace (betaMinus X hX) = X := by
 
 end LetterlessFormula
 
-lemma Logic.GLBetaMinus.eq_sumQuasiNormal_lift :
-    (𝐆𝐋β⁻ X hX : Logic α) = (𝐆𝐋 +ᴸ LetterlessFormulaSet.lift {betaMinus X hX}) := by
+lemma Logic.GLBeta.eq_sumQuasiNormal_lift :
+    (𝐆𝐋β X hX : Logic α) = (𝐆𝐋 +ᴸ LetterlessFormulaSet.lift {betaMinus X hX}) := by
   simp;
 
 end FFL.ProvabilityLogic

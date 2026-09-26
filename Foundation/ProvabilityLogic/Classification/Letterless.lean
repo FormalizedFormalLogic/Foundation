@@ -1,13 +1,13 @@
 module
 
 public import Foundation.ProvabilityLogic.GLAlpha.Basic
-public import Foundation.ProvabilityLogic.GLBetaMinus.Basic
+public import Foundation.ProvabilityLogic.GLBeta.Basic
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 
 /-!
 # Classification of letterless extensions of `GL`
 
-A quasi-normal extension of `GL` by letterless formulas is `GLα` or `GLβ⁻` of its trace,
+A quasi-normal extension of `GL` by letterless formulas is `GLα` or `GLβ` of its trace,
 according as all of its axioms are true in `ℕ` or not.
 
 ## References
@@ -33,9 +33,9 @@ lemma sumQuasiNormal_eq_GLAlpha (h : ∀ A ∈ X, (trace A).Finite) :
   simp [LetterlessFormulaSet.trace];
 
 /-- - [Bek90] -/
-theorem sumQuasiNormal_eq_GLAlpha_or_GLBetaMinus :
+theorem sumQuasiNormal_eq_GLAlpha_or_GLBeta :
     ((∀ A ∈ X, (trace A).Finite) ∧ (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋α X.trace) ∨
-    ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋β⁻ X.trace hX := by
+    ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋β X.trace hX := by
   by_cases h : ∀ A ∈ X, (trace A).Finite;
   · exact .inl ⟨h, sumQuasiNormal_eq_GLAlpha h⟩;
   · push Not at h;
@@ -45,7 +45,7 @@ theorem sumQuasiNormal_eq_GLAlpha_or_GLBetaMinus :
       LetterlessFormulaSet.mem_spectrum.mp (by simpa [LetterlessFormulaSet.trace] using hn) B hB;
     right;
     use hX;
-    rw [GLBetaMinus.eq_sumQuasiNormal_lift,
+    rw [GLBeta.eq_sumQuasiNormal_lift,
       sumQuasiNormal_eq_iff (.inl ⟨⟨B, hB, hfin⟩, ⟨_, Set.mem_singleton _, by simpa using hX⟩⟩)];
     simp [LetterlessFormulaSet.trace];
 
@@ -112,12 +112,12 @@ variable {α : Type*} {X : LetterlessFormulaSet}
 /-- - [Bek90] -/
 theorem sumQuasiNormal_classification :
     (X.Regular T ∧ (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋α X.trace) ∨
-    (¬X.Regular T ∧ ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋β⁻ X.trace hX) := by
+    (¬X.Regular T ∧ ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋β X.trace hX) := by
   have e : X.Regular T ↔ ∀ A ∈ X, (trace A).Finite := by
     simp [LetterlessFormulaSet.Regular, regular_iff_trace_finite];
   by_cases h : X.Regular T;
   · exact .inl ⟨h, sumQuasiNormal_eq_GLAlpha (e.mp h)⟩;
-  · rcases sumQuasiNormal_eq_GLAlpha_or_GLBetaMinus (α := α) (X := X) with h' | h';
+  · rcases sumQuasiNormal_eq_GLAlpha_or_GLBeta (α := α) (X := X) with h' | h';
     · exact absurd (e.mpr h'.1) h;
     · exact .inr ⟨h, h'⟩;
 

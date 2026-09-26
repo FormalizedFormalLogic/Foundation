@@ -6,7 +6,7 @@ public import Foundation.Vorspiel.List.OAOO
 /-!
 # Truth provability logics
 
-The provability logic `PL(T, 𝗧𝗔)` of `T` relative to `𝗧𝗔` is `𝐒`, `𝐃`, `𝐀`, or `𝐆𝐋β⁻ {n}ᶜ`,
+The provability logic `PL(T, 𝗧𝗔)` of `T` relative to `𝗧𝗔` is `𝐒`, `𝐃`, `𝐀`, or `𝐆𝐋β {n}ᶜ`,
 according to whether `T` is sound, `𝚺₁`-sound but not sound, not `𝚺₁`-sound and of characteristic
 `ω`, or of characteristic `n`.
 
@@ -50,8 +50,8 @@ lemma provabilityLogic_TA_weakerThan_S
     T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ⪯ 𝐒 := by
   by_contra hS;
   have h₁ : ⊥ ∈ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
-    (provabilityLogic_eq_GLBetaMinus hS).symm.subset <|
-      Logic.GLBetaMinus.mem_iff.mpr <| by simp [h];
+    (provabilityLogic_eq_GLBeta hS).symm.subset <|
+      Logic.GLBeta.mem_iff.mpr <| by simp [h];
   simpa [standardInterpret, interpret] using Arithmetic.TA.provable_iff.mp <| h₁ ⟨fun _ ↦ ⊥⟩;
 
 /-- - [AB05, Corollary 41(ii)] -/
@@ -73,18 +73,18 @@ theorem soundOnHierarchy_of_axiomD_mem_provabilityLogic_TA
       provable_sigma1_reflection_of_mem_of_not_A hT h Logic.A.not_axiomD hσ
 
 /-- - [AB05, Corollary 41(iv)] -/
-theorem provabilityLogic_TA_eq_GLBetaMinus_iff :
-    T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) = 𝐆𝐋β⁻ {n}ᶜ (by simp) ↔ T.height = n := by
+theorem provabilityLogic_TA_eq_GLBeta_iff :
+    T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) = 𝐆𝐋β {n}ᶜ (by simp) ↔ T.height = n := by
   constructor;
   · exact fun h ↦ trace_provabilityLogic_TA_eq_compl_singleton_iff.mp <|
-      h ▸ Logic.GLBetaMinus.trace_eq;
+      h ▸ Logic.GLBeta.trace_eq;
   · intro hn;
     have h : ∼TBB n ∈ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) := fun f ↦
       Arithmetic.TA.provable_iff.mpr <| by
         simp [standardInterpret, interpret, models_TBB_iff f, hn];
     have hS : ¬T.provabilityLogicRelativeTo 𝗧𝗔 ⪯ 𝐒 :=
       fun hS ↦ unprovable_bot <| hS.wk h ⨀ Logic.S.provable_TBB;
-    exact (provabilityLogic_eq_GLBetaMinus hS).trans <| by
+    exact (provabilityLogic_eq_GLBeta hS).trans <| by
       congr 1; exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
 
 variable [Nonempty α]
@@ -151,7 +151,7 @@ theorem provabilityLogic_TA_eq_A_iff :
 1. `T` is sound and `PL(T, 𝗧𝗔) = 𝐒`.
 2. `T` is `𝚺₁`-sound but not sound, and `PL(T, 𝗧𝗔) = 𝐃`.
 3. `T` is not `𝚺₁`-sound, `T` has characteristic `ω`, and `PL(T, 𝗧𝗔) = 𝐀`.
-4. For some `n`, `T` has characteristic `n` and `PL(T, 𝗧𝗔) = 𝐆𝐋β⁻ {n}ᶜ`.
+4. For some `n`, `T` has characteristic `n` and `PL(T, 𝗧𝗔) = 𝐆𝐋β {n}ᶜ`.
 
 - [AB05, Corollary 41]
 -/
@@ -159,7 +159,7 @@ theorem provabilityLogic_TA_classification : [
     ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) = 𝐒,
     T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) = 𝐃,
     ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) = 𝐀,
-    ∃ n : ℕ, T.height = n ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) = 𝐆𝐋β⁻ {n}ᶜ (by simp)
+    ∃ n : ℕ, T.height = n ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) = 𝐆𝐋β {n}ᶜ (by simp)
   ].OAOO := by
   have h₁ : ℕ↓[ℒₒᵣ] ⊧* T → T.SoundOnHierarchy 𝚺 1 := fun _ ↦ inferInstance;
   have h₂ : T.SoundOnHierarchy 𝚺 1 → T.height = ⊤ :=
@@ -172,7 +172,7 @@ theorem provabilityLogic_TA_classification : [
     by_cases h : T.height = ⊤;
     · exact .inr <| .inr <| .inl ⟨hs₁, h, provabilityLogic_TA_eq_A_iff.mpr ⟨hs₁, h⟩⟩;
     · obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp h;
-      exact .inr <| .inr <| .inr ⟨n, hn.symm, provabilityLogic_TA_eq_GLBetaMinus_iff.mpr hn.symm⟩;
+      exact .inr <| .inr <| .inr ⟨n, hn.symm, provabilityLogic_TA_eq_GLBeta_iff.mpr hn.symm⟩;
   all_goals simp +contextual [h₁, h₂];
 
 end FFL.ProvabilityLogic

@@ -1,7 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.A.Basic
-public import Foundation.ProvabilityLogic.GLBetaMinus.Basic
+public import Foundation.ProvabilityLogic.GLBeta.Basic
 public import Foundation.ProvabilityLogic.Kripke.Graft
 public import Foundation.ProvabilityLogic.S.Arithmetic
 
@@ -10,11 +10,11 @@ public import Foundation.ProvabilityLogic.S.Arithmetic
 
 The trace of a formula is the set of heights of finite rooted `GL` models whose root refutes it,
 and the trace of a logic is the union of the traces of its members. On letterless formulas it
-agrees with `LetterlessFormula.trace`. A logic is bounded above by `GLα` or `GLβ⁻` of its trace,
+agrees with `LetterlessFormula.trace`. A logic is bounded above by `GLα` or `GLβ` of its trace,
 according as the complement of its trace is infinite or finite.
 
 The provability logic of `T` relative to `U` contains `TBB n` for every `n` in its trace. Hence it
-is `GLα` of its trace when the complement of its trace is infinite, and `GLβ⁻` of its trace when
+is `GLα` of its trace when the complement of its trace is infinite, and `GLβ` of its trace when
 it is not contained in `S`.
 
 ## References
@@ -187,14 +187,14 @@ instance : Consistent (𝐆𝐋α X : Logic α) := .of_le (𝓢 := 𝐒) inferIn
 
 end GLAlpha
 
-namespace GLBetaMinus
+namespace GLBeta
 
 variable {X : Set ℕ} {hX : Xᶜ.Finite}
 
-@[simp] lemma trace_eq : (𝐆𝐋β⁻ X hX : Logic α).trace = X :=
+@[simp] lemma trace_eq : (𝐆𝐋β X hX : Logic α).trace = X :=
   (GL.trace_sumQuasiNormal _).trans <| by simp [trace]
 
-theorem mem_iff : A ∈ 𝐆𝐋β⁻ X hX ↔ A.trace ⊆ X := by
+theorem mem_iff : A ∈ 𝐆𝐋β X hX ↔ A.trace ⊆ X := by
   constructor;
   · exact fun h ↦ (trace_subset_of_mem h).trans_eq trace_eq;
   · intro h;
@@ -204,21 +204,21 @@ theorem mem_iff : A ∈ 𝐆𝐋β⁻ X hX ↔ A.trace ⊆ X := by
     exact sumQuasiNormal.mdp (.mem₁ this) (.mem₂ rfl);
 
 /-- - [AB05, Lemma 49] -/
-theorem bot_mem_univ : (⊥ : Formula α) ∈ 𝐆𝐋β⁻ Set.univ (by simp) :=
+theorem bot_mem_univ : (⊥ : Formula α) ∈ 𝐆𝐋β Set.univ (by simp) :=
   mem_iff.mpr (Set.subset_univ _)
 
-end GLBetaMinus
+end GLBeta
 
 namespace GLAlpha
 
 variable {X : Set ℕ} (hX : Xᶜ.Finite)
 
-instance : (𝐆𝐋α X : Logic α) ⪯ 𝐆𝐋β⁻ X hX :=
-  ⟨fun _ h ↦ GLBetaMinus.mem_iff.mpr (mem_iff.mp h).2⟩
+instance : (𝐆𝐋α X : Logic α) ⪯ 𝐆𝐋β X hX :=
+  ⟨fun _ h ↦ GLBeta.mem_iff.mpr (mem_iff.mp h).2⟩
 
-lemma eq_inter_GLBetaMinus : (𝐆𝐋α X : Logic α) = 𝐆𝐋α Set.univ ∩ 𝐆𝐋β⁻ X hX := by
+lemma eq_inter_GLBeta : (𝐆𝐋α X : Logic α) = 𝐆𝐋α Set.univ ∩ 𝐆𝐋β X hX := by
   ext A;
-  simp [mem_iff, GLBetaMinus.mem_iff];
+  simp [mem_iff, GLBeta.mem_iff];
 
 end GLAlpha
 
@@ -231,8 +231,8 @@ theorem weakerThan_GLAlpha_trace (hL : L.traceᶜ.Infinite) : L ⪯ 𝐆𝐋α L
     hL <| hA.subset <| Set.compl_subset_compl.mpr h, h⟩;
 
 /-- - [AB05, Lemma 45] -/
-theorem weakerThan_GLBetaMinus_trace (hL : L.traceᶜ.Finite) : L ⪯ 𝐆𝐋β⁻ L.trace hL :=
-  ⟨fun _ hA ↦ GLBetaMinus.mem_iff.mpr (trace_subset_of_mem hA)⟩
+theorem weakerThan_GLBeta_trace (hL : L.traceᶜ.Finite) : L ⪯ 𝐆𝐋β L.trace hL :=
+  ⟨fun _ hA ↦ GLBeta.mem_iff.mpr (trace_subset_of_mem hA)⟩
 
 end Logic
 
@@ -380,14 +380,14 @@ theorem provabilityLogic_trace_compl_finite
     not_le.mp fun hnm ↦ hn <| Logic.trace_subset_of_mem hm <| by simpa using hnm;
 
 /-- - [AB05, Lemma 49] -/
-theorem provabilityLogic_eq_GLBetaMinus (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
+theorem provabilityLogic_eq_GLBeta (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
     T.provabilityLogicRelativeTo U (α := α) =
-      𝐆𝐋β⁻ (T.provabilityLogicRelativeTo U).trace
+      𝐆𝐋β (T.provabilityLogicRelativeTo U).trace
         (provabilityLogic_trace_compl_finite h) := by
   classical
   suffices (betaMinus _ (provabilityLogic_trace_compl_finite h)).lift ∈
       T.provabilityLogicRelativeTo U (α := α) from
-    Logic.weakerThan_antisymm (Logic.weakerThan_GLBetaMinus_trace _) <|
+    Logic.weakerThan_antisymm (Logic.weakerThan_GLBeta_trace _) <|
       sumQuasiNormal_weakerThan_provabilityLogic <| Set.singleton_subset_iff.mpr this;
   obtain ⟨m, hm⟩ := exists_neg_conj_TBB_mem_provabilityLogic h;
   apply provabilityLogic_mdp (A := Finset.conj <| insert (lift (∼⩕ i ∈ Finset.range m, TBB i)) <|
