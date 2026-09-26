@@ -251,6 +251,39 @@ lemma forces_congr_of_atoms [DecidableEq α] {N : Model κ α} (hR : M.Rel' = N.
 
 end Model
 
+namespace Model.World
+
+open Formula
+
+variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {M : Model κ α} [IsTrans _ M.Rel]
+  {x : M.World} {p : α} {A B C : Formula α}
+
+lemma forces_subst_single_congr (h : ∀ y, (y = x ∨ x ≺ y) → (y ⊩ B ↔ y ⊩ C)) :
+    x ⊩ A⟦p ↦ B⟧ ↔ x ⊩ A⟦p ↦ C⟧ := by
+  induction A generalizing x with
+  | atom a => by_cases a = p <;> simp_all;
+  | falsum => rfl;
+  | imp _ _ ihA ihB => exact imp_congr (ihA h) (ihB h);
+  | box A ih =>
+    exact forall_congr' fun y ↦ imp_congr_right fun Rxy ↦ ih fun z hz ↦ h z <| .inr <| by
+      rcases hz with rfl | hz;
+      · exact Rxy;
+      · exact IsTrans.trans _ _ _ Rxy hz;
+
+lemma forces_subst_single_congr_of_modalizedIn (hA : A.ModalizedIn p)
+    (h : ∀ y, x ≺ y → (y ⊩ B ↔ y ⊩ C)) : x ⊩ A⟦p ↦ B⟧ ↔ x ⊩ A⟦p ↦ C⟧ := by
+  induction A with
+  | atom a => simp [show a ≠ p from hA];
+  | falsum => rfl;
+  | imp _ _ ihA ihB => exact imp_congr (ihA hA.1) (ihB hA.2);
+  | box A =>
+    exact forall_congr' fun y ↦ imp_congr_right fun Rxy ↦ forces_subst_single_congr fun z hz ↦ by
+      rcases hz with rfl | hz;
+      · exact h z Rxy;
+      · exact h z (IsTrans.trans _ _ _ Rxy hz);
+
+end Model.World
+
 namespace Model
 
 variable {κ α : Type*} [Nonempty κ]
@@ -278,13 +311,6 @@ lemma overwrite.isFiniteGL [M.IsFiniteGL] : (M.overwrite V).IsFiniteGL where
   trans := IsTrans.trans (r := M.Rel)
   irrefl := Std.Irrefl.irrefl (r := M.Rel)
   finite := IsFiniteGL.finite (M := M)
-
-lemma forces_overwrite_subst {s : Substitution α α} {x : M.World} {A : Formula α} :
-    x ⊩[M.overwrite fun y a ↦ y ⊩[M] s a] A ↔ x ⊩[M] A⟦s⟧ := by
-  induction A generalizing x with
-  | atom | falsum => rfl;
-  | imp _ _ ihA ihB => exact imp_congr ihA ihB;
-  | box _ ih => exact forall_congr' fun _ ↦ imp_congr_right fun _ ↦ ih;
 
 end Model
 

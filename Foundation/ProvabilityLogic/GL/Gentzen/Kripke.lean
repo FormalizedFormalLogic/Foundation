@@ -13,7 +13,7 @@ public import Mathlib.Basic.Finite.Prod
 
 namespace FFL.ProvabilityLogic
 
-open Kripke Kripke.Model Kripke.Model.World
+open Formula Kripke Kripke.Model Kripke.Model.World
 
 /-! ### Soundness -/
 
@@ -199,6 +199,14 @@ variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 theorem cut (h₁ : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[𝐆𝐋] insert A Γ₂ ⟹ Δ₂) :
     ⊢ᴳ[𝐆𝐋] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ :=
   complete fun M _ x ↦ forcesSequent_cut (sound M h₁ x) (sound M h₂ x)
+
+lemma subst (s : Substitution α α) (h : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ Δ₁) :
+    ⊢ᴳ[𝐆𝐋] Γ₁.image (·⟦s⟧) ⟹ Δ₁.image (·⟦s⟧) := by
+  apply complete;
+  intro _ _ M _ x hx;
+  obtain ⟨D, hD, hxD⟩ := sound (M.subst s) h x
+    fun C hC ↦ forces_subst.mpr (hx _ (Finset.mem_image_of_mem _ hC));
+  exact ⟨_, Finset.mem_image_of_mem _ hD, forces_subst.mp hxD⟩;
 
 end Gentzen
 
