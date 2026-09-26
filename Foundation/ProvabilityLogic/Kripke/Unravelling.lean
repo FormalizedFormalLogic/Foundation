@@ -84,7 +84,6 @@ instance [M.IsFiniteGL] : M.unravelling.IsFiniteGL where
     exact Finite.of_injective (fun x : M.unravelling.World ↦ {a | a ∈ x.1}) fun x y h ↦
       Subtype.ext <| x.2.2.eq_of_mem_iff y.2.2 <| Set.ext_iff.mp h;
 
-/-- The map to the last point is a pseudo-epimorphism. -/
 def tipMap [IsTrans _ M.Rel] : M.unravelling.toModel →ₚ M.toModel where
   toFun x := x.tip
   forth {x y} h := by

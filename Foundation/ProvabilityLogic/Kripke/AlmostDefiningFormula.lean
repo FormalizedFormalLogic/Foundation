@@ -8,9 +8,8 @@ public import Foundation.ProvabilityLogic.S.Basic
 /-!
 # Almost defining formulas
 
-The almost defining formula of a rooted finite GL-model `M` is a modalized formula forced at the
-root of every pseudo-tail of `M`, and fixing that root up to `P`-bisimulation once the valuation at
-the root is given. A modalized formula forced at the root of a free tail is not refuted by `𝐒`.
+Modalized formulas fixing the root of the pseudo-tails of a rooted finite GL-model up to
+bisimulation, once the valuation at the root is given.
 
 ## References
 
@@ -82,10 +81,7 @@ lemma graft.exists_forces_boxItr_bot {N : RootedModel κ α} [N.IsFiniteGL] {a :
 
 variable [DecidableEq α] (P : Finset α) (M : RootedModel κ α) [Fintype M.World] [M.IsGL]
 
-/-- The almost defining formula of `M` over `P`.
-
-- [Bek90, §4 Remark 1]
--/
+/-- - [Bek90, §4 Remark 1] -/
 noncomputable def almostDefiningFormula : Formula α :=
   □(∼□^[M.height + 1]⊥ 🡒
     ◇charFormulaUnder (M := M.toModel) P M.root ⋏ valuationConj (M := M.toModel) P M.root) ⋏
@@ -131,12 +127,7 @@ lemma pseudoTail_forces_almostDefiningFormula (o : α → Prop) :
     · exact absurd (toFreeTail.forces_inl.mp <| forces_boxItr_succ.mp hi (.inl M.root) trivial)
         fun h' ↦ lt_irrefl _ (root_forces_boxItr_bot_iff.mp h');
 
-/-- Let `K` be a rooted GL-model whose root forces no `□^[n]⊥` and whose other points each force
-some `□^[n]⊥`. If its root forces the almost defining formula of `M` and agrees with `o` on `P`,
-it is `P`-bisimilar to the root of the pseudo-tail of `M` with root valuation `o`.
-
-- [Bek90, §4 Lemma 9, Remark 2]
--/
+/-- - [Bek90, §4 Lemma 9, Remark 2] -/
 theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ' α} [K.IsGL]
     (hr : ∀ n, K.root ⊮ □^[n]⊥)
     (hK : ∀ z ≠ K.root, ∃ n, z ⊩ □^[n]⊥)
@@ -206,10 +197,7 @@ theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ'
 
 end Kripke.RootedModel
 
-/-- A modalized formula forced at the root of a free tail is not refuted by `𝐒`.
-
-- [Bek90, §4 Lemma 4]
--/
+/-- - [Bek90, §4 Lemma 4] -/
 theorem Logic.S.not_provable_neg_of_forces_freeTail {M : Model κ α} [M.IsGL] {V : ℕ∞ → α → Prop}
     {C : Formula α} (hC : C.Modalized) (h : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] C) :
     𝐒 ⊬ ∼C := by

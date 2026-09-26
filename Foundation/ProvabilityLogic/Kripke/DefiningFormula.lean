@@ -42,10 +42,7 @@ lemma World.forces_valuationConj : w ⊩ x.valuationConj P ↔ ∀ a ∈ P, (M x
   forces_conj.trans <| Finset.forall_mem_image.trans <| forall₂_congr fun _ _ ↦ by grind
 
 open Classical in
-/-- The characteristic formula of `x` over `P`.
-
-- [Bek90, §4]
--/
+/-- - [Bek90, §4] -/
 def World.charFormulaUnder [Fintype M.World] [M.IsGL] (P : Finset α) (x : M.World) : Formula α :=
   x.valuationConj P ⋏
   (Finset.univ.image fun y : { y // x ≺ y } ↦ ◇y.1.charFormulaUnder P).conj ⋏
@@ -104,11 +101,7 @@ end Model
 
 namespace RootedModel
 
-/-- `A` defines `M` under `P`: it is over `P`, true at the root of `M`, and true at the root of a
-finite GL-model only if its root is `P`-bisimilar to that of `M`.
-
-- [Bek90, §4]
--/
+/-- - [Bek90, §4] -/
 structure IsDefiningFormula (P : Finset α) (M : RootedModel κ α) (A : Formula α) : Prop where
   atoms_subset : A.atoms ⊆ P
   root_forces : M.root ⊩ A

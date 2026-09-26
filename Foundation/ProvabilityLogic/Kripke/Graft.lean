@@ -116,10 +116,7 @@ instance [M.IsFiniteGL] [Finite ι] : (M.graft a ι).IsFiniteGL where
 
 end
 
-/-- The points of `M` keep their forcing, and the points of the chain behave as `a`, on a
-subformula-closed set on whose boxes `a` is reflexive.
-
-- [AB05, Lemma 12]
+/-- - [AB05, Lemma 12]
 - [Bek90, Lemma 5]
 -/
 theorem forces_iff [DecidableEq α] {X : FormulaFinset α} (hX : ∀ B ∈ X, B.subfmls ⊆ X)
