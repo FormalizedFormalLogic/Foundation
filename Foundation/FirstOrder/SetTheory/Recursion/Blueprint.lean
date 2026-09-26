@@ -137,7 +137,8 @@ variable {c v} {f : V}
 
 lemma seq (h : SetTheory.IsAttempt (c.map v) f) : Seq f := h.1
 
-lemma isOrdinal_lh (hf : SetTheory.IsAttempt (c.map v) f) : IsOrdinal (lh f) := SetTheory.isOrdinal_lh hf.1
+variable (f) in
+lemma isOrdinal_lh : IsOrdinal (lh f) := SetTheory.isOrdinal_lh f
 
 lemma spec (h : SetTheory.IsAttempt (c.map v) f) : ∀ β ∈ lh f, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = c.map v (f ↾ β) := h.2
 
@@ -149,7 +150,7 @@ lemma empty (h : SetTheory.IsAttempt (c.map v) f) (hlh : ∅ ∈ lh f) : ⟨∅,
 
 lemma succ (hf : SetTheory.IsAttempt (c.map v) f) : ∀ β, SetTheory.succ β ∈ lh f → ∀ y, ⟨β, y⟩ₖ ∈ f → ⟨SetTheory.succ β, c.map v ((f ↾ β) ⁀' y)⟩ₖ ∈ f := by
   intro β hβsucclh y hyf
-  have hlh := isOrdinal_lh hf
+  have hlh := isOrdinal_lh f
   have := IsOrdinal.of_mem (h := hlh) hβsucclh
   have hβmemlh : β ∈ lh f :=
     IsTransitive.transitive (self := IsOrdinal.toIsTransitive (self := hlh)) (SetTheory.succ β) hβsucclh β (mem_succ_self (x := β))
@@ -183,8 +184,8 @@ lemma unique {f g α β : V} (h₁ : SetTheory.IsAttempt (c.map v) f) (h₂ : Se
     (hlh₁ : lh f = α) (hlh₂ : lh g = β)
     (h₁₂ : α ⊆ β) {γ} (hγα : γ ∈ α) {y₁ y₂} :
     ⟨γ, y₁⟩ₖ ∈ f → ⟨γ, y₂⟩ₖ ∈ g → y₁ = y₂ := by
-  have : IsOrdinal α := hlh₁ ▸ isOrdinal_lh h₁
-  have : IsOrdinal β := hlh₂ ▸ isOrdinal_lh h₂
+  have : IsOrdinal α := hlh₁ ▸ isOrdinal_lh f
+  have : IsOrdinal β := hlh₂ ▸ isOrdinal_lh g
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   let βo : Ordinal V := IsOrdinal.toOrdinal β
   have hαtest : αo.val = α := by simp [αo]
@@ -209,7 +210,7 @@ lemma IsAttempt.successor {F : V → V} {f : V} (hf : IsAttempt F f) : IsAttempt
     intro β hβ w
     have := hf.1.IsFunction
     let α := lh f
-    have : IsOrdinal α := SetTheory.isOrdinal_lh hf.1
+    have : IsOrdinal α := SetTheory.isOrdinal_lh f
     have : IsOrdinal (lh (f ⁀' (F f))) := Seq.lh_seqCons (F f) hf.1 ▸ IsOrdinal.succ
     have : IsOrdinal β := IsOrdinal.of_mem hβ
     have hβα : β ⊆ α := IsOrdinal.subset_iff.mpr (mem_succ_iff.mp (Seq.lh_seqCons (F f) hf.1 ▸ hβ))

@@ -56,6 +56,7 @@ end Blueprint
 variable (V)
 
 structure Construction {k : ℕ} (φ : Blueprint k) where
+  /-- `c.Φ v Y x` states that `x ∈ Φ(Y)`. -/
   Φ : (Fin k → V) → Set V → V → Prop
   defined : 𝚫₁.Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
   monotone {C C' : Set V} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
@@ -106,7 +107,7 @@ private lemma succ_graph {u v s ih} :
 
 lemma succ_defined : 𝚺₁.DefinedFunction (fun v : Fin (k + 2) → V ↦ c.succ (v ·.succ.succ) (v 1) (v 0)) φ.succDef := .mk fun v ↦ by
   simp [Blueprint.succDef, succ_graph, HierarchySymbol.Semiformula.val_sigma, c.eval_formula,
-    c.defined.proper.iff', -and_imp,  BinderNotation.finSuccItr]
+    c.defined.proper.iff', -and_imp, BinderNotation.finSuccItr]
   grind
 
 lemma eval_succDef (v : Fin (k + 3) → V) :
@@ -185,6 +186,7 @@ lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
 
 variable (v)
 
+/-- `c.Fixpoint v x` states that `x ∈ Φ_Fix` (for a specific witness `Φ_Fix`). -/
 def Fixpoint (x : V) : Prop := ∃ s, x ∈ c.limSeq v s
 
 variable {v}
@@ -223,6 +225,7 @@ lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
     have : z ∈ c.limSeq v u := hf z u hu
     exact c.limSeq_cumulative (le_of_lt <| lt_of_mem_rng hu) this⟩
 
+/-- `c.Fixpoint` is a fixpoint of `c.Φ`. -/
 theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
   ⟨by intro h
       rcases c.fixpoint_iff_succ.mp h with ⟨u, hu⟩

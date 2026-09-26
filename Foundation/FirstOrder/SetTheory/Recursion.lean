@@ -114,7 +114,7 @@ lemma existsUnique_of_exists {F : V → V} {α : V} (hex : Exists F α) :
   refine ⟨f, hf, ?_⟩
   intro g hg
   have : IsFunction g := hg.1.1.IsFunction
-  have hα : IsOrdinal α := hf.2 ▸ SetTheory.isOrdinal_lh hf.1.1
+  have hα : IsOrdinal α := hf.2 ▸ SetTheory.isOrdinal_lh f
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   apply (IsAttempt.isAttempt_unique (α := αo) hf.1 hg.1 hf.2 hg.2).symm
 

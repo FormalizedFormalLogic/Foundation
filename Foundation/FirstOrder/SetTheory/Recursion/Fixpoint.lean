@@ -31,13 +31,15 @@ variable {k} (φ : Blueprint k)
 
 instance : Coe (Blueprint k) (SetTheorySemisentence (k + 2)) := ⟨Blueprint.graph⟩
 
-def graphDef : SetTheorySemisentence (k + 3) :=
-  “u ih α. ∀ x, (x ∈ u → (∀ z, !lh.dfn z α → x ∈ z) ∧ !φ.graph x ih ⋯) ∧ ((∀ z, !lh.dfn z α → x ∈ z) ∧ !φ.graph x ih ⋯ → x ∈ u)”
+-- TODO: Use ∈-recursion along `V` instead of recursion along ordinals to define this, no longer require `x` to be an ordinal.
+def mapDef : SetTheorySemisentence (k + 2) :=
+  “u ih. ∀ x, (x ∈ u → !IsOrdinal.dfn x ∧ (∀ s, !lh.dfn s ih → x ⊆ s) ∧ !φ.graph x ih ⋯) ∧ (!IsOrdinal.dfn x ∧ (∀ s, !lh.dfn s ih → x ⊆ s) ∧ !φ.graph x ih ⋯ → x ∈ u)”
+  -- “u ih α. ∀ x, (x ∈ u → (∀ z, !lh.dfn z α → x ∈ z) ∧ !φ.graph x ih ⋯) ∧ ((∀ z, !lh.dfn z α → x ∈ z) ∧ !φ.graph x ih ⋯ → x ∈ u)”
 
 def recBlueprint : Recursion.Blueprint k where
-  graph := φ.graphDef
+  graph := φ.mapDef
 
-def limSeqDef : SetTheorySemisentence (k + 2) := (φ.recBlueprint).resultDef
+def limSeqDef : SetTheorySemisentence (k + 2) := (φ.recBlueprint).result_dfn
 
 def fixpointDef : SetTheorySemisentence (k + 1) :=
   “x. ∃ s L, !φ.limSeqDef L s ⋯  ∧ x ∈ L”
@@ -48,14 +50,14 @@ variable (V)
 
 structure Construction {k : ℕ} (φ : Blueprint k) where
   Φ : (Fin k → V) → Set V → V → Prop
-  defined : Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
+  defined : Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.graph
   monotone {C C' : Set V} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
 
 class Construction.SetSized {k : ℕ} {φ : Blueprint k} (c : Construction V φ) where
-  set_sized {C : Set V} {v x} : c.Φ v C x → ∃ m, c.Φ v {y ∈ C | y < m} x
+  set_sized {C : Set V} {v x} : c.Φ v C x → ∃ m : V, c.Φ v {y ∈ C | y ∈ m} x
 
 class Construction.StrongSetSized {k : ℕ} {φ : Blueprint k} (c : Construction V φ) where
-  strong_set_sized {C : Set V} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y < x} x
+  strong_set_sized {C : Set V} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y ∈ x} x
 
 instance {k : ℕ} {φ : Blueprint k} (c : Construction V φ) [c.StrongSetSized] : c.SetSized where
   set_sized {_ _ x} := fun h ↦ ⟨x, Construction.StrongSetSized.strong_set_sized h⟩
@@ -67,88 +69,108 @@ namespace Construction
 variable {k : ℕ} {φ : Blueprint k} (c : Construction V φ) (v : Fin k → V)
 
 lemma eval_formula (v : Fin k.succ.succ → V) :
-    φ.core.val.Evalb v ↔ c.Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0) := c.defined.iff
+    φ.graph.Evalb v ↔ c.Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0) := c.defined.iff v
 
-lemma succ_existsUnique (s ih : V) :
-    ∃! u : V, ∀ x, (x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x) := by
-  have : 𝚺₁-Predicate fun x ↦ x ≤ s ∧ c.Φ v {z | z ∈ ih} x := by
-    apply HierarchySymbol.Definable.and (by definability)
-      ⟨φ.core.sigma.rew <| Rew.embSubsts (#0 :> &ih :> fun i ↦ &(v i)),
-        by intro x; simp [HierarchySymbol.Semiformula.val_sigma, c.eval_formula]⟩
-  exact finite_comprehension₁! this
-    ⟨s + 1, fun i ↦ by rintro ⟨hi, _⟩; exact lt_succ_iff_le.mpr hi⟩
+lemma map_existsUnique (ih : V) :
+    ∃! u : V, ∀ x, (x ∈ u ↔ IsOrdinal x ∧ x ⊆ lh ih ∧ c.Φ v {z | z ∈ ih} x) := by
+  let s : V := lh ih
+  have : IsOrdinal s := isOrdinal_lh ih
+  have : ℒₛₑₜ-predicate fun x ↦ IsOrdinal x ∧ x ⊆ s ∧ c.Φ v {z | z ∈ ih} x := by
+    refine Language.Definable.and (by definability) (Language.Definable.and (by definability) ?_)
+    #check fun x ↦ c.eval_formula (x :> ih :> v)
+    exact ⟨φ.graph.rew <| Rew.embSubsts (#0 :> &ih :> fun i ↦ &(v i)),
+      by intro x; simp [Semiformula.eval_embSubsts]; sorry⟩
+  -- have hsuccs : ∀ (i : V), IsOrdinal i ∧ i ⊆ s → i ∈ SetTheory.succ s :=
+  --   fun i ↦ by rintro ⟨_, hi⟩; exact mem_succ_iff.mpr (IsOrdinal.subset_iff.mp hi)
+  have hiff (x : V) (p : Prop) : IsOrdinal x ∧ x ⊆ lh ih ∧ p ↔ x ∈ succ s ∧ IsOrdinal x ∧ x ⊆ lh ih ∧ p := by
+    constructor <;> intro h
+    · exact ⟨mem_succ_iff.mpr (IsOrdinal.subset_iff (hα := h.1).mp h.2.1), h⟩
+    · aesop
+  conv => {arg 1; intro u x; rw [hiff]}
+  exact separation_existsUnique (SetTheory.succ s) _ this
 
-noncomputable def succ (s ih : V) : V := Classical.choose! (c.succ_existsUnique v s ih)
+noncomputable def map (ih : V) : V := Classical.choose! (c.map_existsUnique v ih)
 
 variable {v}
 
-lemma mem_succ_iff {v s ih} :
-    x ∈ c.succ v s ih ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x := Classical.choose!_spec (c.succ_existsUnique v s ih) x
+lemma mem_map_iff {v ih} :
+    x ∈ c.map v ih ↔ IsOrdinal x ∧ x ⊆ lh ih ∧ c.Φ v {z | z ∈ ih} x := Classical.choose!_spec (c.map_existsUnique v ih) x
 
-private lemma succ_graph {u v s ih} :
-    u = c.succ v s ih ↔ ∀ x < u + (s + 1), x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x :=
-  ⟨by rintro rfl x _; simp [mem_succ_iff], by
+private lemma map_graph {u v ih} :
+    u = c.map v ih ↔ ∀ x, x ∈ u ↔ IsOrdinal x ∧ x ⊆ lh ih ∧ c.Φ v {z | z ∈ ih} x :=
+  ⟨by rintro rfl x; simp [mem_map_iff], by
     intro h; apply mem_ext
     intro x; constructor
-    · intro hx; exact c.mem_succ_iff.mpr <| h x (lt_of_lt_of_le (lt_of_mem hx) (by simp)) |>.mp hx
-    · intro hx
-      exact h x (lt_of_lt_of_le (lt_succ_iff_le.mpr (c.mem_succ_iff.mp hx).1)
-        (by simp)) |>.mpr (c.mem_succ_iff.mp hx)⟩
+    · intro hx; exact c.mem_map_iff.mpr ((h x).mp hx)
+    · intro hx; exact (h x).mpr (c.mem_map_iff.mp hx)⟩
 
-lemma succ_defined : DefinedFunction (fun v : Fin (k + 2) → V ↦ c.succ (v ·.succ.succ) (v 1) (v 0)) φ.succDef := .mk fun v ↦ by
-  simp [Blueprint.succDef, succ_graph, HierarchySymbol.Semiformula.val_sigma, c.eval_formula,
-    c.defined.proper.iff', -and_imp,  BinderNotation.finSuccItr]
+lemma map_defined : DefinedFunction (fun v : Fin (k + 1) → V ↦ c.map (v ·.succ) (v 0)) φ.mapDef := .mk fun v ↦ by
+  simp [Blueprint.mapDef, map_graph, c.eval_formula,
+    -and_imp, BinderNotation.finSuccItr]
   grind
 
-lemma eval_succDef (v : Fin (k + 3) → V) :
-    φ.succDef.val.Evalb v ↔ v 0 = c.succ (v ·.succ.succ.succ) (v 2) (v 1) := c.succ_defined.iff
+lemma map_definable : ℒₛₑₜ-function₁ (c.map v) := Defined.to_definable (c.map_defined)
 
-noncomputable def prConstruction : Recursion.Construction V φ.recBlueprint where
-  core := c.core
-  core_defined := .mk fun v ↦ by simp [Blueprint.recBlueprint, c.eval_succDef]
+lemma eval_mapDef (v : Fin (k + 2) → V) :
+    φ.mapDef.Evalb v ↔ v 0 = c.map (v ·.succ.succ) (v 1) := c.map_defined.iff v
+
+noncomputable def recConstruction : Recursion.Construction V φ.recBlueprint where
+  map := c.map
+  map_defined := .mk fun v ↦ by simp [Blueprint.recBlueprint, c.eval_mapDef]
 
 variable (v)
 
-noncomputable def limSeq (s : V) : V := c.prConstruction.result v s
+noncomputable def limSeq (s : V) : V := c.recConstruction.result v s
 
 variable {v}
 
-@[simp] lemma limSeq_zero : c.limSeq v 0 = ∅ := by simp [limSeq, prConstruction]
+@[simp] lemma limSeq_zero : c.limSeq v 0 = c.map v ∅ := by simp [limSeq, zero_def]; rfl
 
-lemma limSeq_succ (s : V) : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by simp [limSeq, prConstruction]
+lemma limSeq_succ (s : V) [hs : IsOrdinal s] : c.limSeq v (succ s) = c.map v (Classical.choose (Replacement.attempt_function_exists (c.map v) (c.map_definable) (IsOrdinal.toOrdinal s).succ)) := by simp [limSeq, c.recConstruction.result_succ v s]; rfl
 
 lemma termSet_defined : DefinedFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef := .mk
-  fun v ↦ by simp [c.prConstruction.result_defined_iff, Blueprint.limSeqDef]; rfl
+  fun v ↦ by simp [c.recConstruction.result_defined_iff, Blueprint.limSeqDef]; rfl
 
 @[simp] lemma eval_limSeqDef (v : Fin (k + 2) → V) :
-    φ.limSeqDef.val.Evalb v ↔ v 0 = c.limSeq (v ·.succ.succ) (v 1) := c.termSet_defined.iff
+    φ.limSeqDef.Evalb v ↔ v 0 = c.limSeq (v ·.succ.succ) (v 1) := c.termSet_defined.iff v
 
 instance limSeq_definable :
-  DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.termSet_defined.to_definable
+  (ℒₛₑₜ).DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.termSet_defined.to_definable
 
-@[simp, definability] instance limSeq_definable' (Γ) : Γ-[m + 1].DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.limSeq_definable.of_sigmaOne
+/- TODO: Once the Lévy hierarchy is added, make a version relative to a hierarchy symbol. -/
+-- @[simp, definability] instance limSeq_definable' (Γ) : Γ-[m + 1].DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.limSeq_definable.of_sigmaOne
 
-lemma mem_limSeq_succ_iff {x s : V} :
-    x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by simp [limSeq_succ, mem_succ_iff]
+lemma mem_limSeq_succ_iff {x s : V} [IsOrdinal s] :
+    x ∈ c.limSeq v (succ s) ↔ IsOrdinal x ∧ x ⊆ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by simp [limSeq_succ, mem_succ_iff]
 
-lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
-  induction s' using ISigma1.sigma1_succ_induction generalizing s
-  · apply HierarchySymbol.Definable.ball_le (by definability)
-    apply HierarchySymbol.Definable.comp₂
-    · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+lemma limSeq_cumulative {s s' : V} [IsOrdinal s] [IsOrdinal s'] : s ⊆ s' → c.limSeq v s ⊆ c.limSeq v s' := by
+  let s'o : Ordinal V := IsOrdinal.toOrdinal s'
+  let motive (s' : V) : Prop := s ⊆ s' → c.limSeq v s ⊆ c.limSeq v s'
+  refine transfinite_induction motive ?_ ?_ s'o
+  · unfold Language.DefinablePred
+    apply Language.Definable.imp (by definability)
+    apply Language.Definable.all
+    apply Language.Definable.imp (by definability)
+    apply Language.DefinableRel.comp
+    · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp only; simp [c.eval_limSeqDef]⟩
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
-  case zero =>
-    simp only [nonpos_iff_eq_zero, limSeq_zero]; rintro rfl; simp
-  case succ s' ih =>
-    intro hs u hu
-    rcases zero_or_succ s with (rfl | ⟨s, rfl⟩)
-    · simp at hu
-    have hs : s ≤ s' := by simpa using hs
-    rcases c.mem_limSeq_succ_iff.mp hu with ⟨hu, Hu⟩
-    exact c.mem_limSeq_succ_iff.mpr ⟨_root_.le_trans hu hs, c.monotone (fun z hz ↦ ih hs hz) Hu⟩
+  · intro s'o ih hsso z hz
+    simp_all [limSeq]
+    obtain ⟨f, hf, hlhf, hmemf⟩ := c.recConstruction.result_spec_of_isOrdinal v s
 
-lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
-    u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
+    sorry
+  -- case zero =>
+  --   simp only [nonpos_iff_eq_zero, limSeq_zero]; rintro rfl; simp
+  -- case succ s' ih =>
+  --   intro hs u hu
+  --   rcases zero_or_succ s with (rfl | ⟨s, rfl⟩)
+  --   · simp at hu
+  --   have hs : s ≤ s' := by simpa using hs
+  --   rcases c.mem_limSeq_succ_iff.mp hu with ⟨hu, Hu⟩
+  --   exact c.mem_limSeq_succ_iff.mpr ⟨_root_.le_trans hu hs, c.monotone (fun z hz ↦ ih hs hz) Hu⟩
+
+lemma mem_limSeq_self [c.StrongSetSized] {u s : V} :
+    u ∈ c.limSeq v s → u ∈ c.limSeq v (succ u) := by
   induction u using ISigma1.pi1_order_induction generalizing s
   · apply HierarchySymbol.Definable.all
     apply HierarchySymbol.Definable.imp
@@ -178,7 +200,7 @@ def Fixpoint (x : V) : Prop := ∃ s, x ∈ c.limSeq v s
 
 variable {v}
 
-lemma fixpoint_iff [c.StrongFinite] {x : V} : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
+lemma fixpoint_iff [c.StrongSetSized] {x : V} : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
   ⟨by rintro ⟨s, hs⟩; exact c.mem_limSeq_self hs, fun h ↦ ⟨x + 1, h⟩⟩
 
 lemma fixpoint_iff_succ {x : V} : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u + 1) :=
@@ -235,11 +257,11 @@ lemma fixpoint_defined : Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fix
   simp [Blueprint.fixpointDef, c.eval_limSeqDef]; rfl
 
 @[simp] lemma eval_fixpointDef (v : Fin (k + 1) → V) :
-    φ.fixpointDef.val.Evalb v ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.iff
+    φ.fixpointDef.Evalb v ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.iff v
 
 end
 
-theorem induction [c.Strongset_sized] {P : V → Prop} (hP : ℒₛₑₜ-Predicate P)
+theorem induction [c.StrongSetSized] {P : V → Prop} (hP : ℒₛₑₜ-predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
   apply InductionOnHierarchy.order_induction_sigma (Γ := Γ) (m := 1) (P := fun x ↦ c.Fixpoint v x → P x)
