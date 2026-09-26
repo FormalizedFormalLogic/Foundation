@@ -108,17 +108,16 @@ variable {T U : Theory L}
 
 namespace Δ₁
 
-open Bounding.HierarchySymbol.Semiformula FFL.FirstOrder.Theory
-
 abbrev add (dT : T.Δ₁) (dU : U.Δ₁) : (T ∪ U).Δ₁ where
   ch := T.Δ₁ch ⋎ U.Δ₁ch
   mem_iff {φ} := by
-    simp only [Nat.succ_eq_add_one, Nat.reduceAdd, val_or, LogicalConnective.HomClass.map_or,
+    simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Bounding.HierarchySymbol.Semiformula.val_or,
+      LogicalConnective.HomClass.map_or,
       FirstOrder.Arithmetic.Bootstrapping.Δ₁Class.mem_iff'_s, LogicalConnective.Prop.or_eq,
       Set.mem_union]
     grind
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _
-    fun V _ _ ↦ ProperOn.or (by simp) (by simp)
+    fun V _ _ ↦ Bounding.HierarchySymbol.Semiformula.ProperOn.or (by simp) (by simp)
 
 abbrev ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
   ch := dT.ch
@@ -131,23 +130,11 @@ instance empty : Theory.Δ₁ (∅ : Theory L) where
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _
     fun V _ _ ↦ by simp
 
-abbrev singleton (φ : Sentence L) :
-    _root_.FFL.FirstOrder.Theory.Δ₁ (Set.singleton φ) where
+abbrev singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
   ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)”) _
-  mem_iff {ψ} := by
-    constructor
-    · intro h
-      have h' : ψ = Rewriting.emb φ := by
-        simpa [Semiformula.quote_eq_encode] using h
-      exact ⟨φ, Set.mem_singleton_iff.mpr rfl, h'⟩
-    · rintro ⟨σ, hσ, h⟩
-      have : σ = φ := Set.mem_singleton_iff.mp hσ
-      subst σ
-      simpa [Semiformula.quote_eq_encode] using h
+  mem_iff {ψ} := by simp [Semiformula.quote_eq_encode]
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _
-    fun V _ _ ↦ by
-    intro
-    rfl
+    fun V _ _ ↦ by intro; rfl
 
 @[simp] lemma singleton_toTDef_ch_val (φ : Sentence L) :
     letI := Δ₁.singleton φ
@@ -156,26 +143,17 @@ abbrev singleton (φ : Sentence L) :
 abbrev ofList (l : List (Sentence L)) : Δ₁ {φ | φ ∈ l} :=
   match l with
   |     [] => empty.ofEq (by ext; simp)
-  | φ :: l => ((singleton φ).add (ofList l)).ofEq (by
-      ext x
-      have hmem : x ∈ Set.singleton φ ↔ x = φ := Set.mem_singleton_iff
-      simp only [Set.mem_union, Set.mem_ofPred_eq, List.mem_cons, hmem])
+  | φ :: l => ((singleton φ).add (ofList l)).ofEq (by ext; simp)
 
 noncomputable abbrev ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁ :=
   (ofList h.toFinset.toList).ofEq (by ext; simp)
 
 instance [T.Δ₁] [U.Δ₁] : (T ∪ U).Δ₁ := add inferInstance inferInstance
 
-instance (φ : Sentence L) :
-    _root_.FFL.FirstOrder.Theory.Δ₁ (Set.singleton φ) := singleton φ
+instance (φ : Sentence L) : Theory.Δ₁ {φ} := singleton φ
 
 instance insert {φ : Sentence L} [d : T.Δ₁] : (insert φ T).Δ₁ :=
-  (d.add (singleton φ : _root_.FFL.FirstOrder.Theory.Δ₁ (Set.singleton φ))).ofEq
-    (by
-      ext x
-      have hmem : x ∈ Set.singleton φ ↔ x = φ := Set.mem_singleton_iff
-      simp only [Set.mem_union, Set.mem_insert_iff, hmem]
-      tauto)
+  (d.add (singleton φ)).ofEq (by ext; simp)
 
 end Δ₁
 
