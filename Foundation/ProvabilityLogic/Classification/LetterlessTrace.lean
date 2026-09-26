@@ -26,20 +26,10 @@ namespace Logic.GL
 
 variable {α : Type*} {X : LetterlessFormulaSet}
 
-theorem sumQuasiNormal_eq_GLAlpha (h : ∀ A ∈ X, (trace A).Finite) :
+lemma sumQuasiNormal_eq_GLAlpha (h : ∀ A ∈ X, (trace A).Finite) :
     (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋α X.trace := by
   rw [GLAlpha.eq_sumQuasiNormal_lift,
     sumQuasiNormal_eq_iff (.inr ⟨h, by rintro _ ⟨n, -, rfl⟩; simp⟩)];
-  simp [LetterlessFormulaSet.trace];
-
-theorem sumQuasiNormal_eq_GLBetaMinus (h : ∃ B ∈ X, (spectrum B).Finite) :
-    ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 +ᴸ X.lift (α := α)) = 𝐆𝐋β⁻ X.trace hX := by
-  obtain ⟨B, hB, hfin⟩ := h;
-  have hX : X.traceᶜ.Finite := hfin.subset fun n hn ↦
-    LetterlessFormulaSet.mem_spectrum.mp (by simpa [LetterlessFormulaSet.trace] using hn) B hB;
-  use hX;
-  rw [GLBetaMinus.eq_sumQuasiNormal_lift,
-    sumQuasiNormal_eq_iff (.inl ⟨⟨B, hB, hfin⟩, ⟨_, Set.mem_singleton _, by simpa using hX⟩⟩)];
   simp [LetterlessFormulaSet.trace];
 
 /-- - [Bek90] -/
@@ -49,10 +39,15 @@ theorem sumQuasiNormal_eq_GLAlpha_or_GLBetaMinus :
   by_cases h : ∀ A ∈ X, (trace A).Finite;
   · exact .inl ⟨h, sumQuasiNormal_eq_GLAlpha h⟩;
   · push Not at h;
-    obtain ⟨A, hA, hinf⟩ := h;
-    apply Or.inr;
-    apply sumQuasiNormal_eq_GLBetaMinus;
-    exact ⟨A, hA, spectrum_finite_or_cofinite.resolve_right hinf⟩;
+    obtain ⟨B, hB, hinf⟩ := h;
+    have hfin := spectrum_finite_or_cofinite.resolve_right hinf;
+    have hX : X.traceᶜ.Finite := hfin.subset fun n hn ↦
+      LetterlessFormulaSet.mem_spectrum.mp (by simpa [LetterlessFormulaSet.trace] using hn) B hB;
+    right;
+    use hX;
+    rw [GLBetaMinus.eq_sumQuasiNormal_lift,
+      sumQuasiNormal_eq_iff (.inl ⟨⟨B, hB, hfin⟩, ⟨_, Set.mem_singleton _, by simpa using hX⟩⟩)];
+    simp [LetterlessFormulaSet.trace];
 
 end Logic.GL
 
@@ -81,32 +76,24 @@ lemma not_regular_boxItr_bot : ¬Regular T (□^[n]⊥) := by
   induction n with
   | zero => simp [Regular, Formula.interpret];
   | succ n ih =>
-    intro h;
-    apply ih;
-    exact models_of_provable inferInstance <|
+    by_contra h;
+    exact ih <| models_of_provable inferInstance <|
       T.standardProvability.sound_on (by simpa [Regular, Formula.interpret] using h);
 
-theorem regular_iff_trace_finite [𝗜𝚺₁ ⪯ T] : A.Regular T ↔ (trace A).Finite := by
+lemma regular_iff_trace_finite [𝗜𝚺₁ ⪯ T] : A.Regular T ↔ (trace A).Finite := by
   constructor;
   · intro h;
     by_contra hinf;
     obtain ⟨m, hm⟩ := (spectrum_finite_or_cofinite.resolve_right hinf).bddAbove;
-    apply not_regular_boxItr_bot (n := m + 1) (T := T);
-    apply h.of_imp;
-    apply Logic.GL.mem_iff_spectrum_eq_univ.mpr;
-    ext k;
-    have := @hm k;
-    simp only [spectrum_imp, spectrum_boxItr_bot];
-    grind;
+    exact not_regular_boxItr_bot (T := T) (n := m + 1) <| h.of_imp <|
+      Logic.GL.mem_iff_spectrum_eq_univ.mpr <| Set.ext fun k ↦ by
+        grind [@hm k, spectrum_imp, spectrum_boxItr_bot];
   · intro h;
     obtain ⟨m, hm⟩ := h.bddAbove;
-    apply Regular.of_imp (A := ∼□^[m + 1]⊥);
-    · apply Logic.GL.mem_iff_spectrum_eq_univ.mpr;
-      ext k;
-      have := @hm k;
-      simp only [spectrum_imp, spectrum_neg, spectrum_boxItr_bot];
-      grind;
-    · exact regular_neg.mpr not_regular_boxItr_bot;
+    exact Regular.of_imp (A := ∼□^[m + 1]⊥)
+      (Logic.GL.mem_iff_spectrum_eq_univ.mpr <| Set.ext fun k ↦ by
+        grind [@hm k, spectrum_imp, spectrum_neg, spectrum_boxItr_bot])
+      (regular_neg.mpr not_regular_boxItr_bot);
 
 end LetterlessFormula
 
