@@ -542,6 +542,32 @@ lemma weakerThan_union_right (h : U ⪯ S) (T : Theory L) : T ∪ U ⪯ T ∪ S 
 lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
   Entailment.Equiv.antisymm ⟨weakerThan_union_right e.le T, weakerThan_union_right e.symm.le T⟩
 
+section compact
+
+open Entailment
+
+variable [L.DecidableEq] {T : Theory L} {φ : Sentence L}
+
+lemma compact_add_right (h : T ∪ U ⊢ φ) :
+    ∃ s : { s : Finset (Sentence L) // ↑s ⊆ U }, T ⊢ s.1.conj 🡒 φ := by
+  obtain ⟨𝓕, h𝓕, hfin, hφ⟩ := Compact.finite_provable h;
+  clear h;
+  induction 𝓕, (Set.adjunctiveSet_finite_iff 𝓕).mp hfin using Set.Finite.induction_on
+    generalizing φ with
+  | empty => exact ⟨⟨∅, by simp⟩, C_of_conseq <| wk (by simp) hφ⟩;
+  | @insert ψ S _ hS ih =>
+    obtain ⟨⟨s, hs⟩, hsφ⟩ := ih (Set.insert_subset_iff.mp h𝓕).2 (by simpa using hS) (deduction hφ);
+    rcases h𝓕 (Set.mem_insert ψ S) with hψ | hψ;
+    · exact ⟨⟨s, hs⟩, C_swap hsφ ⨀ by_axm hψ⟩;
+    · exact ⟨⟨insert ψ s, by simpa using Set.insert_subset hψ hs⟩,
+        C_trans CinsertFConjKFConj <| CK_iff_CC.mpr <| C_swap hsφ⟩;
+
+lemma compact_add_left (h : T ∪ U ⊢ φ) :
+    ∃ s : { s : Finset (Sentence L) // ↑s ⊆ T }, U ⊢ s.1.conj 🡒 φ :=
+  compact_add_right <| Set.union_comm T U ▸ h
+
+end compact
+
 end Theory
 
 def Theory.theory (T : Theory L) : Theory L := {σ | T ⊢ σ}

@@ -62,7 +62,7 @@ lemma GL_imp_of_height_not_mem_trace
     exact h (LetterlessFormula.forces_lift_iff.mpr hB);
   · intro hn;
     by_contra hn';
-    have h : LetterlessFormula.lift (∼TBB n 🡒 B) ∈ 𝐆𝐋 over α :=
+    have h : LetterlessFormula.lift (α := α) (∼TBB n 🡒 B) ∈ 𝐆𝐋 :=
       GL_imp_of_height_not_mem_trace fun M _ _ hM ↦ by
         simp_all [LetterlessFormula.forces_lift_iff, RootedModel.height];
     exact hn <| by simpa using Set.eq_univ_iff_forall.mp (Logic.GL.lift_mem_iff.mp h) n;

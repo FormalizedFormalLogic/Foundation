@@ -188,8 +188,12 @@ public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.ProvabilityLogic.Arithmetic.ModifiedSolovaySentences
 public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Arithmetic.StrongInterpret
+public import Foundation.ProvabilityLogic.Classification.AD
+public import Foundation.ProvabilityLogic.Classification.DS
+public import Foundation.ProvabilityLogic.Classification.General
 public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 public import Foundation.ProvabilityLogic.Classification.ProvabilityLogicTrace
+public import Foundation.ProvabilityLogic.Classification.Truth
 public import Foundation.ProvabilityLogic.D.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Kripke
@@ -210,6 +214,7 @@ public import Foundation.ProvabilityLogic.Grz.Basic
 public import Foundation.ProvabilityLogic.Grz.Boxdot
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Basic
 public import Foundation.ProvabilityLogic.Grz.Gentzen.Kripke
+public import Foundation.ProvabilityLogic.Kripke.AlmostDefiningFormula
 public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Foundation.ProvabilityLogic.Kripke.Bisimulation
 public import Foundation.ProvabilityLogic.Kripke.Cone
@@ -258,6 +263,7 @@ public import Foundation.Vorspiel.Graph
 public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.List.Basic
 public import Foundation.Vorspiel.List.ChainI
+public import Foundation.Vorspiel.List.OAOO
 public import Foundation.Vorspiel.Matrix
 public import Foundation.Vorspiel.Multiset
 public import Foundation.Vorspiel.Nat.Basic

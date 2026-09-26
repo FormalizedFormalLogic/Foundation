@@ -88,6 +88,18 @@ instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL where
 
 instance [T.SoundOnHierarchy 𝚺 1] : T.standardProvability.Kreisel := ⟨fun h ↦ provable_sound h⟩
 
+lemma models_standardProvability_iff {σ} : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ ↔ T ⊢ σ :=
+  ⟨T.standardProvability.sound_on,
+    fun h ↦ models_of_provable inferInstance (T.standardProvability.D1 h)⟩
+
+lemma soundOnHierarchy_iff_models_reflection :
+    T.SoundOnHierarchy 𝚺 1 ↔
+      ∀ σ, Hierarchy 𝚺 1 σ → ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ 🡒 σ :=
+  ⟨fun _ _ hσ ↦ Semantics.Imp.models_imply.mpr fun h ↦
+      T.soundOnHierarchy 𝚺 1 (models_standardProvability_iff.mp h) hσ,
+    fun h ↦ ⟨fun hσ hσ' ↦
+      Semantics.Imp.models_imply.mp (h _ hσ') (models_standardProvability_iff.mpr hσ)⟩⟩
+
 open FFL.Entailment in
 /--
 If `π` is equivalent to some 𝚺₁ sentence `σ`,
