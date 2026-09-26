@@ -46,8 +46,8 @@ variable [DecidableEq α]
 lemma forces_pseudoTail_interpolant_iff (hab : a ≠ b) (hac : a ≠ c)
     (h₁ : 𝐃 ⊢ ∼(□(□#b ⋎ #a) 🡒 □#b) 🡒 C) (h₂ : 𝐃 ⊢ C 🡒 □(#a 🡒 □#c) 🡒 □#c) (hC : C.atoms ⊆ {a})
     {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (o : α → Prop) :
-    Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] C ↔ M.Val M.root a := by
-  let V x p := if p = a then M.Val x a else x ≠ M.root;
+    Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] C ↔ M M.root a := by
+  let V x p := if p = a then M x a else x ≠ M.root;
   let N : RootedModel κ α := ⟨M.toModel.overwrite V, M.root, M.root_rel⟩;
   have : N.IsFiniteGL := inferInstanceAs (M.toModel.overwrite V).IsFiniteGL;
   have e : Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] C ↔
@@ -60,12 +60,12 @@ lemma forces_pseudoTail_interpolant_iff (hab : a ≠ b) (hac : a ≠ c)
     simpa [N, V, Model.overwrite, Model.Val, hp] using fun h ↦ RootedModel.not_rel_root (h ▸ R);
   have h₄ : ∀ i, ∀ p ≠ a, Sum.inr i ⊮[(N.toPseudoTail o).toModel] □#p := fun i p hp h ↦
     (show ¬V M.root p by simp [V, hp]) <| h (.inl M.root) trivial;
-  have h₅ : ∀ n : ℕ, Sum.inr (n : ℕ∞) ⊩[(N.toPseudoTail o).toModel] #a ↔ M.Val M.root a := by
+  have h₅ : ∀ n : ℕ, Sum.inr (n : ℕ∞) ⊩[(N.toPseudoTail o).toModel] #a ↔ M M.root a := by
     simp [N, V, Model.overwrite, Model.toFreeTail, Model.Val];
-  have hA : Sum.inr ⊤ ⊩[(N.toPseudoTail o).toModel] ∼(□(□#b ⋎ #a) 🡒 □#b) ↔ M.Val M.root a := by
+  have hA : Sum.inr ⊤ ⊩[(N.toPseudoTail o).toModel] ∼(□(□#b ⋎ #a) 🡒 □#b) ↔ M M.root a := by
     simp [forces_neg, forces_imp, forces_or, toFreeTail.forces_root_box_iff (A := □#b ⋎ #a),
       h₄ _ b hab.symm, h₃ _ b hab.symm, h₅];
-  have hB : Sum.inr ⊤ ⊩[(N.toPseudoTail o).toModel] □(#a 🡒 □#c) 🡒 □#c ↔ M.Val M.root a := by
+  have hB : Sum.inr ⊤ ⊩[(N.toPseudoTail o).toModel] □(#a 🡒 □#c) 🡒 □#c ↔ M M.root a := by
     simp [forces_imp, toFreeTail.forces_root_box_iff (A := #a 🡒 □#c), h₄ _ c hac.symm,
       h₃ _ c hac.symm, h₅];
   exact e.trans ⟨fun h ↦ hB.mp <| iff_forces_pseudoTail.mp h₂ N o h,

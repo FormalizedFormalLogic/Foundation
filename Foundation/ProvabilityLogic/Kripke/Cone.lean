@@ -22,7 +22,7 @@ instance : Nonempty { x : M.World // x = r ∨ r ≺ x } := ⟨⟨r, .inl rfl⟩
 
 def cone (M : Model κ α) (r : M.World) : RootedModel { x : M.World // x = r ∨ r ≺ x } α where
   Rel' x y := x.1 ≺ y.1
-  Val' x a := M.Val x.1 a
+  Val' x a := M x.1 a
   root := ⟨r, .inl rfl⟩
   root_rel := by
     rintro ⟨x, rfl | h⟩ hx;

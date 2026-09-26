@@ -36,7 +36,7 @@ def toFreeTail (V : ℕ∞ → α → Prop) : RootedModel (κ ⊕ ℕ∞) α whe
     | .inr _, .inl _ => True
     | .inr i, .inr j => j < i
   Val' x a := match x with
-    | .inl x => M.Val x a
+    | .inl x => M x a
     | .inr i => V i a
   root := .inr ⊤
   root_rel x hx := by
@@ -141,7 +141,7 @@ lemma forces_inr_box_iff {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
 /-- If the finite points of the chain carry the valuation of the root of `M`, and the root of
 `M` forces `□B 🡒 B` for all `□B ∈ X`, then they agree with the root of `M` on `X`. -/
 lemma forces_inr_iff [DecidableEq α] {M : RootedModel κ α} {V : ℕ∞ → α → Prop}
-    (hV : ∀ n : ℕ, V n = M.Val M.root) {X : FormulaFinset α}
+    (hV : ∀ n : ℕ, V n = M M.root) {X : FormulaFinset α}
     (hX : ∀ B ∈ X, B.subfmls ⊆ X) (hroot : ∀ B, □B ∈ X → M.root ⊩[M.toModel] □B 🡒 B)
     (hA : A ∈ X) (n : ℕ) :
     Sum.inr (n : ℕ∞) ⊩[(M.toModel.toFreeTail V).toModel] A ↔ M.root ⊩[M.toModel] A := by
@@ -164,14 +164,14 @@ variable (M : RootedModel κ α)
 
 - [Vis84]
 -/
-abbrev toTail := M.toModel.toFreeTail fun _ ↦ M.Val M.root
+abbrev toTail := M.toModel.toFreeTail fun _ ↦ M M.root
 
 /-- The finite points of the chain carry the valuation of the root of `M`, and the root `o`.
 
 - [KKIM25]
 -/
 abbrev toPseudoTail (o : α → Prop) :=
-  M.toModel.toFreeTail fun i ↦ if i = ⊤ then o else M.Val M.root
+  M.toModel.toFreeTail fun i ↦ if i = ⊤ then o else M M.root
 
 namespace toTail
 

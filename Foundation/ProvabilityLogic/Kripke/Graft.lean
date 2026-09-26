@@ -35,8 +35,8 @@ def graft (M : RootedModel κ α) (a : M.NonRoot) (ι : Type*) [LT ι] : RootedM
     | .inr _, .inl y => y = a.1 ∨ M.Rel a.1 y
     | .inr i, .inr j => j < i
   Val' x p := match x with
-    | .inl x => M.Val x p
-    | .inr _ => M.Val a.1 p
+    | .inl x => M x p
+    | .inr _ => M a.1 p
   root := .inl M.root
   root_rel x hx := by
     rcases x with x | i;

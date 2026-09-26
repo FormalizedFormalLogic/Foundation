@@ -26,8 +26,8 @@ def extendRoot : RootedModel (Option κ) α where
     | none, some _ => True
     | _, none => False
   Val' x a := match x with
-    | some x => M.Val x a
-    | none => M.Val M.root a
+    | some x => M x a
+    | none => M M.root a
   root := none
   root_rel x hx := by
     rcases x with _ | x;

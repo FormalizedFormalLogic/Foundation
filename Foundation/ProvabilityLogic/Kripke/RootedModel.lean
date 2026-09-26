@@ -20,6 +20,8 @@ structure RootedModel (κ : Type*) [Nonempty κ] (α : Type*) extends Model κ �
 
 namespace RootedModel
 
+instance : CoeFun (RootedModel κ α) (fun M ↦ M.World → α → Prop) := ⟨fun M ↦ M.Val⟩
+
 variable {M : RootedModel κ α} {x : M.World}
 
 abbrev NonRoot (M : RootedModel κ α) := { x : M.World // x ≠ M.root }

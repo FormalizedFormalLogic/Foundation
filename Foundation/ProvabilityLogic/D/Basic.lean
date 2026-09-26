@@ -111,7 +111,7 @@ lemma axiomD_disj {Γ : FormulaFinset α} : 𝐃 ⊢ □Γ.box.disj 🡒 Γ.box.
 open Classical in
 /-- - [KKIM25, Proposition 3.6] -/
 lemma root_forces_of_forces_pseudoTail {κ : Type*} [Nonempty κ] {M : RootedModel κ α} [M.IsFiniteGL]
-    (h : ∀ x, M.root ≺ x → Sum.inr ⊤ ⊩[((M.toModel.cone x).toPseudoTail (M.Val M.root)).toModel] A)
+    (h : ∀ x, M.root ≺ x → Sum.inr ⊤ ⊩[((M.toModel.cone x).toPseudoTail (M M.root)).toModel] A)
     (hΓ : M.root ⊩[M.toModel] A.dSubfmls.conj) : M.root ⊩[M.toModel] A := by
   let Δ := A.subfmls.prebox.filter fun B ↦ ¬M.root ⊩[_] □B;
   obtain ⟨x, Rx, hx⟩ : ∃ x, M.root ≺ x ∧ ∀ B ∈ Δ, ¬x ⊩[_] □B := by
@@ -135,7 +135,7 @@ lemma root_forces_of_forces_pseudoTail {κ : Type*} [Nonempty κ] {M : RootedMod
     intro B hB h;
     exact forces_cone.mpr ((hbox B hB).mp (forces_cone.mp h) x Rx);
   have key : ∀ B ∈ A.subfmls,
-      Sum.inr ⊤ ⊩[((M.toModel.cone x).toPseudoTail (M.Val M.root)).toModel] B ↔
+      Sum.inr ⊤ ⊩[((M.toModel.cone x).toPseudoTail (M M.root)).toModel] B ↔
         M.root ⊩[M.toModel] B := by
     intro B hB;
     induction B with

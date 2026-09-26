@@ -28,7 +28,7 @@ variable {κ₁ κ₂ α : Type*} [Nonempty κ₁] [Nonempty κ₂] {M₁ : Mode
 -/
 structure BisimulationUnder (P : Finset α) (M₁ : Model κ₁ α) (M₂ : Model κ₂ α) where
   toRel : M₁.World → M₂.World → Prop
-  atomic {x₁ x₂ a} : a ∈ P → toRel x₁ x₂ → (M₁.Val x₁ a ↔ M₂.Val x₂ a)
+  atomic {x₁ x₂ a} : a ∈ P → toRel x₁ x₂ → (M₁ x₁ a ↔ M₂ x₂ a)
   forth {x₁ y₁ x₂} : toRel x₁ x₂ → x₁ ≺ y₁ → ∃ y₂, toRel y₁ y₂ ∧ x₂ ≺ y₂
   back {x₁ x₂ y₂} : toRel x₁ x₂ → x₂ ≺ y₂ → ∃ y₁, toRel y₁ y₂ ∧ x₁ ≺ y₁
 
@@ -58,7 +58,7 @@ structure PseudoEpimorphism (M₁ : Model κ₁ α) (M₂ : Model κ₂ α) wher
   toFun : M₁.World → M₂.World
   forth {x y} : x ≺ y → toFun x ≺ toFun y
   back {x v} : toFun x ≺ v → ∃ y, toFun y = v ∧ x ≺ y
-  atomic {x a} : M₁.Val x a ↔ M₂.Val (toFun x) a
+  atomic {x a} : M₁ x a ↔ M₂ (toFun x) a
 
 scoped infix:80 " →ₚ " => PseudoEpimorphism
 

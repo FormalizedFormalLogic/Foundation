@@ -52,7 +52,7 @@ instance : Nonempty (unravelling.World M) := ⟨⟨[M.root], List.suffix_refl _,
 /-- The unravelling of `M`: chains from the root, ordered by proper extension. -/
 def unravelling : RootedModel (unravelling.World M) α where
   Rel' x y := x.1 <:+ y.1 ∧ x.1.length < y.1.length
-  Val' x p := M.Val x.tip p
+  Val' x p := M x.tip p
   root := ⟨[M.root], List.suffix_refl _, by simp⟩
   root_rel x hx :=
     ⟨x.2.1, x.2.1.length_le.lt_of_ne fun h ↦ hx <| Subtype.ext (x.2.1.eq_of_length h).symm⟩

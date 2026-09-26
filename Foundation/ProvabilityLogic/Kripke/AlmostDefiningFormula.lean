@@ -28,7 +28,7 @@ variable {κ κ' α : Type*} [Nonempty κ] [Nonempty κ']
 namespace Kripke.Model
 
 variable {K K' : Model κ α} {r : K.World} (hR : K.Rel' = K'.Rel') (hr : ∀ x, ¬K.Rel' x r)
-  (hV : ∀ x ≠ r, ∀ a, K.Val x a ↔ K'.Val x a)
+  (hV : ∀ x ≠ r, ∀ a, K x a ↔ K' x a)
 include hR hr hV
 
 lemma forces_congr_of_ne {z : K.World} (hz : z ≠ r) {C : Formula α} : z ⊩[K] C ↔ z ⊩[K'] C := by
@@ -142,7 +142,7 @@ theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ'
     (hr : ∀ n, K.root ⊮[_] □^[n]⊥)
     (hK : ∀ z ≠ K.root, ∃ n, z ⊩[_] □^[n]⊥)
     (hΦ : K.root ⊩[_] almostDefiningFormula P M) {o : α → Prop}
-    (ho : ∀ a ∈ P, (o a ↔ K.Val K.root a)) :
+    (ho : ∀ a ∈ P, (o a ↔ K K.root a)) :
     ∃ Bi : (M.toPseudoTail o).toModel ⇄[P] K.toModel, Bi (.inr ⊤) K.root := by
   let R : (M.toPseudoTail o).toModel.World → K.World → Prop
     | .inl x, z => z ⊩[_] charFormulaUnder (M := M.toModel) P x

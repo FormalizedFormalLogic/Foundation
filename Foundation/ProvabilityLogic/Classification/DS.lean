@@ -91,13 +91,13 @@ section Transfer
 variable [DecidableEq α] {K : RootedModel κ α} {p q : α} {γ : Finset α}
 
 lemma val_subst_pIffOn_of_ne (hp : K.root ⊩[_] □#p) {z : K.World} (hz : z ≠ K.root) :
-    (K.subst (Substitution.pIffOn p γ)).Val z q ↔ K.Val z q := by
+    (K.subst (Substitution.pIffOn p γ)) z q ↔ K z q := by
   have := hp z (K.root_rel z hz);
   change z ⊩[_] (if q ∈ γ then #p 🡘 #q else #q) ↔ _;
   grind;
 
 lemma val_subst_pIffOn_root (hnp : K.root ⊮[_] #p) :
-    (K.subst (Substitution.pIffOn p γ)).Val K.root q ↔ (q ∈ γ ↔ ¬K.Val K.root q) := by
+    (K.subst (Substitution.pIffOn p γ)) K.root q ↔ (q ∈ γ ↔ ¬K K.root q) := by
   change K.root ⊩[_] (if q ∈ γ then #p 🡘 #q else #q) ↔ _;
   grind;
 
@@ -114,8 +114,8 @@ lemma root_forces_deltaPIff_imp (hA : Sum.inr ⊤ ⊮[(M.toPseudoTail o).toModel
   intro hδ hΦ hp;
   by_contra hnp;
   obtain ⟨γ, hγ₁, hγ₂⟩ : ∃ γ : Finset α,
-      γ ⊆ A.atoms ∧ ∀ q ∈ A.atoms, (q ∈ γ ↔ ¬(o q ↔ K.Val K.root q)) :=
-    ⟨A.atoms.filter fun q ↦ ¬(o q ↔ K.Val K.root q), Finset.filter_subset _ _,
+      γ ⊆ A.atoms ∧ ∀ q ∈ A.atoms, (q ∈ γ ↔ ¬(o q ↔ K K.root q)) :=
+    ⟨A.atoms.filter fun q ↦ ¬(o q ↔ K K.root q), Finset.filter_subset _ _,
       fun q hq ↦ by simp [hq]⟩;
   have hbox (z : K.World) (n : ℕ) :
       z ⊩[K.toModel.subst (Substitution.pIffOn p γ)] □^[n]⊥ ↔ z ⊩[K.toModel] □^[n]⊥ := by
@@ -128,7 +128,7 @@ lemma root_forces_deltaPIff_imp (hA : Sum.inr ⊤ ⊮[(M.toPseudoTail o).toModel
       (fun z hz q ↦ (val_subst_pIffOn_of_ne hp hz).symm) modalized_almostDefiningFormula).mp
       (of_not_not hΦ))
     fun q hq ↦ by
-      change o q ↔ (K.subst (Substitution.pIffOn p γ)).Val K.root q;
+      change o q ↔ (K.subst (Substitution.pIffOn p γ)) K.root q;
       grind [val_subst_pIffOn_root hnp];
   exact hA <| (Bi.forces_iff hBi subset_rfl).mpr <| forces_subst.mpr <|
     forces_conj.mp hδ _ <| Finset.mem_image_of_mem _ (Finset.mem_powerset.mpr hγ₁);

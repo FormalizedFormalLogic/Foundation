@@ -30,7 +30,7 @@ variable {M : Model κ α} {N : Model κ' α} {P : Finset α} {x : M.World} {w :
 open Classical in
 /-- The literals over `P` true at `x`. -/
 def World.valuationConj (P : Finset α) (x : M.World) : Formula α :=
-  (P.image fun a ↦ if M.Val x a then #a else ∼#a).conj
+  (P.image fun a ↦ if M x a then #a else ∼#a).conj
 
 @[grind .]
 lemma World.atoms_valuationConj : (x.valuationConj P).atoms ⊆ P :=
@@ -38,7 +38,7 @@ lemma World.atoms_valuationConj : (x.valuationConj P).atoms ⊆ P :=
     Finset.forall_mem_image.mpr <| by grind
 
 @[grind =]
-lemma World.forces_valuationConj : w ⊩[_] x.valuationConj P ↔ ∀ a ∈ P, (M.Val x a ↔ N.Val w a) :=
+lemma World.forces_valuationConj : w ⊩[_] x.valuationConj P ↔ ∀ a ∈ P, (M x a ↔ N w a) :=
   forces_conj.trans <| Finset.forall_mem_image.trans <| forall₂_congr fun _ _ ↦ by grind
 
 open Classical in
@@ -76,7 +76,7 @@ lemma World.atoms_charFormulaUnder : (x.charFormulaUnder P).atoms ⊆ P := by
         Finset.forall_mem_image.mpr fun y _ ↦ ih y y.2;
 
 lemma World.forces_charFormulaUnder_iff : w ⊩[_] x.charFormulaUnder P ↔
-    (∀ a ∈ P, (M.Val x a ↔ N.Val w a)) ∧
+    (∀ a ∈ P, (M x a ↔ N w a)) ∧
     (∀ y, x ≺ y → ∃ v, w ≺ v ∧ v ⊩[_] y.charFormulaUnder P) ∧
     (∀ v, w ≺ v → ∃ y, x ≺ y ∧ v ⊩[_] y.charFormulaUnder P) := by
   rw [charFormulaUnder_def];
