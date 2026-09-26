@@ -49,7 +49,6 @@ lemma card_refuted [M.IsFiniteGL] (hw : w ⊩ hyp m) (hbw : w ⊩ □hyp m) (hx 
       ∃ i, x ⊩ □#(some i) ∧ x ⊮ #(some i) := by
     intro x k hx hs;
     induction k <;> grind [seq, hyp, forces_conj₂];
-  have htrans : ∀ {a b c : M.World}, a ≺ b → b ≺ c → a ≺ c := IsTrans.trans _ _ _;
   induction k generalizing x with
   | zero =>
     obtain ⟨i, -, hi⟩ := witness hx hs;
@@ -57,19 +56,19 @@ lemma card_refuted [M.IsFiniteGL] (hw : w ⊩ hyp m) (hbw : w ⊩ □hyp m) (hx 
   | succ k ih =>
     obtain ⟨-, y, hxy, hy⟩ := not_forces_seq_succ.mp hs;
     obtain ⟨i, hbox, hi⟩ := witness hx hs;
-    calc k + 1 + 1 ≤ (refuted y).card + 1 := by grind
+    calc k + 1 + 1 ≤ (refuted y).card + 1 := by grind [IsTrans.trans (r := M.Rel)]
       _ = (insert i (refuted y)).card :=
-        (Finset.card_insert_of_notMem <| by grind [refuted]).symm
+        (Finset.card_insert_of_notMem <| by grind [refuted, IsTrans.trans (r := M.Rel)]).symm
       _ ≤ (refuted x).card :=
-        Finset.card_le_card <| Finset.insert_subset (by grind [refuted]) (by grind [refuted])
+        Finset.card_le_card <| Finset.insert_subset (by grind [refuted]) <| by
+          grind [refuted, IsTrans.trans (r := M.Rel)]
 
 end Semantics
 
 lemma collapse_mem (m : ℕ) : 𝐆𝐋 ⊢ hyp m 🡒 □hyp m 🡒 reflection m 🡒 #none := by
   rw [Logic.GL.iff_valid_finite];
-  intro κ _ M _ w;
-  simp only [forces_imp];
-  by_contra! ⟨hH, hbH, hR, hq⟩;
+  intro κ _ M _ w hH hbH hR;
+  by_contra! hq;
   have hs : ∀ k ≤ m + 1, w ⊮ seq (#none) k := by
     intro k hk;
     induction k with
