@@ -218,7 +218,7 @@ instance [M.IsGL] : (M.subst s).IsGL where
   toIsConverseWellFounded := inferInstanceAs (IsConverseWellFounded _ M.Rel)
 
 lemma forces_congr {N : Model κ α} (hR : M.Rel' = N.Rel') (hV : ∀ x a, M.Val x a ↔ N.Val x a)
-    {x : κ} {A : Formula α} : x ⊩[M] A ↔ x ⊩[N] A := by
+    {x : M.World} {A : Formula α} : x ⊩[M] A ↔ x ⊩[N] A := by
   induction A generalizing x with
   | atom a => exact hV x a;
   | falsum => rfl;
@@ -229,7 +229,7 @@ lemma forces_congr {N : Model κ α} (hR : M.Rel' = N.Rel') (hV : ∀ x a, M.Val
     exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ ih;
 
 lemma forces_congr_of_atoms [DecidableEq α] {N : Model κ α} (hR : M.Rel' = N.Rel') {A : Formula α}
-    (hV : ∀ x, ∀ a ∈ A.atoms, M.Val x a ↔ N.Val x a) {x : κ} : x ⊩[M] A ↔ x ⊩[N] A := by
+    (hV : ∀ x, ∀ a ∈ A.atoms, M.Val x a ↔ N.Val x a) {x : M.World} : x ⊩[M] A ↔ x ⊩[N] A := by
   induction A generalizing x with
   | atom a => exact hV x a (by simp);
   | falsum => rfl;

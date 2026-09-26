@@ -66,7 +66,7 @@ theorem provability_TFAE : [
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
       (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
-      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : κ ⊕ ℕ∞) ⊩[M.toTail.toModel] A,
+      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : M.toTail.World) ⊩[M.toTail.toModel] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
       M.root ⊩[M.toModel] A.rflSubfmls.conj 🡒 A,
     𝐆𝐋 ⊢ A.rflSubfmls.conj 🡒 A
@@ -100,7 +100,7 @@ lemma iff_eventually_forces : 𝐒 ⊢ A ↔
 omit [DecidableEq α] in
 lemma iff_eventually_forces_tail : 𝐒 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
-      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : κ ⊕ ℕ∞) ⊩[M.toTail.toModel] A := by
+      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : M.toTail.World) ⊩[M.toTail.toModel] A := by
   classical
   exact provability_TFAE.out 1 4
 

@@ -14,7 +14,7 @@ open Formula Model.World
 
 namespace Model
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {V : κ → α → Prop}
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {V : M.World → α → Prop}
 
 def overwrite (M : Model κ α) (V : M.World → α → Prop) : Model κ α := ⟨M.Rel', V⟩
 
