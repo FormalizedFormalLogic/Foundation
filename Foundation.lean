@@ -198,6 +198,7 @@ public import Foundation.ProvabilityLogic.Formula
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 public import Foundation.ProvabilityLogic.GL.Basic
 public import Foundation.ProvabilityLogic.GL.CIP
+public import Foundation.ProvabilityLogic.GL.FiniteLocalReflection
 public import Foundation.ProvabilityLogic.GL.Fixedpoint
 public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
