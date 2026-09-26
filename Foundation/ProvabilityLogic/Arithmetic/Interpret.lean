@@ -110,6 +110,38 @@ lemma provabilityLogic_subst {s : Substitution α α}
 
 end
 
+section conj
+
+open Entailment
+
+variable {𝔅 : Provability T₀ T} {f : Realization α L} {Γ : List (Formula α)}
+
+lemma interpret_conj_left {B : Formula α} (hB : B ∈ Γ) :
+    T ⊢ (⋀Γ).interpret f 𝔅 🡒 B.interpret f 𝔅 := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp at hB;
+  | hsingle a =>
+    obtain rfl := List.mem_singleton.mp hB;
+    exact C_id;
+  | hcons C Γ hΓ ih =>
+    rw [List.conj₂_cons_nonempty hΓ];
+    simp only [interpret];
+    rcases List.mem_cons.mp hB with rfl | hB;
+    · cl_prover;
+    · cl_prover [ih hB];
+
+lemma interpret_conj_right {φ : Sentence L} (h : ∀ B ∈ Γ, T ⊢ φ 🡒 B.interpret f 𝔅) :
+    T ⊢ φ 🡒 (⋀Γ).interpret f 𝔅 := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp only [List.conj₂_nil, interpret]; cl_prover;
+  | hsingle a => exact h a (List.mem_singleton_self a);
+  | hcons C Γ hΓ ih =>
+    rw [List.conj₂_cons_nonempty hΓ];
+    simp only [interpret];
+    cl_prover [ih fun B hB ↦ h B (List.mem_cons_of_mem _ hB), h C List.mem_cons_self];
+
+end conj
+
 end FFL.ProvabilityLogic
 
 end

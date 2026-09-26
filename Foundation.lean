@@ -82,6 +82,7 @@ public import Foundation.FirstOrder.Incompleteness.Halting
 public import Foundation.FirstOrder.Incompleteness.Jeroslow
 public import Foundation.FirstOrder.Incompleteness.Löb
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.FiniteLocalReflection
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflection
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refutability
@@ -198,6 +199,7 @@ public import Foundation.ProvabilityLogic.Formula
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 public import Foundation.ProvabilityLogic.GL.Basic
 public import Foundation.ProvabilityLogic.GL.CIP
+public import Foundation.ProvabilityLogic.GL.FiniteLocalReflection
 public import Foundation.ProvabilityLogic.GL.Fixedpoint
 public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
