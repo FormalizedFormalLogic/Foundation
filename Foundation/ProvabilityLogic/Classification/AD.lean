@@ -32,10 +32,10 @@ the chain, for a countermodel `M` of `A` whose root sees an `A`-reflexive world 
 
 - [Bek90, Lemma 5]
 -/
-def ofReflexive (M : RootedModel κ α) [M.IsGL] (hA : M.root ⊮[M.toModel] A) {v : M.World}
+def ofReflexive (M : RootedModel κ α) [M.IsGL] (hA : M.root ⊮[_] A) {v : M.World}
     (Rv : M.root ≺ v) (hv : v.IsReflexiveOf A.subfmls.prebox) :
     StrongReflexiveCountermodel (κ ⊕ Fin 1) A :=
-  have ha : ∀ B, □B ∈ A.subfmls → v ⊩[M.toModel] □B 🡒 B :=
+  have ha : ∀ B, □B ∈ A.subfmls → v ⊩[_] □B 🡒 B :=
     fun B hB ↦ hv B (FormulaFinset.mem_prebox.mpr hB)
   let a : M.NonRoot := ⟨v, by rintro rfl; exact not_rel_root Rv⟩
   have h {B : Formula α} (hB : B ∈ A.subfmls) := graft.forces_iff (fun _ ↦ subfmls_trans) ha hB

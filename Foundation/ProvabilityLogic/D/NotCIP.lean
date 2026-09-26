@@ -77,7 +77,7 @@ lemma S_modalize_iff_of_interpolant (hab : a ≠ b) (hac : a ≠ c)
   apply (S.provability_TFAE.out 1 5).mpr;
   intro κ _ M _ hΓ;
   set X := (C.modalize 🡘 #a).subfmls;
-  have hroot : ∀ B, □B ∈ X → M.root ⊩[M.toModel] □B 🡒 B :=
+  have hroot : ∀ B, □B ∈ X → M.root ⊩[_] □B 🡒 B :=
     fun B hB ↦ forces_conj.mp hΓ _ (Finset.mem_image.mpr ⟨B, FormulaFinset.mem_prebox.mpr hB, rfl⟩);
   have key : ∀ D : Formula α, D.modalize ∈ X →
       (Sum.inr ⊤ ⊩[(M.toPseudoTail fun _ ↦ False).toModel] D ↔ M.root ⊩[M.toModel] D.modalize) := by

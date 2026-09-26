@@ -28,9 +28,9 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
 lemma eventually_isReflexiveOf [M.IsGL] {w : ℕ → M.World} (hw : ∀ n, w (n + 1) ≺ w n)
     (X : FormulaFinset α) : ∃ i, ∀ j ≥ i, (w j).IsReflexiveOf X := by
   have : IsTrans _ fun x y : M.World ↦ y ≺ x := ⟨fun _ _ _ h₁ h₂ ↦ IsTrans.trans _ _ _ h₂ h₁⟩;
-  have h : ∀ A, ∃ i, ∀ j ≥ i, w j ⊩[M] □A 🡒 A := by
+  have h : ∀ A, ∃ i, ∀ j ≥ i, w j ⊩[_] □A 🡒 A := by
     intro A;
-    by_cases h : ∀ n, w n ⊩[M] A;
+    by_cases h : ∀ n, w n ⊩[_] A;
     · exact ⟨0, fun j _ _ ↦ h j⟩;
     · push Not at h;
       obtain ⟨n, hn⟩ := h;
@@ -48,7 +48,7 @@ variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α}
 /-- - [KK23, Theorem 3.1] -/
 theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐒] T) :
     ∃ X : FormulaFinset α, ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
-      (T.level = 1 → x.IsReflexiveOf X) → x ⊩[M] T.toSequent := by
+      (T.level = 1 → x.IsReflexiveOf X) → x ⊩[_] T.toSequent := by
   induction h with
   | axm | botL => exact ⟨∅, by intros; grind⟩;
   | wkL _ _ ih | wkR _ _ ih | impR _ ih =>
@@ -82,7 +82,7 @@ theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐒] T) :
 /-- - [KK23, Theorem 3.1] -/
 theorem sound (h : ⊢ᴳ[𝐒] Γ ⟹[1] Δ) :
     ∃ X : FormulaFinset α, ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
-      x.IsReflexiveOf X → x ⊩[M] (Γ ⟹ Δ) := by
+      x.IsReflexiveOf X → x ⊩[_] (Γ ⟹ Δ) := by
   obtain ⟨X, hX⟩ := sound_aux h;
   exact ⟨X, fun M _ x hx ↦ hX M x fun _ ↦ hx⟩;
 
@@ -130,7 +130,7 @@ lemma truthlemma_freeTail {BS : Sequent α} [Fact (⊬ᴳ[𝐆𝐋] BS)] {t : GL
 /-- - [KK23, Theorem 3.1] -/
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩[M] (Γ ⟹ Δ)) :
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩[_] (Γ ⟹ Δ)) :
     ⊢ᴳ[𝐒] Γ ⟹[1] Δ := by
   by_contra hS;
   have hGL : ∀ {S : Sequent α}, ⊢ᴳ[𝐆𝐋] S → ⊢ᴳ[𝐒] S.ant ⟹[1] S.suc := fun h ↦ .liftUp (of_GL h);
@@ -150,11 +150,11 @@ theorem complete
 theorem TFAE : [
     ⊢ᴳ[𝐒] Γ ⟹[1] Δ,
     ∃ X : FormulaFinset α, ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
-      x.IsReflexiveOf X → x ⊩[M] (Γ ⟹ Δ),
+      x.IsReflexiveOf X → x ⊩[_] (Γ ⟹ Δ),
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] (Γ ⟹ Δ),
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[_] (Γ ⟹ Δ),
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩[M] (Γ ⟹ Δ)
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩[_] (Γ ⟹ Δ)
   ].TFAE := by
   tfae_have 1 → 2 := fun h ↦ by
     obtain ⟨X, hX⟩ := sound h;
@@ -169,7 +169,7 @@ theorem TFAE : [
 
 lemma iff_eventually_forces : ⊢ᴳ[𝐒] Γ ⟹[1] Δ ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] (Γ ⟹ Δ) :=
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[_] (Γ ⟹ Δ) :=
   TFAE.out 1 3
 
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}

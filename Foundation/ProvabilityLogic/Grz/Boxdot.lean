@@ -47,12 +47,12 @@ lemma forces_irreflGen_boxdotTranslate [Std.Refl M.Rel] {x : M.World} :
       exact ⟨h x (Std.Refl.refl x), fun y Rxy ↦ h y Rxy.1⟩;
 
 lemma forces_boxdotTranslate_axiomGrz [M.IsGL] {x : M.World} :
-    x ⊩[M] ⊡(⊡(A 🡒 ⊡A) 🡒 A) 🡒 A := by
+    x ⊩[_] ⊡(⊡(A 🡒 ⊡A) 🡒 A) 🡒 A := by
   induction x using WellFounded.induction (IsConverseWellFounded.cwf (rel := M.Rel)) with
   | _ x ih =>
     intro hx;
     obtain ⟨h₁, h₂⟩ := forces_boxdot.mp hx;
-    have h₃ : ∀ z, x ≺ z → z ⊩[M] A := fun z Rxz ↦ ih z Rxz <|
+    have h₃ : ∀ z, x ≺ z → z ⊩[_] A := fun z Rxz ↦ ih z Rxz <|
       forces_boxdot.mpr ⟨h₂ z Rxz, fun w Rzw ↦ h₂ w (IsTrans.trans _ _ _ Rxz Rzw)⟩;
     apply h₁;
     apply forces_boxdot.mpr;

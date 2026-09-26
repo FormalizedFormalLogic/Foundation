@@ -27,7 +27,7 @@ variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α}
 /-- - [Bek90, Lemma 5] -/
 theorem sound {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐀] T) {κ : Type*} [Nonempty κ]
     (M : RootedModel κ α) [M.IsGL] (a : M.NonRoot) :
-    (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] T.toSequent := by
+    (M.graft a ℕ).root ⊩[_] T.toSequent := by
   induction h with
   | liftUp h => exact GL.Gentzen.sound _ (h.toGL rfl) _;
   | boxGL h => exact GL.Gentzen.sound _ ((boxGL h).toGL rfl) _;
@@ -44,7 +44,7 @@ variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 /-- - [Bek90, Lemma 5] -/
 theorem GL_of_forces_graft
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ)) :
+      (M.graft a ℕ).root ⊩[_] (Γ ⟹ Δ)) :
     ⊢ᴳ[𝐆𝐋] Γ ⟹ insert (□^[(Γ ⟹ Δ).subfmls.prebox.card + 1]⊥) Δ := by
   apply GL.Gentzen.complete;
   intro κ _ M _ x hΓ;
@@ -68,7 +68,7 @@ theorem GL_of_forces_graft
 /-- - [Bek90, Lemma 5] -/
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ)) :
+      (M.graft a ℕ).root ⊩[_] (Γ ⟹ Δ)) :
     ⊢ᴳ[𝐀] Γ ⟹[1] Δ :=
   of_GL_boxItr_bot (GL_of_forces_graft h)
 
@@ -78,9 +78,9 @@ theorem complete
 theorem TFAE : [
     ⊢ᴳ[𝐀] Γ ⟹[1] Δ,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ),
+      (M.graft a ℕ).root ⊩[_] (Γ ⟹ Δ),
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ),
+      (M.graft a ℕ).root ⊩[_] (Γ ⟹ Δ),
     ∃ n : ℕ, ⊢ᴳ[𝐆𝐋] Γ ⟹ insert (□^[n]⊥) Δ
   ].TFAE := by
   tfae_have 1 → 2 := fun h _ _ M _ a ↦ sound h M a;

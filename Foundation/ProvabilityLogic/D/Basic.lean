@@ -111,17 +111,17 @@ open Classical in
 lemma root_forces_of_forces_pseudoTail {κ : Type*} [Nonempty κ] {M : RootedModel κ α} [M.IsFiniteGL]
     (h : ∀ x, M.root ≺ x → Sum.inr ⊤ ⊩[((M.toModel.cone x).toPseudoTail (M.Val M.root)).toModel] A)
     (hΓ : M.root ⊩[M.toModel] A.dSubfmls.conj) : M.root ⊩[M.toModel] A := by
-  let Δ := A.subfmls.prebox.filter fun B ↦ ¬M.root ⊩[M.toModel] □B;
-  obtain ⟨x, Rx, hx⟩ : ∃ x, M.root ≺ x ∧ ∀ B ∈ Δ, ¬x ⊩[M.toModel] □B := by
+  let Δ := A.subfmls.prebox.filter fun B ↦ ¬M.root ⊩[_] □B;
+  obtain ⟨x, Rx, hx⟩ : ∃ x, M.root ≺ x ∧ ∀ B ∈ Δ, ¬x ⊩[_] □B := by
     have h₁ := forces_conj.mp hΓ _ (Finset.mem_image.mpr
       ⟨Δ, Finset.mem_powerset.mpr (Finset.filter_subset _ _), rfl⟩);
-    have h₂ : ¬M.root ⊩[M.toModel] (FormulaFinset.box Δ).disj := by
+    have h₂ : ¬M.root ⊩[_] (FormulaFinset.box Δ).disj := by
       simp only [forces_disj, Finset.mem_image];
       rintro ⟨_, ⟨B, hB, rfl⟩, h⟩;
       exact (Finset.mem_filter.mp hB).2 h;
     obtain ⟨x, Rx, hx⟩ := not_forces_box.mp fun h ↦ h₂ (h₁ h);
     exact ⟨x, Rx, fun B hB h ↦ hx (forces_disj.mpr ⟨□B, Finset.mem_image_of_mem _ hB, h⟩)⟩;
-  have hbox : ∀ B, □B ∈ A.subfmls → (x ⊩[M.toModel] □B ↔ M.root ⊩[M.toModel] □B) := by
+  have hbox : ∀ B, □B ∈ A.subfmls → (x ⊩[_] □B ↔ M.root ⊩[_] □B) := by
     intro B hB;
     constructor;
     · intro h;
@@ -129,7 +129,7 @@ lemma root_forces_of_forces_pseudoTail {κ : Type*} [Nonempty κ] {M : RootedMod
       exact hx B (Finset.mem_filter.mpr ⟨FormulaFinset.mem_prebox.mpr hB, hr⟩) h;
     · exact fun h y Rxy ↦ h y (IsTrans.trans _ _ _ Rx Rxy);
   have hrefl : ∀ B, □B ∈ A.subfmls →
-      (M.toModel.cone x).root ⊩[(M.toModel.cone x).toModel] □B 🡒 B := by
+      (M.toModel.cone x).root ⊩[_] □B 🡒 B := by
     intro B hB h;
     exact forces_cone.mpr ((hbox B hB).mp (forces_cone.mp h) x Rx);
   have key : ∀ B ∈ A.subfmls,
@@ -175,7 +175,7 @@ theorem provability_TFAE : [
   tfae_have 1 → 3 := fun h _ _ M _ V ↦ sound_freeTail h M V;
   tfae_have 2 ↔ 3 := by
     have h : ∀ {κ : Type u} [Nonempty κ] {M : Model κ α} {x : M.World},
-        x ⊩[M] (∅ ⟹ {A}) ↔ x ⊩[M] A := by simp [ForcesSequent];
+        x ⊩[_] (∅ ⟹ {A}) ↔ x ⊩[_] A := by simp [ForcesSequent];
     have e : ⊢ᴳ[𝐃] ∅ ⟹[2] {A} ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] V,
         Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] (∅ ⟹ {A}) := D.Gentzen.TFAE.out 1 2;
     rw [e];

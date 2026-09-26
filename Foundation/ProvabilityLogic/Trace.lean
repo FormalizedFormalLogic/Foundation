@@ -28,7 +28,7 @@ open Entailment Formula Kripke Kripke.Model Kripke.Model.World
 universe u
 
 lemma Kripke.Model.forces_TBB_iff {κ α : Type*} [Nonempty κ] {M : Model κ α} [Fintype M.World]
-    [M.IsGL] {x : M.World} {n : ℕ} : x ⊩[M] TBB n ↔ x.rank ≠ n := by
+    [M.IsGL] {x : M.World} {n : ℕ} : x ⊩[_] TBB n ↔ x.rank ≠ n := by
   grind [TBB, forces_boxItr_bot_iff];
 
 namespace Formula
@@ -41,15 +41,15 @@ variable {α : Type u} {A B : Formula α} {n : ℕ}
 -/
 def trace (A : Formula α) : Set ℕ :=
   {n | ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : Fintype M.World) (_ : M.IsGL),
-    M.height = n ∧ M.root ⊮[M.toModel] A}
+    M.height = n ∧ M.root ⊮[_] A}
 
 lemma root_forces_of_not_mem_trace {κ : Type u} [Nonempty κ] {M : RootedModel κ α}
-    [Fintype M.World] [M.IsGL] (h : M.height ∉ A.trace) : M.root ⊩[M.toModel] A :=
+    [Fintype M.World] [M.IsGL] (h : M.height ∉ A.trace) : M.root ⊩[_] A :=
   Classical.byContradiction fun hA ↦ h ⟨κ, _, M, _, _, rfl, hA⟩
 
 lemma GL_imp_of_height_not_mem_trace
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [Fintype M.World] [M.IsGL],
-      M.root ⊩[M.toModel] B → M.height ∉ A.trace) : 𝐆𝐋 ⊢ B 🡒 A := by
+      M.root ⊩[_] B → M.height ∉ A.trace) : 𝐆𝐋 ⊢ B 🡒 A := by
   apply Logic.GL.iff_root_forces.mpr;
   intro _ _ M _ hB;
   have : Fintype M.World := Fintype.ofFinite _;
@@ -133,7 +133,7 @@ lemma exists_finset_trace_subset_of_mem_sumQuasiNormal {X : Logic α} (h : A ∈
     and_intros;
     · simp [hY₁, hY₂];
     · rintro n ⟨κ, _, M, _, _, rfl, hB⟩;
-      by_cases hC : M.root ⊩[M.toModel] C;
+      by_cases hC : M.root ⊩[_] C;
       · exact Set.biUnion_subset_biUnion_left (by simp) <|
           h₁ ⟨κ, _, M, _, _, rfl, fun h ↦ hB (h hC)⟩;
       · exact Set.biUnion_subset_biUnion_left (by simp) <| h₂ ⟨κ, _, M, _, _, rfl, hC⟩;

@@ -22,8 +22,8 @@ namespace Kripke.Model.World
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {M : Model κ α} [IsTrans _ M.Rel]
   {x : M.World} {p : α} {A B C : Formula α}
 
-lemma forces_subst_single_congr (h : ∀ y, (y = x ∨ x ≺ y) → (y ⊩[M] B ↔ y ⊩[M] C)) :
-    x ⊩[M] A⟦p ↦ B⟧ ↔ x ⊩[M] A⟦p ↦ C⟧ := by
+lemma forces_subst_single_congr (h : ∀ y, (y = x ∨ x ≺ y) → (y ⊩[_] B ↔ y ⊩[_] C)) :
+    x ⊩[_] A⟦p ↦ B⟧ ↔ x ⊩[_] A⟦p ↦ C⟧ := by
   induction A generalizing x with
   | atom a => by_cases a = p <;> simp_all;
   | falsum => rfl;
@@ -35,7 +35,7 @@ lemma forces_subst_single_congr (h : ∀ y, (y = x ∨ x ≺ y) → (y ⊩[M] B 
       · exact IsTrans.trans _ _ _ Rxy hz;
 
 lemma forces_subst_single_congr_of_modalizedIn (hA : A.ModalizedIn p)
-    (h : ∀ y, x ≺ y → (y ⊩[M] B ↔ y ⊩[M] C)) : x ⊩[M] A⟦p ↦ B⟧ ↔ x ⊩[M] A⟦p ↦ C⟧ := by
+    (h : ∀ y, x ≺ y → (y ⊩[_] B ↔ y ⊩[_] C)) : x ⊩[_] A⟦p ↦ B⟧ ↔ x ⊩[_] A⟦p ↦ C⟧ := by
   induction A with
   | atom a => simp [show a ≠ p from hA];
   | falsum => rfl;
@@ -58,7 +58,7 @@ lemma subst (s : Substitution α α) (h : ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ) :
     ⊢ᴳ[𝐆𝐋] Γ.image (·⟦s⟧) ⟹ Δ.image (·⟦s⟧) := by
   apply complete;
   intro _ _ M _ x hx;
-  obtain ⟨D, hD, hxD⟩ := sound (M.overwrite fun y a ↦ y ⊩[M] s a) h x
+  obtain ⟨D, hD, hxD⟩ := sound (M.overwrite fun y a ↦ y ⊩[_] s a) h x
     fun C hC ↦ forces_overwrite_subst.mpr (hx _ (Finset.mem_image_of_mem _ hC));
   exact ⟨_, Finset.mem_image_of_mem _ hD, forces_overwrite_subst.mp hxD⟩;
 
@@ -89,9 +89,9 @@ private lemma fixpoint_premise (hA : A.ModalizedIn p) :
     ⊢ᴳ[𝐆𝐋] {A, □(A 🡘 #p), □(A⟦p ↦ #q⟧ 🡘 #q)} ⟹ {A⟦p ↦ #q⟧} := by
   apply Gentzen.complete;
   intro _ _ M _ x hx;
-  have h₁ : x ⊩[M] □(A 🡘 #p) := hx _ (by simp);
-  have h₂ : x ⊩[M] □(A⟦p ↦ #q⟧ 🡘 #q) := hx _ (by simp);
-  have h₃ : ∀ y, x ≺ y → (y ⊩[M] #p ↔ y ⊩[M] #q) := by
+  have h₁ : x ⊩[_] □(A 🡘 #p) := hx _ (by simp);
+  have h₂ : x ⊩[_] □(A⟦p ↦ #q⟧ 🡘 #q) := hx _ (by simp);
+  have h₃ : ∀ y, x ≺ y → (y ⊩[_] #p ↔ y ⊩[_] #q) := by
     intro y;
     induction y using (IsConverseWellFounded.cwf (rel := M.Rel)).induction with
     | _ y ih =>
@@ -128,7 +128,7 @@ theorem exists_fixpoint (hpq : p ≠ q) (hA : A.ModalizedIn p) (hq : q ∉ A.ato
   intro _ _ M _ x;
   induction x using (IsConverseWellFounded.cwf (rel := M.Rel)).induction with
   | _ x ih =>
-    have h₃ : x ⊩[M] □(A⟦p ↦ D⟧ 🡘 D) := ih;
+    have h₃ : x ⊩[_] □(A⟦p ↦ D⟧ 🡘 D) := ih;
     have h₄ := Gentzen.sound M h₁ x;
     have h₅ := Gentzen.sound M h₂ x;
     simp only [ForcesSequent, Finset.mem_insert, Finset.mem_singleton, forall_eq_or_imp, forall_eq,

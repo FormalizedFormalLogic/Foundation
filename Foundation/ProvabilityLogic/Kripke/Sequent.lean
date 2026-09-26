@@ -16,12 +16,12 @@ open Model.World
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {Γ Γ' Δ Δ' : FormulaFinset α} {A B : Formula α}
 
 def Model.World.ForcesSequent (M : Model κ α) (x : M.World) (S : Sequent α) : Prop :=
-  (∀ C ∈ S.ant, x ⊩[M] C) → ∃ D ∈ S.suc, x ⊩[M] D
+  (∀ C ∈ S.ant, x ⊩[_] C) → ∃ D ∈ S.suc, x ⊩[_] D
 
 scoped[FFL.ProvabilityLogic.Kripke.Model.World]
   notation:55 x:56 " ⊩[" M "] " S:56 => Model.World.ForcesSequent M x S
 
-def Model.ValidateSequent (M : Model κ α) (S : Sequent α) : Prop := ∀ x : M.World, x ⊩[M] S
+def Model.ValidateSequent (M : Model κ α) (S : Sequent α) : Prop := ∀ x : M.World, x ⊩[_] S
 
 scoped[FFL.ProvabilityLogic.Kripke.Model]
   infix:45 " ⊧ " => Model.ValidateSequent
@@ -30,16 +30,16 @@ namespace Model.World
 
 variable {x : M.World}
 
-@[grind .] lemma forcesSequent_axm : x ⊩[M] ({A} ⟹ {A}) := fun hx ↦ ⟨A, by simp, hx A (by simp)⟩
+@[grind .] lemma forcesSequent_axm : x ⊩[_] ({A} ⟹ {A}) := fun hx ↦ ⟨A, by simp, hx A (by simp)⟩
 
-@[grind .] lemma forcesSequent_botL : x ⊩[M] ({⊥} ⟹ ∅) := fun hx ↦ absurd (hx ⊥ (by simp)) id
+@[grind .] lemma forcesSequent_botL : x ⊩[_] ({⊥} ⟹ ∅) := fun hx ↦ absurd (hx ⊥ (by simp)) id
 
 @[grind →]
-lemma forcesSequent_wkL (h : x ⊩[M] (Γ ⟹ Δ)) (hΓ : Γ ⊆ Γ') : x ⊩[M] (Γ' ⟹ Δ) :=
+lemma forcesSequent_wkL (h : x ⊩[_] (Γ ⟹ Δ)) (hΓ : Γ ⊆ Γ') : x ⊩[_] (Γ' ⟹ Δ) :=
   fun hx ↦ h fun C hC ↦ hx C (hΓ hC)
 
 @[grind →]
-lemma forcesSequent_wkR (h : x ⊩[M] (Γ ⟹ Δ)) (hΔ : Δ ⊆ Δ') : x ⊩[M] (Γ ⟹ Δ') :=
+lemma forcesSequent_wkR (h : x ⊩[_] (Γ ⟹ Δ)) (hΔ : Δ ⊆ Δ') : x ⊩[_] (Γ ⟹ Δ') :=
   fun hx ↦ (h hx).imp fun _ hD ↦ ⟨hΔ hD.1, hD.2⟩
 
 end Model.World
@@ -53,20 +53,20 @@ namespace Model.World
 variable {x : M.World}
 
 @[grind →]
-lemma forcesSequent_impL (h₁ : x ⊩[M] (Γ ⟹ insert A Δ)) (h₂ : x ⊩[M] (insert B Γ ⟹ Δ)) :
-    x ⊩[M] (insert (A 🡒 B) Γ ⟹ Δ) := by
+lemma forcesSequent_impL (h₁ : x ⊩[_] (Γ ⟹ insert A Δ)) (h₂ : x ⊩[_] (insert B Γ ⟹ Δ)) :
+    x ⊩[_] (insert (A 🡒 B) Γ ⟹ Δ) := by
   intro hx;
-  have hΓ : ∀ C ∈ Γ, x ⊩[M] C := fun C hC ↦ hx C (by simp [hC]);
-  by_cases hA : x ⊩[M] A;
+  have hΓ : ∀ C ∈ Γ, x ⊩[_] C := fun C hC ↦ hx C (by simp [hC]);
+  by_cases hA : x ⊩[_] A;
   · exact h₂ (by simpa [hx _ (Finset.mem_insert_self _ _) hA] using hΓ);
   · obtain ⟨D, hD, hxD⟩ := h₁ hΓ;
     grind;
 
 @[grind →]
-lemma forcesSequent_impR (h : x ⊩[M] (insert A Γ ⟹ insert B Δ)) :
-    x ⊩[M] (Γ ⟹ insert (A 🡒 B) Δ) := by
+lemma forcesSequent_impR (h : x ⊩[_] (insert A Γ ⟹ insert B Δ)) :
+    x ⊩[_] (Γ ⟹ insert (A 🡒 B) Δ) := by
   intro hx;
-  by_cases hA : x ⊩[M] A;
+  by_cases hA : x ⊩[_] A;
   · obtain ⟨D, hD, hxD⟩ := h (by simpa [hA] using hx);
     rcases Finset.mem_insert.mp hD with rfl | hD;
     · exact ⟨A 🡒 D, by simp, fun _ ↦ hxD⟩;
@@ -75,8 +75,8 @@ lemma forcesSequent_impR (h : x ⊩[M] (insert A Γ ⟹ insert B Δ)) :
 
 @[grind →]
 lemma forcesSequent_cut {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α}
-    (h₁ : x ⊩[M] (Γ₁ ⟹ insert A Δ₁)) (h₂ : x ⊩[M] (insert A Γ₂ ⟹ Δ₂)) :
-    x ⊩[M] (Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂) := by
+    (h₁ : x ⊩[_] (Γ₁ ⟹ insert A Δ₁)) (h₂ : x ⊩[_] (insert A Γ₂ ⟹ Δ₂)) :
+    x ⊩[_] (Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂) := by
   intro hx;
   obtain ⟨D, hD, hxD⟩ := h₁ fun C hC ↦ hx C (by simp [hC]);
   rcases Finset.mem_insert.mp hD with rfl | hD;
@@ -95,7 +95,7 @@ end
 namespace Model
 
 lemma validateSequent_singleton_iff :
-    M ⊧ (Γ ⟹ {A}) ↔ ∀ x : M.World, (∀ C ∈ Γ, x ⊩[M] C) → x ⊩[M] A := by
+    M ⊧ (Γ ⟹ {A}) ↔ ∀ x : M.World, (∀ C ∈ Γ, x ⊩[_] C) → x ⊩[_] A := by
   simp [ValidateSequent, ForcesSequent];
 
 /-! ### Soundness of the propositional rules -/

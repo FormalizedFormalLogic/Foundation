@@ -63,7 +63,7 @@ variable [𝗜𝚺₁ ⪯ T] {A : Formula α}
 
 /-- - [AB05, Lemma 46] -/
 lemma exists_realization_provable_imp_TBB {κ : Type*} [Nonempty κ] (M : RootedModel κ α)
-    [Fintype M.World] [M.IsGL] (hA : M.root ⊮[M.toModel] A) :
+    [Fintype M.World] [M.IsGL] (hA : M.root ⊮[_] A) :
     ∃ f : Realization α ℒₒᵣ, 𝗜𝚺₁ ⊢ f T (A 🡒 TBB M.height) := by
   let S := standardSolovaySentences T M.extendRoot;
   use S.realization;

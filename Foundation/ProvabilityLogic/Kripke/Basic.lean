@@ -116,80 +116,80 @@ scoped notation:55 x:56 " ⊩[" M "] " A:56 => Forces M x A
 
 scoped notation:55 x:56 " ⊮[" M "] " A:56 => ¬Forces M x A
 
-@[simp, grind =] lemma forces_atom {a : α} : x ⊩[M] #a ↔ M x a := Iff.rfl
-@[simp, grind .] lemma not_forces_bot : x ⊮[M] ⊥ := id
-@[simp, grind .] lemma forces_top : x ⊩[M] ⊤ := id
-@[grind =] lemma forces_imp : x ⊩[M] A 🡒 B ↔ x ⊮[M] A ∨ x ⊩[M] B := imp_iff_not_or
-@[grind =] lemma forces_and : x ⊩[M] A ⋏ B ↔ x ⊩[M] A ∧ x ⊩[M] B := by
+@[simp, grind =] lemma forces_atom {a : α} : x ⊩[_] #a ↔ M x a := Iff.rfl
+@[simp, grind .] lemma not_forces_bot : x ⊮[_] ⊥ := id
+@[simp, grind .] lemma forces_top : x ⊩[_] ⊤ := id
+@[grind =] lemma forces_imp : x ⊩[_] A 🡒 B ↔ x ⊮[_] A ∨ x ⊩[_] B := imp_iff_not_or
+@[grind =] lemma forces_and : x ⊩[_] A ⋏ B ↔ x ⊩[_] A ∧ x ⊩[_] B := by
   change ((_ → _ → False) → False) ↔ _; tauto;
-@[grind =] lemma forces_or : x ⊩[M] A ⋎ B ↔ x ⊩[M] A ∨ x ⊩[M] B := by
+@[grind =] lemma forces_or : x ⊩[_] A ⋎ B ↔ x ⊩[_] A ∨ x ⊩[_] B := by
   change ((_ → False) → _) ↔ _; tauto;
-@[grind =] lemma forces_neg : x ⊩[M] ∼A ↔ x ⊮[M] A := Iff.rfl
-@[grind =] lemma forces_iff : x ⊩[M] A 🡘 B ↔ (x ⊩[M] A ↔ x ⊩[M] B) := by
+@[grind =] lemma forces_neg : x ⊩[_] ∼A ↔ x ⊮[_] A := Iff.rfl
+@[grind =] lemma forces_iff : x ⊩[_] A 🡘 B ↔ (x ⊩[_] A ↔ x ⊩[_] B) := by
   simp only [LogicalConnective.iff, forces_and]; grind;
-@[grind =] lemma forces_box : x ⊩[M] □A ↔ ∀ y, x ≺ y → y ⊩[M] A := Iff.rfl
-@[grind =] lemma forces_boxdot : x ⊩[M] ⊡A ↔ x ⊩[M] A ∧ ∀ y, x ≺ y → y ⊩[M] A := forces_and
-@[grind =] lemma forces_dia : x ⊩[M] ◇A ↔ ∃ y, x ≺ y ∧ y ⊩[M] A := by
-  change ((∀ y, x ≺ y → y ⊩[M] A → False) → False) ↔ _; grind;
+@[grind =] lemma forces_box : x ⊩[_] □A ↔ ∀ y, x ≺ y → y ⊩[_] A := Iff.rfl
+@[grind =] lemma forces_boxdot : x ⊩[_] ⊡A ↔ x ⊩[_] A ∧ ∀ y, x ≺ y → y ⊩[_] A := forces_and
+@[grind =] lemma forces_dia : x ⊩[_] ◇A ↔ ∃ y, x ≺ y ∧ y ⊩[_] A := by
+  change ((∀ y, x ≺ y → y ⊩[_] A → False) → False) ↔ _; grind;
 
-@[grind =] lemma not_forces_imp : x ⊮[M] A 🡒 B ↔ x ⊩[M] A ∧ x ⊮[M] B := by grind;
-@[grind =] lemma not_forces_box : x ⊮[M] □A ↔ ∃ y, x ≺ y ∧ y ⊮[M] A := by grind;
+@[grind =] lemma not_forces_imp : x ⊮[_] A 🡒 B ↔ x ⊩[_] A ∧ x ⊮[_] B := by grind;
+@[grind =] lemma not_forces_box : x ⊮[_] □A ↔ ∃ y, x ≺ y ∧ y ⊮[_] A := by grind;
 
 @[grind =]
-lemma forces_boxItr : x ⊩[M] □^[n]A ↔ ∀ y, x ≺^[n] y → y ⊩[M] A := by
+lemma forces_boxItr : x ⊩[_] □^[n]A ↔ ∀ y, x ≺^[n] y → y ⊩[_] A := by
   induction n generalizing x <;> grind;
 
 section boxItr_bot
 
 variable {m : ℕ}
 
-lemma forces_boxItr_succ : x ⊩[M] □^[n + 1]A ↔ ∀ y, x ≺ y → y ⊩[M] □^[n]A :=
+lemma forces_boxItr_succ : x ⊩[_] □^[n + 1]A ↔ ∀ y, x ≺ y → y ⊩[_] □^[n]A :=
   Formula.boxItr_succ ▸ forces_box
 
-lemma forces_boxItr_bot_of_le (hmn : m ≤ n) (h : x ⊩[M] □^[m]⊥) : x ⊩[M] □^[n]⊥ := by
+lemma forces_boxItr_bot_of_le (hmn : m ≤ n) (h : x ⊩[_] □^[m]⊥) : x ⊩[_] □^[n]⊥ := by
   induction m generalizing x n with
   | zero => exact absurd h not_forces_bot;
   | succ m ih =>
     obtain ⟨n, rfl⟩ := Nat.exists_eq_add_one.mpr (show 0 < n by omega);
     exact forces_boxItr_succ.mpr fun y R ↦ ih (by omega) (forces_boxItr_succ.mp h y R);
 
-lemma not_forces_boxItr_bot_of_le (hmn : m ≤ n) (h : x ⊮[M] □^[n]⊥) : x ⊮[M] □^[m]⊥ :=
+lemma not_forces_boxItr_bot_of_le (hmn : m ≤ n) (h : x ⊮[_] □^[n]⊥) : x ⊮[_] □^[m]⊥ :=
   fun h' ↦ h (forces_boxItr_bot_of_le hmn h')
 
-lemma exists_depth_of_forces_boxItr_bot (h : x ⊩[M] □^[n]⊥) :
-    ∃ m, x ⊮[M] □^[m]⊥ ∧ x ⊩[M] □^[m + 1]⊥ := by
+lemma exists_depth_of_forces_boxItr_bot (h : x ⊩[_] □^[n]⊥) :
+    ∃ m, x ⊮[_] □^[m]⊥ ∧ x ⊩[_] □^[m + 1]⊥ := by
   induction n with
   | zero => exact absurd h not_forces_bot;
   | succ n ih =>
-    by_cases hn : x ⊩[M] □^[n]⊥;
+    by_cases hn : x ⊩[_] □^[n]⊥;
     · exact ih hn;
     · exact ⟨n, hn, h⟩;
 
-lemma exists_rel_depth [M.IsGL] (h : x ⊮[M] □^[n + 1]⊥) :
-    ∃ y, x ≺ y ∧ y ⊮[M] □^[n]⊥ ∧ y ⊩[M] □^[n + 1]⊥ := by
+lemma exists_rel_depth [M.IsGL] (h : x ⊮[_] □^[n + 1]⊥) :
+    ∃ y, x ≺ y ∧ y ⊮[_] □^[n]⊥ ∧ y ⊩[_] □^[n + 1]⊥ := by
   obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp fun h' ↦ h (forces_boxItr_succ.mpr h');
-  obtain ⟨t, ⟨Rxt, ht⟩, hmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[M] □^[n]⊥} ⟨y, Rxy, hy⟩;
+  obtain ⟨t, ⟨Rxt, ht⟩, hmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[_] □^[n]⊥} ⟨y, Rxy, hy⟩;
   exact ⟨t, Rxt, ht, forces_boxItr_succ.mpr fun z Rtz ↦
     by_contra fun hz ↦ hmax z ⟨IsTrans.trans _ _ _ Rxt Rtz, hz⟩ Rtz⟩;
 
 end boxItr_bot
 
-lemma forces_conj₂ : {l : List (Formula α)} → (x ⊩[M] ⋀l ↔ ∀ B ∈ l, x ⊩[M] B)
+lemma forces_conj₂ : {l : List (Formula α)} → (x ⊩[_] ⋀l ↔ ∀ B ∈ l, x ⊩[_] B)
   | [] => by simp
   | [B] => by simp
   | B :: C :: l => by simp [forces_and, forces_conj₂ (l := C :: l)]
 
 @[simp]
-lemma forces_conj {Γ : FormulaFinset α} : x ⊩[M] Γ.conj ↔ ∀ B ∈ Γ, x ⊩[M] B := by
+lemma forces_conj {Γ : FormulaFinset α} : x ⊩[_] Γ.conj ↔ ∀ B ∈ Γ, x ⊩[_] B := by
   simp [Finset.conj, forces_conj₂];
 
-lemma forces_disj₂ : {l : List (Formula α)} → (x ⊩[M] ⋁l ↔ ∃ B ∈ l, x ⊩[M] B)
+lemma forces_disj₂ : {l : List (Formula α)} → (x ⊩[_] ⋁l ↔ ∃ B ∈ l, x ⊩[_] B)
   | [] => by simp
   | [B] => by simp
   | B :: C :: l => by simp [forces_or, forces_disj₂ (l := C :: l)]
 
 @[simp]
-lemma forces_disj {Γ : FormulaFinset α} : x ⊩[M] Γ.disj ↔ ∃ B ∈ Γ, x ⊩[M] B := by
+lemma forces_disj {Γ : FormulaFinset α} : x ⊩[_] Γ.disj ↔ ∃ B ∈ Γ, x ⊩[_] B := by
   simp [Finset.disj, forces_disj₂];
 
 end Model.World

@@ -38,7 +38,7 @@ lemma World.atoms_valuationConj : (x.valuationConj P).atoms ⊆ P :=
     Finset.forall_mem_image.mpr <| by grind
 
 @[grind =]
-lemma World.forces_valuationConj : w ⊩[N] x.valuationConj P ↔ ∀ a ∈ P, (M.Val x a ↔ N.Val w a) :=
+lemma World.forces_valuationConj : w ⊩[_] x.valuationConj P ↔ ∀ a ∈ P, (M.Val x a ↔ N.Val w a) :=
   forces_conj.trans <| Finset.forall_mem_image.trans <| forall₂_congr fun _ _ ↦ by grind
 
 open Classical in
@@ -75,16 +75,16 @@ lemma World.atoms_charFormulaUnder : (x.charFormulaUnder P).atoms ⊆ P := by
     · exact (FormulaFinset.atoms_disj_subset _).trans <| Finset.biUnion_subset.mpr <|
         Finset.forall_mem_image.mpr fun y _ ↦ ih y y.2;
 
-lemma World.forces_charFormulaUnder_iff : w ⊩[N] x.charFormulaUnder P ↔
+lemma World.forces_charFormulaUnder_iff : w ⊩[_] x.charFormulaUnder P ↔
     (∀ a ∈ P, (M.Val x a ↔ N.Val w a)) ∧
-    (∀ y, x ≺ y → ∃ v, w ≺ v ∧ v ⊩[N] y.charFormulaUnder P) ∧
-    (∀ v, w ≺ v → ∃ y, x ≺ y ∧ v ⊩[N] y.charFormulaUnder P) := by
+    (∀ y, x ≺ y → ∃ v, w ≺ v ∧ v ⊩[_] y.charFormulaUnder P) ∧
+    (∀ v, w ≺ v → ∃ y, x ≺ y ∧ v ⊩[_] y.charFormulaUnder P) := by
   rw [charFormulaUnder_def];
   simp [forces_and, forces_valuationConj, forces_conj, forces_box, forces_disj, forces_dia,
     Subtype.exists];
 
 @[grind .]
-lemma World.forces_charFormulaUnder_self : x ⊩[M] x.charFormulaUnder P := by
+lemma World.forces_charFormulaUnder_self : x ⊩[_] x.charFormulaUnder P := by
   induction x using WellFounded.induction IsConverseWellFounded.cwf (r := flip M.Rel) with
   | h x ih =>
     exact forces_charFormulaUnder_iff.mpr
@@ -93,7 +93,7 @@ lemma World.forces_charFormulaUnder_self : x ⊩[M] x.charFormulaUnder P := by
 /-- Being forced at a point forcing the characteristic formula is a `P`-bisimulation. -/
 def charBisimulationUnder (P : Finset α) (M : Model κ α) [Fintype M.World] [M.IsGL]
     (N : Model κ' α) : M ⇄[P] N where
-  toRel x w := w ⊩[N] x.charFormulaUnder P
+  toRel x w := w ⊩[_] x.charFormulaUnder P
   atomic ha h := (forces_charFormulaUnder_iff.mp h).1 _ ha
   forth h R := (forces_charFormulaUnder_iff.mp h |>.2.1 _ R).imp fun _ ↦ And.symm
   back h R := (forces_charFormulaUnder_iff.mp h |>.2.2 _ R).imp fun _ ↦ And.symm
@@ -111,9 +111,9 @@ finite GL-model only if its root is `P`-bisimilar to that of `M`.
 -/
 structure IsDefiningFormula (P : Finset α) (M : RootedModel κ α) (A : Formula α) : Prop where
   atoms_subset : A.atoms ⊆ P
-  root_forces : M.root ⊩[M.toModel] A
+  root_forces : M.root ⊩[_] A
   unique : ∀ {κ' : Type u} [Nonempty κ'] (N : RootedModel κ' α) [N.IsFiniteGL],
-    N.root ⊩[N.toModel] A → ∃ Bi : M.toModel ⇄[P] N.toModel, Bi M.root N.root
+    N.root ⊩[_] A → ∃ Bi : M.toModel ⇄[P] N.toModel, Bi M.root N.root
 
 /-- - [Bek90, Lemma 7] -/
 theorem exists_isDefiningFormula {M : RootedModel κ α} [M.IsFiniteGL] (P : Finset α) :
