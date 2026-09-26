@@ -33,8 +33,8 @@ Main results of this repository. More detailed explanations are provided in [Doc
     - [Consistency of ZFC][set_theory:zfc_consistent] (relative to Lean's type theory)
     - [Downward Löwenheim–Skolem theorem for models of set theory][set_theory:loewenheim_skolem]
 - `ProvabilityLogic`: [Provability logic][provability_logic]
-  - Arithmetical completeness theorems of [$\mathsf{GL}$][pl:gl_arith] and [$\mathsf{S}$][pl:s_arith] _(Solovay)_, [$\mathsf{Grz}$][pl:grz_arith], and [$\mathsf{GL} + \Box^n \bot$][pl:glboxbot_arith]
-  - [Classification of provability logics][pl:classification] _(Artemov–Beklemishev)_
+  - Arithmetical completeness theorems of [$\mathsf{GL}$][pl:gl_arith] and [$\mathsf{S}$][pl:s_arith], [$\mathsf{Grz}$][pl:grz_arith], and [$\mathsf{GL} + \Box^n \bot$][pl:glboxbot_arith]
+  - [Classification of provability logics][pl:classification]
   - [Provability Logic Zoo](#provability-logic-zoo)
 - `SecondOrder`: Syntax, semantics, and derivations of second-order logic.
 - `Syntax`: Syntax shared by first-order and second-order logic.
@@ -97,7 +97,7 @@ Foundation is a [Lake](https://github.com/leanprover/lean4/tree/master/src/lake)
 It requires [elan](https://github.com/leanprover/elan) and [just](https://github.com/casey/just).
 
 ```shell
-just cache   # fetch prebuilt oleans of Mathlib and of Foundation
+just cache
 lake build
 ```
 
