@@ -54,23 +54,27 @@ lemma lt_of_mem {i a : V} (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (ex
 lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by
   have := lt_of_le_of_lt (exp_le_of_mem H) h; simp at this
 
-@[definability] lemma HierarchySymbol.Definable.ball_mem (Γ m) {P : (Fin k → V) → V → Prop}
+@[definability] lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_ball_mem
+    (Γ m) {P : (Fin k → V) → V → Prop}
     {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∀ x ∈ f v, P v x) := by
   have : Γ-[m + 1].Definable (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
-    .ball_lt hf (.imp (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var
-      0) (hf.retraction Fin.succ)) h)
+    .arithmetic_ball_lt hf
+      (.imp (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0)
+        (hf.retraction Fin.succ)) h)
   exact this.of_iff <| by intro v; exact ⟨fun h x _ hxv ↦ h x hxv,
     fun h x hx ↦ h x (lt_of_mem hx) hx⟩
 
-@[definability] lemma HierarchySymbol.Definable.bexs_mem (Γ m) {P : (Fin k → V) → V → Prop}
+@[definability] lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_bexs_mem
+    (Γ m) {P : (Fin k → V) → V → Prop}
     {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Definable (fun v ↦ ∃ x ∈ f v, P v x) := by
   have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
-    .bexs_lt hf (.and (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var
-      0) (hf.retraction _)) h)
+    .arithmetic_bexs_lt hf
+      (.and (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0)
+        (hf.retraction _)) h)
   exact this.of_iff <| by
     intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩,
       by rintro ⟨x, _, hx, hvx⟩; exact ⟨x, hx, hvx⟩⟩
@@ -556,11 +560,12 @@ lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Pre
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
   have : Γ.alt-[m]-Predicate (fun s : V ↦ ∀ i < a, P i → i ∈ s) := by
-    apply HierarchySymbol.Definable.ball_blt
+    apply Bounding.HierarchySymbol.Definable.arithmetic_ball_blt
     · simp
     apply Bounding.HierarchySymbol.Definable.imp
-    · simpa using HierarchySymbol.Definable.bcomp₁ (by definability)
-    · simpa using HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
+    · simpa using Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₁ (by definability)
+    · simpa using Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₂
+        (by definability) (by definability)
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : V) := by
     simpa using InductionOnBroadHierarchy.least_number Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩

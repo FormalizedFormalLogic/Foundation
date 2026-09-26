@@ -148,7 +148,7 @@ lemma mem_limSeq_succ_iff {x s : V} :
 
 lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
   induction s' using ISigma1.sigma1_succ_induction generalizing s
-  · apply HierarchySymbol.Definable.ball_le (by definability)
+  · apply Bounding.HierarchySymbol.Definable.arithmetic_ball_le (by definability)
     apply Bounding.HierarchySymbol.Definable.comp₂
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)),
       by intro v; simp [c.eval_limSeqDef]⟩

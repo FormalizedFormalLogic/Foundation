@@ -226,20 +226,22 @@ not coincide: specialized declarations remain in Arithmetic files.
 | Indexed symbol and shared definitions | `FFL.FirstOrder.Bounding.HierarchySymbol` |
 | Formula operations and properness | `...HierarchySymbol.Semiformula` |
 | Shared definability lemmas | `...HierarchySymbol.Definable`, `Defined`, etc. |
-| Arithmetic-specific indexed-formula results | `...HierarchySymbol.Arithmetical.Semiformula` |
-| Arithmetic-specific definability results | `...HierarchySymbol.Arithmetical.Definable`, etc. |
+| Arithmetic-specific indexed-formula results | Canonical receiver namespace, `arithmetic_` prefix |
+| Arithmetic-specific definability results | Canonical receiver namespace, `arithmetic_` prefix |
 | Arithmetic bound types and their own methods | `FFL.FirstOrder.Arithmetic.Bounded`, etc. |
 | Common embeddings and absoluteness | `FFL.FirstOrder.Bounding` and its existing subnamespaces |
 | Natural casts, arithmetic models, completeness | `FFL.FirstOrder.Arithmetic` |
 
 `...` in this table means `FFL.FirstOrder.Bounding`; it is not literal Lean syntax.
-`Arithmetical` is a namespace, not a new type, typeclass, or copied hierarchy symbol.
+Do not create an `Arithmetical` subnamespace for declarations whose receiver is a shared
+indexed type. Put them beside the common receiver declarations and distinguish arithmetic
+specializations with an `arithmetic_` prefix.
 
 For example, specialize a common type in a statement declared as:
 
 ```text
-FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical.Definable.ball_lt
-FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical.Semiformula.ProvablyProperOn.ofProperOn
+FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_ball_lt
+FFL.FirstOrder.Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn
 ```
 
 The hypotheses and conclusions of these declarations use the canonical common types,
@@ -252,16 +254,15 @@ Preserve useful calls such as `h.graph_delta`, `h.and h'`, `h.retraction e`, `φ
 and `h.proper` wherever supported by the existing API. Check the receiver's actual
 declaration head, implicit binders, and reducibility when such a call fails.
 
-Arithmetic-specific lemmas are deliberately grouped under `Arithmetical`. Lean does not
-automatically search that namespace because a receiver happens to use an arithmetic
-bounding. Use a qualified call to a specialized lemma when necessary. Do not add a second
+Arithmetic-specific lemmas on shared indexed receivers use the canonical receiver namespace
+and an `arithmetic_` name prefix, so field notation works through the shared receiver type.
+Qualify a call only when the receiver or name is genuinely ambiguous. Do not add a second
 forwarding theorem solely to obtain a shorter field name.
 
-Do not copy generic `and`, `or`, `comp`, `graph_delta`, `var`, or `const` into
-`Arithmetical`. Specialization follows from their argument types. Arithmetic-specific
-bounded quantifier conveniences may remain when they select the `<` operator and remove
-an operator-membership premise; those change the useful interface rather than merely
-renaming a general theorem.
+Do not copy generic `and`, `or`, `comp`, `graph_delta`, `var`, or `const` under arithmetic
+names. Specialization follows from their argument types. Arithmetic-specific bounded
+quantifier conveniences may remain when they select the `<` operator and remove an
+operator-membership premise; prefix these with `arithmetic_` in the common receiver namespace.
 
 Avoid broad `open ...Semiformula` declarations to recover many old names at once. Prefer
 receiver notation, narrow tested opens, or qualification at the use site. Namespace
@@ -310,8 +311,8 @@ In `Foundation/FirstOrder/Arithmetic/Definability/Hierarchy.lean`:
   copied `Semiformula`, `Semisentence`, and `Sentence` definitions.
 - Introduce only the Arithmetic notation for indexed symbols.
 - Keep the useful `<`-quantifier conveniences in the specialized namespace.
-- Keep the arithmetic completeness result `ProvablyProperOn.ofProperOn` specialized to
-  the existing arithmetic models and theories. Move its name under `Arithmetical`.
+- Keep the arithmetic completeness result specialized to the existing arithmetic models
+  and theories as `Semiformula.ProvablyProperOn.arithmetic_ofProperOn`.
 
 In `Foundation/FirstOrder/Arithmetic/Definability/Definable.lean`:
 
@@ -321,7 +322,8 @@ In `Foundation/FirstOrder/Arithmetic/Definability/Definable.lean`:
 - Use the single shared notation family instead of redeclaring it for arithmetic aliases.
 - Retain arithmetic interpretations of addition, multiplication, powers, and order.
 - Retain results depending on arithmetic order laws, successor bounds, or arithmetic
-  theories. Put the indexed definability results under `Arithmetical`.
+  theories. Put them beside their shared receiver declarations and prefix them with
+  `arithmetic_`.
 - Preserve useful specialization lemmas only when they actually simplify a recurring
   arithmetic interface, and document the reason in the implementation report.
 
@@ -333,8 +335,9 @@ cause through the common indexed API rather than maintaining another wrapper.
 
 `Arithmetic/Definability/BoundedDefinable.lean` retains its arithmetic bound types and
 proofs. Change its hierarchy symbols and canonical definability references. Put specialized
-lemmas whose subject is the shared indexed definability API under `Arithmetical`; methods
-whose subject is an arithmetic-specific bound type stay with that type.
+lemmas whose subject is the shared indexed definability API in the canonical receiver
+namespace with an `arithmetic_` prefix; methods whose subject is an arithmetic-specific
+bound type stay with that type.
 
 `Tarski/HierarchicalDefinability/Absoluteness.lean` retains `Bounding.IsInitial` and the
 general embedding-based results. Its raw `Closure`/`Hierarchy` statements need no phantom

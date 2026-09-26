@@ -30,7 +30,7 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
   · exact zero
   · exact this x
 
-open HierarchySymbol
+open Bounding.HierarchySymbol
 
 theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Function₂ f)
     {P : V → V → Prop} (hP : 𝚺₁-Relation P)
@@ -57,19 +57,19 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
           (DefinableFunction₁.comp (.var _)))
       apply Definable.and
         (Definable.comp₂ (.var 0) (by definability))
-      apply Definable.ball_lt (.var _)
-      apply Definable.ball_lt (.var _)
-      apply Definable.ball_lt (.var _)
+      apply Definable.arithmetic_ball_lt (.var _)
+      apply Definable.arithmetic_ball_lt (.var _)
+      apply Definable.arithmetic_ball_lt (.var _)
       apply Definable.imp
         (Definable.comp₂ (.var _) (DefinableFunction₂.comp (.var _) (.var _)))
       apply Definable.imp
         (Definable.comp₂ (.var _)
           (DefinableFunction₂.comp (DefinableFunction₂.comp (.var _) (.const _)) (.var _)))
-      apply Definable.ball_le
+      apply Definable.arithmetic_ball_le
         (Definable.comp₂
           (.var _)
           (DefinableFunction₂.comp (.const _) (.var _)))
-      apply Definable.ball_le (.var _)
+      apply Definable.arithmetic_ball_le (.var _)
       apply Definable.comp₂
         (DefinableFunction₂.comp
           (.var _) (.var _)) (.var _)
@@ -96,15 +96,15 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
     induction i using ISigma1.sigma1_succ_induction
     · apply Definable.imp
         (Definable.comp₂ (.var _) (.const _))
-      apply Definable.ball_lt (.const _)
+      apply Definable.arithmetic_ball_lt (.const _)
       apply Definable.imp
         (Definable.comp₂
           (.const _)
           (DefinableFunction₂.comp
             (DefinableFunction₂.comp
               (.const _) (.var _)) (.var _)))
-      apply Definable.ball_le (.var _)
-      apply Definable.ball_le (.var _)
+      apply Definable.arithmetic_ball_le (.var _)
+      apply Definable.arithmetic_ball_le (.var _)
       apply Definable.comp₂ (.var _) (.var _)
     case zero =>
       intro _ _ _ _ _ h y' _
@@ -256,16 +256,16 @@ lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
     intro x hx
     induction x using ISigma1.sigma1_order_induction
     · clear hp hq ind
-      apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.imp
+      apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-        apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+        apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.comp₂
         · simp [Fin.isValue]
         · simp
-      · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.or
-        · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+      · apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.or
+        · apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.comp₂
           · simp
           · simp
-        · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+        · apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.comp₂
           · simp
           · simp
     case ind z ih =>

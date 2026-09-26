@@ -335,7 +335,8 @@ noncomputable instance : (T.craig).Δ₁ where
   ch := T.craigCh
   mem_iff φ := (Theory.IsCraigAxiom.defined (V := ℕ) (T := T)).iff.trans
     (Theory.isCraigAxiom_quote_iff φ)
-  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦
+  isDelta1 :=
+    Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _ fun V _ _ ↦
     (Theory.IsCraigAxiom.defined (V := V) (T := T)).proper
 
 variable [L.DecidableEq]

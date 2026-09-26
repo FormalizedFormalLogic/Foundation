@@ -74,8 +74,10 @@ private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)
     refine succ_induction_forall_sigma (s := s) (P := fun x ↦ x ≤ a → P (a - x))
       (Q := fun x w ↦ x ≤ a → Q (a - x) w) ?_ ?_ ?_ ?_;
     · apply Bounding.HierarchySymbol.Definable.imp
-      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
-      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
+      · apply Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₂
+          (by definability) (by definability)
+      · apply Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₂
+          (by definability) (by definability)
     · intro x
       rw [imp_congr_right fun _ ↦ hPQ (a - x)];
       exact imp_forall_iff;
@@ -122,7 +124,7 @@ lemma exists_bound_of_definable_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜�
   have hbdd : 𝚷-[s].DefinableRel fun y w ↦ ∀ x < y, x < a → ∃ u ≤ w, R x u := by
     have h₁ : 𝚷-[s].Definable fun w : Fin 4 → V ↦ R (w 1) (w 0) := hR.retraction ![1, 0];
     have h₂ : 𝚷-[s].Definable fun w : Fin 3 → V ↦ ∃ u ≤ w 2, R (w 0) u :=
-      (HierarchySymbol.Definable.bexs' (P := fun v u ↦ R (v 0) u) h₁
+      (Bounding.HierarchySymbol.Definable.arithmetic_bexs' (P := fun v u ↦ R (v 0) u) h₁
         (#2 : ArithmeticSemiterm V 3)).of_iff (by intro w; simp);
     have hlt : 𝚺-[s].Definable fun w : Fin 3 → V ↦ w 0 < a :=
       Bounding.HierarchySymbol.Definable.of_iff
@@ -131,7 +133,8 @@ lemma exists_bound_of_definable_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜�
         (by intro w; simp);
     have h₃ : 𝚷-[s].Definable fun w : Fin 3 → V ↦ w 0 < a → ∃ u ≤ w 2, R (w 0) u :=
       Bounding.HierarchySymbol.Definable.imp hlt h₂
-    exact (HierarchySymbol.Definable.ball (P := fun v x ↦ x < a → ∃ u ≤ v 1, R x u) h₃
+    exact (Bounding.HierarchySymbol.Definable.arithmetic_ball
+      (P := fun v x ↦ x < a → ∃ u ≤ v 1, R x u) h₃
       (#0 : ArithmeticSemiterm V 2)).of_iff (by intro v; simp);
   have key : ∀ y : V, ∃ w, ∀ x < y, x < a → ∃ u ≤ w, R x u := by
     refine succ_induction_exists_pi Γ hbdd (fun _ ↦ Iff.rfl) ⟨0, by simp⟩ ?_;

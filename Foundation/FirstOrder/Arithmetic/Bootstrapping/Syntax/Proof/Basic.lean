@@ -885,7 +885,7 @@ lemma disjDistr (ps s : V) (d : Derivable T (vecToSet ps ∪ s)) :
     intro k hk
     induction k using ISigma1.sigma1_succ_induction
     · apply Bounding.HierarchySymbol.Definable.imp (by definability)
-      apply HierarchySymbol.Definable.ball_le (by definability)
+      apply Bounding.HierarchySymbol.Definable.arithmetic_ball_le (by definability)
       apply Bounding.HierarchySymbol.Definable.imp (by definability)
       apply Bounding.HierarchySymbol.Definable.imp (by definability)
       definability

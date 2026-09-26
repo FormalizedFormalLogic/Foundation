@@ -988,8 +988,10 @@ noncomputable instance InductionScheme.delta1_univ :
     rw [h]
     exact (inductionR_quote_iff (C := Set.univ) (fun _ ↦ Iff.rfl) φ).trans
       (mem_inductionScheme_iff φ).symm
-  isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
-    have := InductionR.univ_defined (V := V); simp
+  isDelta1 :=
+    Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
+      (fun V _ _ ↦ by
+        have := InductionR.univ_defined (V := V); simp)
 
 /-! ## Correctness of `IsSigma1`: `IsSigma1 ⌜ψ⌝ ↔ Hierarchy 𝚺 1 ψ` -/
 
@@ -1087,8 +1089,10 @@ noncomputable instance InductionScheme.delta1_sigma1 :
       simp
     rw [h]
     exact (inductionR_quote_iff isSigma1_iff_hierarchy φ).trans (mem_inductionScheme_iff φ).symm
-  isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
-    have := InductionR.sigma1_defined (V := V); simp
+  isDelta1 :=
+    Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
+      (fun V _ _ ↦ by
+        have := InductionR.sigma1_defined (V := V); simp)
 
 /-! ## `𝗣𝗔` and `𝗜𝚺⁺₁` are recursively enumerable -/
 

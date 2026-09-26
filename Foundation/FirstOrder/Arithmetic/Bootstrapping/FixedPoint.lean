@@ -69,7 +69,7 @@ noncomputable def ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
     !(substsGraph ℒₒᵣ) y n φ”
 
 instance substNumerals.defined :
-    Arithmetic.HierarchySymbol.DefinedFunction
+    Bounding.HierarchySymbol.DefinedFunction
       (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := .mk fun v ↦ by
   unfold ssnums
   symm

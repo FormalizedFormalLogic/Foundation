@@ -48,7 +48,7 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
   · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
   · simp [sub_spec_of_lt hxy]
 
-open FirstOrder.Arithmetic.HierarchySymbol.Definable
+open FirstOrder.Bounding.HierarchySymbol.Definable
 
 def _root_.FFL.FirstOrder.Arithmetic.subDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)”

@@ -71,7 +71,7 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗕𝚷s]
 private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s + 1].Definable P) :
   ∃ Q : (Fin (k + 1) → V) → Prop, 𝚷-[s].Definable Q ∧ MonotoneWitness P Q := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕 𝚷 s);
-  induction k, P, hP using HierarchySymbol.Definable.sigma_succ_induction with
+  induction k, P, hP using Bounding.HierarchySymbol.Definable.arithmetic_sigma_succ_induction with
   | @pi k P hP =>
     use fun w ↦ P (w ·.succ);
     and_intros;
@@ -112,7 +112,8 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
     obtain ⟨Q, hQ, hM⟩ := ih;
     use fun w : Fin (k + 1) → V ↦ ∀ x < t.val (w ·.succ) id, Q (w 0 :> x :> (w ·.succ));
     and_intros;
-    · apply Bounding.HierarchySymbol.Definable.of_iff <| HierarchySymbol.Definable.ball
+    · apply Bounding.HierarchySymbol.Definable.of_iff <|
+        Bounding.HierarchySymbol.Definable.arithmetic_ball
         (P := fun (v : Fin (k + 1) → V) (x : V) ↦ Q (v 0 :> x :> (v ·.succ)))
         (definable_swap hQ) (Rew.bShift t);
       simp [Semiterm.val_bShift'];
@@ -142,7 +143,7 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
     use fun w : Fin (k + 1) → V ↦ ∃ x < t.val (w ·.succ) id, Q (w 0 :> x :> (w ·.succ));
     and_intros;
     · apply Bounding.HierarchySymbol.Definable.of_iff
-        (HierarchySymbol.Definable.bexs
+        (Bounding.HierarchySymbol.Definable.arithmetic_bexs
           (P := fun (v : Fin (k + 1) → V) (x : V) ↦ Q (v 0 :> x :> (v ·.succ)))
           (definable_swap hQ) (Rew.bShift t));
       intro w;
@@ -163,7 +164,7 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺-[s 
     use fun w : Fin (k + 1) → V ↦ ∃ x < w 0, Q (w 0 :> x :> (w ·.succ));
     and_intros;
     · apply Bounding.HierarchySymbol.Definable.of_iff
-        (HierarchySymbol.Definable.bexs
+        (Bounding.HierarchySymbol.Definable.arithmetic_bexs
           (P := fun (v : Fin (k + 1) → V) (x : V) ↦ Q (v 0 :> x :> (v ·.succ)))
           (definable_swap hQ) #0);
       simp;
@@ -192,7 +193,7 @@ lemma BPi.collection_sigma_succ {R : V → V → Prop}
   obtain ⟨Q, hQ, hM⟩ := exists_monotoneWitness hR;
   have hS : 𝚷-[s].DefinableRel fun x v : V ↦ ∃ y < v, Q ![v, x,
     y] := Bounding.HierarchySymbol.Definable.of_iff
-    (HierarchySymbol.Definable.bexs
+    (Bounding.HierarchySymbol.Definable.arithmetic_bexs
       (P := fun (w : Fin 2 → V) (y : V) ↦ Q ![w 1, w 0, y])
       ((hQ.retraction ![2, 1, 0]).of_iff fun u ↦
         Iff.of_eq <| congrArg Q <| funext fun i ↦ by match i with | 0 | 1 | 2 => simp) #1)
@@ -274,7 +275,7 @@ lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] [V↓[ℒ�
         (inferInstance : 𝚷-[s].DefinableRel (LT.lt : V → V → Prop)) ![&a, #0]) (by intro v; simp);
     have hbexs : 𝚷-[s].Definable
         fun v : Fin 1 → V ↦ ∃ y < (&b : ArithmeticSemiterm V 1).val v id, Q (v 0) y := by
-      apply HierarchySymbol.Definable.bexs;
+      apply Bounding.HierarchySymbol.Definable.arithmetic_bexs;
       exact .of_iff (hQ.retraction ![1, 0]) (by intro w; simp);
     exact (hlt.or hbexs).of_iff (by intro v; simp);
   have key : ∀ x, a < x ∨ ∃ y < b, Q x y := by

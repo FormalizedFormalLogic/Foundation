@@ -514,7 +514,7 @@ lemma order_induction {P : V → Prop} (hP : Γ-[s].DefinablePred P)
   · exact Γ
   · exact s
   · suffices Γ-[s].DefinablePred fun x ↦ ∀ y < x, P y by exact this
-    exact HierarchySymbol.Definable.ball_blt (by simp) (hP.retraction ![0])
+    exact Bounding.HierarchySymbol.Definable.arithmetic_ball_blt (by simp) (hP.retraction ![0])
   case zero => simp
   case succ x IH =>
     intro y hxy
@@ -536,8 +536,9 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[s].DefinablePred P)
     · exact s
     · suffices Γ-[s].DefinablePred fun x ↦ x ≤ a → P (a - x) by exact this
       apply Bounding.HierarchySymbol.Definable.imp
-      · apply HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
-      · apply HierarchySymbol.Definable.bcomp₁ (by definability)
+      · apply Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₂
+          (by definability) (by definability)
+      · apply Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₁ (by definability)
     case zero =>
       intro _; simpa using ha
     case succ x IH =>
@@ -589,9 +590,10 @@ lemma least_number {P : V → Prop} (hP : Γ-[s].DefinablePred P)
     · exact Γ.alt
     · exact s
     · suffices Γ.alt-[s].DefinablePred fun z ↦ ∀ w < z, ¬P w by exact this
-      apply HierarchySymbol.Definable.ball_blt (by definability)
+      apply Bounding.HierarchySymbol.Definable.arithmetic_ball_blt (by definability)
       apply Bounding.HierarchySymbol.Definable.not
-      apply HierarchySymbol.Definable.bcomp₁ (hP := by simpa using hP) (by definability)
+      apply Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₁
+        (hP := by simpa using hP) (by definability)
     case zero => simp
     case succ x IH =>
       intro w hx hw

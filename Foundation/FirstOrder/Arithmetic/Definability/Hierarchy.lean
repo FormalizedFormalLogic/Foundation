@@ -27,36 +27,40 @@ scoped notation "𝚫ᴬ₁" => (𝚫ᴬ-[1])
 
 end FFL.FirstOrder.Arithmetic
 
-namespace FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical.Semiformula
+namespace FFL.FirstOrder.Bounding.HierarchySymbol.Semiformula
 
 universe w
 
+open FFL.FirstOrder.Arithmetic
 open scoped FFL.FirstOrder.Arithmetic
 
 variable {ξ : Type*} {n m : ℕ}
 
 variable {Γ : HierarchySymbol ℬ[<, ℒₒᵣ]}
 
-def ball (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) : Γ.Semiformula ξ n :=
+def arithmetic_ball (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) :
+    Γ.Semiformula ξ n :=
   Bounding.HierarchySymbol.Semiformula.ball
     (R := FFL.FirstOrder.Semiformula.Operator.LT.lt) (by rfl) t φ
 
-def bexs (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) :
+def arithmetic_bexs (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) :
     Γ.Semiformula ξ n :=
   Bounding.HierarchySymbol.Semiformula.bexs
     (R := FFL.FirstOrder.Semiformula.Operator.LT.lt) (by rfl) t φ
 
-@[simp] lemma val_ball (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) :
-  (ball t φ).val = ∀¹[“#0 < !!(Rew.bShift t)”] φ.val :=
+@[simp] lemma val_arithmetic_ball (t : ArithmeticSemiterm ξ n)
+    (φ : Γ.Semiformula ξ (n + 1)) :
+  (arithmetic_ball t φ).val = ∀¹[“#0 < !!(Rew.bShift t)”] φ.val :=
   Bounding.HierarchySymbol.Semiformula.val_ball
-    (R := Semiformula.Operator.LT.lt) (by rfl) t φ
+    (R := FFL.FirstOrder.Semiformula.Operator.LT.lt) (by rfl) t φ
 
-@[simp] lemma val_bexs (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) :
-  (bexs t φ).val = ∃¹[“#0 < !!(Rew.bShift t)”] φ.val :=
+@[simp] lemma val_arithmetic_bexs (t : ArithmeticSemiterm ξ n)
+    (φ : Γ.Semiformula ξ (n + 1)) :
+  (arithmetic_bexs t φ).val = ∃¹[“#0 < !!(Rew.bShift t)”] φ.val :=
   Bounding.HierarchySymbol.Semiformula.val_bexs
-    (R := Semiformula.Operator.LT.lt) (by rfl) t φ
+    (R := FFL.FirstOrder.Semiformula.Operator.LT.lt) (by rfl) t φ
 
-lemma ProvablyProperOn.ofProperOn (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T]
+lemma ProvablyProperOn.arithmetic_ofProperOn (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T]
     {φ : 𝚫ᴬ-[m].Semisentence n}
     (h : ∀ (M : Type w) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], φ.ProperOn M) :
     φ.ProvablyProperOn T := by
@@ -64,4 +68,4 @@ lemma ProvablyProperOn.ofProperOn (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯
   intro M _ _
   simpa [models_iff] using! (h M).iff
 
-end FFL.FirstOrder.Bounding.HierarchySymbol.Arithmetical.Semiformula
+end FFL.FirstOrder.Bounding.HierarchySymbol.Semiformula

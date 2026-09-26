@@ -489,7 +489,7 @@ lemma IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation 
   suffices ∀ p, IsUFormula L p → ∀ n ≤ p, fstIdx p = n → P n p
   by rintro n p ⟨h, rfl⟩; exact this p h (fstIdx p) (by simp) rfl
   apply IsUFormula.induction (P := fun p ↦ ∀ n ≤ p, fstIdx p = n → P n p) Γ
-  · apply HierarchySymbol.Definable.ball_le (by definability)
+  · apply Bounding.HierarchySymbol.Definable.arithmetic_ball_le (by definability)
     apply Bounding.HierarchySymbol.Definable.imp (by definability)
     simp; exact hP
   · rintro n k r v hr hv _ _ rfl; simpa using hrel n k r v hr hv
