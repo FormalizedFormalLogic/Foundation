@@ -43,17 +43,14 @@ def trace (A : Formula α) : Set ℕ :=
   {n | ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : Fintype M.World) (_ : M.IsGL),
     M.height = n ∧ M.root ⊮ A}
 
-lemma root_forces_of_not_mem_trace {κ : Type u} [Nonempty κ] {M : RootedModel κ α}
-    [Fintype M.World] [M.IsGL] (h : M.height ∉ A.trace) : M.root ⊩ A :=
-  Classical.byContradiction fun hA ↦ h ⟨κ, _, M, _, _, rfl, hA⟩
-
 lemma GL_imp_of_height_not_mem_trace
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [Fintype M.World] [M.IsGL],
       M.root ⊩ B → M.height ∉ A.trace) : 𝐆𝐋 ⊢ B 🡒 A := by
   apply Logic.GL.iff_root_forces.mpr;
   intro _ _ M _ hB;
   have : Fintype M.World := Fintype.ofFinite _;
-  exact root_forces_of_not_mem_trace (h M hB);
+  by_contra hA;
+  exact h M hB ⟨_, _, M, _, _, rfl, hA⟩;
 
 @[simp] lemma trace_lift (B : LetterlessFormula) : (↑B : Formula α).trace = B.trace := by
   ext n;
@@ -101,8 +98,9 @@ theorem trace_finite_or_compl_finite (A : Formula α) : A.trace.Finite ∨ A.tra
   have := RootedModel.rank_lt_height Rru;
   apply (Set.finite_Iio M.height).subset;
   intro n hn;
-  exact Set.mem_Iio.mpr <| lt_of_not_ge fun hle ↦ hn ⟨_, _, M.graft ⟨u, hne⟩ (Fin (n - u.rank - 1)),
-    inferInstance, inferInstance, by grind [RootedModel.graft.height_eq],
+  by_contra! hle;
+  exact hn ⟨_, _, M.graft ⟨u, hne⟩ (Fin (n - u.rank - 1)), inferInstance, inferInstance,
+    by grind [RootedModel.graft.height_eq],
     fun h ↦ hA <| ((RootedModel.graft.forces_iff (fun _ ↦ subfmls_trans)
       (fun B hB ↦ hu B (FormulaFinset.mem_prebox.mpr hB)) mem_subfmls_self).1 M.root).mp h⟩;
 
@@ -141,7 +139,7 @@ lemma exists_finset_trace_subset_of_mem_sumQuasiNormal {X : Logic α} (h : A ∈
     obtain ⟨Y, hY, h⟩ := ih;
     exact ⟨Y, hY, trace_subst_subset.trans h⟩;
 
-theorem trace_sumQuasiNormal (X : Logic α) : (𝐆𝐋 +ᴸ X).trace = X.trace := by
+lemma trace_sumQuasiNormal (X : Logic α) : (𝐆𝐋 +ᴸ X).trace = X.trace := by
   apply subset_antisymm;
   · apply Set.iUnion₂_subset;
     intro A hA;
@@ -171,7 +169,7 @@ theorem mem_iff : A ∈ 𝐆𝐋α X ↔ A.trace.Finite ∧ A.trace ⊆ X := by
     · exact Formula.GL_imp_of_height_not_mem_trace fun _ _ _ hM hn ↦ forces_TBB_iff.mp
         (forces_conj.mp hM _ <| Finset.mem_image_of_mem _ <| hfin.mem_toFinset.mpr hn) rfl;
 
-@[simp] theorem trace_eq : (𝐆𝐋α X : Logic α).trace = X :=
+@[simp] lemma trace_eq : (𝐆𝐋α X : Logic α).trace = X :=
   (GL.trace_sumQuasiNormal _).trans <| by simp [trace]
 
 lemma mono (h : X ⊆ Y) : (𝐆𝐋α X : Logic α) ⪯ 𝐆𝐋α Y :=
@@ -189,7 +187,7 @@ namespace GLBetaMinus
 
 variable {X : Set ℕ} {hX : Xᶜ.Finite}
 
-@[simp] theorem trace_eq : (𝐆𝐋β⁻ X hX : Logic α).trace = X :=
+@[simp] lemma trace_eq : (𝐆𝐋β⁻ X hX : Logic α).trace = X :=
   (GL.trace_sumQuasiNormal _).trans <| by simp [trace]
 
 theorem mem_iff : A ∈ 𝐆𝐋β⁻ X hX ↔ A.trace ⊆ X := by
@@ -202,7 +200,7 @@ theorem mem_iff : A ∈ 𝐆𝐋β⁻ X hX ↔ A.trace ⊆ X := by
     exact sumQuasiNormal.mdp (.mem₁ this) (.mem₂ rfl);
 
 /-- - [AB05, Lemma 49] -/
-lemma bot_mem_univ : (⊥ : Formula α) ∈ 𝐆𝐋β⁻ Set.univ (by simp) :=
+theorem bot_mem_univ : (⊥ : Formula α) ∈ 𝐆𝐋β⁻ Set.univ (by simp) :=
   mem_iff.mpr (Set.subset_univ _)
 
 end GLBetaMinus
@@ -214,7 +212,7 @@ variable {X : Set ℕ} (hX : Xᶜ.Finite)
 instance : (𝐆𝐋α X : Logic α) ⪯ 𝐆𝐋β⁻ X hX :=
   ⟨fun _ h ↦ GLBetaMinus.mem_iff.mpr (mem_iff.mp h).2⟩
 
-theorem eq_inter_GLBetaMinus : (𝐆𝐋α X : Logic α) = 𝐆𝐋α Set.univ ∩ 𝐆𝐋β⁻ X hX := by
+lemma eq_inter_GLBetaMinus : (𝐆𝐋α X : Logic α) = 𝐆𝐋α Set.univ ∩ 𝐆𝐋β⁻ X hX := by
   ext A;
   simp [mem_iff, GLBetaMinus.mem_iff];
 

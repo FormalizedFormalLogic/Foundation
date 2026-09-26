@@ -177,27 +177,17 @@ lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
         (C ∈ (saturate hD S₀ h₀ (x :: l)).1.suc → C ∈ (saturate hD S₀ h₀ l).1.suc) := by
       intro C hC;
       have := hx C hC;
-      constructor;
-      · intro h;
-        rcases hnew.1 h with h | ⟨-, h⟩;
-        · exact h;
-        · omega;
-      · intro h;
-        rcases hnew.2 h with h | ⟨-, h⟩;
-        · exact h;
-        · omega;
+      exact ⟨fun h ↦ (hnew.1 h).resolve_right fun h' ↦ absurd h'.2 (by omega),
+        fun h ↦ (hnew.2 h).resolve_right fun h' ↦ absurd h'.2 (by omega)⟩;
     and_intros;
     · intro A B hAB h;
       rcases List.mem_cons.mp hAB with rfl | hAB;
       · exact (saturateStep_imp (hD := hD)).1 h;
-      · rcases ih₁ hAB ((old hAB).1 h) with h | h;
-        · exact .inl (hsub.suc h);
-        · exact .inr (hsub.ant h);
+      · exact (ih₁ hAB ((old hAB).1 h)).imp (hsub.suc ·) (hsub.ant ·);
     · intro A B hAB h;
       rcases List.mem_cons.mp hAB with rfl | hAB;
       · exact (saturateStep_imp (hD := hD)).2 h;
-      · obtain ⟨h₁, h₂⟩ := ih₂ hAB ((old hAB).2 h);
-        exact ⟨hsub.ant h₁, hsub.suc h₂⟩;
+      · exact (ih₂ hAB ((old hAB).2 h)).imp (hsub.ant ·) (hsub.suc ·);
     · intro hbox A hA h;
       rcases List.mem_cons.mp hA with rfl | hA;
       · exact saturateStep_box (hD := hD) hbox h;
@@ -206,13 +196,6 @@ lemma saturate_saturated (hl : l.Pairwise (·.complexity ≤ ·.complexity)) :
 /-- The subformulas of `BS`, sorted by complexity. -/
 noncomputable abbrev sortedSubfmls (BS : Sequent α) : List (Formula α) :=
   BS.subfmls.toList.insertionSort (·.complexity ≤ ·.complexity)
-
-omit hD in
-lemma sortedSubfmls_pairwise {BS : Sequent α} :
-    (sortedSubfmls BS).Pairwise (·.complexity ≤ ·.complexity) :=
-  haveI : Std.Total (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ ↦ le_total _ _⟩;
-  haveI : IsTrans _ (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ _ ↦ le_trans⟩;
-  List.pairwise_insertionSort _ _
 
 /-- Every sequent on which `D` fails extends to a saturated one within the subformulas of `BS`,
 which is moreover closed under `□A ↦ A` on the left if `D` is closed under that rule. -/
@@ -223,7 +206,10 @@ theorem exists_saturated (hD : IsImpClosed D) {BS S₀ : Sequent α} (h₀ : ¬D
         ∀ {A}, □A ∈ S.ant → A ∈ S.ant) := by
   have hl : ∀ {C}, C ∈ sortedSubfmls BS ↔ C ∈ BS.subfmls := by simp [List.mem_insertionSort];
   have hsub := saturate_subset_subfmls (hD := hD) (h₀ := h₀) hS₀ fun _ ↦ hl.mp;
-  obtain ⟨h₁, h₂, h₃⟩ := saturate_saturated (hD := hD) (h₀ := h₀) sortedSubfmls_pairwise;
+  have : Std.Total (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ ↦ le_total _ _⟩;
+  have : IsTrans _ (fun A B : Formula α ↦ A.complexity ≤ B.complexity) := ⟨fun _ _ _ ↦ le_trans⟩;
+  obtain ⟨h₁, h₂, h₃⟩ :=
+    saturate_saturated (hD := hD) (h₀ := h₀) (List.pairwise_insertionSort _ BS.subfmls.toList);
   use (saturate hD S₀ h₀ (sortedSubfmls BS)).1;
   and_intros;
   · exact subset_saturate;

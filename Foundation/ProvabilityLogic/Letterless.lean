@@ -97,10 +97,7 @@ lemma spectrum_TBB : spectrum (TBB n) = {n}ᶜ := by
   suffices (∃ k < i, n ≤ k) ∨ i < n ↔ i ≠ n by simpa [TBB];
   constructor;
   · rintro (⟨k, hk, hn⟩ | h) <;> omega;
-  · intro h;
-    rcases Nat.lt_or_gt_of_ne h with h | h;
-    · exact .inr h;
-    · exact .inl ⟨n, h, le_rfl⟩;
+  · exact fun h ↦ (Nat.lt_or_gt_of_ne h).symm.imp (⟨n, ·, le_rfl⟩) id;
 
 lemma spectrum_conj₂ : ∀ {l : List LetterlessFormula}, spectrum (⋀l) = ⋂ A ∈ l, A.spectrum
   | []  => by simp
@@ -116,7 +113,6 @@ lemma spectrum_conj' {ι : Type*} {s : Finset ι} {f : ι → LetterlessFormula}
 
 @[simp, grind =] lemma trace_TBB : trace (TBB n) = {n} := by simp [trace]
 
-
 @[grind .]
 lemma spectrum_finite_or_cofinite : A.spectrum.Finite ∨ A.spectrumᶜ.Finite := by
   induction A using Formula.rec' with
@@ -128,8 +124,7 @@ lemma spectrum_finite_or_cofinite : A.spectrum.Finite ∨ A.spectrumᶜ.Finite :
   | box A ih =>
     by_cases h : ∀ i, i ∈ spectrum A;
     · simp [h];
-    · push Not at h;
-      obtain ⟨k, hk⟩ := h;
+    · obtain ⟨k, hk⟩ := not_forall.mp h;
       left;
       apply (Set.finite_Iic k).subset;
       intro n hn;
@@ -172,7 +167,6 @@ lemma exists_finset_of_spectrum_subset (hXA : X.spectrum ⊆ spectrum A)
     (h : (∃ B ∈ X, (spectrum B).Finite) ∨ (trace A).Finite) :
     ∃ Y : Finset LetterlessFormula, ↑Y ⊆ X ∧
       ∀ n, (∀ C ∈ Y, n ∈ spectrum C) → n ∈ spectrum A := by
-  classical
   obtain ⟨Y₀, hY₀, hfin⟩ : ∃ Y₀ : Finset LetterlessFormula, ↑Y₀ ⊆ X ∧
       {n | (∀ C ∈ Y₀, n ∈ spectrum C) ∧ n ∉ spectrum A}.Finite := by
     rcases h with ⟨B, hB, hfin⟩ | hfin;

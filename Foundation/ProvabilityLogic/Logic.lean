@@ -68,8 +68,7 @@ instance : L₁ ⪯ L₁ +ᴸ L₂ := ⟨subset_left⟩
 
 lemma subset_iff : (L₁ +ᴸ X) ⊆ (L₁ +ᴸ Y) ↔ X ⊆ (L₁ +ᴸ Y) := by
   constructor;
-  · intro h A hA;
-    exact h (mem₂ hA);
+  · exact fun h _ hA ↦ h (mem₂ hA);
   · intro h A hA;
     induction hA with
     | mem₁ hA => exact mem₁ hA;
@@ -207,7 +206,7 @@ lemma box_conj {Γ : FormulaFinset α} : normalOf 𝔸 ⊢ Γ.box.conj 🡒 □�
       CinsertFConjKFConj;
     have h₂ : normalOf 𝔸 ⊢ □A ⋏ □Γ.conj 🡒 □(A ⋏ Γ.conj) := box_and;
     have h₃ : normalOf 𝔸 ⊢ □(A ⋏ Γ.conj) 🡒 □(insert A Γ).conj := box_mono CKFConjinsertFConj;
-    rw [FormulaFinset.box, Finset.image_insert];
+    rw [FormulaFinset.box_insert];
     cl_prover [ih, h₁, h₂, h₃];
 
 end Logic.normalOf
