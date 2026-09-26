@@ -70,6 +70,14 @@ theorem provabilityLogic_eq_A_or_eq_D_or_eq_S
   · grind;
   · simp [Logic.weakerThan_antisymm hS <| S_weakerThan_provabilityLogic hT h₂];
 
+lemma provabilityLogic_equiv_A_or_equiv_D_or_equiv_S
+    (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
+    (hS : T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
+    T.provabilityLogicRelativeTo U (α := α) ≊ 𝐀 ∨
+      T.provabilityLogicRelativeTo U (α := α) ≊ 𝐃 ∨
+      T.provabilityLogicRelativeTo U (α := α) ≊ 𝐒 := by
+  simpa only [Logic.equiv_iff] using provabilityLogic_eq_A_or_eq_D_or_eq_S hT hS
+
 lemma imp_mem_provabilityLogic_of_mem_addAlpha (hN : N.Finite)
     (h : A ∈ T.provabilityLogicRelativeTo (T.addAlpha U N)) :
     (⩕ n ∈ hN.toFinset, alpha n : LetterlessFormula).lift 🡒 A ∈ T.provabilityLogicRelativeTo U := by
@@ -135,6 +143,15 @@ theorem provabilityLogic_classification :
       grind [Logic.GLAlpha.eq_inter_GLBeta hL];
     · grind [provabilityLogic_eq_GLBeta h];
   · grind [provabilityLogic_eq_GLAlpha hL];
+
+lemma provabilityLogic_classification_equiv :
+    T.provabilityLogicRelativeTo U (α := α) ≊
+        𝐆𝐋α (T.provabilityLogicRelativeTo U (α := α)).trace ∨
+      ∃ hL : (T.provabilityLogicRelativeTo U (α := α)).traceᶜ.Finite,
+        T.provabilityLogicRelativeTo U (α := α) ≊ 𝐆𝐋β _ hL ∨
+        T.provabilityLogicRelativeTo U (α := α) ≊ 𝐃 ∩ 𝐆𝐋β _ hL ∨
+        T.provabilityLogicRelativeTo U (α := α) ≊ 𝐒 ∩ 𝐆𝐋β _ hL := by
+  simpa only [Logic.equiv_iff] using provabilityLogic_classification
 
 end
 

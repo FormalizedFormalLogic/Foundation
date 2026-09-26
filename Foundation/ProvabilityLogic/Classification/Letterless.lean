@@ -121,6 +121,11 @@ theorem sumQuasiNormal_classification :
     · exact absurd (e.mpr h'.1) h;
     · exact .inr ⟨h, h'⟩;
 
+lemma sumQuasiNormal_classification_equiv :
+    (X.Regular T ∧ (𝐆𝐋 +ᴸ X.lift (α := α)) ≊ 𝐆𝐋α X.trace) ∨
+    (¬X.Regular T ∧ ∃ hX : X.traceᶜ.Finite, (𝐆𝐋 +ᴸ X.lift (α := α)) ≊ 𝐆𝐋β X.trace hX) := by
+  simpa only [equiv_iff] using sumQuasiNormal_classification
+
 end Logic.GL
 
 end FFL.ProvabilityLogic

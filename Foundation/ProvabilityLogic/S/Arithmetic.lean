@@ -82,6 +82,9 @@ theorem eq_provabilityLogicRelativeTo_TA : 𝐒 = T.provabilityLogicRelativeTo �
   simpa [ArithmeticTheory.provabilityLogicRelativeTo, Arithmetic.TA.provable_iff,
     Logic.provable_iff_mem] using arithmetical_completeness_iff;
 
+lemma equiv_provabilityLogicRelativeTo_TA : 𝐒 ≊ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
+  equiv_iff.mpr eq_provabilityLogicRelativeTo_TA
+
 theorem eq_provabilityLogicRelativeTo_peano_TA :
     𝐒 = 𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
   eq_provabilityLogicRelativeTo_TA

@@ -81,6 +81,9 @@ theorem eq_provabilityLogic [T.SoundOnHierarchy 𝚺 1] : 𝐆𝐋 = T.provabili
   ext A;
   exact arithmetical_completeness_iff;
 
+lemma equiv_provabilityLogic [T.SoundOnHierarchy 𝚺 1] : 𝐆𝐋 ≊ T.provabilityLogic (α := α) :=
+  equiv_iff.mpr eq_provabilityLogic
+
 theorem eq_provabilityLogic_peano : 𝐆𝐋 = 𝗣𝗔.provabilityLogic (α := α) :=
   eq_provabilityLogic
 

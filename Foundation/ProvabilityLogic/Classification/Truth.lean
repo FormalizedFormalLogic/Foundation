@@ -87,6 +87,10 @@ theorem provabilityLogic_TA_eq_GLBeta_iff :
     exact (provabilityLogic_eq_GLBeta hS).trans <| by
       congr 1; exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
 
+lemma provabilityLogic_TA_equiv_GLBeta_iff :
+    T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐆𝐋β {n}ᶜ (by simp) ↔ T.height = n :=
+  Logic.equiv_iff.trans provabilityLogic_TA_eq_GLBeta_iff
+
 variable [Nonempty α]
 
 /-- - [AB05, Corollary 41(i)] -/
@@ -101,6 +105,10 @@ theorem provabilityLogic_TA_eq_S_iff :
     exact Semantics.Imp.models_imply.mp (Arithmetic.TA.provable_iff.mp (h₁ ⟨fun _ ↦ φ⟩)) <|
       Arithmetic.models_standardProvability_iff.mpr <| by_axm hφ;
   · exact fun _ ↦ Logic.S.eq_provabilityLogicRelativeTo_TA.symm;
+
+lemma provabilityLogic_TA_equiv_S_iff :
+    T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐒 ↔ ℕ↓[ℒₒᵣ] ⊧* T :=
+  Logic.equiv_iff.trans provabilityLogic_TA_eq_S_iff
 
 /-- - [AB05, Corollary 41(ii)] -/
 theorem provabilityLogic_TA_eq_D_iff :
@@ -125,6 +133,11 @@ theorem provabilityLogic_TA_eq_D_iff :
     · exact h;
     · exact absurd (provabilityLogic_TA_eq_S_iff.mp h) hs;
 
+lemma provabilityLogic_TA_equiv_D_iff :
+    T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐃 ↔
+      T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T :=
+  Logic.equiv_iff.trans provabilityLogic_TA_eq_D_iff
+
 /-- - [AB05, Corollary 41(iii)] -/
 theorem provabilityLogic_TA_eq_A_iff :
     T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) = 𝐀 ↔
@@ -145,6 +158,11 @@ theorem provabilityLogic_TA_eq_A_iff :
         (h ▸ Logic.D.axiomD)) hs₁;
     · have := provabilityLogic_TA_eq_S_iff.mp h;
       exact (hs₁ inferInstance).elim;
+
+lemma provabilityLogic_TA_equiv_A_iff :
+    T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐀 ↔
+      ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ :=
+  Logic.equiv_iff.trans provabilityLogic_TA_eq_A_iff
 
 /-- Exactly one of the following holds.
 
@@ -174,6 +192,14 @@ theorem provabilityLogic_TA_classification : [
     · obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp h;
       exact .inr <| .inr <| .inr ⟨n, hn.symm, provabilityLogic_TA_eq_GLBeta_iff.mpr hn.symm⟩;
   all_goals simp +contextual [h₁, h₂];
+
+lemma provabilityLogic_TA_classification_equiv : [
+    ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐒,
+    T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐃,
+    ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐀,
+    ∃ n : ℕ, T.height = n ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐆𝐋β {n}ᶜ (by simp)
+  ].OAOO := by
+  simpa only [Logic.equiv_iff] using provabilityLogic_TA_classification
 
 end FFL.ProvabilityLogic
 
