@@ -193,15 +193,15 @@ lemma iff_valid : ⊢ᴳ[𝐆𝐋] S ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → M ⊧ S :=
   ⟨fun h _ _ M _ ↦ sound M h, complete⟩
 
-variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
+variable {Γ Γ₁ Γ₂ Δ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 /-- Cut is admissible. -/
 theorem cut (h₁ : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[𝐆𝐋] insert A Γ₂ ⟹ Δ₂) :
     ⊢ᴳ[𝐆𝐋] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ :=
   complete fun M _ x ↦ forcesSequent_cut (sound M h₁ x) (sound M h₂ x)
 
-lemma subst (s : Substitution α α) (h : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ Δ₁) :
-    ⊢ᴳ[𝐆𝐋] Γ₁.image (·⟦s⟧) ⟹ Δ₁.image (·⟦s⟧) := by
+lemma subst (s : Substitution α α) (h : ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ) :
+    ⊢ᴳ[𝐆𝐋] Γ.image (·⟦s⟧) ⟹ Δ.image (·⟦s⟧) := by
   apply complete;
   intro _ _ M _ x hx;
   obtain ⟨D, hD, hxD⟩ := sound (M.subst s) h x

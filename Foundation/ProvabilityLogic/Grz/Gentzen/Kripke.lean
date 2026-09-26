@@ -89,11 +89,12 @@ lemma mem_closure : C ∈ closure BS ↔
   simp [closure];
 
 @[grind .]
-lemma subfmls_subset_closure : BS.subfmls ⊆ closure BS := fun _ h ↦ mem_closure.mpr (.inl h)
+lemma subfmls_subset_closure : BS.subfmls ⊆ closure BS :=
+  Finset.subset_union_left.trans Finset.subset_union_left
 
 @[grind →]
-lemma mem_closure_of_box (h : □A ∈ BS.subfmls) : □(A 🡒 □A) ∈ closure BS :=
-  mem_closure.mpr (.inr (.inr ⟨A, h, rfl⟩))
+lemma mem_closure_of_box (h : □A ∈ BS.subfmls) : □(A 🡒 □A) ∈ closure BS := by
+  simp [closure, h];
 
 @[grind →]
 lemma mem_subfmls_of_imp_mem_closure (h : A 🡒 B ∈ closure BS) :
@@ -111,7 +112,7 @@ lemma mem_closure_of_box_mem_closure (h : □A ∈ closure BS) : A ∈ closure B
   · exact subfmls_subset_closure (BS.mem_subfmls_subfmls h Formula.mem_subfmls_box);
   · cases h;
   · cases h;
-    exact mem_closure.mpr (.inr (.inl ⟨C, hC, rfl⟩));
+    simp [closure, hC];
 
 /-- The worlds of the canonical countermodel of `BS`. -/
 structure SaturatedSequent (BS : Sequent α) extends Sequent α where

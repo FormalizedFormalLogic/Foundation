@@ -26,9 +26,9 @@ noncomputable abbrev Logic.GLBetaMinus {α : Type*} (X : Set ℕ) (hX : Xᶜ.Fin
 
 notation "𝐆𝐋β⁻" => Logic.GLBetaMinus
 
-namespace LetterlessFormula
+variable {α : Type*} {X : Set ℕ} {hX : Xᶜ.Finite}
 
-variable {X : Set ℕ} {hX : Xᶜ.Finite}
+namespace LetterlessFormula
 
 @[simp]
 lemma spectrum_betaMinus : spectrum (betaMinus X hX) = Xᶜ := by
@@ -41,7 +41,7 @@ lemma trace_betaMinus : trace (betaMinus X hX) = X := by
 
 end LetterlessFormula
 
-lemma Logic.GLBetaMinus.eq_sumQuasiNormal_lift {α : Type*} {X : Set ℕ} {hX : Xᶜ.Finite} :
+lemma Logic.GLBetaMinus.eq_sumQuasiNormal_lift :
     (𝐆𝐋β⁻ X hX : Logic α) = (𝐆𝐋 +ᴸ LetterlessFormulaSet.lift {betaMinus X hX}) := by
   simp;
 
