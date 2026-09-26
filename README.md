@@ -1,6 +1,5 @@
 [Docs]: https://FormalizedFormalLogic.github.io/Foundation/docs
 [Catalogue]: https://FormalizedFormalLogic.github.io/Catalogue
-[FFL]: https://github.com/FormalizedFormalLogic
 
 # Foundation
 
@@ -16,7 +15,6 @@ Main results of this repository. More detailed explanations are provided in [Doc
 - `Logic`: Fundamental notions shared by all logics (entailment, semantics, calculi, Lindenbaum algebras, …).
 - `Propositional`: Propositional logic (classical and intuitionistic).
   - [Completeness of Tait calculus][prop:completeness]
-  - [Heyting algebra semantics of intuitionistic logic][prop:heyting]
 - `FirstOrder`: [First-order logic][first_order]
   - [Completeness theorem][first_order:completeness]
   - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:hauptsatz]
@@ -31,15 +29,12 @@ Main results of this repository. More detailed explanations are provided in [Doc
     - [Löb's theorem][arith:loeb]
     - [Tarski's undefinability of truth][arith:tarski]
     - [Church's theorem and undecidability of first-order logic][arith:church]
-    - [Local][arith:local_reflection] and [uniform][arith:uniform_reflection] reflection principles
   - [Set theory][set_theory]: $\mathsf{Z}$, $\mathsf{ZF}$, $\mathsf{ZFC}$ and their models.
     - [Consistency of ZFC][set_theory:zfc_consistent] (relative to Lean's type theory)
     - [Downward Löwenheim–Skolem theorem for models of set theory][set_theory:loewenheim_skolem]
 - `ProvabilityLogic`: [Provability logic][provability_logic]: modal logics describing the provability predicates of arithmetic.
-  - Solovay's arithmetical completeness theorems: [$\mathsf{GL}$][pl:gl_arith] is the provability logic of $\mathsf{PA}$ (and of every $\Sigma_1$-sound theory), and [$\mathsf{S}$][pl:s_arith] is its provability logic relative to true arithmetic.
-  - Arithmetical completeness of [$\mathsf{Grz}$][pl:grz_arith] and of [$\mathsf{GL} + \Box^n \bot$][pl:glboxbot_arith].
-  - [Classification of provability logics][pl:classification] _(Artemov–Beklemishev)_: every provability logic is $\mathsf{GL}_\alpha$, $\mathsf{GL}_\beta$, $\mathsf{D} \cap \mathsf{GL}_\beta$, or $\mathsf{S} \cap \mathsf{GL}_\beta$; in particular, the [provability logics relative to true arithmetic][pl:classification_truth] are exactly $\mathsf{S}$, $\mathsf{D}$, $\mathsf{A}$, and $\mathsf{GL} + \lnot (\Box^{n+1} \bot \to \Box^n \bot)$.
-  - [de Jongh–Sambin fixed-point theorem][pl:fixedpoint] and Craig interpolation of [$\mathsf{GL}$][pl:gl_cip] and [$\mathsf{S}$][pl:s_cip]; [$\mathsf{D}$ lacks it][pl:d_not_cip].
+  - Arithmetical completeness theorems of [$\mathsf{GL}$][pl:gl_arith] and [$\mathsf{S}$][pl:s_arith] _(Solovay)_, [$\mathsf{Grz}$][pl:grz_arith], and [$\mathsf{GL} + \Box^n \bot$][pl:glboxbot_arith]
+  - [Classification of provability logics][pl:classification] _(Artemov–Beklemishev)_
   - [Provability Logic Zoo](#provability-logic-zoo)
 - `SecondOrder`: Syntax, semantics, and derivations of second-order logic.
 - `Syntax`: Languages, terms, and rewriting shared by first-order and second-order logic.
@@ -47,7 +42,6 @@ Main results of this repository. More detailed explanations are provided in [Doc
 - `Vorspiel`: Supplemental definitions and theorems for Mathlib.
 
 [prop:completeness]: ./Foundation/Propositional/Boolean/Tait.lean
-[prop:heyting]: ./Foundation/Propositional/Heyting/Semantics.lean
 [first_order]: ./Foundation/FirstOrder
 [first_order:completeness]: ./Foundation/FirstOrder/LK/Completeness/CounterModel.lean
 [first_order:hauptsatz]: ./Foundation/FirstOrder/LK/Hauptsatz.lean
@@ -62,8 +56,6 @@ Main results of this repository. More detailed explanations are provided in [Doc
 [arith:loeb]: ./Foundation/FirstOrder/Incompleteness/Löb.lean
 [arith:tarski]: ./Foundation/FirstOrder/Incompleteness/Tarski.lean
 [arith:church]: ./Foundation/FirstOrder/Incompleteness/Church.lean
-[arith:local_reflection]: ./Foundation/FirstOrder/Incompleteness/Reflection/Local.lean
-[arith:uniform_reflection]: ./Foundation/FirstOrder/Incompleteness/Reflection/Uniform.lean
 [set_theory]: ./Foundation/FirstOrder/SetTheory
 [set_theory:zfc_consistent]: ./Foundation/FirstOrder/SetTheory/Universe.lean
 [set_theory:loewenheim_skolem]: ./Foundation/FirstOrder/SetTheory/LoewenheimSkolem.lean
@@ -73,17 +65,11 @@ Main results of this repository. More detailed explanations are provided in [Doc
 [pl:grz_arith]: ./Foundation/ProvabilityLogic/Grz/Arithmetic.lean
 [pl:glboxbot_arith]: ./Foundation/ProvabilityLogic/GLPlusBoxBot/Arithmetic.lean
 [pl:classification]: ./Foundation/ProvabilityLogic/Classification/General.lean
-[pl:classification_truth]: ./Foundation/ProvabilityLogic/Classification/Truth.lean
-[pl:fixedpoint]: ./Foundation/ProvabilityLogic/GL/Fixedpoint.lean
-[pl:gl_cip]: ./Foundation/ProvabilityLogic/GL/CIP.lean
-[pl:s_cip]: ./Foundation/ProvabilityLogic/S/CIP.lean
-[pl:d_not_cip]: ./Foundation/ProvabilityLogic/D/NotCIP.lean
 
 ### Documents
 
 - [Docs]: catalogue of definitions and theorems, _generated by [doc-gen4](https://github.com/leanprover/doc-gen4)_.
 - [Catalogue]: an overview of the formalized results across the organization.
-- [Formalized Formal Logic][FFL]: the organization, with other repositories developed on top of Foundation.
 
 ### Zoo
 
