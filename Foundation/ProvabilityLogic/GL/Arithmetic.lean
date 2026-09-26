@@ -87,7 +87,7 @@ theorem eq_provabilityLogic_peano : 𝐆𝐋 = 𝗣𝗔.provabilityLogic (α := 
 lemma equiv_provabilityLogic_peano : 𝐆𝐋 ≊ 𝗣𝗔.provabilityLogic (α := α) :=
   equiv_provabilityLogic
 
-lemma equiv_provabilityLogic_IBroadSigmaOne : 𝐆𝐋 ≊ 𝗜𝚺⁺₁.provabilityLogic (α := α) :=
+lemma equiv_provabilityLogic_peano_con : 𝐆𝐋 ≊ (𝗣𝗔 ∪ 𝗣𝗔.Con).provabilityLogic (α := α) :=
   equiv_provabilityLogic
 
 end Logic.GL

@@ -87,8 +87,8 @@ lemma equiv_provabilityLogicRelativeTo_peano_TA :
     𝐒 ≊ 𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
   equiv_provabilityLogicRelativeTo_TA
 
-lemma equiv_provabilityLogicRelativeTo_IBroadSigmaOne_TA :
-    𝐒 ≊ 𝗜𝚺⁺₁.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
+lemma equiv_provabilityLogicRelativeTo_peano_con_TA :
+    𝐒 ≊ (𝗣𝗔 ∪ 𝗣𝗔.Con).provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
   equiv_provabilityLogicRelativeTo_TA
 
 end Logic.S
