@@ -82,6 +82,7 @@ public import Foundation.FirstOrder.Incompleteness.Halting
 public import Foundation.FirstOrder.Incompleteness.Jeroslow
 public import Foundation.FirstOrder.Incompleteness.Löb
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.FiniteLocalReflection
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflection
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refutability
