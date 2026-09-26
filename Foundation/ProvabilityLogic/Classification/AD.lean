@@ -7,9 +7,7 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflec
 /-!
 # Provability logics between `A` and `D`
 
-If the provability logic of `T` relative to `U` has trace `ℕ` and contains a formula outside `𝐀`,
-then `U` proves every `𝚺₁` reflection instance for `T`, and hence the logic contains `𝐃`.
-So no such provability logic lies strictly between `𝐀` and `𝐃`.
+No provability logic with trace `ℕ` lies strictly between `𝐀` and `𝐃`.
 
 ## References
 
@@ -27,11 +25,7 @@ namespace Kripke.StrongReflexiveCountermodel
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : Formula α}
 
-/-- The strong reflexive countermodel `M.graft v (Fin 1)` of `A`, whose `u` is the single point of
-the chain, for a countermodel `M` of `A` whose root sees an `A`-reflexive world `v`.
-
-- [Bek90, Lemma 5]
--/
+/-- - [Bek90, Lemma 5] -/
 def ofReflexive (M : RootedModel κ α) [M.IsGL] (hA : M.root ⊮ A) {v : M.World}
     (Rv : M.root ≺ v) (hv : v.IsReflexiveOf A.subfmls.prebox) :
     StrongReflexiveCountermodel (κ ⊕ Fin 1) A :=
@@ -80,10 +74,7 @@ lemma provable_localReflectionOn_sigma1_of_mem_of_not_A
   rintro _ ⟨σ, hσ, rfl⟩;
   exact provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA hσ;
 
-/-- If the provability logic of `T` relative to `U` has trace `ℕ` and strictly contains `𝐀`, then
-it contains `𝐃`.
-
-- [AB05, Lemma 51, Corollary 52(ii)]
+/-- - [AB05, Lemma 51, Corollary 52(ii)]
 -/
 theorem D_weakerThan_provabilityLogic
     (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
@@ -96,10 +87,7 @@ theorem D_weakerThan_provabilityLogic
   · exact fun f ↦ provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA <| by
       simp [interpret, Arithmetic.standardProvability_def]
 
-/-- No provability logic with trace `ℕ` lies strictly between `𝐀` and `𝐃`.
-
-- [AB05, Corollary 55]
--/
+/-- - [AB05, Corollary 55] -/
 theorem not_A_strictlyWeakerThan_provabilityLogic_strictlyWeakerThan_D
     (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ) :
     ¬(𝐀 ⪱ T.provabilityLogicRelativeTo U (α := α) ∧ T.provabilityLogicRelativeTo U (α := α) ⪱ 𝐃) :=

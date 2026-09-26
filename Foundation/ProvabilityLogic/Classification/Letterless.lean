@@ -57,7 +57,6 @@ namespace LetterlessFormula
 
 variable {T : ArithmeticTheory} [T.Δ₁] {A B : LetterlessFormula} {n : ℕ}
 
-/-- A letterless formula is regular if its arithmetical interpretation is true. -/
 def Regular (T : ArithmeticTheory) [T.Δ₁] (A : LetterlessFormula) : Prop :=
   ℕ↓[ℒₒᵣ] ⊧ A.interpret ⟨Empty.elim⟩ T.standardProvability
 

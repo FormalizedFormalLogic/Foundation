@@ -7,10 +7,7 @@ public import Foundation.ProvabilityLogic.Trace
 /-!
 # Provability logics between `𝐃` and `𝐒`
 
-If `𝐃 ⊬ A`, there is a formula `B` over the atoms of `A` with `𝐒 ⊬ B` and
-`𝐀 +ᴸ {A} ⊢ B ⋎ (□#p 🡒 #p)`. If the provability logic of `T` relative to `U` has trace `ω` and
-contains a formula outside `𝐃`, then `U` proves the local reflection schema for `T`, so the logic
-contains `𝐒`. Hence no provability logic of trace `ω` lies strictly between `𝐃` and `𝐒`.
+No provability logic of trace `ω` lies strictly between `𝐃` and `𝐒`.
 
 ## References
 
@@ -52,8 +49,6 @@ namespace Kripke.RootedModel
 
 variable {κ κ' α β : Type*} [Nonempty κ] [Nonempty κ']
 
-/-- The rooted model on the frame and root of `K` in which an atom `a` holds where `s a` is
-forced in `K`. -/
 def subst (K : RootedModel κ α) (s : Substitution β α) : RootedModel κ β where
   toModel := K.toModel.subst s
   root := K.root
@@ -159,10 +154,7 @@ lemma A_weakerThan_provabilityLogic_of_trace
     simpa using (lift_mem_provabilityLogic_iff (A := alpha i)).mp <| by
       simpa using alpha_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ i)
 
-/-- If the provability logic of `T` relative to `U` has trace `ω` and contains a formula outside
-`𝐃`, then `U` proves `Pr_T(σ) 🡒 σ` for every sentence `σ`.
-
-- [Bek90, Theorem 1]
+/-- - [Bek90, Theorem 1]
 - [AB05, Lemma 57]
 -/
 theorem provable_reflection_of_not_D (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
@@ -199,9 +191,7 @@ theorem provable_reflection_of_not_D (hT : (T.provabilityLogicRelativeTo U (α :
   simp only [standardInterpret, interpret, e] at h₄ h₅;
   cl_prover [h₃, h₄, h₅];
 
-/-- A provability logic of trace `ω` strictly containing `𝐃` contains `𝐒`.
-
-- [Bek90, Assertion 1]
+/-- - [Bek90, Assertion 1]
 - [AB05, Lemma 56, Lemma 57]
 -/
 theorem S_weakerThan_provabilityLogic
@@ -213,10 +203,7 @@ theorem S_weakerThan_provabilityLogic
   rintro _ ⟨C, rfl⟩ _;
   exact provable_reflection_of_not_D hT hA hAD;
 
-/-- No provability logic of trace `ω` lies strictly between `𝐃` and `𝐒`.
-
-- [AB05, Corollary 58]
--/
+/-- - [AB05, Corollary 58] -/
 theorem not_D_strictlyWeakerThan_provabilityLogic_strictlyWeakerThan_S
     (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ) :
     ¬(𝐃 ⪱ T.provabilityLogicRelativeTo U (α := α) ∧ T.provabilityLogicRelativeTo U (α := α) ⪱ 𝐒) :=

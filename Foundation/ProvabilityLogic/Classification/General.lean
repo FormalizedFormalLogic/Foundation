@@ -28,7 +28,6 @@ open ProvabilityLogic Formula
 
 variable (T U : ArithmeticTheory) [T.Δ₁] (N : Set ℕ)
 
-/-- `U` extended by the standard `T`-interpretations of `alpha n` for `n ∈ N`. -/
 noncomputable def addAlpha : ArithmeticTheory :=
   U ∪ (fun n ↦ (alpha n : LetterlessFormula).interpret ⟨Empty.elim⟩ T.standardProvability) '' N
 
