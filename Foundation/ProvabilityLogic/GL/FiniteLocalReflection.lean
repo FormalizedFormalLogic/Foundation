@@ -38,17 +38,17 @@ section Semantics
 variable {κ : Type*} [Nonempty κ] {M : Model κ (Option (Fin (m + 1)))} {x w : M.World} {k : ℕ}
 
 lemma not_forces_seq_succ {B : Formula _} :
-    x ⊮[M] seq B (k + 1) ↔ x ⊮[M] seq B k ∧ ∃ y, x ≺ y ∧ y ⊮[M] seq B k := by
+    x ⊮ seq B (k + 1) ↔ x ⊮ seq B k ∧ ∃ y, x ≺ y ∧ y ⊮ seq B k := by
   grind [seq];
 
 open scoped Classical in
 noncomputable def refuted (x : M.World) : Finset (Fin (m + 1)) :=
-  {i | ∃ z, (z = x ∨ x ≺ z) ∧ z ⊮[M] #(some i)}
+  {i | ∃ z, (z = x ∨ x ≺ z) ∧ z ⊮ #(some i)}
 
-lemma card_refuted [M.IsFiniteGL] (hw : w ⊩[M] hyp m) (hbw : w ⊩[M] □hyp m) (hx : x = w ∨ w ≺ x)
-    (hs : x ⊮[M] seq (#none) k) : k + 1 ≤ (refuted x).card := by
-  have witness : ∀ {x k}, (x = w ∨ w ≺ x) → x ⊮[M] seq (#none) k →
-      ∃ i, x ⊩[M] □#(some i) ∧ x ⊮[M] #(some i) := by
+lemma card_refuted [M.IsFiniteGL] (hw : w ⊩ hyp m) (hbw : w ⊩ □hyp m) (hx : x = w ∨ w ≺ x)
+    (hs : x ⊮ seq (#none) k) : k + 1 ≤ (refuted x).card := by
+  have witness : ∀ {x k}, (x = w ∨ w ≺ x) → x ⊮ seq (#none) k →
+      ∃ i, x ⊩ □#(some i) ∧ x ⊮ #(some i) := by
     intro x k hx hs;
     induction k <;> grind [seq, hyp, forces_conj₂];
   have htrans : ∀ {a b c : M.World}, a ≺ b → b ≺ c → a ≺ c := IsTrans.trans _ _ _;
@@ -72,7 +72,7 @@ lemma collapse_mem (m : ℕ) : 𝐆𝐋 ⊢ hyp m 🡒 □hyp m 🡒 reflection 
   intro κ _ M _ w;
   simp only [forces_imp];
   by_contra! ⟨hH, hbH, hR, hq⟩;
-  have hs : ∀ k ≤ m + 1, w ⊮[M] seq (#none) k := by
+  have hs : ∀ k ≤ m + 1, w ⊮ seq (#none) k := by
     intro k hk;
     induction k with
     | zero => exact hq;
