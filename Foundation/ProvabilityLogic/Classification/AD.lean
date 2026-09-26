@@ -53,12 +53,8 @@ def ofReflexive (M : RootedModel κ α) [M.IsGL] (hA : M.root ⊮ A) {v : M.Worl
 
 end Kripke.StrongReflexiveCountermodel
 
-universe u
-
-variable {α : Type u} {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Formula α}
+variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U] {A : Formula α}
   {σ : ArithmeticSentence}
-
-variable [𝗜𝚺₁ ⪯ U]
 
 theorem provable_sigma1_reflection_of_mem_of_not_A
     (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
@@ -82,7 +78,7 @@ lemma provable_localReflectionOn_sigma1_of_mem_of_not_A
     (hAL : A ∈ T.provabilityLogicRelativeTo U) (hAA : 𝐀 ⊬ A) :
     U ⊢* T.standardProvability.reflOn (Arithmetic.Hierarchy 𝚺 1) := by
   rintro _ ⟨σ, hσ, rfl⟩;
-  apply provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA hσ;
+  exact provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA hσ;
 
 /-- If the provability logic of `T` relative to `U` has trace `ℕ` and strictly contains `𝐀`, then
 it contains `𝐃`.
