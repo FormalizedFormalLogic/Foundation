@@ -120,10 +120,7 @@ theorem TFAE : [
 
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
-/-- Cut is admissible.
-
-- [KKIM25, Theorem 5.8]
--/
+/-- - [KKIM25, Theorem 5.8] -/
 theorem cut : {ℓ : Fin 3} → ⊢ᴳ[𝐃] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[𝐃] insert A Γ₂ ⟹[ℓ] Δ₂ →
     ⊢ᴳ[𝐃] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
   | 0, h₁, h₂ => iff_GL.mpr (GL.Gentzen.cut (iff_GL.mp h₁) (iff_GL.mp h₂))

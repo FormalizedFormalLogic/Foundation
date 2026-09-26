@@ -78,9 +78,7 @@ lemma S_modalize_iff_of_interpolant (hab : a ≠ b) (hac : a ≠ c)
   exact forces_iff.mpr <| (key C (by simp [X, subfmls])).symm.trans <|
     forces_pseudoTail_interpolant_iff hab hac h₁ h₂ hC M _;
 
-/-- **`𝐃` does not have the Craig interpolation property.**
-
-- [Bek89, Theorem 2] -/
+/-- - [Bek89, Theorem 2] -/
 theorem not_CIP (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) :
     ¬∀ A B : Formula α, 𝐃 ⊢ A 🡒 B →
       ∃ C, 𝐃 ⊢ A 🡒 C ∧ 𝐃 ⊢ C 🡒 B ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by

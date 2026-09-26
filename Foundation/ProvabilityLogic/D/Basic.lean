@@ -82,7 +82,6 @@ instance [Inhabited α] : (𝐃 : Logic α) ⪱ 𝐒 :=
 
 variable [DecidableEq α]
 
-/-- The `n`-ary form of axiom `D`. -/
 lemma axiomD_disj {Γ : FormulaFinset α} : 𝐃 ⊢ □Γ.box.disj 🡒 Γ.box.disj := by
   induction Γ using Finset.induction_on with
   | empty =>
