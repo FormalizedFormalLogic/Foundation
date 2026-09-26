@@ -30,16 +30,28 @@ variable {α : Type*} {A : Formula α}
 
 /-! ### Kripke soundness -/
 
-theorem sound {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (h : 𝐆𝐋 ⊢ A) : M ⊧ A := by
-  classical
+section
+
+variable {κ : Type*} [Nonempty κ] {M : Model κ α}
+
+lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩ □(□A 🡒 A) 🡒 □A := by
+  intro hx;
+  by_contra hA;
+  obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp hA;
+  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮ A} ⟨y, Rxy, hy⟩;
+  apply ht;
+  apply hx t Rxt;
+  intro z Rtz;
+  by_contra hz;
+  exact tmax z ⟨IsTrans.trans _ _ _ Rxt Rtz, hz⟩ Rtz;
+
+theorem sound (M : Model κ α) [M.IsGL] (h : 𝐆𝐋 ⊢ A) : M ⊧ A := by
   apply normalOf.sound _ h;
   rintro _ (⟨B, rfl⟩ | ⟨B, rfl⟩) x;
   · exact fun h y Rxy z Ryz ↦ h z (IsTrans.trans _ _ _ Rxy Ryz);
-  · intro hx;
-    have : ⊢ᴳ[𝐆𝐋] {□(□B 🡒 B)} ⟹ {□B} := by
-      simpa using Gentzen.boxGL (Γ := {□B 🡒 B}) <| Gentzen.wkL (Γ := insert (□B 🡒 B) {□B}) <|
-        Gentzen.impL (Gentzen.union (□B)) (Gentzen.union B);
-    exact validateSequent_singleton_iff.mp (Gentzen.sound M this) x (by simpa);
+  · exact forces_axiomL;
+
+end
 
 instance : Consistent (𝐆𝐋 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ sound (pointModel fun _ ↦ False) h 0
