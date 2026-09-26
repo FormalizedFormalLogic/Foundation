@@ -9,6 +9,10 @@ public import Foundation.FirstOrder.Arithmetic.Exponential
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Bounding
+
+open scoped FFL.FirstOrder.Arithmetic
+
 /-- ∀ x, ∃ y, 2^{|x|^2} = y
 -/
 def _root_.FFL.Omega1.omega1 : ArithmeticSentence :=
@@ -72,17 +76,17 @@ lemma exponential_smash (a b : V) : Exponential (‖a‖ * ‖b‖) (a ⨳ b) :=
 lemma exponential_smash_one (a : V) : Exponential ‖a‖ (a ⨳ 1) := by
   simpa using exponential_smash a 1
 
-def smashDef : 𝚺₀.Semisentence 3 := .mkSigma
+def smashDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “z x y. ∃ lx <⁺ x, ∃ ly <⁺ y, !lengthDef lx x ∧ !lengthDef ly y ∧ !exponentialDef (lx * ly) z”
 
-instance smash_defined : 𝚺₀-Function₂ (Smash.smash : V → V → V) via smashDef := .mk <| fun v ↦ by
+instance smash_defined : 𝚺ᴬ₀-Function₂ (Smash.smash : V → V → V) via smashDef := .mk <| fun v ↦ by
   suffices Exponential (‖v 1‖ * ‖v 2‖) (v 0) ↔ v 0 = v 1 ⨳ v 2 by
     simpa [smashDef, ←le_iff_lt_succ]
   constructor
   · rintro h; exact h.uniq (exponential_smash (v 1) (v 2))
   · intro h; simp [h, exponential_smash]
 
-instance smash_definable : 𝚺₀-Function₂ (Smash.smash : V → V → V) := smash_defined.to_definable
+instance smash_definable : 𝚺ᴬ₀-Function₂ (Smash.smash : V → V → V) := smash_defined.to_definable
 
 @[simp] lemma smash_pow2 (a b : V) : Pow2 (a ⨳ b) := (exponential_smash a b).range_pow2
 

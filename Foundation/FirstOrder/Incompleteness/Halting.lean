@@ -3,6 +3,9 @@ module
 public import Foundation.FirstOrder.Incompleteness.First
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
@@ -24,7 +27,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
     constructor;
     · assumption;
     · suffices REPred fun a : ℕ ↦ T ⊬ φ/[a] by simpa [hP] using! this;
-      have : 𝚺₁-Predicate fun b : ℕ ↦ Bootstrapping.Provable T
+      have : 𝚺ᴬ₁-Predicate fun b : ℕ ↦ Bootstrapping.Provable T
           (Bootstrapping.neg ℒₒᵣ
             <| Bootstrapping.subst ℒₒᵣ ?[Bootstrapping.Arithmetic.numeral b] ⌜φ⌝) := by
         clear hP; definability;

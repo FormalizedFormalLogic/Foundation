@@ -5,6 +5,9 @@ public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
 public import Foundation.Vorspiel.Computability
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Theory
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -12,11 +15,11 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 /-- TODO: define predicate `VariableFree` and make `mem_iff`
 `∀ φ : Sentence, ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T` -/
 class Δ₁ (T : Theory L) where
-  ch : 𝚫₁.Semisentence 1
+  ch : 𝚫ᴬ₁.Semisentence 1
   mem_iff : ∀ φ : Proposition L, ℕ ⊧/![⌜φ⌝] ch.val ↔ ∃ σ ∈ T, φ = σ
   isDelta1 : ch.ProvablyProperOn 𝗜𝚺₁
 
-abbrev Δ₁ch (T : Theory L) [T.Δ₁] : 𝚫₁.Semisentence 1 := Δ₁.ch T
+abbrev Δ₁ch (T : Theory L) [T.Δ₁] : 𝚫ᴬ₁.Semisentence 1 := Δ₁.ch T
 
 variable [L.Primcodable]
 
@@ -64,7 +67,7 @@ def _root_.FFL.FirstOrder.Theory.Δ₁Class (T : Theory L) [T.Δ₁] : Set V :=
 
 variable {T : Theory L} [T.Δ₁]
 
-instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.Δ₁ch := .mk <| by
+instance Δ₁Class.defined : 𝚫ᴬ₁-Predicate[V] (· ∈ T.Δ₁Class) via T.Δ₁ch := .mk <| by
   constructor
   · intro v
     have : V ⊧/![v 0] (Theory.Δ₁.ch T).sigma.val ↔ V ⊧/![v 0] (Theory.Δ₁.ch T).pi.val := by
@@ -75,7 +78,7 @@ instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.�
     rwa [Matrix.fun_eq_vec_one v]
   · intro v; simp [←Matrix.fun_eq_vec_one, Theory.Δ₁Class]
 
-instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ₁Class.defined.to_definable
+instance Δ₁Class.definable : 𝚫ᴬ₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ₁Class.defined.to_definable
 
 @[simp] lemma Δ₁Class.proper : T.Δ₁ch.ProperOn V := (Theory.Δ₁.isDelta1 (T := T)).properOn V
 

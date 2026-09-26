@@ -8,6 +8,8 @@ public import Foundation.Vorspiel.Computability
 
 @[expose] public section
 open Encodable Denumerable
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
 
@@ -435,7 +437,7 @@ end codeOfComputablePred
 
 section
 
-theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺₁-Predicate p := by
+theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺ᴬ₁-Predicate p := by
   constructor
   · intro h
     refine ⟨.mkSigma (codeOfREPred p) (by simp [codeOfREPred, codeOfPartrec']), ?_⟩
@@ -447,21 +449,21 @@ theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺₁-Predicate p 
         (Primrec.to_comp <| Primrec.vector_cons.comp .id <| .const _)
     exact this.of_eq <| by intro x; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
 
-theorem computablePred_iff_delta1 {p : ℕ → Prop} : ComputablePred p ↔ 𝚫₁-Predicate p := by
+theorem computablePred_iff_delta1 {p : ℕ → Prop} : ComputablePred p ↔ 𝚫ᴬ₁-Predicate p := by
   classical
   constructor
   · intro hp
-    change 𝚫₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0))
+    change 𝚫ᴬ₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0))
     apply Bounding.HierarchySymbol.Definable.delta_iff_sigma_and_pi.mpr
     rcases ComputablePred.computable_iff_re_compl_re'.mp hp with ⟨hp, hnp⟩
     exact ⟨(rePred_iff_sigma1.mp hnp).notSigma.of_iff (by intro v; simp), rePred_iff_sigma1.mp hp⟩
   · intro h
-    change 𝚫₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0)) at h
+    change 𝚫ᴬ₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0)) at h
     have h := Bounding.HierarchySymbol.Definable.delta_iff_sigma_and_pi.mp h
     exact ComputablePred.computable_iff_re_compl_re'.mpr
       ⟨rePred_iff_sigma1.mpr h.2, rePred_iff_sigma1.mpr h.1.notPi⟩
 
-theorem computable_iff_sigma1 {f : ℕ → ℕ} : Computable f ↔ 𝚺₁-Function₁ f := by
+theorem computable_iff_sigma1 {f : ℕ → ℕ} : Computable f ↔ 𝚺ᴬ₁-Function₁ f := by
   constructor
   · intro hf
     let F : List.Vector ℕ 1 →. ℕ := fun v ↦ Part.some (f (v.get 0))
@@ -482,7 +484,7 @@ theorem computable_iff_sigma1 {f : ℕ → ℕ} : Computable f ↔ 𝚺₁-Funct
       intro p
       simpa [List.Vector.cons_get] using hφ ![p.2, p.1]
 
-theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔ 𝚺₁-Function₂ f := by
+theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔ 𝚺ᴬ₁-Function₂ f := by
   constructor
   · intro hf
     let F : List.Vector ℕ 2 →. ℕ := fun v ↦ Part.some (f (v.get 0) (v.get 1))

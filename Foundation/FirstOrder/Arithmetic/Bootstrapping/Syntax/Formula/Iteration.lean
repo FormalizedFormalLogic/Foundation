@@ -3,6 +3,9 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 set_option autoImplicit true
 namespace FFL.FirstOrder.Semiformula
 
@@ -47,7 +50,7 @@ open QQConj
 
 noncomputable def qqConj (ps : V) : V := construction.result ![] ps
 
-def qqConjGraph : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def qqConjGraph : 𝚺ᴬ₁.Semisentence 2 := blueprint.resultDef
 
 scoped notation:65 "^⋀ " ps:66 => qqConj ps
 
@@ -57,11 +60,11 @@ scoped notation:65 "^⋀ " ps:66 => qqConj ps
 
 section
 
-instance qqConj.defined : 𝚺₁-Function₁[V] qqConj via qqConjGraph := construction.result_defined
+instance qqConj.defined : 𝚺ᴬ₁-Function₁[V] qqConj via qqConjGraph := construction.result_defined
 
-instance qqConj.definable : 𝚺₁-Function₁ (qqConj : V → V) := qqConj.defined.to_definable
+instance qqConj.definable : 𝚺ᴬ₁-Function₁ (qqConj : V → V) := qqConj.defined.to_definable
 
-instance qqConj.definable' : Γ-[m + 1]-Function₁ (qqConj : V → V) := .of_sigmaOne qqConj.definable
+instance qqConj.definable' : Γᴬ-[m + 1]-Function₁ (qqConj : V → V) := .of_sigmaOne qqConj.definable
 
 end
 
@@ -113,7 +116,7 @@ open QQDisj
 
 noncomputable def qqDisj (ps : V) : V := construction.result ![] ps
 
-def qqDisjGraph : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def qqDisjGraph : 𝚺ᴬ₁.Semisentence 2 := blueprint.resultDef
 
 scoped notation:65 "^⋁ " ps:66 => qqDisj ps
 
@@ -123,11 +126,11 @@ scoped notation:65 "^⋁ " ps:66 => qqDisj ps
 
 section
 
-instance qqDisj.defined : 𝚺₁-Function₁[V] qqDisj via qqDisjGraph := construction.result_defined
+instance qqDisj.defined : 𝚺ᴬ₁-Function₁[V] qqDisj via qqDisjGraph := construction.result_defined
 
-instance qqDisj.definable : 𝚺₁-Function₁[V] qqDisj := qqDisj.defined.to_definable
+instance qqDisj.definable : 𝚺ᴬ₁-Function₁[V] qqDisj := qqDisj.defined.to_definable
 
-instance qqDisj.definable' : Γ-[m + 1]-Function₁[V] qqDisj := .of_sigmaOne qqDisj.definable
+instance qqDisj.definable' : Γᴬ-[m + 1]-Function₁[V] qqDisj := .of_sigmaOne qqDisj.definable
 
 end
 
@@ -195,17 +198,18 @@ noncomputable def disjSeqSubst (w p k : V) : V := construction.result ![w, p] k
     disjSeqSubst w p (k + 1) = subst ℒₒᵣ (numeral k ∷ w) p ^⋎ disjSeqSubst w p k := by
   simp [disjSeqSubst, construction]
 
-noncomputable def disjSeqSubstGraph : 𝚺₁.Semisentence 4 :=
+noncomputable def disjSeqSubstGraph : 𝚺ᴬ₁.Semisentence 4 :=
   blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
 
 section
 
-instance disjSeqSubst.defined : 𝚺₁-Function₃[V] disjSeqSubst via disjSeqSubstGraph := .mk fun v ↦ by
+instance disjSeqSubst.defined : 𝚺ᴬ₁-Function₃[V] disjSeqSubst via disjSeqSubstGraph :=
+  .mk fun v ↦ by
   simp [construction.result_defined_iff, disjSeqSubstGraph, disjSeqSubst]
 
-instance disjSeqSubst.definable : 𝚺₁-Function₃[V] disjSeqSubst := disjSeqSubst.defined.to_definable
+instance disjSeqSubst.definable : 𝚺ᴬ₁-Function₃[V] disjSeqSubst := disjSeqSubst.defined.to_definable
 
-instance disjSeqSubst.definable' : Γ-[m + 1]-Function₃[V] disjSeqSubst :=
+instance disjSeqSubst.definable' : Γᴬ-[m + 1]-Function₃[V] disjSeqSubst :=
   .of_sigmaOne disjSeqSubst.definable
 
 end
@@ -267,16 +271,16 @@ noncomputable def substItr (w p k : V) : V := construction.result ![w, p] k
 
 section
 
-noncomputable def substItrGraph : 𝚺₁.Semisentence 4 :=
+noncomputable def substItrGraph : 𝚺ᴬ₁.Semisentence 4 :=
   blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
 
-instance substItr.defined : 𝚺₁-Function₃[V] substItr via substItrGraph := .mk fun v ↦ by
+instance substItr.defined : 𝚺ᴬ₁-Function₃[V] substItr via substItrGraph := .mk fun v ↦ by
   simp [construction.result_defined_iff, substItrGraph, substItr]
 
-instance substItr.definable : 𝚺₁-Function₃ (substItr : V → V → V → V) :=
+instance substItr.definable : 𝚺ᴬ₁-Function₃ (substItr : V → V → V → V) :=
   substItr.defined.to_definable
 
-instance substItr.definable' : Γ-[m + 1]-Function₃ (substItr : V → V → V → V) :=
+instance substItr.definable' : Γᴬ-[m + 1]-Function₃ (substItr : V → V → V → V) :=
   .of_sigmaOne substItr.definable
 
 end
@@ -416,7 +420,7 @@ section verums
 
 noncomputable def qqVerums (k : V) : V := ^⋀ repeatVec ^⊤ k
 
-def qqVerumsGraph : 𝚺₁.Semisentence 2 := .mkSigma
+def qqVerumsGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “y k. ∃ verum, !qqVerumDef verum ∧ ∃ vs, !repeatVecDef vs verum k ∧ !qqConjGraph y vs”
 
 @[simp] lemma le_qqVerums (k : V) : k ≤ qqVerums k := by
@@ -424,12 +428,12 @@ def qqVerumsGraph : 𝚺₁.Semisentence 2 := .mkSigma
 
 section
 
-instance qqVerums.defined : 𝚺₁-Function₁[V] qqVerums via qqVerumsGraph :=
+instance qqVerums.defined : 𝚺ᴬ₁-Function₁[V] qqVerums via qqVerumsGraph :=
   .mk fun v ↦ by simp [qqVerumsGraph]; rfl
 
-instance qqVerums.definable : 𝚺₁-Function₁[V] qqVerums := qqVerums.defined.to_definable
+instance qqVerums.definable : 𝚺ᴬ₁-Function₁[V] qqVerums := qqVerums.defined.to_definable
 
-instance qqVerums.definable' : Γ-[m + 1]-Function₁[V] qqVerums := .of_sigmaOne qqVerums.definable
+instance qqVerums.definable' : Γᴬ-[m + 1]-Function₁[V] qqVerums := .of_sigmaOne qqVerums.definable
 
 end
 

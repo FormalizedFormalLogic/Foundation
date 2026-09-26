@@ -12,12 +12,16 @@ public import Mathlib.Computability.Reduce
 # Church's undecidability theorem
 
 The set of sentences provable in an arithmetic theory `T ⊇ 𝗥₀` is not computable, whether `T` is
-sound on `𝚺₁` sentences (`uncomputable_theory_of_sigma1Sound`) or merely consistent and extends
+sound on `𝚺ᴬ₁` sentences (`uncomputable_theory_of_sigma1Sound`) or merely consistent and
+extends
 `𝗜𝚺₁` (`uncomputable_theory_of_consistent`). Provability in pure first-order logic is likewise
 undecidable (`undecidability_first_order_logic`).
 -/
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
 
@@ -26,7 +30,7 @@ open Bootstrapping Bootstrapping.Arithmetic
 section Diagonalization
 
 lemma computable_iff_sigma1_simulate {α β : Type*} [Primcodable α] [Primcodable β]
-    {f : ℕ → ℕ} (hf : 𝚺₁-Function₁ f)
+    {f : ℕ → ℕ} (hf : 𝚺ᴬ₁-Function₁ f)
     {F : α → β} (h : ∀ a, f (Encodable.encode a) = Encodable.encode (F a)) :
     Computable F := by
   have hCode : Computable fun a : α ↦ f (Encodable.encode a) :=
@@ -37,7 +41,7 @@ lemma computable_iff_sigma1_simulate {α β : Type*} [Primcodable α] [Primcodab
 
 lemma computable₂_iff_sigma1_simulate {α β γ : Type*} [Primcodable α] [Primcodable β]
     [Primcodable γ]
-    {f : ℕ → ℕ → ℕ} (hf : 𝚺₁-Function₂ f)
+    {f : ℕ → ℕ → ℕ} (hf : 𝚺ᴬ₁-Function₂ f)
     {F : α → β → γ}
     (h : ∀ a b, f (Encodable.encode a) (Encodable.encode b) = Encodable.encode (F a b)) :
     Computable₂ F := by

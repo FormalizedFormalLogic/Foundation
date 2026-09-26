@@ -14,6 +14,9 @@ This file provides functions and relations defined in $\mathsf{PA^-}
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 variable {a b c : V}
@@ -50,13 +53,14 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 open FirstOrder.Bounding.HierarchySymbol.Definable
 
-def _root_.FFL.FirstOrder.Arithmetic.subDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.subDef : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)”
 
-instance sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef :=
+instance sub_defined : 𝚺ᴬ₀-Function₂ ((· - ·) : V → V → V) via subDef :=
   .mk <| by intro v; simp [FirstOrder.Arithmetic.subDef, sub_eq_iff]
 
-instance sub_definable (ℌ : HierarchySymbol) : ℌ.DefinableFunction₂ ((· - ·) : V → V → V) :=
+instance sub_definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ.DefinableFunction₂ ((· - ·) : V → V → V) :=
   sub_defined.to_definable₀
 
 instance sub_polybounded : Bounded₂ ((· - ·) : V → V → V) := ⟨#0, fun _ ↦ by simp⟩
@@ -175,13 +179,14 @@ lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
       exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def _root_.FFL.FirstOrder.Arithmetic.dvd : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.dvd : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “x y. ∃ z <⁺ y, y = x * z”
 
-instance dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd :=
+instance dvd_defined : 𝚺ᴬ₀-Relation (fun a b : V ↦ a ∣ b) via dvd :=
   .mk fun v ↦ by simp [dvd_iff_bounded, dvd]
 
-instance dvd_definable (ℌ : HierarchySymbol) : ℌ.DefinableRel ((· ∣ ·) : V → V → Prop) :=
+instance dvd_definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ.DefinableRel ((· ∣ ·) : V → V → Prop) :=
   dvd_defined.to_definable₀
 
 section
@@ -240,10 +245,11 @@ lemma eq_one_or_eq_of_dvd_of_prime {p a : V} (pp : Prime p) (hxp : a ∣ p) : a 
 def IsPrime (a : V) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 -- TODO: prove IsPrime a ↔ Prime a
 
-def _root_.FFL.FirstOrder.Arithmetic.isPrime : 𝚺₀.Semisentence 1 :=
+def _root_.FFL.FirstOrder.Arithmetic.isPrime : 𝚺ᴬ₀.Semisentence 1 :=
   .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x”
 
-instance isPrime_defined : 𝚺₀-Predicate (fun a : V ↦ IsPrime a) via isPrime := .mk fun v ↦ by
+instance isPrime_defined : 𝚺ᴬ₀-Predicate (fun a : V ↦ IsPrime a) via isPrime :=
+  .mk fun v ↦ by
   simp [Semiformula.eval_substs, IsPrime, isPrime]
 
 end Prime
@@ -252,14 +258,15 @@ end Prime
 
 section min
 
-def min.dfn : 𝚺₀.Semisentence 3 :=
+def min.dfn : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≤ y → z = x) ∧ (x ≥ y → z = y)”
 
 set_option linter.flexible false in
-instance min_defined : 𝚺₀-Function₂[V] min via min.dfn := .mk fun v ↦ by
+instance min_defined : 𝚺ᴬ₀-Function₂[V] min via min.dfn := .mk fun v ↦ by
   simp [min.dfn]; grind
 
-instance min_definable (ℌ) : ℌ-Function₂[V] min := min_defined.to_definable₀
+instance min_definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₂[V] min := min_defined.to_definable₀
 
 instance min_polybounded : Bounded₂ (min : V → V → V) := ⟨#0, fun _ ↦ by simp⟩
 
@@ -269,16 +276,18 @@ end min
 
 section max
 
-def max.dfn : 𝚺₀.Semisentence 3 :=
+def max.dfn : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)”
 
 set_option linter.flexible false in
-instance max_defined : 𝚺₀-Function₂[V] max via max.dfn :=
+instance max_defined : 𝚺ᴬ₀-Function₂[V] max via max.dfn :=
   .mk fun v ↦ by simp [max.dfn]; grind
 
-instance max_definable (Γ) : Γ-Function₂[V] max := max_defined.to_definable₀
+instance max_definable (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    Γ-Function₂[V] max := max_defined.to_definable₀
 
-instance max_polybounded : Bounded₂ (max : V → V → V) := ⟨‘#0 + #1’, fun v ↦ by simp⟩
+instance max_polybounded : Bounded₂ (max : V → V → V) :=
+  ⟨‘#0 + #1’, fun v ↦ by simp⟩
 
 end max
 

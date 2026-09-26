@@ -3,6 +3,9 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -53,16 +56,16 @@ lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :
 @[simp] lemma qqFunc_inj {k f v k' f' w : V} :
     ^func k f v = ^func k' f' w ↔ k = k' ∧ f = f' ∧ v = w := by simp [qqFunc]
 
-def _root_.FFL.FirstOrder.Arithmetic.qqBvarDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqBvarDef : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1”
 
-instance qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef :=
+instance qqBvar_defined : 𝚺ᴬ₀-Function₁ (qqBvar : V → V) via qqBvarDef :=
   .mk fun _ ↦ by simp_all [qqBvarDef, qqBvar]
 
-def _root_.FFL.FirstOrder.Arithmetic.qqFvarDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqFvarDef : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1”
 
-instance qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef :=
+instance qqFvar_defined : 𝚺ᴬ₀-Function₁ (qqFvar : V → V) via qqFvarDef :=
   .mk fun v ↦ by simp_all [qqFvarDef, qqFvar]
 
 private lemma qqFunc_graph {x k f v : V} :
@@ -74,11 +77,11 @@ private lemma qqFunc_graph {x k f v : V} :
         ⟪2, k, f, v⟫, by simp [qqFunc], rfl, rfl⟩,
    by rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, rfl⟩; rfl⟩
 
-def _root_.FFL.FirstOrder.Arithmetic.qqFuncDef : 𝚺₀.Semisentence 4 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.qqFuncDef : 𝚺ᴬ₀.Semisentence 4 := .mkSigma
   “x k f v. ∃ fv < x, !pairDef fv f v ∧
     ∃ kfv < x, !pairDef kfv k fv ∧ ∃ x' < x, !pairDef x' 2 kfv ∧ x = x' + 1”
 
-instance qqFunc_defined : 𝚺₀-Function₃ (qqFunc : V → V → V → V) via qqFuncDef :=
+instance qqFunc_defined : 𝚺ᴬ₀-Function₃ (qqFunc : V → V → V → V) via qqFuncDef :=
   .mk fun v ↦ by simp [qqFuncDef, qqFunc_graph]
 
 namespace FormalizedTerm
@@ -151,7 +154,7 @@ def IsUTerm : V → Prop := (construction L).Fixpoint ![]
 
 /-- Note: `noncomputable` attribute to prohibit compilation of a large term.
 This is necessary for Zoo and integration with Verso. -/
-noncomputable def isUTerm : 𝚫₁.Semisentence 1 := (blueprint L).fixpointDefΔ₁
+noncomputable def isUTerm : 𝚫ᴬ₁.Semisentence 1 := (blueprint L).fixpointDefΔ₁
 
 variable {L}
 
@@ -159,12 +162,12 @@ namespace IsUTerm
 
 variable {Γ : Polarity} {m : ℕ}
 
-instance defined : 𝚫₁-Predicate (IsUTerm L (V := V)) via (isUTerm L) :=
+instance defined : 𝚫ᴬ₁-Predicate (IsUTerm L (V := V)) via (isUTerm L) :=
   (construction L).fixpoint_definedΔ₁
 
-instance definable : 𝚫₁-Predicate (IsUTerm L (V := V)) := defined.to_definable
+instance definable : 𝚫ᴬ₁-Predicate (IsUTerm L (V := V)) := defined.to_definable
 
-instance definable' (Γ) : Γ-[m + 1]-Predicate (IsUTerm L (V := V)) := definable.of_deltaOne
+instance definable' (Γ) : Γᴬ-[m + 1]-Predicate (IsUTerm L (V := V)) := definable.of_deltaOne
 
 end IsUTerm
 
@@ -172,7 +175,7 @@ variable (L)
 
 def IsUTermVec (n w : V) : Prop := n = len w ∧ ∀ i < n, IsUTerm L w.[i]
 
-noncomputable def isUTermVec : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def isUTermVec : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “n w. !lenDef n w ∧ ∀ i < n, ∃ u, !nthDef u w i ∧ !(isUTerm L).sigma u”)
   (.mkPi “n w. (∀ l, !lenDef l w → n = l) ∧ ∀ i < n, ∀ u, !nthDef u w i → !(isUTerm L).pi u”)
 
@@ -227,14 +230,14 @@ lemma two_iff {v : V} :
 
 section
 
-instance defined : 𝚫₁-Relation (IsUTermVec (V := V) L) via (isUTermVec L) :=
+instance defined : 𝚫ᴬ₁-Relation (IsUTermVec (V := V) L) via (isUTermVec L) :=
   ⟨by intro v; simp [isUTermVec, Bounding.HierarchySymbol.Semiformula.val_sigma,
     IsUTerm.defined.proper.iff'],
    by intro v; simp [isUTermVec, Bounding.HierarchySymbol.Semiformula.val_sigma, IsUTermVec]⟩
 
-instance definable : 𝚫₁-Relation (IsUTermVec (V := V) L) := defined.to_definable
+instance definable : 𝚫ᴬ₁-Relation (IsUTermVec (V := V) L) := defined.to_definable
 
-instance definable' (Γ) {m : ℕ} : Γ-[m + 1]-Relation (IsUTermVec (V := V) L) :=
+instance definable' (Γ) {m : ℕ} : Γᴬ-[m + 1]-Relation (IsUTermVec (V := V) L) :=
   definable.of_deltaOne
 
 end
@@ -271,7 +274,7 @@ alias ⟨case, mk⟩ := case_iff
 lemma func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     IsUTerm L (^func k f v) := func_iff.mpr ⟨hkf, hv⟩
 
-lemma induction (Γ : Polarity) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
     (hbvar : ∀ z, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsUTermVec L k v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, IsUTerm L t → P t :=
@@ -288,9 +291,9 @@ end term
 namespace Language.TermRec
 
 structure Blueprint (arity : ℕ) where
-  bvar : 𝚺₁.Semisentence (arity + 2)
-  fvar : 𝚺₁.Semisentence (arity + 2)
-  func : 𝚺₁.Semisentence (arity + 5)
+  bvar : 𝚺ᴬ₁.Semisentence (arity + 2)
+  fvar : 𝚺ᴬ₁.Semisentence (arity + 2)
+  func : 𝚺ᴬ₁.Semisentence (arity + 5)
 
 namespace Blueprint
 
@@ -313,13 +316,13 @@ noncomputable def blueprint : Fixpoint.Blueprint arity := ⟨.mkDelta
           ∀ i < k, ∀ vi, !nthDef vi v i → ∀ v'i, !nthDef v'i w i → :⟪vi, v'i⟫:∈ C) ∧
         !qqFuncDef t k f v ∧ !β.func.graphDelta.pi y k f v w ⋯) )”)⟩
 
-noncomputable def graph : 𝚺₁.Semisentence (arity + 2) := .mkSigma
+noncomputable def graph : 𝚺ᴬ₁.Semisentence (arity + 2) := .mkSigma
   “t y. ∃ pr <⁺ (t + y + 1)², !pairDef pr t y ∧ !(β.blueprint L).fixpointDef pr ⋯”
 
-noncomputable def result : 𝚺₁.Semisentence (arity + 2) := .mkSigma
+noncomputable def result : 𝚺ᴬ₁.Semisentence (arity + 2) := .mkSigma
   “y t. (!(isUTerm L).pi t → !(β.graph L) t y ⋯) ∧ (¬!(isUTerm L).sigma t → y = 0)”
 
-noncomputable def resultVec : 𝚺₁.Semisentence (arity + 3) := .mkSigma
+noncomputable def resultVec : 𝚺ᴬ₁.Semisentence (arity + 3) := .mkSigma
   “w' k w.
     (!(isUTermVec L).pi k w →
       !lenDef k w' ∧
@@ -334,10 +337,10 @@ structure Construction {k : ℕ} (φ : Blueprint k) where
   bvar : (Fin k → V) → V → V
   fvar : (Fin k → V) → V → V
   func : (Fin k → V) → V → V → V → V → V
-  bvar_defined : 𝚺₁.DefinedFunction (fun v ↦ bvar (v ·.succ) (v 0)) φ.bvar
-  fvar_defined : 𝚺₁.DefinedFunction (fun v ↦ fvar (v ·.succ) (v 0)) φ.fvar
+  bvar_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ bvar (v ·.succ) (v 0)) φ.bvar
+  fvar_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ fvar (v ·.succ) (v 0)) φ.fvar
   func_defined :
-    𝚺₁.DefinedFunction (fun v ↦ func (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.func
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ func (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.func
 
 variable {V}
 
@@ -449,17 +452,17 @@ lemma Graph.case_iff {t y : V} :
 
 variable (c)
 
-lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1)) (β.graph L) :=
+lemma graph_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1)) (β.graph L) :=
   .mk fun v ↦ by
   simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Graph]
 
 @[simp] lemma eval_graphDef (v : Fin (arity + 2) → V) :
     (β.graph L).val.Evalb v ↔ c.Graph L (v ·.succ.succ) (v 0) (v 1) := (graph_defined c).iff
 
-instance graph_definable : 𝚺₁.Definable fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1) :=
+instance graph_definable : 𝚺ᴬ₁.Definable fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1) :=
   (graph_defined c).to_definable
 
-instance graph_definable₂ (param) : 𝚺-[0 + 1]-Relation (c.Graph L param) := by
+instance graph_definable₂ (param) : 𝚺ᴬ-[0 + 1]-Relation (c.Graph L param) := by
   simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 2) (graph_definable
     c) (#0 :> #1 :> fun i ↦ &(param i))
 
@@ -633,7 +636,7 @@ variable (c)
 
 section
 
-lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result L (v ·.succ) (v 0))
+lemma result_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ c.result L (v ·.succ) (v 0))
   (β.result L) := .mk fun v ↦ by
   simp [Blueprint.result, Bounding.HierarchySymbol.Semiformula.val_sigma,
     IsUTerm.defined.proper.iff',
@@ -649,7 +652,7 @@ private lemma resultVec_graph {w' k w} :
   Classical.choose!_eq_iff_right (c.graph_existsUnique_vec_total L param k w)
 
 lemma resultVec_defined :
-    𝚺₁.DefinedFunction (fun v ↦ c.resultVec L (v ·.succ.succ) (v 0) (v 1)) (β.resultVec L) :=
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ c.resultVec L (v ·.succ.succ) (v 0) (v 1)) (β.resultVec L) :=
   .mk fun v ↦ by
   symm
   simpa [Blueprint.resultVec, Bounding.HierarchySymbol.Semiformula.val_sigma,
@@ -695,9 +698,9 @@ noncomputable def termBV (t : V) : V := construction.result L ![] t
 
 noncomputable def termBVVec (k v : V) : V := construction.resultVec L ![] k v
 
-noncomputable def termBVGraph : 𝚺₁.Semisentence 2 := blueprint.result L
+noncomputable def termBVGraph : 𝚺ᴬ₁.Semisentence 2 := blueprint.result L
 
-noncomputable def termBVVecGraph : 𝚺₁.Semisentence 3 := blueprint.resultVec L
+noncomputable def termBVVecGraph : 𝚺ᴬ₁.Semisentence 3 := blueprint.resultVec L
 
 variable {L}
 variable {Γ : Polarity} {k : V}
@@ -726,20 +729,21 @@ lemma termBVVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts) :
 
 section
 
-instance termBV.defined : 𝚺₁-Function₁ (termBV (V := V) L) via (termBVGraph L) :=
+instance termBV.defined : 𝚺ᴬ₁-Function₁ (termBV (V := V) L) via (termBVGraph L) :=
   construction.result_defined
 
-instance termBV.definable : 𝚺₁-Function₁ (termBV (V := V) L) := termBV.defined.to_definable
+instance termBV.definable : 𝚺ᴬ₁-Function₁ (termBV (V := V) L) := termBV.defined.to_definable
 
-instance termBV.definable' {k : ℕ} : Γ-[k + 1]-Function₁ (termBV (V := V) L) :=
+instance termBV.definable' {k : ℕ} : Γᴬ-[k + 1]-Function₁ (termBV (V := V) L) :=
   termBV.definable.of_sigmaOne
 
-instance termBVVec.defined : 𝚺₁-Function₂ (termBVVec (V := V) L) via (termBVVecGraph L) :=
+instance termBVVec.defined : 𝚺ᴬ₁-Function₂ (termBVVec (V := V) L) via (termBVVecGraph L) :=
   construction.resultVec_defined
 
-instance termBVVec.definable : 𝚺₁-Function₂ (termBVVec (V := V) L) := termBVVec.defined.to_definable
+instance termBVVec.definable : 𝚺ᴬ₁-Function₂ (termBVVec (V := V) L) :=
+  termBVVec.defined.to_definable
 
-instance termBVVec.definable' {i : ℕ} : Γ-[i + 1]-Function₂ (termBVVec (V := V) L) :=
+instance termBVVec.definable' {i : ℕ} : Γᴬ-[i + 1]-Function₂ (termBVVec (V := V) L) :=
   termBVVec.definable.of_sigmaOne
 
 end
@@ -759,11 +763,11 @@ class IsSemitermVec (k n v : V) : Prop where
   isUTermVec : IsUTermVec L k v
   bv : ∀  {i}, i < k → termBV L v.[i] ≤ n
 
-noncomputable def isSemiterm : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def isSemiterm : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p. !(isUTerm L).sigma p ∧ ∃ b, !(termBVGraph L) b p ∧ b ≤ n”)
   (.mkPi “n p. !(isUTerm L).pi p ∧ ∀ b, !(termBVGraph L) b p → b ≤ n”)
 
-noncomputable def isSemitermVec : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def isSemitermVec : 𝚫ᴬ₁.Semisentence 3 := .mkDelta
   (.mkSigma “k n ps.
     !(isUTermVec L).sigma k ps ∧ ∀ i < k, ∃ p, !nthDef p ps i ∧ ∃ b, !(termBVGraph L) b p ∧ b ≤ n”)
   (.mkPi “k n ps.
@@ -861,20 +865,20 @@ lemma SemitermVec.adjoin {n m w t : V} (h : IsSemitermVec L n m w) (ht : IsSemit
 
 section
 
-instance IsSemiterm.defined : 𝚫₁-Relation (IsSemiterm (V := V) L) via (isSemiterm L) := .mk <| by
+instance IsSemiterm.defined : 𝚫ᴬ₁-Relation (IsSemiterm (V := V) L) via (isSemiterm L) := .mk <| by
   refine ⟨?_, ?_⟩
   · intro v
     simp [isSemiterm, Bounding.HierarchySymbol.Semiformula.val_sigma]
   · intro v
     simp [isSemiterm, IsSemiterm.def, Bounding.HierarchySymbol.Semiformula.val_sigma]
 
-instance IsSemiterm.definable : 𝚫₁-Relation (IsSemiterm (V := V) L) :=
+instance IsSemiterm.definable : 𝚫ᴬ₁-Relation (IsSemiterm (V := V) L) :=
   IsSemiterm.defined.to_definable
 
 instance IsSemiterm.definable' (Γ : Polarity) (m : ℕ) :
-    Γ-[m + 1]-Relation (IsSemiterm (V := V) L) := IsSemiterm.definable.of_deltaOne
+    Γᴬ-[m + 1]-Relation (IsSemiterm (V := V) L) := IsSemiterm.definable.of_deltaOne
 
-instance IsSemitermVec.defined : 𝚫₁-Relation₃ (IsSemitermVec (V := V) L) via (isSemitermVec L) :=
+instance IsSemitermVec.defined : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V) L) via (isSemitermVec L) :=
   .mk <| by
   refine ⟨?_, ?_⟩
   · intro v
@@ -882,11 +886,11 @@ instance IsSemitermVec.defined : 𝚫₁-Relation₃ (IsSemitermVec (V := V) L) 
   · intro v
     simp [isSemitermVec, IsSemitermVec.def, Bounding.HierarchySymbol.Semiformula.val_sigma]
 
-instance IsSemitermVec.definable : 𝚫₁-Relation₃ (IsSemitermVec (V := V) L) :=
+instance IsSemitermVec.definable : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V) L) :=
   IsSemitermVec.defined.to_definable
 
 instance IsSemitermVec.definable' (Γ : Polarity) (m : ℕ) :
-    Γ-[m + 1]-Relation₃ (IsSemitermVec (V := V) L) := IsSemitermVec.definable.of_deltaOne
+    Γᴬ-[m + 1]-Relation₃ (IsSemitermVec (V := V) L) := IsSemitermVec.definable.of_deltaOne
 
 end
 
@@ -908,7 +912,7 @@ lemma IsSemiterm.case_iff {n t : V} :
 
 alias ⟨IsSemiterm.case, IsSemiterm.mk'⟩ := IsSemiterm.case_iff
 
-lemma IsSemiterm.induction (Γ : Polarity) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma IsSemiterm.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, IsSemiterm L n t → P t := by
@@ -932,7 +936,7 @@ lemma IsSemiterm.induction (Γ : Polarity) {P : V → Prop} (hP : Γ-[1]-Predica
     · simp [ht.bv]
     · simp [h.bv (by simpa using hi)]⟩
 
-lemma IsSemiterm.sigma1_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
+lemma IsSemiterm.sigma1_induction {P : V → Prop} (hP : 𝚺ᴬ₁-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, IsSemiterm L n t → P t := IsSemiterm.induction 𝚺 hP hbvar hfvar hfunc
