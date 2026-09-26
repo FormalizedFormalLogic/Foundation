@@ -27,7 +27,7 @@ variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α}
 /-- - [Bek90, Lemma 5] -/
 theorem sound {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐀] T) {κ : Type*} [Nonempty κ]
     (M : RootedModel κ α) [M.IsGL] (a : M.NonRoot) :
-    (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] T.toSequent := by
+    (M.graft a ℕ).root ⊩ T.toSequent := by
   induction h with
   | liftUp h => exact GL.Gentzen.sound _ (h.toGL rfl) _;
   | boxGL h => exact GL.Gentzen.sound _ ((boxGL h).toGL rfl) _;
@@ -44,17 +44,14 @@ variable {α : Type u} [DecidableEq α] {Γ Δ : FormulaFinset α}
 /-- - [Bek90, Lemma 5] -/
 theorem GL_of_forces_graft
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ)) :
+      (M.graft a ℕ).root ⊩ (Γ ⟹ Δ)) :
     ⊢ᴳ[𝐆𝐋] Γ ⟹ insert (□^[(Γ ⟹ Δ).subfmls.prebox.card + 1]⊥) Δ := by
   apply GL.Gentzen.complete;
   intro κ _ M _ x hΓ;
   by_contra! hx;
   have : Fintype M.World := Fintype.ofFinite _;
-  have hr : (Γ ⟹ Δ).subfmls.prebox.card < x.rank := by
-    have := hx _ (Finset.mem_insert_self _ _);
-    rw [forces_boxItr_bot_iff] at this;
-    omega;
-  obtain ⟨z, Rxz, hz⟩ := exists_isReflexiveOf_of_card_lt_rank hr;
+  obtain ⟨z, Rxz, hz⟩ := exists_isReflexiveOf_of_card_lt_rank <|
+    not_lt.mp <| forces_boxItr_bot_iff.not.mp <| hx _ (Finset.mem_insert_self _ _);
   have hzx : z ≠ x := fun h ↦ Std.Irrefl.irrefl (r := M.Rel) x (h ▸ Rxz);
   let a : (M.cone x).NonRoot := ⟨⟨z, .inr Rxz⟩, fun h ↦ hzx (congrArg Subtype.val h)⟩;
   have key := fun {C} (hC : C ∈ (Γ ⟹ Δ).subfmls) ↦
@@ -68,7 +65,7 @@ theorem GL_of_forces_graft
 /-- - [Bek90, Lemma 5] -/
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ)) :
+      (M.graft a ℕ).root ⊩ (Γ ⟹ Δ)) :
     ⊢ᴳ[𝐀] Γ ⟹[1] Δ :=
   of_GL_boxItr_bot (GL_of_forces_graft h)
 
@@ -78,9 +75,9 @@ theorem complete
 theorem TFAE : [
     ⊢ᴳ[𝐀] Γ ⟹[1] Δ,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ),
+      (M.graft a ℕ).root ⊩ (Γ ⟹ Δ),
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] (Γ ⟹ Δ),
+      (M.graft a ℕ).root ⊩ (Γ ⟹ Δ),
     ∃ n : ℕ, ⊢ᴳ[𝐆𝐋] Γ ⟹ insert (□^[n]⊥) Δ
   ].TFAE := by
   tfae_have 1 → 2 := fun h _ _ M _ a ↦ sound h M a;
@@ -91,7 +88,6 @@ theorem TFAE : [
 
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
-/-- Cut is admissible. -/
 theorem cut : {ℓ : Fin 2} → ⊢ᴳ[𝐀] Γ₁ ⟹[ℓ] insert A Δ₁ → ⊢ᴳ[𝐀] insert A Γ₂ ⟹[ℓ] Δ₂ →
     ⊢ᴳ[𝐀] Γ₁ ∪ Γ₂ ⟹[ℓ] Δ₁ ∪ Δ₂
   | 0, h₁, h₂ => iff_GL.mpr (GL.Gentzen.cut (iff_GL.mp h₁) (iff_GL.mp h₂))

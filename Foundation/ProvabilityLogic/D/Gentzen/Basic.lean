@@ -20,7 +20,7 @@ variable {α : Type*} [DecidableEq α]
 
 /-- The three-layered cut-free sequent calculus of `D`: the layers `0` and `1` are those of `S`.
 
-- [KKIM25, §3]
+- [KKIM25, Section 3]
 -/
 inductive Gentzen : LayeredSequent 3 α → Prop
   | axm (ℓ) (A) : Gentzen ({A} ⟹[ℓ] {A})
@@ -82,17 +82,11 @@ lemma of_S {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐒] T) : ⊢ᴳ[𝐃] T.ant �
   | boxGL _ ih => exact boxGL ih;
   | boxL _ ih => exact boxL ih;
 
-/-- The layer `0` is the sequent calculus of `GL`.
-
-- [KKIM25, Theorem 4.1]
--/
+/-- - [KKIM25, Theorem 4.1] -/
 theorem iff_GL : ⊢ᴳ[𝐃] Γ ⟹[0] Δ ↔ ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ :=
   ⟨fun h ↦ h.toGL rfl, fun h ↦ of_S (S.Gentzen.iff_GL.mpr h)⟩
 
-/-- The layer `1` is the upper layer of the sequent calculus of `S`.
-
-- [KKIM25, Theorem 4.2]
--/
+/-- - [KKIM25, Theorem 4.2] -/
 theorem iff_S : ⊢ᴳ[𝐃] Γ ⟹[1] Δ ↔ ⊢ᴳ[𝐒] Γ ⟹[1] Δ := ⟨fun h ↦ h.toS rfl, of_S⟩
 
 /-- - [KKIM25, Theorem 4.3] -/

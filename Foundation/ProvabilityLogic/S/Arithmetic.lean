@@ -25,13 +25,10 @@ section
 variable {α : Type*} {T U : ArithmeticTheory} [Diagonalization T] [T ⪯ U]
          {𝔅 : Provability T U} [𝔅.HBL] [𝔅.SoundOn ℕ] [ℕ↓[ℒₒᵣ] ⊧* U] {A : Formula α}
 
-/-- Arithmetical soundness of `S`.
-
-- [Sol76]
--/
+/-- - [Sol76] -/
 theorem arithmetical_soundness (h : 𝐒 ⊢ A) (f : Realization α ℒₒᵣ) :
     ℕ↓[ℒₒᵣ] ⊧ A.interpret f 𝔅 := by
-  have : ℕ↓[ℒₒᵣ] ⊧* T := models_of_subtheory (T := T) (U := U) (M := ℕ) inferInstance;
+  have : ℕ↓[ℒₒᵣ] ⊧* T := models_of_subtheory (inferInstance : ℕ↓[ℒₒᵣ] ⊧* U);
   induction h generalizing f with
   | mem₁ h => exact models_of_provable inferInstance (GL.arithmetical_soundness h);
   | mem₂ h =>
@@ -50,15 +47,12 @@ universe u
 variable {α : Type u} {A : Formula α}
          {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [ℕ↓[ℒₒᵣ] ⊧* T]
 
-/-- Solovay's arithmetical completeness theorem for `S`: the formulas all of whose realizations are
-true are exactly the theorems of `S`.
-
-- [Sol76]
+/-- - [Sol76]
 - [AB05, Theorem 3]
 -/
 theorem arithmetical_completeness (H : ∀ f : Realization α ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ f T A) : 𝐒 ⊢ A := by
   classical
-  have : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (T := 𝗜𝚺₁) (U := T) (M := ℕ) inferInstance;
+  have : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (inferInstance : ℕ↓[ℒₒᵣ] ⊧* T);
   contrapose! H;
   obtain ⟨κ, _, M, _, h₁, h₂⟩ := exists_countermodel H;
   have : Fintype M.World := Fintype.ofFinite _;
@@ -81,6 +75,9 @@ theorem eq_provabilityLogicRelativeTo_TA : 𝐒 = T.provabilityLogicRelativeTo �
   ext A;
   simpa [ArithmeticTheory.provabilityLogicRelativeTo, Arithmetic.TA.provable_iff,
     Logic.provable_iff_mem] using arithmetical_completeness_iff;
+
+lemma equiv_provabilityLogicRelativeTo_TA : 𝐒 ≊ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
+  equiv_iff.mpr eq_provabilityLogicRelativeTo_TA
 
 theorem eq_provabilityLogicRelativeTo_peano_TA :
     𝐒 = 𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=

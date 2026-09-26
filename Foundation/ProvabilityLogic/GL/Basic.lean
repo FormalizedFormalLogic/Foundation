@@ -2,7 +2,6 @@ module
 
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Kripke.Cone
-public import Foundation.ProvabilityLogic.Kripke.Soundness
 public import Foundation.ProvabilityLogic.Kripke.Unravelling
 
 /-!
@@ -35,11 +34,11 @@ section
 
 variable {κ : Type*} [Nonempty κ] {M : Model κ α}
 
-lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩[M] □(□A 🡒 A) 🡒 □A := by
+lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩ □(□A 🡒 A) 🡒 □A := by
   intro hx;
   by_contra hA;
   obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp hA;
-  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[M] A} ⟨y, Rxy, hy⟩;
+  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮ A} ⟨y, Rxy, hy⟩;
   apply ht;
   apply hx t Rxt;
   intro z Rtz;
@@ -53,6 +52,9 @@ theorem sound (M : Model κ α) [M.IsGL] (h : 𝐆𝐋 ⊢ A) : M ⊧ A := by
   · exact forces_axiomL;
 
 end
+
+instance : Consistent (𝐆𝐋 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ sound (pointModel fun _ ↦ False) h 0
 
 /-! ### From the sequent calculus -/
 
@@ -91,7 +93,6 @@ lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[𝐆𝐋] S) : �
 
 /-! ### Quasi-normal extensions -/
 
-/-- A quasi-normal extension of `GL` proves `A` if it proves `Γ` and `𝐆𝐋 ⊢ Γ.conj 🡒 A`. -/
 lemma sumQuasiNormal_of_conj [DecidableEq α] {L : Logic α} {Γ : FormulaFinset α}
     (hΓ : ∀ B ∈ Γ, 𝐆𝐋 +ᴸ L ⊢ B) (h : 𝐆𝐋 ⊢ Γ.conj 🡒 A) : 𝐆𝐋 +ᴸ L ⊢ A :=
   sumQuasiNormal.of_left h ⨀ FConj_iff_forall_provable.mpr hΓ
@@ -106,9 +107,9 @@ theorem provability_TFAE : [
     𝐆𝐋 ⊢ A,
     ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A,
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩ A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
-      M.root ⊩[M.toModel] A
+      M.root ⊩ A
   ].TFAE := by
   tfae_have 1 → 3 := fun h _ _ M _ ↦ sound M h;
   tfae_have 3 → 2 := fun h ↦ Gentzen.complete fun M _ x _ ↦ ⟨A, by simp, h M x⟩;
@@ -118,27 +119,25 @@ theorem provability_TFAE : [
   tfae_have 4 → 3 := fun h _ _ M _ x ↦ Model.forces_cone.mp <| h (M.cone x);
   tfae_finish;
 
-theorem iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A} := provability_TFAE.out 1 2
+lemma iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A} := provability_TFAE.out 1 2
 
 omit [DecidableEq α] in
-theorem iff_valid_finite :
+lemma iff_valid_finite :
     𝐆𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
   classical
   exact provability_TFAE.out 1 3
 
 omit [DecidableEq α] in
-theorem iff_root_forces : 𝐆𝐋 ⊢ A ↔
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A := by
+lemma iff_root_forces : 𝐆𝐋 ⊢ A ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩ A := by
   classical
   exact provability_TFAE.out 1 4
 
 omit [DecidableEq α] in
-/-- `𝐆𝐋` is complete for finite trees.
-
-- [CZ97] -/
+/-- - [CZ97] -/
 theorem iff_tree_root_forces : 𝐆𝐋 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
-      M.root ⊩[M.toModel] A := by
+      M.root ⊩ A := by
   classical
   exact provability_TFAE.out 1 5
 

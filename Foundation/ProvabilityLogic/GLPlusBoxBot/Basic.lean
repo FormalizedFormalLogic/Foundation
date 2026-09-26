@@ -36,7 +36,7 @@ lemma iff_provable_GL : GLPlusBoxBot n ⊢ A ↔ 𝐆𝐋 ⊢ □^[n]⊥ 🡒 A 
   constructor;
   · intro h;
     suffices ∀ {κ : Type _} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
-        x ⊩[M] □^[n]⊥ → x ⊩[M] A from
+        x ⊩ □^[n]⊥ → x ⊩ A from
       GL.iff_valid_finite.mpr fun M _ x ↦ this M x;
     induction h with
     | mem₁ h => exact fun M _ x _ ↦ GL.sound M h x;

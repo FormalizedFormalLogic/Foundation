@@ -20,7 +20,7 @@ namespace FFL.ProvabilityLogic
 
 open Entailment Formula Kripke Kripke.Model Kripke.Model.World Kripke.RootedModel
 
-/-- Artemov's logic: `𝐆𝐋` extended by `TBB n` for every `n`.
+/-- Artemov's logic: `𝐆𝐋` extended by `alpha n` for every `n`.
 
 - [Art86]
 -/
@@ -30,28 +30,19 @@ notation "𝐀" => Logic.A
 
 variable {α : Type*} {A : Formula α} {n : ℕ}
 
-lemma Logic.S.provable_TBB : 𝐒 ⊢ TBB n (α := α) := by
-  simpa [TBB] using S.axiomT;
-
-lemma Logic.D.provable_TBB : 𝐃 ⊢ TBB n (α := α) := by
-  classical
-  cases n with
-  | zero => exact D.axiomP;
-  | succ n => simpa [TBB] using D.axiomD_disj (Γ := {□^[n]⊥});
-
 namespace Logic.A
 
 lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐀 ⊢ A := sumQuasiNormal.of_left h
 
-lemma provable_TBB : 𝐀 ⊢ TBB n (α := α) := sumQuasiNormal.mem₂ ⟨n, trivial, rfl⟩
+lemma provable_alpha : 𝐀 ⊢ alpha n (α := α) := sumQuasiNormal.mem₂ ⟨n, trivial, rfl⟩
 
 lemma neg_boxItr_bot : 𝐀 ⊢ ∼□^[n](⊥ : Formula α) := by
   induction n with
   | zero => exact of_GL (by simp);
-  | succ n ih => exact of_GL (by unfold TBB; cl_prover) ⨀ provable_TBB ⨀ ih;
+  | succ n ih => exact of_GL (by unfold alpha; cl_prover) ⨀ provable_alpha ⨀ ih;
 
 lemma sound (h : 𝐀 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] {x : M.World}
-    (hx : ∀ n, x ⊮[M] □^[n]⊥) : x ⊩[M] A := by
+    (hx : ∀ n, x ⊮ □^[n]⊥) : x ⊩ A := by
   induction h generalizing M with
   | mem₁ h => exact GL.sound M h x;
   | mem₂ h =>
@@ -70,9 +61,9 @@ theorem provability_TFAE [DecidableEq α] : [
     𝐀 ⊢ A,
     ⊢ᴳ[𝐀] ∅ ⟹[1] {A},
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] A,
+      (M.graft a ℕ).root ⊩ A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] A,
+      (M.graft a ℕ).root ⊩ A,
     ∃ n : ℕ, 𝐆𝐋 ⊢ ∼□^[n]⊥ 🡒 A
   ].TFAE := by
   tfae_have 1 → 3 := fun h _ _ M _ a ↦ sound h _ graft.not_forces_boxItr_bot;
@@ -95,14 +86,14 @@ lemma iff_provable_GL : 𝐀 ⊢ A ↔ ∃ n : ℕ, 𝐆𝐋 ⊢ ∼□^[n]⊥ �
 
 lemma iff_forces_graft : 𝐀 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (a : M.NonRoot),
-      (M.graft a ℕ).root ⊩[(M.graft a ℕ).toModel] A := by
+      (M.graft a ℕ).root ⊩ A := by
   classical
   exact provability_TFAE.out 1 4
 
 /-- - [AB05, Lemma 51] -/
 lemma exists_countermodel [DecidableEq α] (h : 𝐀 ⊬ A) :
     ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL) (u : M.World),
-      M.root ⊮[M.toModel] A ∧ M.root ≺ u ∧ u.IsReflexiveOf A.subfmls.prebox := by
+      M.root ⊮ A ∧ M.root ≺ u ∧ u.IsReflexiveOf A.subfmls.prebox := by
   have := GL.iff_root_forces.not.mp fun h' ↦
     h <| iff_provable_GL.mpr ⟨A.subfmls.prebox.card + 1, h'⟩;
   push Not at this;
@@ -113,30 +104,32 @@ lemma exists_countermodel [DecidableEq α] (h : 𝐀 ⊬ A) :
     not_lt.mp fun h ↦ h₁ <| forces_boxItr_bot_iff.mpr h;
   exact ⟨κ, inferInstance, M, inferInstance, u, h₂, Ru, hu⟩;
 
-lemma subset_D : (𝐀 : Logic α) ⊆ 𝐃 :=
-  sumQuasiNormal.subset_iff.mpr fun _ ⟨_, _, h⟩ ↦ h ▸ D.provable_TBB
+instance : (𝐀 : Logic α) ⪯ 𝐃 :=
+  Logic.weakerThan_iff.mpr <| sumQuasiNormal.subset_iff.mpr fun _ ⟨_, _, h⟩ ↦ h ▸ D.provable_alpha
+
+instance : Consistent (𝐀 : Logic α) := .of_le (𝓢 := 𝐃) inferInstance inferInstance
 
 lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a := by
-  intro h;
+  by_contra h;
   obtain ⟨n, h⟩ := iff_provable_GL.mp h;
   let L := finiteLineModel (n + 1) α;
-  have hT (x : L.World) : x ⊩[L] TBB n ↔ (x : ℕ) ≠ n := by
-    simpa using LetterlessFormula.forces_lift_iff (x := x) (A := TBB n);
+  have hT (x : L.World) : x ⊩ alpha n ↔ (x : ℕ) ≠ n := by
+    simpa using LetterlessFormula.forces_lift_iff (x := x) (A := alpha n);
   have h₁ : Fin.last (n + 1) ⊩[L] ∼□^[n]⊥ := fun h ↦ by simpa using forces_boxItr_bot_iff.mp h;
-  have h₂ : Fin.last (n + 1) ⊩[L] □(□TBB n ⋎ □TBB n) := fun y Ry ↦
+  have h₂ : Fin.last (n + 1) ⊩[L] □(□alpha n ⋎ □alpha n) := fun y Ry ↦
     forces_or.mpr <| or_self_iff.mpr fun z Rz ↦ (hT z).mpr (by omega);
-  have h₃ : Fin.last (n + 1) ⊮[L] □TBB n ⋎ □TBB n := fun h ↦
+  have h₃ : Fin.last (n + 1) ⊮[L] □alpha n ⋎ □alpha n := fun h ↦
     (hT _).mp (or_self_iff.mp (forces_or.mp h) ⟨n, by omega⟩ (show n < n + 1 by omega)) rfl;
-  have := forces_subst.mp <| GL.sound (L.subst fun _ ↦ TBB n) h (Fin.last (n + 1));
+  have := forces_subst.mp <| GL.sound (L.subst fun _ ↦ alpha n) h (Fin.last (n + 1));
   rw [subst_imp, subst_neg, subst_boxItr] at this;
   exact h₃ (this h₁ h₂);
 
-lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐀 :=
-  ⟨fun _ ↦ of_GL, fun h ↦
-    GL.sound (pointModel fun _ ↦ True) (h (provable_TBB (n := 0))) 0 fun _ h ↦ h.elim⟩
+instance : (𝐆𝐋 : Logic α) ⪱ 𝐀 :=
+  .of_unprovable_provable (φ := alpha 0)
+    (fun h ↦ GL.sound (pointModel fun _ ↦ True) h 0 fun _ h ↦ h.elim) provable_alpha
 
-lemma ssubset_D [Inhabited α] : (𝐀 : Logic α) ⊂ 𝐃 :=
-  ⟨subset_D, fun h ↦ not_axiomD (a := default) (h D.axiomD)⟩
+instance [Inhabited α] : (𝐀 : Logic α) ⪱ 𝐃 :=
+  .of_unprovable_provable (not_axiomD (a := default)) D.axiomD
 
 end Logic.A
 

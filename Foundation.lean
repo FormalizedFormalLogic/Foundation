@@ -188,8 +188,7 @@ public import Foundation.ProvabilityLogic.Arithmetic.StrongInterpret
 public import Foundation.ProvabilityLogic.Classification.AD
 public import Foundation.ProvabilityLogic.Classification.DS
 public import Foundation.ProvabilityLogic.Classification.General
-public import Foundation.ProvabilityLogic.Classification.LetterlessTrace
-public import Foundation.ProvabilityLogic.Classification.ProvabilityLogicTrace
+public import Foundation.ProvabilityLogic.Classification.Letterless
 public import Foundation.ProvabilityLogic.Classification.Truth
 public import Foundation.ProvabilityLogic.D.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Basic
@@ -205,7 +204,7 @@ public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.GL.Gentzen.Maehara
 public import Foundation.ProvabilityLogic.GL.Letterless
 public import Foundation.ProvabilityLogic.GLAlpha.Basic
-public import Foundation.ProvabilityLogic.GLBetaMinus.Basic
+public import Foundation.ProvabilityLogic.GLBeta.Basic
 public import Foundation.ProvabilityLogic.GLPlusBoxBot.Arithmetic
 public import Foundation.ProvabilityLogic.GLPlusBoxBot.Basic
 public import Foundation.ProvabilityLogic.Grz.Arithmetic
@@ -220,12 +219,9 @@ public import Foundation.ProvabilityLogic.Kripke.Cone
 public import Foundation.ProvabilityLogic.Kripke.DefiningFormula
 public import Foundation.ProvabilityLogic.Kripke.FiniteLineModel
 public import Foundation.ProvabilityLogic.Kripke.Graft
-public import Foundation.ProvabilityLogic.Kripke.Overwrite
 public import Foundation.ProvabilityLogic.Kripke.Rank
 public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.ProvabilityLogic.Kripke.RootedModel
-public import Foundation.ProvabilityLogic.Kripke.Sequent
-public import Foundation.ProvabilityLogic.Kripke.Soundness
 public import Foundation.ProvabilityLogic.Kripke.Tail
 public import Foundation.ProvabilityLogic.Kripke.Unravelling
 public import Foundation.ProvabilityLogic.Letterless

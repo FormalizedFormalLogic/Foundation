@@ -8,9 +8,8 @@ public import Foundation.ProvabilityLogic.S.Basic
 /-!
 # Almost defining formulas
 
-The almost defining formula of a rooted finite GL-model `M` is a modalized formula forced at the
-root of every pseudo-tail of `M`, and fixing that root up to `P`-bisimulation once the valuation at
-the root is given. A modalized formula forced at the root of a free tail is not refuted by `𝐒`.
+Modalized formulas fixing the root of the pseudo-tails of a rooted finite GL-model up to
+bisimulation, once the valuation at the root is given.
 
 ## References
 
@@ -28,19 +27,18 @@ variable {κ κ' α : Type*} [Nonempty κ] [Nonempty κ']
 namespace Kripke.Model
 
 variable {K K' : Model κ α} {r : K.World} (hR : K.Rel' = K'.Rel') (hr : ∀ x, ¬K.Rel' x r)
-  (hV : ∀ x ≠ r, ∀ a, K.Val x a ↔ K'.Val x a)
+  (hV : ∀ x ≠ r, ∀ a, K x a ↔ K' x a)
 include hR hr hV
 
-lemma forces_congr_of_ne {z : K.World} (hz : z ≠ r) {C : Formula α} : z ⊩[K] C ↔ z ⊩[K'] C := by
-  induction C generalizing z with
-  | atom a => exact hV z hz a;
-  | falsum => rfl;
-  | imp A B ihA ihB => exact imp_congr (ihA hz) (ihB hz);
-  | box A ih =>
-    change (∀ y, K.Rel' z y → _) ↔ (∀ y, K'.Rel' z y → _);
-    exact hR ▸ forall_congr' fun y ↦ imp_congr_right fun R ↦ ih fun h ↦ hr z (h ▸ R);
-
 lemma forces_congr_of_modalized {C : Formula α} (hC : C.Modalized) : r ⊩[K] C ↔ r ⊩[K'] C := by
+  have h {z : K.World} (hz : z ≠ r) {C : Formula α} : z ⊩[K] C ↔ z ⊩[K'] C := by
+    induction C generalizing z with
+    | atom a => exact hV z hz a;
+    | falsum => rfl;
+    | imp A B ihA ihB => exact imp_congr (ihA hz) (ihB hz);
+    | box A ih =>
+      change (∀ y, K.Rel' z y → _) ↔ (∀ y, K'.Rel' z y → _);
+      exact hR ▸ forall_congr' fun y ↦ imp_congr_right fun R ↦ ih fun h ↦ hr z (h ▸ R);
   induction C with
   | atom a => exact (hC a rfl).elim;
   | falsum => rfl;
@@ -48,7 +46,7 @@ lemma forces_congr_of_modalized {C : Formula α} (hC : C.Modalized) : r ⊩[K] C
   | box A =>
     change (∀ y, K.Rel' r y → _) ↔ (∀ y, K'.Rel' r y → _);
     exact hR ▸ forall_congr' fun y ↦ imp_congr_right fun R ↦
-      forces_congr_of_ne hR hr hV fun h ↦ hr r <| by subst h; exact R;
+      h fun e ↦ hr r <| by subst e; exact R;
 
 end Kripke.Model
 
@@ -56,7 +54,7 @@ namespace Kripke.RootedModel
 
 lemma graft.exists_forces_boxItr_bot {N : RootedModel κ α} [N.IsFiniteGL] {a : N.NonRoot}
     {z : (N.graft a ℕ).World} (hz : z ≠ (N.graft a ℕ).root) :
-    ∃ n, z ⊩[(N.graft a ℕ).toModel] □^[n]⊥ := by
+    ∃ n, z ⊩ □^[n]⊥ := by
   have : Fintype N.World := Fintype.ofFinite _;
   have h₁ (k : ℕ) : ∀ x, x ≠ N.root → x ⊩[N.toModel] □^[k]⊥ →
       Sum.inl x ⊩[(N.graft a ℕ).toModel] □^[k]⊥ := by
@@ -83,10 +81,7 @@ lemma graft.exists_forces_boxItr_bot {N : RootedModel κ α} [N.IsFiniteGL] {a :
 
 variable [DecidableEq α] (P : Finset α) (M : RootedModel κ α) [Fintype M.World] [M.IsGL]
 
-/-- The almost defining formula of `M` over `P`.
-
-- [Bek90, §4 Remark 1]
--/
+/-- - [Bek90, §4 Remark 1] -/
 noncomputable def almostDefiningFormula : Formula α :=
   □(∼□^[M.height + 1]⊥ 🡒
     ◇charFormulaUnder (M := M.toModel) P M.root ⋏ valuationConj (M := M.toModel) P M.root) ⋏
@@ -95,9 +90,9 @@ noncomputable def almostDefiningFormula : Formula α :=
 variable {P M}
 
 lemma exists_rel_forces_charFormulaUnder {K : RootedModel κ' α} [K.IsGL]
-    (hΦ : K.root ⊩[K.toModel] almostDefiningFormula P M) {z : K.World} (hz : K.root ≺ z)
-    (h : z ⊮[K.toModel] □^[M.height + 1]⊥) (x : M.World) :
-    ∃ z', z ≺ z' ∧ z' ⊩[K.toModel] x.charFormulaUnder P := by
+    (hΦ : K.root ⊩ almostDefiningFormula P M) {z : K.World} (hz : K.root ≺ z)
+    (h : z ⊮ □^[M.height + 1]⊥) (x : M.World) :
+    ∃ z', z ≺ z' ∧ z' ⊩ x.charFormulaUnder P := by
   obtain ⟨z₀, R₀, h₀⟩ := forces_dia.mp (forces_and.mp <| (forces_and.mp hΦ).1 z hz h).1;
   by_cases hx : x = M.root;
   · exact ⟨z₀, R₀, hx ▸ h₀⟩;
@@ -132,23 +127,18 @@ lemma pseudoTail_forces_almostDefiningFormula (o : α → Prop) :
     · exact absurd (toFreeTail.forces_inl.mp <| forces_boxItr_succ.mp hi (.inl M.root) trivial)
         fun h' ↦ lt_irrefl _ (root_forces_boxItr_bot_iff.mp h');
 
-/-- Let `K` be a rooted GL-model whose root forces no `□^[n]⊥` and whose other points each force
-some `□^[n]⊥`. If its root forces the almost defining formula of `M` and agrees with `o` on `P`,
-it is `P`-bisimilar to the root of the pseudo-tail of `M` with root valuation `o`.
-
-- [Bek90, §4 Lemma 9, Remark 2]
--/
+/-- - [Bek90, §4 Lemma 9, Remark 2] -/
 theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ' α} [K.IsGL]
-    (hr : ∀ n, K.root ⊮[K.toModel] □^[n]⊥)
-    (hK : ∀ z ≠ K.root, ∃ n, z ⊩[K.toModel] □^[n]⊥)
-    (hΦ : K.root ⊩[K.toModel] almostDefiningFormula P M) {o : α → Prop}
-    (ho : ∀ a ∈ P, (o a ↔ K.Val K.root a)) :
+    (hr : ∀ n, K.root ⊮ □^[n]⊥)
+    (hK : ∀ z ≠ K.root, ∃ n, z ⊩ □^[n]⊥)
+    (hΦ : K.root ⊩ almostDefiningFormula P M) {o : α → Prop}
+    (ho : ∀ a ∈ P, (o a ↔ K K.root a)) :
     ∃ Bi : (M.toPseudoTail o).toModel ⇄[P] K.toModel, Bi (.inr ⊤) K.root := by
   let R : (M.toPseudoTail o).toModel.World → K.World → Prop
-    | .inl x, z => z ⊩[K.toModel] charFormulaUnder (M := M.toModel) P x
+    | .inl x, z => z ⊩ charFormulaUnder (M := M.toModel) P x
     | .inr i, z => i = ⊤ ∧ z = K.root ∨ ∃ m : ℕ, i = m ∧
-        z ⊮[K.toModel] □^[m + M.height + 1]⊥ ∧ z ⊩[K.toModel] □^[m + M.height + 2]⊥
-  have hroot {z : K.World} {m : ℕ} (h : z ⊩[K.toModel] □^[m]⊥) : K.root ≺ z :=
+        z ⊮ □^[m + M.height + 1]⊥ ∧ z ⊩ □^[m + M.height + 2]⊥
+  have hroot {z : K.World} {m : ℕ} (h : z ⊩ □^[m]⊥) : K.root ≺ z :=
     K.root_rel _ fun e ↦ hr _ (e ▸ h)
   use
     { toRel := R
@@ -171,7 +161,7 @@ theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ'
           · exact (exists_rel_forces_charFormulaUnder hΦ (hroot h₂)
               (not_forces_boxItr_bot_of_le (by omega) h₁) y).imp fun _ ↦ And.symm;
         · obtain ⟨m', rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt R');
-          have : z ⊮[K.toModel] □^[m' + M.height + 2]⊥ := by
+          have : z ⊮ □^[m' + M.height + 2]⊥ := by
             rcases h with ⟨rfl, rfl⟩ | ⟨m, rfl, h₁, -⟩;
             · exact hr _;
             · have : m' < m := by exact_mod_cast toFreeTail.rel_inr_inr.mp R';
@@ -207,10 +197,7 @@ theorem exists_bisimulation_of_forces_almostDefiningFormula {K : RootedModel κ'
 
 end Kripke.RootedModel
 
-/-- A modalized formula forced at the root of a free tail is not refuted by `𝐒`.
-
-- [Bek90, §4 Lemma 4]
--/
+/-- - [Bek90, §4 Lemma 4] -/
 theorem Logic.S.not_provable_neg_of_forces_freeTail {M : Model κ α} [M.IsGL] {V : ℕ∞ → α → Prop}
     {C : Formula α} (hC : C.Modalized) (h : Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] C) :
     𝐒 ⊬ ∼C := by
@@ -230,7 +217,7 @@ theorem Logic.S.not_provable_neg_of_forces_freeTail {M : Model κ α} [M.IsGL] {
       · obtain ⟨z, R, hz⟩ := not_forces_box.mp hD;
         obtain ⟨k, hk⟩ := toFreeTail.eventually_rel R;
         exact ⟨k, fun n hn ↦ iff_of_false (fun h ↦ hz (h z (hk n hn))) hD⟩;
-  intro hC';
+  by_contra hC';
   obtain ⟨k, hk⟩ := key C hC;
   obtain ⟨i, hi⟩ := eventually_forces hC' (M.toFreeTail V).toModel (w := fun n ↦ .inr n)
     fun n ↦ toFreeTail.rel_inr_inr.mpr (by exact_mod_cast n.lt_succ_self);

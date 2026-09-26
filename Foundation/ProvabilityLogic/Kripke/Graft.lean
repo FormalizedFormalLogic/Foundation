@@ -35,8 +35,8 @@ def graft (M : RootedModel κ α) (a : M.NonRoot) (ι : Type*) [LT ι] : RootedM
     | .inr _, .inl y => y = a.1 ∨ M.Rel a.1 y
     | .inr i, .inr j => j < i
   Val' x p := match x with
-    | .inl x => M.Val x p
-    | .inr _ => M.Val a.1 p
+    | .inl x => M x p
+    | .inr _ => M a.1 p
   root := .inl M.root
   root_rel x hx := by
     rcases x with x | i;
@@ -101,9 +101,8 @@ instance [M.IsGL] [WellFoundedLT ι] : IsConverseWellFounded _ (M.graft a ι).Re
         · exact ih j h;
     constructor;
     rintro (x | i);
-    · by_cases hx : x = M.root;
-      · subst hx;
-        constructor;
+    · rcases eq_or_ne x M.root with rfl | hx;
+      · constructor;
         rintro (y | j) h;
         · exact hinl y (by rintro rfl; exact not_rel_root h);
         · exact hinr j;
@@ -117,16 +116,13 @@ instance [M.IsFiniteGL] [Finite ι] : (M.graft a ι).IsFiniteGL where
 
 end
 
-/-- The points of `M` keep their forcing, and the points of the chain behave as `a`, on a
-subformula-closed set on whose boxes `a` is reflexive.
-
-- [AB05, Lemma 12]
+/-- - [AB05, Lemma 12]
 - [Bek90, Lemma 5]
 -/
-lemma forces_iff [DecidableEq α] {X : FormulaFinset α} (hX : ∀ B ∈ X, B.subfmls ⊆ X)
-    (ha : ∀ B, □B ∈ X → a.1 ⊩[M.toModel] □B 🡒 B) {A : Formula α} (hA : A ∈ X) :
+theorem forces_iff [DecidableEq α] {X : FormulaFinset α} (hX : ∀ B ∈ X, B.subfmls ⊆ X)
+    (ha : ∀ B, □B ∈ X → a.1 ⊩ □B 🡒 B) {A : Formula α} (hA : A ∈ X) :
     (∀ x, Sum.inl x ⊩[(M.graft a ι).toModel] A ↔ x ⊩[M.toModel] A) ∧
-    (∀ i, Sum.inr i ⊩[(M.graft a ι).toModel] A ↔ a.1 ⊩[M.toModel] A) := by
+    (∀ i, Sum.inr i ⊩[(M.graft a ι).toModel] A ↔ a.1 ⊩ A) := by
   induction A with
   | atom | falsum => exact ⟨fun _ ↦ Iff.rfl, fun _ ↦ Iff.rfl⟩;
   | imp B C ihB ihC =>
@@ -151,7 +147,7 @@ lemma forces_iff [DecidableEq α] {X : FormulaFinset α} (hX : ∀ B ∈ X, B.su
           · exact (ih₁ y).mpr (h y Ray);
         · exact (ih₂ j).mpr (ha B hA h);
 
-lemma not_forces_boxItr_bot (n : ℕ) : (M.graft a ℕ).root ⊮[(M.graft a ℕ).toModel] □^[n]⊥ := by
+lemma not_forces_boxItr_bot (n : ℕ) : (M.graft a ℕ).root ⊮ □^[n]⊥ := by
   have h : ∀ m : ℕ, (M.graft a ℕ).RelItr m (.inr m) (.inr 0) := by
     intro m;
     induction m with

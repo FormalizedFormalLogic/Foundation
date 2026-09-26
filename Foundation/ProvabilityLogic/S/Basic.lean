@@ -1,6 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.GL.Basic
+public import Foundation.ProvabilityLogic.Letterless
 public import Foundation.ProvabilityLogic.S.Gentzen.Kripke
 
 /-!
@@ -35,8 +36,11 @@ lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐒 ⊢ A := sumQuasiNormal.of_left h
 
 lemma axiomT : 𝐒 ⊢ □A 🡒 A := sumQuasiNormal.mem₂ ⟨A, rfl⟩
 
+lemma provable_alpha {n : ℕ} : 𝐒 ⊢ Formula.alpha n (α := α) := by
+  simpa [Formula.alpha] using axiomT;
+
 lemma eventually_forces (h : 𝐒 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
-    {w : ℕ → M.World} (hw : ∀ n, w (n + 1) ≺ w n) : ∃ i, ∀ j ≥ i, w j ⊩[M] A := by
+    {w : ℕ → M.World} (hw : ∀ n, w (n + 1) ≺ w n) : ∃ i, ∀ j ≥ i, w j ⊩ A := by
   induction h generalizing κ with
   | mem₁ h => exact ⟨0, fun j _ ↦ GL.sound M h (w j)⟩;
   | mem₂ h =>
@@ -51,6 +55,8 @@ lemma eventually_forces (h : 𝐒 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model �
     obtain ⟨i, hi⟩ := ih (M.subst s) hw;
     exact ⟨i, fun j hj ↦ forces_subst.mp (hi j hj)⟩;
 
+section
+
 universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
@@ -64,7 +70,7 @@ theorem provability_TFAE : [
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
       (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
-      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : κ ⊕ ℕ∞) ⊩[M.toTail.toModel] A,
+      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : M.toTail.World) ⊩[M.toTail.toModel] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
       M.root ⊩[M.toModel] A.rflSubfmls.conj 🡒 A,
     𝐆𝐋 ⊢ A.rflSubfmls.conj 🡒 A
@@ -77,7 +83,7 @@ theorem provability_TFAE : [
   tfae_have 4 → 5 := by
     intro h _ _ M _ hΓ;
     obtain ⟨i, hi⟩ := h M;
-    have hroot : ∀ B, □B ∈ A.subfmls → M.root ⊩[M.toModel] □B 🡒 B :=
+    have hroot : ∀ B, □B ∈ A.subfmls → M.root ⊩ □B 🡒 B :=
       fun B hB ↦ forces_conj.mp hΓ _
         (Finset.mem_image.mpr ⟨B, FormulaFinset.mem_prebox.mpr hB, rfl⟩);
     exact (Model.toFreeTail.forces_inr_iff (fun _ ↦ rfl) (fun _ hB ↦ Formula.subfmls_trans hB) hroot
@@ -91,41 +97,39 @@ lemma iff_provable_gentzen : 𝐒 ⊢ A ↔ ⊢ᴳ[𝐒] ∅ ⟹[1] {A} := prova
 omit [DecidableEq α] in
 lemma iff_eventually_forces : 𝐒 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
-      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩[M] A := by
+      (∀ n, w (n + 1) ≺ w n) → ∃ i, ∀ j ≥ i, w j ⊩ A := by
   classical
   exact provability_TFAE.out 1 3
 
 omit [DecidableEq α] in
 lemma iff_eventually_forces_tail : 𝐒 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL],
-      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : κ ⊕ ℕ∞) ⊩[M.toTail.toModel] A := by
+      ∃ i : ℕ, ∀ j ≥ i, (Sum.inr ↑j : M.toTail.World) ⊩[M.toTail.toModel] A := by
   classical
   exact provability_TFAE.out 1 4
 
 lemma iff_provable_GL : 𝐒 ⊢ A ↔ 𝐆𝐋 ⊢ A.rflSubfmls.conj 🡒 A := provability_TFAE.out 1 6
 
-/-- A formula outside `𝐒` is refuted at the root of a finite GL-model that is reflexive at the
-root for its boxed subformulas. -/
 lemma exists_countermodel (h : 𝐒 ⊬ A) :
     ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-      M.root ⊮[M.toModel] A ∧ ∀ B, □B ∈ A.subfmls → M.root ⊩[M.toModel] □B 🡒 B := by
+      M.root ⊮ A ∧ ∀ B, □B ∈ A.subfmls → M.root ⊩ □B 🡒 B := by
   obtain ⟨κ, _, M, _, hM⟩ :
       ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-        M.root ⊮[M.toModel] A.rflSubfmls.conj 🡒 A := by
+        M.root ⊮ A.rflSubfmls.conj 🡒 A := by
     simpa using GL.iff_root_forces.not.mp (iff_provable_GL.not.mp h);
   obtain ⟨h₁, h₂⟩ := not_forces_imp.mp hM;
   exact ⟨κ, inferInstance, M, inferInstance, h₂,
     fun B hB ↦ forces_conj.mp h₁ _ (Finset.mem_image.mpr ⟨B, by simpa using hB, rfl⟩)⟩;
 
-omit [DecidableEq α] in
-lemma consistent : 𝐒 ⊬ (⊥ : Formula α) := by
+end
+
+instance : Consistent (𝐒 : Logic α) := by
   classical
-  intro h;
-  have h : 𝐆𝐋 ⊢ (⊥ : Formula α).rflSubfmls.conj 🡒 ⊥ := iff_provable_GL.mp h;
-  have : (⊥ : Formula α).rflSubfmls = ∅ := by
-    ext;
-    simp [Formula.rflSubfmls, Formula.subfmls];
-  simpa [this, forces_imp] using GL.sound (pointModel (α := α) fun _ ↦ False) h 0;
+  apply consistent_iff_exists_unprovable.mpr;
+  use ⊥;
+  by_contra! h;
+  simpa [Formula.rflSubfmls, Formula.subfmls, forces_imp] using
+    GL.sound (pointModel (α := α) fun _ ↦ False) (iff_provable_GL.mp h) 0;
 
 end Logic.S
 
