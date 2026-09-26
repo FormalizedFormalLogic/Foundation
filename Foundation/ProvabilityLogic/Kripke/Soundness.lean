@@ -22,10 +22,7 @@ theorem sound (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : normalOf 𝔸 ⊢ A) : M �
   induction h generalizing x with
   | axm hA => exact h𝔸 _ hA x;
   | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x);
-  | nec _ ih => exact fun y _ ↦ ih y;
-  | axiomK => exact fun h₁ h₂ y Rxy ↦ h₁ y Rxy (h₂ y Rxy);
-  | _ => simp only [Axioms.Verum, Axioms.ImplyK, Axioms.ImplyS, Axioms.AndElim₁, Axioms.AndElim₂,
-      Axioms.AndInst, Axioms.OrInst₁, Axioms.OrInst₂, Axioms.OrElim, Axioms.DNE]; grind;
+  | _ => grind;
 
 end Logic.normalOf
 

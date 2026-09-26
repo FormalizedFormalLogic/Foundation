@@ -25,9 +25,6 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
 abbrev World (_ : Model κ α) := κ
 
 abbrev Rel {M : Model κ α} : M.World → M.World → Prop := M.Rel'
-
-abbrev Val {M : Model κ α} : M.World → α → Prop := M.Val'
-
 scoped infix:60 " ≺ " => Rel
 
 @[grind]
@@ -60,6 +57,11 @@ scoped notation x:45 " ⊀^[" n:0 "] " y:46 => NotRelItr n x y
 lemma notRelItr_iff : x ⊀^[n] y ↔ ¬x ≺^[n] y := Iff.rfl
 
 end RelItr
+
+abbrev Val {M : Model κ α} : M.World → α → Prop := M.Val'
+
+instance : CoeFun (Model κ α) (λ M => M.World → α → Prop) := ⟨λ M => M.Val⟩
+
 
 class IsGL (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel
 
@@ -106,7 +108,7 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {x : M.World} {A B : Fo
 
 @[grind]
 def Forces (M : Model κ α) (x : M.World) : Formula α → Prop
-  | #a    => M.Val x a
+  | #a    => M x a
   | ⊥     => False
   | A 🡒 B => Forces M x A → Forces M x B
   | □A    => ∀ y, x ≺ y → Forces M y A
@@ -115,7 +117,7 @@ scoped notation:55 x:56 " ⊩[" M "] " A:56 => Forces M x A
 
 scoped notation:55 x:56 " ⊮[" M "] " A:56 => ¬Forces M x A
 
-@[simp, grind =] lemma forces_atom {a : α} : x ⊩[M] #a ↔ M.Val x a := Iff.rfl
+@[simp, grind =] lemma forces_atom {a : α} : x ⊩[M] #a ↔ M x a := Iff.rfl
 @[simp, grind .] lemma not_forces_bot : x ⊮[M] ⊥ := id
 @[simp, grind .] lemma forces_top : x ⊩[M] ⊤ := id
 @[grind =] lemma forces_imp : x ⊩[M] A 🡒 B ↔ x ⊮[M] A ∨ x ⊩[M] B := imp_iff_not_or

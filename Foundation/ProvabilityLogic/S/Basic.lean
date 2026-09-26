@@ -108,7 +108,8 @@ lemma iff_provable_GL : 𝐒 ⊢ A ↔ 𝐆𝐋 ⊢ A.rflSubfmls.conj 🡒 A := 
 root for its boxed subformulas. -/
 lemma exists_countermodel (h : 𝐒 ⊬ A) :
     ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-      M.root ⊮[M.toModel] A ∧ ∀ B, □B ∈ A.subfmls → M.root ⊩[M.toModel] □B 🡒 B := by
+      M.root ⊮[_] A ∧
+      ∀ B, □B ∈ A.subfmls → M.root ⊩[_] □B 🡒 B := by
   obtain ⟨κ, _, M, _, hM⟩ :
       ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
         M.root ⊮[M.toModel] A.rflSubfmls.conj 🡒 A := by
@@ -117,11 +118,11 @@ lemma exists_countermodel (h : 𝐒 ⊬ A) :
   exact ⟨κ, inferInstance, M, inferInstance, h₂,
     fun B hB ↦ forces_conj.mp h₁ _ (Finset.mem_image.mpr ⟨B, by simpa using hB, rfl⟩)⟩;
 
-omit [DecidableEq α] in
-lemma consistent : 𝐒 ⊬ (⊥ : Formula α) := by
-  classical
-  intro h;
-  have h : 𝐆𝐋 ⊢ (⊥ : Formula α).rflSubfmls.conj 🡒 ⊥ := iff_provable_GL.mp h;
+instance : Entailment.Consistent (𝐒 : Logic α) := by
+  apply consistent_iff_exists_unprovable.mpr;
+  use ⊥;
+  by_contra! h;
+  replace h := iff_provable_GL.mp h;
   have : (⊥ : Formula α).rflSubfmls = ∅ := by
     ext;
     simp [Formula.rflSubfmls, Formula.subfmls];

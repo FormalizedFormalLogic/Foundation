@@ -16,14 +16,14 @@ namespace Model
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {V : κ → α → Prop}
 
-def overwrite (M : Model κ α) (V : κ → α → Prop) : Model κ α := ⟨M.Rel', V⟩
+def overwrite (M : Model κ α) (V : M.World → α → Prop) : Model κ α := ⟨M.Rel', V⟩
 
 instance [M.IsFiniteGL] : (M.overwrite V).IsFiniteGL where
   trans := IsTrans.trans (r := M.Rel)
   irrefl := Std.Irrefl.irrefl (r := M.Rel)
   finite := IsFiniteGL.finite (M := M)
 
-lemma forces_overwrite_subst {s : Substitution α α} {x : κ} {A : Formula α} :
+lemma forces_overwrite_subst {s : Substitution α α} {x : M.World} {A : Formula α} :
     x ⊩[M.overwrite fun y a ↦ y ⊩[M] s a] A ↔ x ⊩[M] A⟦s⟧ := by
   induction A generalizing x with
   | atom | falsum => rfl;

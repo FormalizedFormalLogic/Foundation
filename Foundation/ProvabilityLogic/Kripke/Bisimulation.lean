@@ -38,20 +38,20 @@ scoped notation:50 M₁ " ⇄[" P "] " M₂ => BisimulationUnder P M₁ M₂
 instance {P : Finset α} : CoeFun (M₁ ⇄[P] M₂) fun _ ↦ M₁.World → M₂.World → Prop :=
   ⟨BisimulationUnder.toRel⟩
 
-lemma BisimulationUnder.forces_iff [DecidableEq α] {P : Finset α} (Bi : M₁ ⇄[P] M₂)
-    {x₁ : M₁.World} {x₂ : M₂.World} (h : Bi x₁ x₂) {A : Formula α} (hA : A.atoms ⊆ P) :
+lemma BisimulationUnder.forces_iff [DecidableEq α] {P : Finset α} (Z : M₁ ⇄[P] M₂)
+    {x₁ : M₁.World} {x₂ : M₂.World} (h : Z x₁ x₂) {A : Formula α} (hA : A.atoms ⊆ P) :
     x₁ ⊩[M₁] A ↔ x₂ ⊩[M₂] A := by
   induction A generalizing x₁ x₂ with
-  | atom a => exact Bi.atomic (hA (by simp)) h;
+  | atom a => exact Z.atomic (hA (by simp)) h;
   | falsum => rfl;
   | imp A B ihA ihB => exact imp_congr (ihA h (by grind)) (ihB h (by grind));
   | box A ih =>
     constructor;
     · intro hx y₂ R;
-      obtain ⟨y₁, hy, R'⟩ := Bi.back h R;
+      obtain ⟨y₁, hy, R'⟩ := Z.back h R;
       exact (ih hy hA).mp (hx y₁ R');
     · intro hx y₁ R;
-      obtain ⟨y₂, hy, R'⟩ := Bi.forth h R;
+      obtain ⟨y₂, hy, R'⟩ := Z.forth h R;
       exact (ih hy hA).mpr (hx y₂ R');
 
 structure PseudoEpimorphism (M₁ : Model κ₁ α) (M₂ : Model κ₂ α) where
