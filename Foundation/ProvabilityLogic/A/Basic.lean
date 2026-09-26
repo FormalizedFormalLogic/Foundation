@@ -110,7 +110,7 @@ instance : (𝐀 : Logic α) ⪯ 𝐃 :=
 instance : Consistent (𝐀 : Logic α) := .of_le (𝓢 := 𝐃) inferInstance inferInstance
 
 lemma not_axiomD {a : α} : 𝐀 ⊬ □(□#a ⋎ □#a) 🡒 □#a ⋎ □#a := by
-  intro h;
+  by_contra h;
   obtain ⟨n, h⟩ := iff_provable_GL.mp h;
   let L := finiteLineModel (n + 1) α;
   have hT (x : L.World) : x ⊩ TBB n ↔ (x : ℕ) ≠ n := by

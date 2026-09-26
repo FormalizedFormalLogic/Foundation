@@ -50,11 +50,8 @@ theorem GL_of_forces_graft
   intro κ _ M _ x hΓ;
   by_contra! hx;
   have : Fintype M.World := Fintype.ofFinite _;
-  have hr : (Γ ⟹ Δ).subfmls.prebox.card < x.rank := by
-    have := hx _ (Finset.mem_insert_self _ _);
-    rw [forces_boxItr_bot_iff] at this;
-    omega;
-  obtain ⟨z, Rxz, hz⟩ := exists_isReflexiveOf_of_card_lt_rank hr;
+  obtain ⟨z, Rxz, hz⟩ := exists_isReflexiveOf_of_card_lt_rank <|
+    not_lt.mp <| forces_boxItr_bot_iff.not.mp <| hx _ (Finset.mem_insert_self _ _);
   have hzx : z ≠ x := fun h ↦ Std.Irrefl.irrefl (r := M.Rel) x (h ▸ Rxz);
   let a : (M.cone x).NonRoot := ⟨⟨z, .inr Rxz⟩, fun h ↦ hzx (congrArg Subtype.val h)⟩;
   have key := fun {C} (hC : C ∈ (Γ ⟹ Δ).subfmls) ↦
