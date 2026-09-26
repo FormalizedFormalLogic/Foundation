@@ -32,8 +32,8 @@ class IsInitial (ℬ : Bounding L) (ι : M ↪ₛ[L] N) : Prop where
 variable (ι : M ↪ₛ[L] N)
 variable [ℬ.IsInitial ι]
 
-private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t :
-  Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
+private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ)
+    (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
     (ih : ∀ e ε, φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε))
     (e : Fin n → M) (ε : ξ → M) :
     (∀¹[R.operator ![#0, Rew.bShift t]] φ).Eval e ε →
@@ -46,8 +46,8 @@ private lemma ball_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t
   simpa only [Matrix.comp_vecCons''] using
     ih (c :> e) ε (h c ((IsInitial.operator_iff (ℬ := ℬ) (ι := ι) hR _ _).mpr hb))
 
-private lemma bexs_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) (t :
-  Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
+private lemma bexs_upward {n} {R : Semiformula.Operator L 2} (hR : R ∈ ℬ)
+    (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1))
     (ih : ∀ e ε, φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε))
     (e : Fin n → M) (ε : ξ → M) :
     (∃¹[R.operator ![#0, Rew.bShift t]] φ).Eval e ε →

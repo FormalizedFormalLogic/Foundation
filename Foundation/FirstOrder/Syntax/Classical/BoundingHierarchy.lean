@@ -261,12 +261,17 @@ lemma neg {φ : Semiformula L ξ n} :
 lemma sigma_succ_induction {s : ℕ} {P : (n : ℕ) → Semiformula L ξ n → Prop}
     (hPi : ∀ n φ, ℬ.Hierarchy 𝚷 s φ → P n φ)
     (hAnd : ∀ n φ ψ,
-      ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
-    (hOr : ∀ n φ ψ, ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
-    (hBall : ∀ R ∈ ℬ, ∀ n t φ, ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∀¹[R.operator ![#0,
-      Rew.bShift t]] φ))
-    (hBexs : ∀ R ∈ ℬ, ∀ n t φ, ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹[R.operator ![#0,
-      Rew.bShift t]] φ))
+      ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) ψ →
+      P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ,
+      ℬ.Hierarchy 𝚺 (s + 1) φ → ℬ.Hierarchy 𝚺 (s + 1) ψ →
+      P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ R ∈ ℬ, ∀ n t φ,
+      ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ →
+      P n (∀¹[R.operator ![#0, Rew.bShift t]] φ))
+    (hBexs : ∀ R ∈ ℬ, ∀ n t φ,
+      ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ →
+      P n (∃¹[R.operator ![#0, Rew.bShift t]] φ))
     (hExs : ∀ n φ, ℬ.Hierarchy 𝚺 (s + 1) φ → P (n + 1) φ → P n (∃¹ φ))
     (n φ) : ℬ.Hierarchy 𝚺 (s + 1) φ → P n φ := by
   generalize hΓ : (𝚺 : Polarity) = Γ

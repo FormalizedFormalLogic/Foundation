@@ -19,6 +19,7 @@ universe w
 
 variable {ξ : Type*} {n m : ℕ}
 
+/-- A hierarchy symbol for the arithmetical hierarchy. -/
 abbrev HierarchySymbol := Bounding.HierarchySymbol
 
 @[match_pattern] abbrev HierarchySymbol.mk (Γ : SigmaPiDelta) (n : ℕ) : HierarchySymbol :=

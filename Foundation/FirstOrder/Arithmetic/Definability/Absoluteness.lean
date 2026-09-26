@@ -14,8 +14,7 @@ lemma nat_modelsWithParam_iff_models_substs {k : ℕ} {v : Fin k → ℕ} {φ : 
 
 variable (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
-/-- The natural-number embedding into a model of Peano arithmetic without induction.
-This is the routine structure-embedding form of the natural cast. -/
+/-- The natural-number embedding into a model of $\mathsf{PA^-}$. -/
 def natCastEmbedding : ℕ ↪ₛ[ℒₒᵣ] V where
   toFun := Nat.cast
   func' := by
@@ -39,7 +38,7 @@ def natCastEmbedding : ℕ ↪ₛ[ℒₒᵣ] V where
 
 @[simp] lemma natCastEmbedding_apply (n : ℕ) : natCastEmbedding V n = (n : V) := rfl
 
-instance : (ℬ[<, ℒₒᵣ]).IsInitial (natCastEmbedding V) where
+instance : ℬ[<, ℒₒᵣ].IsInitial (natCastEmbedding V) where
   operator_iff := by
     intro R hR a b
     obtain rfl := Set.mem_singleton_iff.mp hR
@@ -53,8 +52,8 @@ instance : (ℬ[<, ℒₒᵣ]).IsInitial (natCastEmbedding V) where
 
 lemma modelsWithParam_iff_models_substs {k : ℕ} {v : Fin k → ℕ}
     {φ : ArithmeticSemisentence k} :
-    φ.Evalb (M := V) (Nat.cast ∘ v) ↔ V↓[ℒₒᵣ] ⊧ (φ ⇜ (fun i ↦
-      Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
+    φ.Evalb (M := V) (Nat.cast ∘ v) ↔
+      V↓[ℒₒᵣ] ⊧ (φ ⇜ fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i)) := by
   simp [models_iff, Function.comp_def, Matrix.empty_eq, numeral_eq_natCast]
 
 lemma shigmaZero_absolute {k} (φ : 𝚺₀.Semisentence k) (v : Fin k → ℕ) :
