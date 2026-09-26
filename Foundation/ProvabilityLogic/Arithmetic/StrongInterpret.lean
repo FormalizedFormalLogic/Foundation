@@ -54,17 +54,17 @@ lemma provable_interpret_boxdotTranslate_iff :
 lemma models_interpret_boxdotTranslate_iff {M : Type*} [Nonempty M] [Tarski.Structure L M]
     [M↓[L] ⊧* T] [𝔅.SoundOn M] :
     M↓[L] ⊧ Aᵇ.interpret f 𝔅 ↔ M↓[L] ⊧ A.strongInterpret f 𝔅 := by
-  have hT₀ : M↓[L] ⊧* T₀ := models_of_subtheory (T := T₀) (U := T) (M := M) inferInstance;
+  have hT₀ : M↓[L] ⊧* T₀ := models_of_subtheory (inferInstance : M↓[L] ⊧* T);
   induction A with
   | box A ih =>
     suffices (M↓[L] ⊧ Aᵇ.interpret f 𝔅 ∧ M↓[L] ⊧ 𝔅 (Aᵇ.interpret f 𝔅)) ↔
         (M↓[L] ⊧ A.strongInterpret f 𝔅 ∧ M↓[L] ⊧ 𝔅 (A.strongInterpret f 𝔅)) by
       simpa [interpret, strongInterpret] using this;
-    have h₁ : M↓[L] ⊧ 𝔅 (Aᵇ.interpret f 𝔅) → M↓[L] ⊧ 𝔅 (A.strongInterpret f 𝔅) := fun h ↦
-      models_of_provable hT₀ <| 𝔅.D1 <| provable_interpret_boxdotTranslate_iff.mp (𝔅.sound_on h);
-    have h₂ : M↓[L] ⊧ 𝔅 (A.strongInterpret f 𝔅) → M↓[L] ⊧ 𝔅 (Aᵇ.interpret f 𝔅) := fun h ↦
-      models_of_provable hT₀ <| 𝔅.D1 <| provable_interpret_boxdotTranslate_iff.mpr (𝔅.sound_on h);
-    grind;
+    exact and_congr ih
+      ⟨fun h ↦ models_of_provable hT₀ <| 𝔅.D1 <|
+          provable_interpret_boxdotTranslate_iff.mp (𝔅.sound_on h),
+        fun h ↦ models_of_provable hT₀ <| 𝔅.D1 <|
+          provable_interpret_boxdotTranslate_iff.mpr (𝔅.sound_on h)⟩;
   | _ => simp_all [interpret, strongInterpret];
 
 end Formula
