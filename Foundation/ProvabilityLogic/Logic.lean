@@ -40,9 +40,6 @@ lemma weakerThan_antisymm (h₁ : L₁ ⪯ L₂) (h₂ : L₂ ⪯ L₁) : L₁ =
 lemma eq_or_strictlyWeakerThan (h : L₁ ⪯ L₂) : L₁ = L₂ ∨ L₁ ⪱ L₂ :=
   (weakerThan_iff.mp h).eq_or_ssubset.imp_right strictlyWeakerThan_iff.mpr
 
-lemma unprovable_bot [ModusPonens L] [HasAxiomEFQ L] [Consistent L] : L ⊬ ⊥ := fun h ↦
-  have ⟨_, hA⟩ := Consistent.exists_unprovable ‹_›; hA (of_O h)
-
 end Logic
 
 /-! ### Quasi-normal sums -/

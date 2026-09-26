@@ -115,7 +115,7 @@ theorem provabilityLogic_classification :
           WeakerThan.pbl (𝓢 := 𝐆𝐋α Set.univ) <| Logic.GLAlpha.mem_iff.mpr
             ⟨by simpa [LetterlessFormula.trace] using hL.biUnion fun _ _ ↦ Set.finite_singleton _,
               Set.subset_univ _⟩;
-        exact Logic.unprovable_bot <| h.wk (imp_mem_provabilityLogic_of_mem_addTBB hL <|
+        exact unprovable_bot <| h.wk (imp_mem_provabilityLogic_of_mem_addTBB hL <|
           (provabilityLogic_eq_GLBetaMinus h₁).symm.subset <| Logic.GLBetaMinus.mem_iff.mpr <| by
             simp [V, trace_provabilityLogic_addTBB]) ⨀ h₂;
       have h₂ : T.provabilityLogicRelativeTo U (α := α) =

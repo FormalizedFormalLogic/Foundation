@@ -98,7 +98,7 @@ theorem not_CIP (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) :
     simpa only [subst_iff, subst_atom, Substitution.single_apply, ite_true] using
       show 𝐒 ⊢ (C.modalize 🡘 #a)⟦a ↦ E⟧ from
         sumQuasiNormal.subst (S_modalize_iff_of_interpolant hab hac h₁ h₂ hC);
-  exact unprovable_bot (L := 𝐒) <|
+  exact unprovable_bot (𝓢 := 𝐒) <|
     by cl_prover [this, (S.of_GL hE : 𝐒 ⊢ ∼C.modalize⟦a ↦ E⟧ 🡘 E)];
 
 end Logic.D
