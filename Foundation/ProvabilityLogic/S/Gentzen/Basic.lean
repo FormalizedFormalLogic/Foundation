@@ -41,7 +41,7 @@ notation:45 "⊬ᴳ[𝐒] " S:50 => ¬Gentzen S
 
 namespace Gentzen
 
-variable {ℓ : Fin 2} {Γ Δ : FormulaFinset α}
+variable {Γ Δ : FormulaFinset α}
 
 lemma of_GL {S : Sequent α} (h : ⊢ᴳ[𝐆𝐋] S) : ⊢ᴳ[𝐒] S.ant ⟹[0] S.suc := by
   induction h with
@@ -62,7 +62,7 @@ lemma toGL {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐒] T) : T.level = 0 → ⊢�
   | impL _ _ ih₁ ih₂ => exact fun hl ↦ .impL (ih₁ hl) (ih₂ hl);
   | impR _ ih => exact fun hl ↦ .impR (ih hl);
   | boxGL _ ih => exact fun hl ↦ .boxGL (ih hl);
-  | liftUp | boxL => simp;
+  | liftUp | boxL => nofun;
 
 /-- The lower layer is the sequent calculus of `GL`.
 

@@ -46,9 +46,15 @@ namespace S.Gentzen
 variable {α : Type*} [DecidableEq α] {Γ Δ : FormulaFinset α}
 
 /-- - [KK23, Theorem 3.1] -/
-theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐒] T) :
+theorem sound (h : ⊢ᴳ[𝐒] Γ ⟹[1] Δ) :
     ∃ X : FormulaFinset α, ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
-      (T.level = 1 → x.IsReflexiveOf X) → x ⊩ T.toSequent := by
+      x.IsReflexiveOf X → x ⊩ (Γ ⟹ Δ) := by
+  suffices ∀ {T : LayeredSequent 2 α}, ⊢ᴳ[𝐒] T → ∃ X : FormulaFinset α,
+      ∀ {κ : Type _} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
+        (T.level = 1 → x.IsReflexiveOf X) → x ⊩ T.toSequent by
+    obtain ⟨X, hX⟩ := this h;
+    exact ⟨X, fun M _ x hx ↦ hX M x fun _ ↦ hx⟩;
+  intro T h;
   induction h with
   | axm | botL => exact ⟨∅, by intros; grind⟩;
   | wkL _ _ ih | wkR _ _ ih | impR _ ih =>
@@ -78,13 +84,6 @@ theorem sound_aux {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐒] T) :
     rcases Finset.mem_insert.mp hC with rfl | hC;
     · exact hx C (by simp) (hΓ _ (by simp));
     · exact hΓ C (by simp [hC]);
-
-/-- - [KK23, Theorem 3.1] -/
-theorem sound (h : ⊢ᴳ[𝐒] Γ ⟹[1] Δ) :
-    ∃ X : FormulaFinset α, ∀ {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL] (x : M.World),
-      x.IsReflexiveOf X → x ⊩ (Γ ⟹ Δ) := by
-  obtain ⟨X, hX⟩ := sound_aux h;
-  exact ⟨X, fun M _ x hx ↦ hX M x fun _ ↦ hx⟩;
 
 universe u
 
@@ -156,9 +155,7 @@ theorem TFAE : [
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (w : ℕ → M.World),
       (∀ n, w (n + 1) ≺ w n) → ∃ i, w i ⊩ (Γ ⟹ Δ)
   ].TFAE := by
-  tfae_have 1 → 2 := fun h ↦ by
-    obtain ⟨X, hX⟩ := sound h;
-    exact ⟨X, fun M _ ↦ hX M⟩;
+  tfae_have 1 → 2 := sound;
   tfae_have 2 → 3 := by
     rintro ⟨X, hX⟩ _ _ M _ w hw;
     obtain ⟨i, hi⟩ := eventually_isReflexiveOf hw X;

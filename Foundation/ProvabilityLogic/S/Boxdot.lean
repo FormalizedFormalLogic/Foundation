@@ -14,20 +14,12 @@ open Kripke
 
 namespace Logic.S
 
-universe u
+variable {α : Type*} {A : Formula α}
 
-variable {α : Type u} [DecidableEq α] {A : Formula α}
-
-omit [DecidableEq α] in
-theorem boxdotTranslate_iff_GL : 𝐒 ⊢ Aᵇ ↔ 𝐆𝐋 ⊢ Aᵇ := by
-  classical
-  constructor;
-  · intro h;
-    apply GL.iff_root_forces.mpr;
-    intro _ _ M _;
+theorem boxdotTranslate_iff_GL : 𝐒 ⊢ Aᵇ ↔ 𝐆𝐋 ⊢ Aᵇ :=
+  ⟨fun h ↦ GL.iff_root_forces.mpr fun M _ ↦ by
     obtain ⟨i, hi⟩ := iff_eventually_forces_tail.mp h M;
-    exact (RootedModel.toTail.forces_inr_boxdotTranslate_iff i).mp (hi i le_rfl);
-  · exact of_GL;
+    exact (RootedModel.toTail.forces_inr_boxdotTranslate_iff i).mp (hi i le_rfl), of_GL⟩
 
 end Logic.S
 

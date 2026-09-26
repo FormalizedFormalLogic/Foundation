@@ -108,6 +108,13 @@ lemma axiomD_disj {Γ : FormulaFinset α} : 𝐃 ⊢ □Γ.box.disj 🡒 Γ.box.
     have h₅ : 𝐆𝐋 ⊢ (□(□A ⋎ □Φ) 🡒 □A ⋎ □Φ) 🡒 (□Φ 🡒 Φ) 🡒 □Ψ 🡒 Ψ := by cl_prover [h₃, h₄];
     exact of_GL h₅ ⨀ axiomD ⨀ ih;
 
+omit [DecidableEq α] in
+lemma provable_TBB {n : ℕ} : 𝐃 ⊢ Formula.TBB n (α := α) := by
+  classical
+  cases n with
+  | zero => exact axiomP;
+  | succ n => simpa [Formula.TBB] using axiomD_disj (Γ := {□^[n]⊥});
+
 open Classical in
 /-- - [KKIM25, Proposition 3.6] -/
 lemma root_forces_of_forces_pseudoTail {κ : Type*} [Nonempty κ] {M : RootedModel κ α} [M.IsFiniteGL]

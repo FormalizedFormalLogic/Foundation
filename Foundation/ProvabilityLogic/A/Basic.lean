@@ -30,15 +30,6 @@ notation "𝐀" => Logic.A
 
 variable {α : Type*} {A : Formula α} {n : ℕ}
 
-lemma Logic.S.provable_TBB : 𝐒 ⊢ TBB n (α := α) := by
-  simpa [TBB] using S.axiomT;
-
-lemma Logic.D.provable_TBB : 𝐃 ⊢ TBB n (α := α) := by
-  classical
-  cases n with
-  | zero => exact D.axiomP;
-  | succ n => simpa [TBB] using D.axiomD_disj (Γ := {□^[n]⊥});
-
 namespace Logic.A
 
 lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐀 ⊢ A := sumQuasiNormal.of_left h

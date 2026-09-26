@@ -1,6 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.GL.Basic
+public import Foundation.ProvabilityLogic.Letterless
 public import Foundation.ProvabilityLogic.S.Gentzen.Kripke
 
 /-!
@@ -34,6 +35,9 @@ variable {α : Type*} {A : Formula α}
 lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐒 ⊢ A := sumQuasiNormal.of_left h
 
 lemma axiomT : 𝐒 ⊢ □A 🡒 A := sumQuasiNormal.mem₂ ⟨A, rfl⟩
+
+lemma provable_TBB {n : ℕ} : 𝐒 ⊢ Formula.TBB n (α := α) := by
+  simpa [Formula.TBB] using axiomT;
 
 lemma eventually_forces (h : 𝐒 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
     {w : ℕ → M.World} (hw : ∀ n, w (n + 1) ≺ w n) : ∃ i, ∀ j ≥ i, w j ⊩ A := by
@@ -106,12 +110,9 @@ lemma iff_eventually_forces_tail : 𝐒 ⊢ A ↔
 
 lemma iff_provable_GL : 𝐒 ⊢ A ↔ 𝐆𝐋 ⊢ A.rflSubfmls.conj 🡒 A := provability_TFAE.out 1 6
 
-/-- A formula outside `𝐒` is refuted at the root of a finite GL-model that is reflexive at the
-root for its boxed subformulas. -/
 lemma exists_countermodel (h : 𝐒 ⊬ A) :
     ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
-      M.root ⊮ A ∧
-      ∀ B, □B ∈ A.subfmls → M.root ⊩ □B 🡒 B := by
+      M.root ⊮ A ∧ ∀ B, □B ∈ A.subfmls → M.root ⊩ □B 🡒 B := by
   obtain ⟨κ, _, M, _, hM⟩ :
       ∃ (κ : Type u) (_ : Nonempty κ) (M : RootedModel κ α) (_ : M.IsFiniteGL),
         M.root ⊮ A.rflSubfmls.conj 🡒 A := by
@@ -122,16 +123,13 @@ lemma exists_countermodel (h : 𝐒 ⊬ A) :
 
 end
 
-instance : Entailment.Consistent (𝐒 : Logic α) := by
+instance : Consistent (𝐒 : Logic α) := by
   classical
   apply consistent_iff_exists_unprovable.mpr;
   use ⊥;
   by_contra! h;
-  replace h := iff_provable_GL.mp h;
-  have : (⊥ : Formula α).rflSubfmls = ∅ := by
-    ext;
-    simp [Formula.rflSubfmls, Formula.subfmls];
-  simpa [this, forces_imp] using GL.sound (pointModel (α := α) fun _ ↦ False) h 0;
+  simpa [Formula.rflSubfmls, Formula.subfmls, forces_imp] using
+    GL.sound (pointModel (α := α) fun _ ↦ False) (iff_provable_GL.mp h) 0;
 
 end Logic.S
 

@@ -31,7 +31,7 @@ variable {α : Type*} {T U : ArithmeticTheory} [Diagonalization T] [T ⪯ U]
 -/
 theorem arithmetical_soundness (h : 𝐒 ⊢ A) (f : Realization α ℒₒᵣ) :
     ℕ↓[ℒₒᵣ] ⊧ A.interpret f 𝔅 := by
-  have : ℕ↓[ℒₒᵣ] ⊧* T := models_of_subtheory (T := T) (U := U) (M := ℕ) inferInstance;
+  have : ℕ↓[ℒₒᵣ] ⊧* T := models_of_subtheory (inferInstance : ℕ↓[ℒₒᵣ] ⊧* U);
   induction h generalizing f with
   | mem₁ h => exact models_of_provable inferInstance (GL.arithmetical_soundness h);
   | mem₂ h =>
@@ -58,7 +58,7 @@ true are exactly the theorems of `S`.
 -/
 theorem arithmetical_completeness (H : ∀ f : Realization α ℒₒᵣ, ℕ↓[ℒₒᵣ] ⊧ f T A) : 𝐒 ⊢ A := by
   classical
-  have : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (T := 𝗜𝚺₁) (U := T) (M := ℕ) inferInstance;
+  have : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (inferInstance : ℕ↓[ℒₒᵣ] ⊧* T);
   contrapose! H;
   obtain ⟨κ, _, M, _, h₁, h₂⟩ := exists_countermodel H;
   have : Fintype M.World := Fintype.ofFinite _;
