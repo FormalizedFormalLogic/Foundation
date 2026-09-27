@@ -788,4 +788,20 @@ lemma mem_asymm₃ {x y z : V} : x ∈ y → y ∈ z → z ∉ x := by
   have : x ∈ succ x := mem_succ_self x
   simp [←h] at this
 
+-- This lemma requires `foundation`
+lemma subset_of_succ_subset {x y : V} (h : succ x ⊆ succ y) : x ⊆ y := by
+  intro z hz
+  have hzy : z = y ∨ z ∈ y := mem_insert.mp (h z (mem_insert (x := x).mpr (Or.inr hz)))
+  have hxy : x = y ∨ x ∈ y := mem_insert.mp (h x (mem_succ_self x))
+  have : (z = y ∨ z ∈ y) ∧ (x = y ∨ x ∈ y) := by
+    exact And.intro hzy hxy
+  aesop
+
+@[simp] lemma succ_inj {x y : V} : succ x = succ y ↔ x = y := by
+  constructor <;> intro h
+  · ext z
+    exact Iff.intro (subset_of_succ_subset (subset_of_eq h) z)
+      (subset_of_succ_subset (subset_of_eq h.symm) z)
+  · simp only [h]
+
 end FFL.FirstOrder.SetTheory

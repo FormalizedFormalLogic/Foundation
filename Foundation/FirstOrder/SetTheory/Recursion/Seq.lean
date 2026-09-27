@@ -14,7 +14,7 @@ Compare to `Foundation.FirstOrder.Arithmetic.HFS.Seq`.
 
 -/
 
-namespace LO.FirstOrder.SetTheory
+namespace FFL.FirstOrder.SetTheory
 
 open SetTheory
 
@@ -30,7 +30,7 @@ lemma Seq.seq_iff {s : V} : Seq s ↔ IsFunction s ∧ IsOrdinal (domain s) :=
 
 theorem Seq.IsFunction {s : V} (h : Seq s) : IsFunction s := h.1
 
-def _root_.LO.FirstOrder.SetTheory.seq.dfn : SetTheorySemisentence 1 :=
+def _root_.FFL.FirstOrder.SetTheory.seq.dfn : SetTheorySemisentence 1 :=
   f“s. !IsFunction.dfn s ∧ ∃ l, l = !domain.dfn s ∧ !IsOrdinal.dfn l”
 
 instance seq.defined : ℒₛₑₜ-predicate[V] (Seq : V → Prop) via seq.dfn := .mk <| by
@@ -66,42 +66,51 @@ The length of a sequence, or `0` if it is not a sequence.
 -/
 noncomputable def lh (s : V) : V := Classical.choose! (lh_exists_uniq s)
 
-lemma lh_prop (s : V) : (Seq s → domain s = lh s) ∧ (¬Seq s → lh s = 0) := Classical.choose!_spec (lh_exists_uniq s)
+lemma lh_prop (s : V) : (Seq s → domain s = lh s) ∧ (¬Seq s → lh s = 0) :=
+  Classical.choose!_spec (lh_exists_uniq s)
 
 lemma lh_prop_of_not_seq {s : V} (h : ¬Seq s) : lh s = 0 := (lh_prop s).2 h
 
 lemma Seq.domain_eq {s : V} (h : Seq s) : domain s = lh s := (lh_prop s).1 h
 
 lemma isOrdinal_lh (s : V) : IsOrdinal (lh s) :=
-  by_cases (fun hs : Seq s ↦ exists_eq_left'.mp (hs.domain_eq ▸ hs.2)) (fun hs ↦ lh_prop_of_not_seq hs ▸ IsOrdinal.zero)
+  by_cases (fun hs : Seq s ↦ exists_eq_left'.mp (hs.domain_eq ▸ hs.2))
+  (fun hs ↦ lh_prop_of_not_seq hs ▸ IsOrdinal.zero)
 
 lemma isOrdinal_domain {s : V} (hs : Seq s) : IsOrdinal (domain s) := exists_eq_left'.mp hs.2
 
-lemma Seq.isOrdinal_of_mem_lh {s α : V} (hα : α ∈ lh s) : IsOrdinal α := IsOrdinal.of_mem (h := isOrdinal_lh s) hα
+lemma Seq.isOrdinal_of_mem_lh {s α : V} (hα : α ∈ lh s) : IsOrdinal α :=
+  IsOrdinal.of_mem (h := isOrdinal_lh s) hα
 
-lemma Seq.isOrdinal_of_mem_domain {s α : V} (hs : Seq s) (hα : α ∈ domain s) : IsOrdinal α := IsOrdinal.of_mem (h := isOrdinal_domain hs) hα
+lemma Seq.isOrdinal_of_mem_domain {s α : V} (hs : Seq s) (hα : α ∈ domain s) : IsOrdinal α :=
+  IsOrdinal.of_mem (h := isOrdinal_domain hs) hα
 
-def _root_.LO.FirstOrder.SetTheory.lh.dfn : SetTheorySemisentence 2 :=
+def _root_.FFL.FirstOrder.SetTheory.lh.dfn : SetTheorySemisentence 2 :=
   f“l s. (!seq.dfn s → l = !domain.dfn s) ∧ (¬!seq.dfn s → !isEmpty l)”
 
-instance lh.defined : ℒₛₑₜ-function₁ (lh : V → V) via lh.dfn := .mk fun v ↦ by simp [lh.dfn, lh]; aesop
+instance lh.defined : ℒₛₑₜ-function₁ (lh : V → V) via lh.dfn :=
+  .mk fun v ↦ by simp [lh.dfn, lh]; aesop
 
 instance lh.definable : ℒₛₑₜ-function₁ (lh : V → V) := lh.defined.to_definable
 
 /- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
 -- instance lh_definable' (ℌ) : ℌ-Function₁ (lh : V → V) := lh_definable.of_zero
 
-lemma Seq.nth_exists_uniq {s : V} (h : Seq s) {α : V} (hα : α ∈ lh s) : ∃! y, ⟨α, y⟩ₖ ∈ s := (exists_unique_of_mem_function (isFunction_iff.mp h.IsFunction)) α (Seq.domain_eq h ▸ hα)
+lemma Seq.nth_exists_uniq {s : V} (h : Seq s) {α : V} (hα : α ∈ lh s) : ∃! y, ⟨α, y⟩ₖ ∈ s :=
+  (exists_unique_of_mem_function (isFunction_iff.mp h.IsFunction)) α (Seq.domain_eq h ▸ hα)
 
-lemma Seq.exists {s : V} (h : Seq s) {α : V} (hα : α ∈ lh s) : ∃ y, ⟨α, y⟩ₖ ∈ s := (nth_exists_uniq h hα) |> ExistsUnique.exists
+lemma Seq.exists {s : V} (h : Seq s) {α : V} (hα : α ∈ lh s) : ∃ y, ⟨α, y⟩ₖ ∈ s :=
+  (nth_exists_uniq h hα) |> ExistsUnique.exists
 
 /-- The `α`th entry in a sequence, assuming `α` is in the length of the sequence. -/
-noncomputable def Seq.nth {s : V} (h : Seq s) {α : V} (hα : α ∈ lh s) : V := Classical.choose! (h.nth_exists_uniq hα)
+noncomputable def Seq.nth {s : V} (h : Seq s) {α : V} (hα : α ∈ lh s) : V :=
+  Classical.choose! (h.nth_exists_uniq hα)
 
 @[simp] lemma Seq.nth_mem {s : V} (h : Seq s) {α : V} (hα : α ∈ lh s) :
     ⟨α, h.nth hα⟩ₖ ∈ s := Classical.choose!_spec (h.nth_exists_uniq hα)
 
-lemma Seq.nth_uniq {s : V} (h : Seq s) {α y : V} (hα : α ∈ lh s) (hy : ⟨α, y⟩ₖ ∈ s) : y = h.nth hα :=
+lemma Seq.nth_uniq {s : V} (h : Seq s) {α y : V} (hα : α ∈ lh s) (hy : ⟨α, y⟩ₖ ∈ s) :
+  y = h.nth hα :=
     (h.nth_exists_uniq hα).unique hy (by simp)
 
 lemma Seq.lh_eq_of {s : V} (h : Seq s) {l} (hdomain : domain s = l) : lh s = l := by
@@ -120,15 +129,18 @@ noncomputable def seqCons (s x : V) : V := insert ⟨lh s, x⟩ₖ s
 
 section znth
 
-theorem znth_existsUnique (s α : V) : ∃! x, (Seq s ∧ α ∈ lh s → ⟨α, x⟩ₖ ∈ s) ∧ (¬(Seq s ∧ α ∈ lh s) → x = ∅) := by
+theorem znth_existsUnique (s α : V) :
+    ∃! x, (Seq s ∧ α ∈ lh s → ⟨α, x⟩ₖ ∈ s) ∧ (¬(Seq s ∧ α ∈ lh s) → x = ∅) := by
   by_cases h : Seq s ∧ α ∈ lh s
   · simpa [h] using h.1.nth_exists_uniq h.2
   · simp [h]
 
-/-- The `α`th entry in a sequence. Returns `∅` if `s` is not a sequence or `α` is not in its domain. -/
+/-- The `α`th entry in a sequence. Returns `∅` if `s` is
+not a sequence or `α` is not in its domain. -/
 noncomputable def znth (s α : V) : V := Classical.choose! (znth_existsUnique s α)
 
-protected lemma Seq.znth {s α : V} (h : Seq s) (hα : α ∈ lh s) : ⟨α, znth s α⟩ₖ ∈ s := Classical.choose!_spec (znth_existsUnique s α) |>.1 ⟨h, hα⟩
+protected lemma Seq.znth {s α : V} (h : Seq s) (hα : α ∈ lh s) : ⟨α, znth s α⟩ₖ ∈ s :=
+  Classical.choose!_spec (znth_existsUnique s α) |>.1 ⟨h, hα⟩
 
 lemma Seq.znth_eq_of_mem {s α x : V} (h : Seq s) (hα : ⟨α, x⟩ₖ ∈ s) : znth s α = x := by
   have hlt : α ∈ lh s := (by simp_all [lh] : domain s = lh s) ▸ (mem_domain_iff.mpr ⟨x, hα⟩)
@@ -137,10 +149,13 @@ lemma Seq.znth_eq_of_mem {s α x : V} (h : Seq s) (hα : ⟨α, x⟩ₖ ∈ s) :
 lemma znth_prop_not {s α : V} (h : ¬Seq s ∨ α ∉ lh s) : znth s α = 0 :=
   Classical.choose!_spec (znth_existsUnique s α) |>.2 (by simpa [-not_and, not_and_or] using h)
 
-def _root_.LO.FirstOrder.SetTheory.znth.dfn : SetTheorySemisentence 3 :=
-  f“x s α. ∃ l, !lh.dfn l s ∧ (!seq.dfn s ∧ α ∈ l → !kpair.dfn α x ∈ s) ∧ (¬(!seq.dfn s ∧ α ∈ l) → !isEmpty x)”
+def _root_.FFL.FirstOrder.SetTheory.znth.dfn : SetTheorySemisentence 3 :=
+  f“x s α. ∃ l, !lh.dfn l s ∧
+    (!seq.dfn s ∧ α ∈ l → !kpair.dfn α x ∈ s) ∧ (¬(!seq.dfn s ∧ α ∈ l) → !isEmpty x)”
 
-private lemma znth_graph {x s α : V} : (∃ l, l = lh s ∧ (Seq s ∧ α ∈ l → ⟨α, x⟩ₖ ∈ s) ∧ (¬(Seq s ∧ α ∈ l) → x = ∅)) ↔ x = znth s α := by
+private lemma znth_graph {x s α : V} :
+    (∃ l, l = lh s ∧ (Seq s ∧ α ∈ l → ⟨α, x⟩ₖ ∈ s) ∧ (¬(Seq s ∧ α ∈ l) → x = ∅)) ↔
+      x = znth s α := by
   simp [znth, Classical.choose!_eq_iff_right]
 
 instance znth.defined : ℒₛₑₜ-function₂ (znth : V → V → V) via znth.dfn := .mk fun v ↦ by
@@ -163,7 +178,8 @@ infixr:67 " ⁀' " => seqCons
   simpa using Eq.symm <| Seq.domain_eq (V := V) (s := ∅) (by simp)
 
 lemma Seq.isempty_of_lh_eq_zero {s : V} (hs : Seq s) (h : lh s = ∅) : s = ∅ :=
-  subset_empty_iff_eq_empty.mp (empty_prod (range s) ▸ (mem_function_iff.mp ((hs.domain_eq ▸ h) ▸ isFunction_iff.mp hs.IsFunction)).1)
+  subset_empty_iff_eq_empty.mp (empty_prod (range s) ▸ (mem_function_iff.mp ((hs.domain_eq ▸ h) ▸
+    isFunction_iff.mp hs.IsFunction)).1)
 
 @[simp] lemma Seq.subset_seqCons (s x : V) : s ⊆ s ⁀' x := by simp [seqCons]
 
@@ -176,7 +192,8 @@ lemma Seq.subseteq_seqCons {s} (_ : Seq s) (x : V) : s ⊆ s ⁀' x := by
 
 protected lemma Seq.seqCons {s : V} (h : Seq s) (x : V) : Seq (s ⁀' x) := by
   have := h.IsFunction
-  have heq := (forall_eq' (p := fun l ↦ lh s = l) (a' := domain s)).mp (fun l ↦ (lh_eq_of h (l := l)))
+  have heq :=
+      (forall_eq' (p := fun l ↦ lh s = l) (a' := domain s)).mp (fun l ↦ (lh_eq_of h (l := l)))
   have hlh := (((exists_eq_left' (a' := lh s)).mp (heq ▸ h.2)))
   have hnmem : lh s ∉ domain s := (domain_eq h) ▸ mem_irrefl (lh s)
   exact ⟨IsFunction.insert s (lh s) x hnmem,
@@ -185,7 +202,8 @@ protected lemma Seq.seqCons {s : V} (h : Seq s) (x : V) : Seq (s ⁀' x) := by
 @[simp] lemma Seq.lh_seqCons (x : V) {s} (h : Seq s) : lh (s ⁀' x) = succ (lh s) := by
   simpa [seqCons, h.domain_eq, succ] using (h.seqCons x).domain_eq.symm
 
-lemma kpair_mem_seqCons_iff {α x z s : V} : ⟨α, x⟩ₖ ∈ s ⁀' z ↔ (α = lh s ∧ x = z) ∨ ⟨α, x⟩ₖ ∈ s := by simp [seqCons]
+lemma kpair_mem_seqCons_iff {α x z s : V} : ⟨α, x⟩ₖ ∈ s ⁀' z ↔ (α = lh s ∧ x = z) ∨ ⟨α, x⟩ₖ ∈ s :=
+  by simp [seqCons]
 
 @[simp] lemma lh_mem_seqCons (s z : V) : ⟨lh s, z⟩ₖ ∈ s ⁀' z := by simp [seqCons]
 
@@ -193,11 +211,12 @@ lemma kpair_mem_seqCons_iff {α x z s : V} : ⟨α, x⟩ₖ ∈ s ⁀' z ↔ (α
   suffices ⟨lh s, x⟩ₖ ∈ s → x = z by simpa [seqCons]
   intro hmem; have := h.lt_lh_of_mem hmem; simp at this
 
-lemma Seq.mem_seqCons_iff_of_lt {s x z : V} (hα : α ∈ lh s) : ⟨α, x⟩ₖ ∈ s ⁀' z ↔ ⟨α, x⟩ₖ ∈ s := by
+lemma Seq.mem_seqCons_iff_of_lt {s x z α : V} (hα : α ∈ lh s) : ⟨α, x⟩ₖ ∈ s ⁀' z ↔ ⟨α, x⟩ₖ ∈ s := by
   suffices α = lh s → x = z → ⟨α, x⟩ₖ ∈ s by simpa [seqCons, hα]
   rintro rfl; simp at hα
 
-@[simp] lemma lh_not_mem {s} (h : Seq s) (x : V) : ⟨lh s, x⟩ₖ ∉ s := fun hmem ↦ by have := h.lt_lh_of_mem hmem; simp at this
+@[simp] lemma lh_not_mem {s} (h : Seq s) (x : V) : ⟨lh s, x⟩ₖ ∉ s :=
+  fun hmem ↦ by have := h.lt_lh_of_mem hmem; simp at this
 
 section
 
@@ -208,10 +227,11 @@ lemma seqCons_graph (t x s : V) :
         rfl, by rfl⟩,
    by rintro ⟨l, rfl, p, rfl, rfl⟩; rfl⟩
 
-def _root_.LO.FirstOrder.SetTheory.seqCons.dfn : SetTheorySemisentence 3 :=
+def _root_.FFL.FirstOrder.SetTheory.seqCons.dfn : SetTheorySemisentence 3 :=
   “t s x. ∃ l, !lh.dfn l s ∧ ∃ p, !kpair.dfn p l x ∧ !insert.dfn t p s”
 
-instance seqCons.defined : ℒₛₑₜ-function₂ (seqCons : V → V → V) via seqCons.dfn := .mk fun v ↦ by simp [seqCons.dfn, seqCons_graph]
+instance seqCons.defined : ℒₛₑₜ-function₂ (seqCons : V → V → V) via seqCons.dfn :=
+  .mk fun v ↦ by simp [seqCons.dfn, seqCons_graph]
 
 instance seqCons.definable : ℒₛₑₜ-function₂ (seqCons : V → V → V) := seqCons.defined.to_definable
 
@@ -220,10 +240,12 @@ instance seqCons.definable : ℒₛₑₜ-function₂ (seqCons : V → V → V) 
 
 end
 
-@[simp] lemma Seq.restrict {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α] (hsubseteq : α ⊆ lh s) : Seq (s ↾ α) :=
+@[simp] lemma Seq.restrict {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α] (hsubseteq : α ⊆ lh s) :
+    Seq (s ↾ α) :=
   ⟨h.IsFunction.restrict s α, α, by simp [h.domain_eq, hsubseteq, hα]⟩
 
-@[simp] lemma Seq.lh_restrict {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α] (hsubseteq : α ⊆ lh s) : lh (s ↾ α) = α := by
+@[simp] lemma Seq.lh_restrict {s : V} (h : Seq s) {α : V} [hα : IsOrdinal α]
+    (hsubseteq : α ⊆ lh s) : lh (s ↾ α) = α := by
   simp only [domain_restrict_eq, lh_eq_of (Seq.restrict h hsubseteq)]
   exact inter_eq_right_of_subset (h.lh_eq_domain_of ▸ hsubseteq)
 
@@ -331,29 +353,33 @@ meta def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 
 @[simp] lemma doubleton_seq (x y : V) : Seq !⟦x, y⟧ := by apply Seq.seqCons; simp
 
-@[simp] lemma mem_singleton_seq_iff (x y : V) : ⟨∅, x⟩ₖ ∈ !⟦y⟧ ↔ x = y := by simp [kpair_mem_seqCons_iff]
+@[simp] lemma mem_singleton_seq_iff (x y : V) : ⟨∅, x⟩ₖ ∈ !⟦y⟧ ↔ x = y :=
+    by simp [kpair_mem_seqCons_iff]
 
 section
 
-def _root_.LO.FirstOrder.SetTheory.mkSeq₁.dfn : SetTheorySemisentence 2 :=
+def _root_.FFL.FirstOrder.SetTheory.mkSeq₁.dfn : SetTheorySemisentence 2 :=
   “s x. ∀ z, !isEmpty z → !seqCons.dfn s z x”
 
-instance mkSeq₁.defined : ℒₛₑₜ-function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁.dfn := .mk fun v ↦ by simp [mkSeq₁.dfn]
+instance mkSeq₁.defined : ℒₛₑₜ-function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁.dfn :=
+    .mk fun v ↦ by simp [mkSeq₁.dfn]
 
 instance mkSeq₁.definable : ℒₛₑₜ-function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁.defined.to_definable
 
 /- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
 -- instance mkSeq₁.definable' (Γ) : Γ-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁.definable.of_zero
 
-def _root_.LO.FirstOrder.SetTheory.mkSeq₂.dfn : SetTheorySemisentence 3 :=
+def _root_.FFL.FirstOrder.SetTheory.mkSeq₂.dfn : SetTheorySemisentence 3 :=
   “s x y. ∃ sx, !mkSeq₁.dfn sx x ∧ !seqCons.dfn s sx y”
 
-instance mkSeq₂.defined : ℒₛₑₜ-function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂.dfn := .mk fun v ↦ by simp [mkSeq₂.dfn]
+instance mkSeq₂.defined : ℒₛₑₜ-function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂.dfn :=
+    .mk fun v ↦ by simp [mkSeq₂.dfn]
 
 instance mkSeq₂.definable : ℒₛₑₜ-function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂.defined.to_definable
 
 /- TODO: Once the Lévy hierarchy is added, add a hierarchy-symbol-specific version. -/
--- instance mkSeq₂.definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂.definable.of_sigmaOne
+-- instance mkSeq₂.definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) :=
+--   mkSeq₂.definable.of_sigmaOne
 
 end
 
@@ -370,7 +396,8 @@ theorem sigmaOne_skolem_seq! {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l
   rcases sigmaOne_skolem_seq hP this with ⟨s, Ss, rfl, hs⟩
   exact ExistsUnique.intro s ⟨Ss, rfl, hs⟩ (by
     rintro s' ⟨Ss', hss', hs'⟩
-    exact Seq.lh_ext Ss' Ss hss' (fun i x₁ x₂ h₁ h₂ ↦ H i (Ss.lt_lh_of_mem h₂) |>.unique (hs' i x₁ h₁) (hs i x₂ h₂)))
+    exact Seq.lh_ext Ss' Ss hss'
+      (fun i x₁ x₂ h₁ h₂ ↦ H i (Ss.lt_lh_of_mem h₂) |>.unique (hs' i x₁ h₁) (hs i x₂ h₂)))
 -/
 
 section seqToVec
@@ -385,19 +412,20 @@ noncomputable def vecToSeq : {n : ℕ} → (Fin n → V) → V
     vecToSeq (v <: a) = vecToSeq v ⁀' a := by simp [vecToSeq]
 
 @[simp] lemma vecToSeq_seq {n} (v : Fin n → V) : Seq (vecToSeq v) := by
-  induction' n with n ih
-  · simp [vecToSeq]
-  · exact (ih _).seqCons _
+  induction n with
+  | zero => simp [vecToSeq]
+  | succ n ih => exact (ih _).seqCons _
 
 @[simp] lemma lh_vecToSeq {n} (v : Fin n → V) : lh (vecToSeq v) = n := by
-  induction' n with n ih <;> (simp [vecToSeq, *]; rfl)
+  induction n <;> (simp [vecToSeq, *]; rfl)
 
 lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟨(i : V), v i⟩ₖ ∈ vecToSeq v := by
-  induction' n with n ih
-  · exact i.elim0
-  · cases' i using Fin.lastCases with i
-    · simp [vecToSeq, kpair_mem_seqCons_iff]
-    · simpa [vecToSeq, kpair_mem_seqCons_iff] using Or.inr <| ih (v ·.castSucc) i
+  induction n with
+  | zero => exact i.elim0
+  | succ n ih =>
+    cases i using Fin.lastCases with
+    | last => simp [vecToSeq, kpair_mem_seqCons_iff]
+    | cast i => simpa [vecToSeq, kpair_mem_seqCons_iff] using Or.inr <| ih (v ·.castSucc) i
 
 end seqToVec
 
@@ -421,20 +449,30 @@ syntax:45 first_order_term:45 " ∼[" first_order_term "]" first_order_term:0 : 
 syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ] $t₂:first_order_term]) =>
-    `(memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
-  | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term]) =>
-    `(∼memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
-  | `(⤫formula(faf)[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ] $t₂:first_order_term]) => do
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ]
+      $t₂:first_order_term]) =>
+    `(memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u],
+        ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ]
+      $t₂:first_order_term]) =>
+    `(∼memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u],
+      ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ]
+      $t₂:first_order_term]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
     let x₃ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t₁] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $x₃ $binders* | $fbinders* | $t₂ ] 🡒 “#2 ∼[#1] #0”))))
-  | `(⤫formula(faf)[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term]) => do
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t₁] 🡒
+        ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒
+          ∀¹ (⤫term(faf)[ $x₁ $x₂ $x₃ $binders* | $fbinders* | $t₂ ] 🡒 “#2 ∼[#1] #0”))))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ]
+      $t₂:first_order_term]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
     let x₃ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t₁] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒 ∀¹ (⤫term(faf)[ $x₁ $x₂ $x₃ $binders* | $fbinders* | $t₂ ] 🡒 “#2 ≁[#1] #0”))))
+    `(∀¹ (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t₁] 🡒
+        ∀¹ (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] 🡒
+          ∀¹ (⤫term(faf)[ $x₁ $x₂ $x₃ $binders* | $fbinders* | $t₂ ] 🡒 “#2 ≁[#1] #0”))))
 
 #check f“x y. x ∈ y”
 
@@ -446,4 +484,4 @@ macro_rules
 
 end notations
 
-end LO.FirstOrder.SetTheory
+end FFL.FirstOrder.SetTheory

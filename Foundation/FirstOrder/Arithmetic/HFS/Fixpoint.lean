@@ -239,12 +239,7 @@ lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
     have : z ∈ c.limSeq v u := hf z u hu
     exact c.limSeq_cumulative (le_of_lt <| lt_of_mem_rng hu) this⟩
 
-<<<<<<< HEAD
-/-- `c.Fixpoint` is a fixpoint of `c.Φ`. -/
-theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
-=======
 theorem case [c.Finite] {x : V} : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
->>>>>>> master
   ⟨by intro h
       rcases c.fixpoint_iff_succ.mp h with ⟨u, hu⟩
       have : c.Φ v {z | z ∈ c.limSeq v u} x := (c.mem_limSeq_succ_iff.mp hu).2

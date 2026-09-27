@@ -20,7 +20,8 @@ namespace PR
 structure Blueprint (k : ℕ) where
   /-- `p.zero.Evalb (z :> v)` states that `z` is the value at `0`. Equivalently, `z = c.zero v`. -/
   zero : 𝚺₁.Semisentence (k + 1)
-  /-- `p.succ.Evalb (u :> z :> i :> v)` states that `u` is the value at `i + 1`, where `z` is the value at `i`. Equivalently, `u = c.succ v i z`. -/
+  /-- `p.succ.Evalb (u :> z :> i :> v)` states that `u` is the value at `i + 1`, where
+  `z` is the value at `i`. Equivalently, `u = c.succ v i z`. -/
   succ : 𝚺₁.Semisentence (k + 3)
 
 def Blueprint.cseqDef {k : ℕ} (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSigma
@@ -203,12 +204,8 @@ lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
         (by simp [←hu]) h' h⟩
 
 set_option linter.flexible false in
-<<<<<<< HEAD
-lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
-=======
 lemma result_defined : 𝚺₁.DefinedFunction
     (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
->>>>>>> master
   simp [Blueprint.resultDef, result_graph, c.cseq_defined_iff]
 
 lemma result_defined_delta : 𝚫₁.DefinedFunction
