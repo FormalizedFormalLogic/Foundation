@@ -6,16 +6,24 @@ As a baseline, follow the [Mathlib style guide](https://leanprover-community.git
 
 Human contributors need not follow this document to the letter — treat it as a description of the house style. 🤖 AI coding agents should follow it as closely as possible, especially the items marked 🤖: machine-generated proofs tend to drift toward a verbose, defensive style, and those items exist to counteract that drift.
 
+## Linters
+
+The library builds with Mathlib's standard linter set, which [`lakefile.toml`](../lakefile.toml) opts into wholesale (`weak.linter.mathlibStandardSet`), minus the header linter, which enforces a copyright header this repository does not carry. `autoImplicit` is off, as in Mathlib. A warning is an error: CI builds with `lake build Foundation --wfail`. Fix a warning, never suppress it.
+
+Much of what this document would otherwise spell out — the 100-column limit, `<|` rather than `$`, `·` rather than `.` as the focus dot, `fun` rather than `λ`, core `cases`/`induction` rather than `cases'`/`induction'` — the set already enforces, so those rules are not repeated here.
+
 ## General conventions
 
 - Omit type annotations that are trivially inferred.
-- Do not introduce implicit variables ad hoc in lemma statements. Declare them with `variable` in a `section`, and cut a new `section` when the context changes, rather than keeping one giant file-wide block.
+- Do not introduce implicit variables ad hoc in lemma statements. Declare them with `variable` in a `section`, and cut a new `section` when the context changes, rather than keeping one giant file-wide block. `autoImplicit` being off, an undeclared variable is an error rather than a silently auto-bound binder.
 
 ## Proof style
 
 Overall: construct terms directly when the type determines them, and hand the residue to automation — rather than opening holes in the goal and filling them one by one.
 
-🤖 **Prefer direct term construction over `refine … ?_`.**
+🤖 **Avoid `refine … ?_`.** Reach for it only when nothing else expresses the step.
+
+When the components are already at hand, build the term directly:
 
 ```lean
 -- Avoid:
@@ -27,15 +35,30 @@ refine ⟨n, ?_, ?_⟩
 exact ⟨n, hn, hn.le⟩
 ```
 
-Reserve `refine` for components that genuinely need tactic work — and never write bound variables inside it:
+When they still need tactic work, introduce the witness with `use`, split what remains with `and_intros`, and discharge each goal under its own focus dot:
+
+```lean
+-- Avoid:
+refine ⟨f x, hf x, ?_⟩
+
+-- Prefer:
+use f x
+and_intros
+· exact hf x
+· simpa using hg x
+```
+
+Never write bound variables inside `refine` — introduce them with `intro` as a tactic:
 
 ```lean
 -- Avoid:
 refine ⟨hd, fun x hx => ?_⟩
 
 -- Prefer:
-refine ⟨hd, ?_⟩
-intro x hx
+and_intros
+· exact hd
+· intro x hx
+  …
 ```
 
 **Use `obtain` actively when extracting witnesses from existential hypotheses** (`obtain ⟨n, hn⟩ := exists_bound f`). For other pattern decomposition, `rcases`/`rintro` are equally fine.
@@ -101,7 +124,25 @@ Citations go at the end of the docstring as a list, one line per BibTeX key, of 
 - [VS83, Theorem 10, Theorem 11(b), Theorem 11(c)]
 ```
 
-🤖 **For proofs submitted by AI agents, citations are mandatory**: every non-trivial definition and theorem must point to its source in the literature. If none exists (folklore, a routine technical bridge, original to this formalization), the docstring must say so and briefly explain why — never silently omit it.
+Cite definitions (`def`, `inductive`, `structure`, `abbrev`) and `theorem`s. Supporting lemmas do not each need a citation — a source repeated on every small closure or rewriting lemma is noise, not attribution.
+
+The alternative placement is a `## References` section at the end of the module docstring, collecting the keys the module draws on:
+
+```
+/-!
+# Strict arithmetical hierarchy
+
+…
+
+## References
+
+- [HP98, 0.30, Lemma I.1.69]
+-/
+```
+
+Prefer that form when the declarations themselves carry no docstrings.
+
+🤖 **For proofs submitted by AI agents, citations are mandatory** at the granularity above: every non-trivial definition and theorem must be traceable to its source in the literature, whether through its own docstring or through the module's `## References`. If no source exists (folklore, a routine technical bridge, original to this formalization), say so and briefly explain why — never silently omit it.
 
 ### Stale comments and planning artifacts
 
@@ -115,7 +156,7 @@ Attach `@[grind]` to lemmas and definitions that plausibly help `grind` close go
 
 ## No `sorry`
 
-`sorry` is never acceptable in submitted proofs. CI runs `just axiom-audit`, which fails the build on any remaining `sorry` (as well as on axioms outside the allowlist) — a proof left in a skeleton state cannot land. If a proof is incomplete, keep it out of the PR rather than submitting it with `sorry` placeholders.
+`sorry` is never acceptable in submitted proofs. CI runs `just forgive`, which fails the build on any remaining `sorry` (as well as on axioms outside the allowlist) — a proof left in a skeleton state cannot land. If a proof is incomplete, keep it out of the PR rather than submitting it with `sorry` placeholders.
 
 ## `set_option`
 

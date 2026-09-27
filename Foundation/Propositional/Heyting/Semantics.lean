@@ -5,8 +5,11 @@ public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Vorspiel.Order.Heyting
 
 @[expose] public section
+set_option autoImplicit true
 
-namespace LO.Propositional
+namespace FFL.Propositional
+
+universe u w
 
 variable {α : Type u}
 
@@ -37,25 +40,25 @@ variable {ℍ : Type*} [HeytingAlgebra ℍ] (v : α → ℍ)
 
 end Formula
 
-structure HeytingSemantics (α : Type*) where
+structure Heyting.Model (α : Type*) where
   Algebra : Type*
   valAtom : α → Algebra
   [heyting : HeytingAlgebra Algebra]
   [nontrivial : Nontrivial Algebra]
 
-namespace HeytingSemantics
+namespace Heyting.Model
 
-variable (ℍ : HeytingSemantics α)
+variable (ℍ : Heyting.Model α)
 
-instance : CoeSort (HeytingSemantics α) (Type _) := ⟨Algebra⟩
+instance : CoeSort (Heyting.Model α) (Type _) := ⟨Algebra⟩
 
 instance : HeytingAlgebra ℍ := ℍ.heyting
 
 instance : Nontrivial ℍ := ℍ.nontrivial
 
-def hVal (ℍ : HeytingSemantics α) (φ : Formula α) : ℍ := φ.hVal ℍ.valAtom
+def hVal (ℍ : Heyting.Model α) (φ : Formula α) : ℍ := φ.hVal ℍ.valAtom
 
-scoped [LO.Propositional] infix:45 " ⊧ₕ " => LO.Propositional.HeytingSemantics.hVal
+scoped [FFL.Propositional] infix:45 " ⊧ₕ " => FFL.Propositional.Heyting.Model.hVal
 
 @[simp] lemma hVal_falsum : (ℍ ⊧ₕ ⊥) = ⊥ := rfl
 
@@ -65,23 +68,24 @@ scoped [LO.Propositional] infix:45 " ⊧ₕ " => LO.Propositional.HeytingSemanti
 
 @[simp] lemma hVal_imply (φ ψ : Formula α) : (ℍ ⊧ₕ φ 🡒 ψ) = (ℍ ⊧ₕ φ) ⇨ (ℍ ⊧ₕ ψ) := rfl
 
-@[simp] lemma hVal_iff (φ ψ : Formula α) : (ℍ ⊧ₕ φ 🡘 ψ) = bihimp (ℍ ⊧ₕ φ) (ℍ ⊧ₕ ψ) := by simp [LogicalConnective.iff, bihimp, inf_comm]
+@[simp] lemma hVal_iff (φ ψ : Formula α) : (ℍ ⊧ₕ φ 🡘 ψ) = bihimp (ℍ ⊧ₕ φ) (ℍ ⊧ₕ ψ) := by
+  simp [LogicalConnective.iff, bihimp, inf_comm]
 
 @[simp] lemma hVal_verum : (ℍ ⊧ₕ ⊤) = ⊤ := by simp [Formula.top_def];
 
 @[simp] lemma hVal_not (φ : Formula α) : (ℍ ⊧ₕ ∼φ) = (ℍ ⊧ₕ φ)ᶜ := by simp [Formula.neg_def];
 
-instance : Semantics (HeytingSemantics α) (Formula α) := ⟨fun ℍ φ ↦ (ℍ ⊧ₕ φ) = ⊤⟩
+instance : Semantics (Heyting.Model α) (Formula α) := ⟨fun ℍ φ ↦ (ℍ ⊧ₕ φ) = ⊤⟩
 
-lemma val_def {ℍ : HeytingSemantics α} {φ : Formula α} : ℍ ⊧ φ ↔ φ.hVal ℍ.valAtom = ⊤ := by rfl
+lemma val_def {ℍ : Heyting.Model α} {φ : Formula α} : ℍ ⊧ φ ↔ φ.hVal ℍ.valAtom = ⊤ := by rfl
 
-lemma val_def' {ℍ : HeytingSemantics α} {φ : Formula α} : ℍ ⊧ φ ↔ (ℍ ⊧ₕ φ) = ⊤ := by rfl
+lemma val_def' {ℍ : Heyting.Model α} {φ : Formula α} : ℍ ⊧ φ ↔ (ℍ ⊧ₕ φ) = ⊤ := by rfl
 
-instance : Semantics.Top (HeytingSemantics α) := ⟨fun ℍ ↦ by simp [val_def]⟩
+instance : Semantics.Top (Heyting.Model α) := ⟨fun ℍ ↦ by simp [val_def]⟩
 
-instance : Semantics.Bot (HeytingSemantics α) := ⟨fun ℍ ↦ by simp [val_def]⟩
+instance : Semantics.Bot (Heyting.Model α) := ⟨fun ℍ ↦ by simp [val_def]⟩
 
-instance : Semantics.And (HeytingSemantics α) := ⟨fun {ℍ φ ψ} ↦ by simp [val_def]⟩
+instance : Semantics.And (Heyting.Model α) := ⟨fun {ℍ φ ψ} ↦ by simp [val_def]⟩
 
 @[simp] lemma val_imply {φ ψ : Formula α} : ℍ ⊧ φ 🡒 ψ ↔ (ℍ ⊧ₕ φ) ≤ (ℍ ⊧ₕ ψ) := by
   simp [val_def]; rfl
@@ -97,12 +101,12 @@ lemma val_not (φ : Formula α) : ℍ ⊧ ∼φ ↔ (ℍ ⊧ₕ φ) = ⊥ := by
 @[simp] lemma val_or (φ ψ : Formula α) : ℍ ⊧ φ ⋎ ψ ↔ (ℍ ⊧ₕ φ) ⊔ (ℍ ⊧ₕ ψ) = ⊤ := by
   simp [val_def]; rfl
 
-def mod (H : Hilbert α) : Set (HeytingSemantics α) := Semantics.models (HeytingSemantics α) H
+def mod (H : Hilbert α) : Set (Heyting.Model α) := Semantics.models (Heyting.Model α) H
 
 variable {H : Hilbert α}
 
 lemma mod_models_iff {φ : Formula α} :
-    mod.{_,w} H ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* H → ℍ ⊧ φ := by
+    mod.{_,w} H ⊧ φ ↔ ∀ ℍ : Heyting.Model.{_,w} α, ℍ ⊧* H → ℍ ⊧ φ := by
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
 lemma sound {φ : Formula α} : H ⊢ φ → mod H ⊧ φ := by
@@ -124,7 +128,7 @@ open Entailment.LindenbaumAlgebra
 
 variable [DecidableEq α] {H : Hilbert α} [Entailment.Consistent H] [Entailment.Int H]
 
-def lindenbaum (H : Hilbert α) [Entailment.Consistent H] [Entailment.Int H] : HeytingSemantics α where
+def lindenbaum (H : Hilbert α) [Entailment.Consistent H] [Entailment.Int H] : Heyting.Model α where
   Algebra := Entailment.LindenbaumAlgebra H
   valAtom a := ⟦.atom a⟧
   heyting := Entailment.LindenbaumAlgebra.heyting _
@@ -146,17 +150,19 @@ instance : Complete H (lindenbaum H) := ⟨lindenbaum_complete_iff.mp⟩
 
 end
 
-lemma complete [DecidableEq α] [Entailment.Int H] {φ : Formula α} (h : mod.{_,u} H ⊧ φ) : H ⊢ φ := by
+lemma complete [Entailment.Int H] {φ : Formula α} (h : mod.{_, u} H ⊧ φ) :
+    H ⊢ φ := by
+  classical
   wlog Con : Entailment.Consistent H
-  . exact Entailment.not_consistent_iff_inconsistent.mp Con φ
-  exact lindenbaum_complete_iff.mp <| mod_models_iff.mp h (lindenbaum H) $ by
+  · exact Entailment.not_consistent_iff_inconsistent.mp Con φ
+  exact lindenbaum_complete_iff.mp <| mod_models_iff.mp h (lindenbaum H) <| by
     constructor;
     intro ψ hψ;
-    exact lindenbaum_complete_iff.mpr $ Hilbert.of_schema hψ;
+    exact lindenbaum_complete_iff.mpr <| Hilbert.of_schema hψ;
 
-instance [DecidableEq α] [Entailment.Int H] : Complete H (mod.{_,u} H) := ⟨complete⟩
+instance [Entailment.Int H] : Complete H (mod.{_,u} H) := ⟨complete⟩
 
-end HeytingSemantics
+end Heyting.Model
 
-end LO.Propositional
+end FFL.Propositional
 end

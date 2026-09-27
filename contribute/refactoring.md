@@ -77,7 +77,7 @@ The following proofs and definitions are bad examples. Rewrite them into the bet
   Prefer:
 
   ```lean
-  refine ⟨x, y, by tactic1, z, by tactic2⟩
+  exact ⟨x, y, by tactic1, z, by tactic2⟩
   ```
 
 - ```lean

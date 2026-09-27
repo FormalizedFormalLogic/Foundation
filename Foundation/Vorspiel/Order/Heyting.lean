@@ -9,7 +9,7 @@ section frame
 
 variable {α : Type*} [Order.Frame α]
 
-theorem compl_iSup' {a : ι → α} : (⨆ i, a i)ᶜ = ⨅ i, (a i)ᶜ := by
+theorem compl_iSup' {ι : Type*} {a : ι → α} : (⨆ i, a i)ᶜ = ⨅ i, (a i)ᶜ := by
   simpa using iSup_himp_eq (f := a) (a := ⊥)
 
 end frame
@@ -22,10 +22,11 @@ variable {α : Type*} [HeytingAlgebra α]
 lemma himp_himp_inf_himp_inf_le (a b c : α) : (a ⇨ b ⇨ c) ⊓ (a ⇨ b) ⊓ a ≤ c := calc
   (a ⇨ b ⇨ c) ⊓ (a ⇨ b) ⊓ a = (a ⇨ b ⇨ c) ⊓ b ⊓ a := by simp only [inf_assoc, himp_inf_self]
   _                         = (a ⇨ b ⇨ c) ⊓ a ⊓ b := by simp only [inf_assoc, inf_comm a b]
-  _                         ≤ (b ⇨ c) ⊓ b         := by simp only [himp_inf_self a (b ⇨ c), le_inf_iff]
-                                                        constructor
-                                                        · simp only [inf_assoc, inf_le_left]
-                                                        · exact inf_le_right
+  _                         ≤ (b ⇨ c) ⊓ b         := by
+      simp only [himp_inf_self a (b ⇨ c), le_inf_iff]
+      constructor
+      · simp only [inf_assoc, inf_le_left]
+      · exact inf_le_right
   _                         ≤ c                   := by simp
 
 @[simp, grind .]

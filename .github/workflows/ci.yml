@@ -7,8 +7,6 @@ on:
   pull_request:
     branches:
       - master
-  # Required so these checks also run against the queue's speculative merge
-  # commit; otherwise a merge queue entry has no status checks to wait on.
   merge_group:
     branches:
       - master
@@ -21,72 +19,121 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  LAKE_ARTIFACT_CACHE: true
+  LAKE_RESTORE_ARTIFACTS: true
+  LAKE_NO_CACHE: true
+
 jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Setup elan
-        run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Print lake and lean version
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+      - name: Print tool versions
         run: |
           lake --version
           lean --version
 
-      # Restore project cache
-      - name: Get Mathlib cache
-        run: lake exe cache get
-      - name: Restore cache
-        id: cache-restore
-        uses: actions/cache/restore@v6
+      - run: lake build Foundation --wfail
+      - run: just forgive
+
+      # A merge-queue commit becomes `master` as is, so publishing it there lets the push run that
+      # follows, and the jobs below, restore it instead of compiling it again.
+      - name: Save remote cache
+        if: >-
+          github.event_name == 'merge_group' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/master')
+        env:
+          LAKE_CONFIG: lake-cache.toml
+          LAKE_CACHE_KEY: ${{ secrets.LAKE_CACHE_KEY }}
+        run: |
+          lake build --no-build -o .lake/outputs.jsonl Foundation
+          lake cache put \
+            .lake/outputs.jsonl \
+            --service ffl-upload \
+            --repo FormalizedFormalLogic/Foundation
+
+  # The jobs below only produce what `deploy` publishes from `master`; `workflow_dispatch` lets a
+  # branch try them out.
+  import-graph:
+    name: Generate import graph
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v7
         with:
-          path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          # Cache entries are immutable, so the key includes the commit SHA to always save fresh.
-          # Branch isolation is already enforced by the cache's built-in scoping.
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: |
-            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
-      - name: Unpack project cache
-        if: hashFiles('.lake/Foundation-x86_64-unknown-linux-gnu.tar.gz') != ''
-        run: lake unpack
-
-      - uses: extractions/setup-just@v4
-
-      - name: Build Foundation
-        run: lake build Foundation
-
-      - name: Check sorry-freeness and axiom allowlist (axiom-audit)
-        run: just axiom-audit
-
-      - name: Build docs
-        run: lake build Foundation:docs
-
-      - name: Pack project cache
-        run: lake pack
-      - name: Save project cache
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        id: cache-save
-        uses: actions/cache/save@v6
-        with:
-          path: .lake/Foundation-x86_64-unknown-linux-gnu.tar.gz
-          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
       - uses: ts-graphviz/setup-graphviz@v2
-      - name: Generate import graph
-        run: just import-graph
 
-      - name: Upload lean artifacts
-        uses: actions/upload-artifact@v7
+      - run: lake build Foundation
+      - run: just import-graph
+
+      - uses: actions/upload-artifact@v7
         with:
-          name: lean-artifacts
+          name: import-graph
           path: |
-            .lake/build/doc
             import_graph.png
             import_graph.pdf
             import_graph.html
+          retention-days: 1
+
+  zoo:
+    name: Generate zoo
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+      - uses: typst-community/setup-typst@v5
+
+      - run: lake build Foundation
+      - run: just zoo
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: zoo
+          path: pages/zoo
+          retention-days: 1
+
+  docs:
+    name: Generate docs
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+
+      # doc-gen's database of core and dependency modules takes most of its ~20 minutes to fill,
+      # and only changes with the toolchain and the dependencies. `fromDb` renders just the import
+      # closure of `Foundation`, so rows left behind by removed modules never reach the output.
+      - name: Restore doc-gen database
+        uses: actions/cache@v6
+        with:
+          path: |
+            .lake/build/api-docs.db*
+            .lake/build/doc-data
+          key: doc-gen-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: doc-gen-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+      - run: lake build Foundation
+      - run: just docs
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: docs
+          path: .lake/build/doc
           retention-days: 1
           include-hidden-files: true
 
@@ -132,6 +179,9 @@ jobs:
     if: github.ref == 'refs/heads/master'
     needs:
       - build
+      - import-graph
+      - zoo
+      - docs
       - check-references
       - mk-all-check
     permissions:
@@ -144,17 +194,18 @@ jobs:
       - uses: actions/checkout@v7
       - uses: pandoc/actions/setup@v1
 
-      - name: Download lean artifacts
-        uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@v8
         with:
-          name: lean-artifacts
-      - name: Copy from artifacts to pages
-        run: |
-          cp -r "$GITHUB_WORKSPACE/.lake/build/doc" pages/docs
-          cp "$GITHUB_WORKSPACE/import_graph.png" \
-             "$GITHUB_WORKSPACE/import_graph.pdf" \
-             "$GITHUB_WORKSPACE/import_graph.html" \
-             pages/
+          name: import-graph
+          path: pages
+      - uses: actions/download-artifact@v8
+        with:
+          name: zoo
+          path: pages/zoo
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs
+          path: pages/docs
 
       - name: Compile README.md to index.html
         run: |

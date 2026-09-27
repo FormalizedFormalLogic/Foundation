@@ -3,9 +3,9 @@ module
 public import Foundation.FirstOrder.Arithmetic.Basic
 
 @[expose] public section
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-abbrev FirstOrderTrueArith : ArithmeticTheory := Structure.theory ℒₒᵣ ℕ
+abbrev FirstOrderTrueArith : ArithmeticTheory := Tarski.Structure.theory ℒₒᵣ ℕ
 
 notation "𝗧𝗔" => FirstOrderTrueArith
 
@@ -25,4 +25,4 @@ instance (T : ArithmeticTheory) [ℕ↓[ℒₒᵣ] ⊧* T] : T ⪯ 𝗧𝗔 := �
 
 end TA
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

@@ -246,7 +246,7 @@ lemma IsCompanion.mapRep_eq (h : IsCompanion e a b) {y z : A}
 
 lemma IsCompanion.mapRep_mono (h : IsCompanion e a b) (hu : u₁ ≤ u₂) :
     h.mapRep u₁ ≤ h.mapRep u₂ := by
-  show (h.mapRep u₁ : β) ≤ (h.mapRep u₂ : β)
+  change (h.mapRep u₁ : β) ≤ (h.mapRep u₂ : β)
   rw [h.val_mapRep, h.val_mapRep]
   exact h.map_le_map (by rw [← insertRepPair_spec u₁, ← insertRepPair_spec u₂]; exact hu)
 
@@ -266,7 +266,7 @@ def IsCompanion.extend (h : IsCompanion e a b) :
   left_inv _ := h.mapRep_mapRep
   right_inv _ := h.symm.mapRep_mapRep
   map_rel_iff' {x₁ x₂} := by
-    show h.mapRep x₁ ≤ h.mapRep x₂ ↔ x₁ ≤ x₂
+    change h.mapRep x₁ ≤ h.mapRep x₂ ↔ x₁ ≤ x₂
     refine ⟨fun hu => ?_, h.mapRep_mono⟩
     have := h.symm.mapRep_mono hu
     rwa [h.mapRep_mapRep, h.mapRep_mapRep] at this
@@ -281,13 +281,13 @@ lemma IsCompanion.extend_spec (h : IsCompanion e a b)
 
 lemma IsCompanion.extend_coe (h : IsCompanion e a b) (x : A) :
     (h.extend ⟨x, le_closure_insert x.2⟩ : β) = e x := by
-  show (h.mapRep ⟨x, le_closure_insert x.2⟩ : β) = e x
+  change (h.mapRep ⟨x, le_closure_insert x.2⟩ : β) = e x
   rw [h.mapRep_eq (y := x) (z := x) (BooleanAlgebra.eq_insertRep_self ..)]
   exact (BooleanAlgebra.eq_insertRep_self ..).symm
 
 lemma IsCompanion.extend_self (h : IsCompanion e a b) :
     (h.extend ⟨a, self_mem_closure_insert⟩ : β) = b := by
-  show (h.mapRep ⟨a, self_mem_closure_insert⟩ : β) = b
+  change (h.mapRep ⟨a, self_mem_closure_insert⟩ : β) = b
   rw [h.mapRep_eq (y := ⊤) (z := ⊥) (by simp)]
   simp [e.map_top, e.map_bot]
 

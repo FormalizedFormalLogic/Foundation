@@ -8,9 +8,11 @@ public import Foundation.Propositional.Hilbert.Basic
   # Dialectica-like realizableation of intuitionistic propositional logic
 -/
 
-namespace LO.Propositional.Dialectica
+namespace FFL.Propositional.Dialectica
 
 open Formula
+
+variable {α : Type*}
 
 inductive Player
   | eloise : Player
@@ -80,11 +82,13 @@ namespace Realizable
 
 @[simp] lemma verum {w c V} : ⟦w | c⟧⊩[V] (⊤ : Formula α) := by simp [Realizable]
 
-@[simp] lemma not {φ : Formula α} {V θ f} : ⟦f | θ⟧⊩[V] ∼φ ↔ ¬⟦θ.1 | f.2 θ.1 θ.2⟧⊩[V] φ := Eq.to_iff rfl
+@[simp] lemma not {φ : Formula α} {V θ f} :
+    ⟦f | θ⟧⊩[V] ∼φ ↔ ¬⟦θ.1 | f.2 θ.1 θ.2⟧⊩[V] φ := Eq.to_iff rfl
 
 end Realizable
 
-protected lemma Valid.refl (φ : Formula α) : ⊩ φ 🡒 φ := ⟨⟨id, fun _ π ↦ π⟩, by rintro V ⟨θ, π⟩; simp⟩
+protected lemma Valid.refl (φ : Formula α) : ⊩ φ 🡒 φ :=
+  ⟨⟨id, fun _ π ↦ π⟩, by rintro V ⟨θ, π⟩; simp⟩
 
 lemma NotValid.em (a : α) : ⊮ atom a ⋎ ∼atom a := by
   rintro (⟨⟨⟩⟩ | ⟨f⟩)
@@ -98,6 +102,6 @@ lemma NotValid.em (a : α) : ⊮ atom a ⋎ ∼atom a := by
     refine ⟨fun _ ↦ true, ⟨(), (), ()⟩, ?_⟩
     rw [Realizable.or_right]; simp
 
-end LO.Propositional.Dialectica
+end FFL.Propositional.Dialectica
 
 end

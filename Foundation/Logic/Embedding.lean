@@ -6,9 +6,10 @@ public import Foundation.Propositional.Entailment.Cl
 
 /-! # Faithful embeddings among logical systems -/
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
-variable {F₁ F₂ F₃ : Type*} {S₁ S₂ S₃ : Type*} [Entailment S₁ F₁] [Entailment S₂ F₂] [Entailment S₃ F₃]
+variable {F₁ F₂ F₃ : Type*} {S₁ S₂ S₃ : Type*}
+variable [Entailment S₁ F₁] [Entailment S₂ F₂] [Entailment S₃ F₃]
 
 def IsFaithfulEmbedding (𝓢₁ : S₁) (𝓢₂ : S₂) (f : F₁ → F₂) : Prop := ∀ φ, 𝓢₂ ⊢ f φ ↔ 𝓢₁ ⊢ φ
 
@@ -23,7 +24,8 @@ lemma fun_exists (𝓢₁ : S₁) (𝓢₂ : S₂) [FaithfullyEmbeddable 𝓢₁
 @[refl] protected instance refl (𝓢₁ : S₁) : FaithfullyEmbeddable 𝓢₁ 𝓢₁ where
   prop := ⟨id, by intros _; simp⟩
 
-@[trans] lemma trans (𝓢₁ : S₁) (𝓢₂ : S₂) (𝓢₃ : S₃) [FaithfullyEmbeddable 𝓢₁ 𝓢₂] [FaithfullyEmbeddable 𝓢₂ 𝓢₃] :
+@[trans] lemma trans (𝓢₁ : S₁) (𝓢₂ : S₂) (𝓢₃ : S₃)
+    [FaithfullyEmbeddable 𝓢₁ 𝓢₂] [FaithfullyEmbeddable 𝓢₂ 𝓢₃] :
     FaithfullyEmbeddable 𝓢₁ 𝓢₃ where
   prop := by
     rcases fun_exists 𝓢₁ 𝓢₂ with ⟨f₁₂, h₁₂⟩
@@ -33,6 +35,6 @@ lemma fun_exists (𝓢₁ : S₁) (𝓢₂ : S₂) [FaithfullyEmbeddable 𝓢₁
 
 end FaithfullyEmbeddable
 
-end LO.Entailment
+end FFL.Entailment
 
 end

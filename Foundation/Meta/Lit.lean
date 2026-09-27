@@ -5,7 +5,7 @@ public import Foundation.Logic.LogicSymbol
 
 public section
 
-namespace LO.Meta
+namespace FFL.Meta
 
 open Mathlib Qq Lean Elab Meta Tactic
 
@@ -20,6 +20,8 @@ inductive Litform (α : Type*) : Type _
   | iff           : Litform α → Litform α → Litform α
 
 namespace Litform
+
+variable {α : Type*}
 
 instance : LogicalConnective (Litform α) where
   wedge := Litform.and
@@ -60,9 +62,9 @@ instance [Repr α] : Repr (Litform α) := ⟨fun t _ ↦ format t⟩
 
 end ToString
 
-variable (F : Q(Type*)) (ls : Q(LogicalConnective $F)) (ln : Q(LogicalNeutral $F))
+variable {u : Level} (F : Q(Type u)) (ls : Q(LogicalConnective $F)) (ln : Q(LogicalNeutral $F))
 
-abbrev _root_.LO.Meta.Lit := Litform Expr
+abbrev _root_.FFL.Meta.Lit := Litform Expr
 
 variable {F}
 
@@ -76,7 +78,7 @@ abbrev toExpr : Lit → Q($F)
   |   φ 🡒 ψ => q($(toExpr φ) 🡒 $(toExpr ψ))
   | iff φ ψ => q($(toExpr φ) 🡘 $(toExpr ψ))
 
-partial def summands {α : Q(Type $u)} (inst : Q(Add $α)) :
+partial def summands {u : Level} {α : Q(Type u)} (inst : Q(Add $α)) :
     Q($α) → MetaM (List Q($α))
   | ~q($x + $y) => return (← summands inst x) ++ (← summands inst y)
   | n => return [n]
@@ -122,10 +124,10 @@ def dMem (φ : Lit) (Δ : List Lit) : MetaM Bool :=
 def dSubsetList (Γ Δ : List Lit) : MetaM Bool := do
   match Γ with
   |     [] => return true
-  | φ :: Γ => return (←φ.dMem Γ) && (←dSubsetList Γ Δ)
+  | φ :: Γ => return (←φ.dMem Δ) && (←dSubsetList Γ Δ)
 
 end Lit
 
-end LO.Meta
+end FFL.Meta
 
 end

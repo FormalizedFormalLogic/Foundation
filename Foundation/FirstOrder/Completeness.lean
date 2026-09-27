@@ -1,5 +1,0 @@
-module
-
-public import Foundation.FirstOrder.Completeness.CanonicalModel
-public import Foundation.FirstOrder.Completeness.CountableSublanguage
-public import Foundation.FirstOrder.Completeness.CounterModel

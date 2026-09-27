@@ -5,7 +5,7 @@ public import Foundation.Vorspiel.Computability
 
 @[expose] public section
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 section
 
@@ -28,6 +28,6 @@ lemma decidable_of_incomplete : Inconsistent 𝓢 → Decidable 𝓢 :=
 
 end
 
-end LO.Entailment
+end FFL.Entailment
 
 end

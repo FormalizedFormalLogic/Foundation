@@ -1,0 +1,6 @@
+version: v0
+
+accept:
+  - propext
+  - Quot.sound
+  - Classical.choice

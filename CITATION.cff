@@ -3,7 +3,7 @@ message: "If you use this software, please cite it as below."
 title: "Formalized Formal Logic"
 abstract: A mechanized proof library for mathematical logic.
 authors:
-- family-names: "Saito"
+- family-names: "Saitou"
   given-names: "Shogo"
 - family-names: "Noguchi"
   given-names: "Mashu"

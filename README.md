@@ -1,6 +1,5 @@
 [Docs]: https://FormalizedFormalLogic.github.io/Foundation/docs
 [Catalogue]: https://FormalizedFormalLogic.github.io/Catalogue
-[Zoo]: https://github.com/FormalizedFormalLogic/Zoo
 [ProvabilityLogic]: https://github.com/FormalizedFormalLogic/ProvabilityLogic
 [FFL]: https://github.com/FormalizedFormalLogic
 
@@ -35,18 +34,17 @@ Main results of this repository. More detailed explanations are provided in [Doc
   - [Set theory][set_theory]: $\mathsf{Z}$, $\mathsf{ZF}$, $\mathsf{ZFC}$ and their models.
     - [Consistency of ZFC][set_theory:zfc_consistent] (relative to Lean's type theory)
     - [Downward Löwenheim–Skolem theorem for models of set theory][set_theory:loewenheim_skolem]
-    - [Set Theory Zoo](#set-theory-zoo)
 - `SecondOrder`: Syntax, semantics, and derivations of second-order logic.
 - `Meta`: Proof automation.
 - `Vorspiel`: Supplemental definitions and theorems for Mathlib.
 
 [prop:completeness]: ./Foundation/Propositional/Boolean/Tait.lean
 [first_order]: ./Foundation/FirstOrder
-[first_order:completeness]: ./Foundation/FirstOrder/Completeness/CounterModel.lean
-[first_order:hauptsatz]: ./Foundation/FirstOrder/Hauptsatz.lean
-[first_order:goedel_translation]: ./Foundation/FirstOrder/NegationTranslation/GoedelGentzen.lean
-[first_order:downward_loewenheim_skolem]: ./Foundation/FirstOrder/Skolemization/Hull.lean
-[first_order:intuitionistic]: ./Foundation/FirstOrder/Intuitionistic
+[first_order:completeness]: ./Foundation/FirstOrder/LK/Completeness/CounterModel.lean
+[first_order:hauptsatz]: ./Foundation/FirstOrder/LK/Hauptsatz.lean
+[first_order:goedel_translation]: ./Foundation/FirstOrder/LJ/GoedelGentzen.lean
+[first_order:downward_loewenheim_skolem]: ./Foundation/FirstOrder/Tarski/Skolemization.lean
+[first_order:intuitionistic]: ./Foundation/FirstOrder/Kripke/Intuitionistic.lean
 [arith]: ./Foundation/FirstOrder/Arithmetic
 [incompleteness]: ./Foundation/FirstOrder/Incompleteness
 [arith:goedel_it1]: ./Foundation/FirstOrder/Incompleteness/First.lean
@@ -74,9 +72,9 @@ See the [organization page][FFL] for the other repositories.
 
 ### Zoo
 
-Automatically generated[^1] diagrams "Zoo" illustrate the Lean 4-verified interrelationships among theories and proof systems.
-
-[^1]: To reduce build time in GitHub Actions, generated in a separate repository, see [Zoo].
+Diagrams "Zoo" illustrate the Lean 4-verified interrelationships among theories.
+They are generated from the environment by [`Zoo/`](./Zoo) on every build; run `just zoo` to
+regenerate them locally.
 
 - A solid arrow $\mathsf{A} \leftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
 - A dashed arrow $\mathsf{A} \dashleftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
@@ -84,11 +82,7 @@ Automatically generated[^1] diagrams "Zoo" illustrate the Lean 4-verified interr
 
 #### Arithmetic Theory Zoo
 
-![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Zoo/arithmetic.png)
-
-#### Set Theory Zoo
-
-![Set Theory Zoo](https://formalizedformallogic.github.io/Zoo/set_theory.png)
+<a href="https://formalizedformallogic.github.io/Foundation/zoo/arithmetic.png"><img alt="Arithmetic Theory Zoo" src="https://formalizedformallogic.github.io/Foundation/zoo/arithmetic.png" height="600"></a>
 
 ## Contributing
 
@@ -108,7 +102,7 @@ lake build
 List of contact information and areas of expertise of the current main developers.
 If you have any interest or questions, [create a new issue](https://github.com/FormalizedFormalLogic/Foundation/issues) or contact us directly.
 
-- Palalansoukî (Shogo Saito, [@iehality][iehality:github], ✉️:[palalansouki@gmail.com][iehality:email])
+- Palalansoukî (Shogo Saitou, [@iehality][iehality:github], ✉️:[palalansouki@gmail.com][iehality:email])
   - Overall design and maintenance.
   - First-order logic.
   - Intuitionistic first-order logic.
