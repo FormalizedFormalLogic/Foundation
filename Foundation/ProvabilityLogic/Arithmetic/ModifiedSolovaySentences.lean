@@ -19,6 +19,8 @@ reflection principle for `σ` that they yield.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL
 
 open Entailment
@@ -204,28 +206,34 @@ def WitnessLE (P Q : V → Prop) : Prop := ∃ w, P w ∧ ∀ v < w, ¬Q v
 /-- A witness of `P` appears strictly before any witness of `Q`. -/
 def WitnessLT (P Q : V → Prop) : Prop := ∃ w, P w ∧ ∀ v ≤ w, ¬Q v
 
-def cmpLE (P : 𝚺₁.Semisentence 2) (Q : 𝚷₁.Semisentence 2) : 𝚺₁.Semisentence 2 := .mkSigma
+def cmpLE (P : 𝚺ᴬ₁.Semisentence 2) (Q : 𝚷ᴬ₁.Semisentence 2) :
+    𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a b. ∃ w, !P.val w a ∧ ∀ v < w, ¬!Q.val v b”
 
-def cmpLT (P : 𝚺₁.Semisentence 2) (Q : 𝚷₁.Semisentence 2) : 𝚺₁.Semisentence 2 := .mkSigma
+def cmpLT (P : 𝚺ᴬ₁.Semisentence 2) (Q : 𝚷ᴬ₁.Semisentence 2) :
+    𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a b. ∃ w, !P.val w a ∧ ∀ v <⁺ w, ¬!Q.val v b”
 
-@[simp] lemma val_cmpLE {P : 𝚺₁.Semisentence 2} {Q : 𝚷₁.Semisentence 2} {a b : V} :
+@[simp] lemma val_cmpLE {P : 𝚺ᴬ₁.Semisentence 2} {Q : 𝚷ᴬ₁.Semisentence 2} {a b : V} :
     V ⊧/![a, b] (cmpLE P Q).val ↔
       WitnessLE (fun w ↦ V ⊧/![w, a] P.val) (fun w ↦ V ⊧/![w, b] Q.val) := by
   simp [cmpLE, WitnessLE];
 
-@[simp] lemma val_cmpLT [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : 𝚺₁.Semisentence 2} {Q : 𝚷₁.Semisentence 2} {a b : V} :
+@[simp] lemma val_cmpLT [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+    {P : 𝚺ᴬ₁.Semisentence 2} {Q : 𝚷ᴬ₁.Semisentence 2} {a b : V} :
     V ⊧/![a, b] (cmpLT P Q).val ↔
       WitnessLT (fun w ↦ V ⊧/![w, a] P.val) (fun w ↦ V ⊧/![w, b] Q.val) := by
   simp [cmpLT, WitnessLT, Semiformula.ballLTSucc, lt_succ_iff_le];
 
 lemma exists_cheapest [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finite ι] (P : ι → V → Prop)
-    (hP : ∀ i, 𝚺₁-Predicate (P i)) (o : ι → ℕ) (h : ∃ i w, P i w) :
+    (hP : ∀ i, 𝚺ᴬ₁-Predicate (P i)) (o : ι → ℕ) (h : ∃ i w, P i w) :
     ∃ j, (∀ i, o i < o j → WitnessLT (P j) (P i)) ∧ ∀ i, o j ≤ o i → WitnessLE (P j) (P i) := by
+  classical
+  let := Fintype.ofFinite ι
   obtain ⟨i₀, w₀, h₀⟩ := h;
   obtain ⟨w, ⟨i₁, h₁⟩, hw⟩ : ∃ w, (∃ i, P i w) ∧ ∀ v < w, ¬∃ i, P i v :=
-    InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (HierarchySymbol.Definable.fintype_exs hP)
+    InductionOnBroadHierarchy.least_number_sigma 𝚺 1
+      (Bounding.HierarchySymbol.Definable.fintype_exs hP)
       ⟨i₀, h₀⟩;
   obtain ⟨j, hj, hmin⟩ := (InvImage.wf o wellFounded_lt).has_min {i | P i w} ⟨i₁, h₁⟩;
   use j;
@@ -242,7 +250,7 @@ end comparison
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Formula α}
   (T : ArithmeticTheory) [T.Δ₁] (M : StrongReflexiveCountermodel κ A) [Fintype M.World]
-  (σ : ArithmeticSentence) (θ : 𝚺₀.Semisentence 1)
+  (σ : ArithmeticSentence) (θ : 𝚺ᴬ₀.Semisentence 1)
 
 section stx
 
@@ -278,19 +286,19 @@ lemma ord_injective : Function.Injective (ord M) := by
   · exact absurd h (Fintype.equivFin _ a).isLt.ne;
   · exact (Fintype.equivFin _).injective (Fin.val_injective h);
 
-def prfNegSigma : 𝚺₁.Semisentence 2 := .mkSigma
+def prfNegSigma : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “w e. ∃ n, !(negGraph ℒₒᵣ) n e ∧ !(proof T).sigma w n”
 
-def prfNegPi : 𝚷₁.Semisentence 2 := .mkPi
+def prfNegPi : 𝚷ᴬ₁.Semisentence 2 := .mkPi
   “w e. ∀ n, !(negGraph ℒₒᵣ) n e → !(proof T).pi w n”
 
 open Classical in
 /-- The tolls of the gate into `z`. -/
-def tollSigma (z : M.extendRoot.World) : 𝚺₁.Semisentence 2 :=
+def tollSigma (z : M.extendRoot.World) : 𝚺ᴬ₁.Semisentence 2 :=
   if z = some M.u then .mkSigma “w e. !θ.val w” else prfNegSigma T
 
 open Classical in
-def tollPi (z : M.extendRoot.World) : 𝚷₁.Semisentence 2 :=
+def tollPi (z : M.extendRoot.World) : 𝚷ᴬ₁.Semisentence 2 :=
   if z = some M.u then .mkPi “w e. !θ.val w” else prfNegPi T
 
 variable {n : ℕ} (t : M.extendRoot.World → ArithmeticSemiterm Empty n)
@@ -376,8 +384,8 @@ abbrev H (x : M.extendRoot.World) : ArithmeticSentence :=
 abbrev notPayable (z : M.extendRoot.World) : ArithmeticSentence :=
   notPayableAux T M σ (fun z ↦ ⌜T.modifiedSolovay M σ θ z⌝) z
 
-lemma H_sigma_one (x : M.extendRoot.World) : Hierarchy 𝚺 1 (H T M σ θ x) := by
-  have h (ε : List M.extendRoot.World) : Hierarchy 𝚺 1 (chain T M σ θ ε) := by
+lemma H_sigma_one (x : M.extendRoot.World) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (H T M σ θ x) := by
+  have h (ε : List M.extendRoot.World) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (chain T M σ θ ε) := by
     induction ε with
     | nil => simp [chainAux];
     | cons y ε ih => rcases ε with _ | ⟨x, ε⟩ <;> simp_all [chainAux, moveAux];
@@ -516,7 +524,7 @@ lemma Reach.disjunction (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val) (h :
       simpa [Theory.ModifiedSolovay, h] using hx;
     obtain ⟨⟨y, hy⟩, hy₁, hy₂⟩ := exists_cheapest (ι := {z // z ∈ next M x})
       (fun z ↦ Toll T M σ θ V z.1)
-      (fun z ↦ HierarchySymbol.Defined.to_definable
+      (fun z ↦ FFL.FirstOrder.Bounding.HierarchySymbol.Defined.to_definable
         (.mkSigma ((tollSigma T M θ z.1).val/[#0, ⌜T.modifiedSolovay M σ θ z.1⌝]))
         (.mk fun v ↦ by simp))
       (fun z ↦ ord M z.1) ⟨⟨z, hz⟩, (payable_iff_exists_toll hθσ).mp hzp⟩;
@@ -619,7 +627,7 @@ variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : Formula α}
 -/
 def standardModifiedSolovaySentences
     (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] (M : StrongReflexiveCountermodel κ A)
-    [Fintype M.World] [M.IsGL] {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+    [Fintype M.World] [M.IsGL] {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
     T.standardProvability.ModifiedSolovaySentences M σ :=
   have hex := ISigma1.exists_matrix_provable_of_sentence hσ;
   have hθσ : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁],

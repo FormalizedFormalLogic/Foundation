@@ -16,6 +16,8 @@ it's inductive property is provable in $\mathsf{I}\Sigma_0$.
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 variable {V : Type*} [ORingStructure V]
 
 section ISigma0
@@ -27,13 +29,13 @@ noncomputable def ext (u z : V) : V := z / u % u
 lemma ext_graph (a b c : V) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x % b := by
   simp [ext]
 
-def _root_.FFL.FirstOrder.Arithmetic.extDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.extDef : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “a b c. ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b”
 
-instance ext_defined : 𝚺₀-Function₂[V] ext via extDef := .mk fun v ↦ by
+instance ext_defined : 𝚺ᴬ₀-Function₂[V] ext via extDef := .mk fun v ↦ by
   simp [extDef, ext_graph, Semiformula.eval_substs, le_iff_lt_succ]
 
-instance ext_definable : 𝚺₀-Function₂[V] ext := ext_defined.to_definable
+instance ext_definable : 𝚺ᴬ₀-Function₂[V] ext := ext_defined.to_definable
 
 @[simp] lemma ext_le_add (u z : V) : ext u z ≤ z :=
   le_trans (mod_le (z / u) u) (by simp)
@@ -98,7 +100,7 @@ lemma Exponential.Seqₛ.iff (y X Y : V) :
       · exact Or.inl ⟨by simp [hx], by simp [hy]⟩
       · exact Or.inr ⟨by simp [hx], by simp [hy]⟩⟩
 
-def Exponential.Seqₛ.def : 𝚺₀.Semisentence 3 := .mkSigma
+def Exponential.Seqₛ.def : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “ y X Y.
     ∀ u <⁺ y, u ≠ 2 → !ppow2Def u →
       ( (∃ ext_u_X <⁺ X, !extDef ext_u_X u X ∧ !extDef (2 * ext_u_X) u² X) ∧
@@ -107,7 +109,7 @@ def Exponential.Seqₛ.def : 𝚺₀.Semisentence 3 := .mkSigma
         (∃ ext_u_Y <⁺ Y, !extDef ext_u_Y u Y ∧ !extDef (2 * ext_u_Y²) u² Y) ) ”
 
 instance Exponential.Seqₛ.defined :
-    𝚺₀-Relation₃[V] Exponential.Seqₛ via Exponential.Seqₛ.def := .mk fun v ↦ by
+    𝚺ᴬ₀-Relation₃[V] Exponential.Seqₛ via Exponential.Seqₛ.def := .mk fun v ↦ by
   simp [Exponential.Seqₛ.iff, Exponential.Seqₛ.def, sq]
 
 lemma Exponential.graph_iff (x y : V) :
@@ -125,7 +127,7 @@ lemma Exponential.graph_iff (x y : V) :
       · exact Or.inr
           ⟨X, bX, Y, bY, ⟨H₀.1.symm, H₀.2.symm⟩, Hₛ, ⟨u, hu, ne2, ppu, hX.symm, hY.symm⟩⟩⟩
 
-def _root_.FFL.FirstOrder.Arithmetic.exponentialDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.exponentialDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “x y.
     (x = 0 ∧ y = 1) ∨ ∃ X <⁺ y⁴, ∃ Y <⁺ y⁴,
       (!extDef 1 4 X ∧ !extDef 2 4 Y) ∧
@@ -133,14 +135,15 @@ def _root_.FFL.FirstOrder.Arithmetic.exponentialDef : 𝚺₀.Semisentence 2 := 
       ∃ u <⁺ y², u ≠ 2 ∧ !ppow2Def u ∧ !extDef x u X ∧ !extDef y u Y”
 
 /-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
-instance Exponential.defined : 𝚺₀-Relation[V] Exponential via exponentialDef := .mk fun v ↦ by
+instance Exponential.defined : 𝚺ᴬ₀-Relation[V] Exponential via exponentialDef := .mk fun v ↦ by
   simp [Exponential.graph_iff, exponentialDef, pow_four, sq]
 
 /-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
-instance exponential_definable : 𝚺₀-Relation (Exponential : V → V → Prop) :=
+instance exponential_definable : 𝚺ᴬ₀-Relation (Exponential : V → V → Prop) :=
   Exponential.defined.to_definable
 
-@[simp] instance exponential_definable' (Γ) : Γ-Relation (Exponential : V → V → Prop) :=
+@[simp] instance exponential_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    Γ-Relation (Exponential : V → V → Prop) :=
   exponential_definable.of_zero
 
 namespace Exponential
@@ -801,13 +804,13 @@ lemma exponential_exp (a : V) : Exponential a (Exp.exp a) :=
 lemma exponential_graph {a b : V} : a = Exp.exp b ↔ Exponential b a :=
   Classical.choose!_eq_iff_right _
 
-def _root_.FFL.FirstOrder.Arithmetic.expDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.expDef : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “x y. !exponentialDef.val y x”
 
-instance exp_defined_deltaZero : 𝚺₀-Function₁[V] Exp.exp via expDef := .mk fun v ↦ by
+instance exp_defined_deltaZero : 𝚺ᴬ₀-Function₁[V] Exp.exp via expDef := .mk fun v ↦ by
   simp [expDef, exponential_graph]
 
-instance exp_definable_deltaZero : 𝚺₀-Function₁ (Exp.exp : V → V) :=
+instance exp_definable_deltaZero : 𝚺ᴬ₀-Function₁ (Exp.exp : V → V) :=
   exp_defined_deltaZero.to_definable
 
 lemma exp_of_exponential {a b : V} (h : Exponential a b) : Exp.exp a = b :=

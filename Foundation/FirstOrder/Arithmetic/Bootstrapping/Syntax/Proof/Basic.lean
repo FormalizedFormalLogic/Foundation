@@ -4,6 +4,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL
 
 open FirstOrder Arithmetic
@@ -20,7 +22,7 @@ variable (L)
 
 def IsFormulaSet (s : V) : Prop := ∀ p ∈ s, IsFormula L p
 
-noncomputable def isFormulaSet : 𝚫₁.Semisentence 1 := .mkDelta
+noncomputable def isFormulaSet : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
   (.mkSigma “s. ∀ p ∈' s, !(isSemiformula L).sigma 0 p”)
   (.mkPi “s. ∀ p ∈' s, !(isSemiformula L).pi 0 p”)
 
@@ -30,12 +32,12 @@ namespace IsFormulaSet
 
 section
 
-instance defined : 𝚫₁-Predicate[V] IsFormulaSet L via isFormulaSet L := .mk
+instance defined : 𝚫ᴬ₁-Predicate[V] IsFormulaSet L via isFormulaSet L := .mk
   ⟨by intro v; simp [isFormulaSet], by intro v; simp [isFormulaSet]; rfl⟩
 
-instance definable : 𝚫₁-Predicate[V] IsFormulaSet L := defined.to_definable
+instance definable : 𝚫ᴬ₁-Predicate[V] IsFormulaSet L := defined.to_definable
 
-instance definable' {Γ : Polarity} {m : ℕ} : Γ-[m + 1]-Predicate[V] IsFormulaSet L :=
+instance definable' {Γ : Polarity} {m : ℕ} : Γᴬ-[m + 1]-Predicate[V] IsFormulaSet L :=
   .of_deltaOne definable
 
 end
@@ -76,7 +78,7 @@ lemma setShift_existsUnique (s : V) :
 
 noncomputable def setShift (s : V) : V := Classical.choose! (setShift_existsUnique L s)
 
-noncomputable def setShiftGraph : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def setShiftGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “t s. (∀ y ∈' t, ∃ x ∈' s, !(shiftGraph L) y x) ∧ (∀ x ∈' s, ∃ y, !(shiftGraph L) y x ∧ y ∈ t)”
 
 variable {L}
@@ -129,10 +131,10 @@ private lemma setShift_graph (t s : V) :
       rcases mem_setShift_iff.mp hy with ⟨x, hx, rfl⟩
       exact h₂ x hx
 
-instance setShift.defined : 𝚺₁-Function₁[V] setShift L via setShiftGraph L :=
+instance setShift.defined : 𝚺ᴬ₁-Function₁[V] setShift L via setShiftGraph L :=
   .mk fun v ↦ by simp [setShiftGraph, setShift_graph]
 
-instance setShift.definable : 𝚺₁-Function₁[V] setShift L := setShift.defined.to_definable
+instance setShift.definable : 𝚺ᴬ₁-Function₁[V] setShift L := setShift.defined.to_definable
 
 end
 
@@ -160,70 +162,72 @@ noncomputable def axm (s p : V) : V := ⟪s, 9, p⟫ + 1
 
 section
 
-def axLGraph : 𝚺₀.Semisentence 3 :=
+def axLGraph : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 0 p ∧ y = y' + 1”
 
-instance axL.defined : 𝚺₀-Function₂[V] axL via axLGraph := .mk fun v ↦ by simp_all [axLGraph, axL]
+instance axL.defined : 𝚺ᴬ₀-Function₂[V] axL via axLGraph := .mk fun v ↦ by simp_all [axLGraph, axL]
 
-def verumIntroGraph : 𝚺₀.Semisentence 2 :=
+def verumIntroGraph : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “y s. ∃ y' < y, !pair₃Def y' s 1 0 ∧ y = y' + 1”
 
-instance verumIntro.defined : 𝚺₀-Function₁[V] verumIntro via verumIntroGraph :=
+instance verumIntro.defined : 𝚺ᴬ₀-Function₁[V] verumIntro via verumIntroGraph :=
   .mk fun v ↦ by simp_all [verumIntroGraph, verumIntro]
 
-def andIntroGraph : 𝚺₀.Semisentence 6 :=
+def andIntroGraph : 𝚺ᴬ₀.Semisentence 6 :=
   .mkSigma “y s p q dp dq. ∃ y' < y, !pair₆Def y' s 2 p q dp dq ∧ y = y' + 1”
 
 instance andIntro.defined :
-    𝚺₀-Function₅ (andIntro : V → V → V → V → V → V) via andIntroGraph :=
+    𝚺ᴬ₀-Function₅ (andIntro : V → V → V → V → V → V) via andIntroGraph :=
   .mk fun v ↦ by simp_all [andIntroGraph, andIntro]
 
-def orIntroGraph : 𝚺₀.Semisentence 5 :=
+def orIntroGraph : 𝚺ᴬ₀.Semisentence 5 :=
   .mkSigma “y s p q d. ∃ y' < y, !pair₅Def y' s 3 p q d ∧ y = y' + 1”
 
-instance orIntro.defined : 𝚺₀-Function₄ (orIntro : V → V → V → V → V) via orIntroGraph :=
+instance orIntro.defined : 𝚺ᴬ₀-Function₄ (orIntro : V → V → V → V → V) via orIntroGraph :=
   .mk fun v ↦ by simp_all [orIntroGraph, orIntro]
 
-def allIntroGraph : 𝚺₀.Semisentence 4 :=
+def allIntroGraph : 𝚺ᴬ₀.Semisentence 4 :=
   .mkSigma “y s p d. ∃ y' < y, !pair₄Def y' s 4 p d ∧ y = y' + 1”
 
-instance allIntro.defined : 𝚺₀-Function₃ (allIntro : V → V → V → V) via allIntroGraph :=
+instance allIntro.defined : 𝚺ᴬ₀-Function₃ (allIntro : V → V → V → V) via allIntroGraph :=
   .mk fun v ↦ by simp_all [allIntroGraph, allIntro]
 
-def exsIntroGraph : 𝚺₀.Semisentence 5 :=
+def exsIntroGraph : 𝚺ᴬ₀.Semisentence 5 :=
   .mkSigma “y s p t d. ∃ y' < y, !pair₅Def y' s 5 p t d ∧ y = y' + 1”
 
-instance exsIntro.defined : 𝚺₀-Function₄ (exsIntro : V → V → V → V → V) via exsIntroGraph :=
+instance exsIntro.defined : 𝚺ᴬ₀-Function₄ (exsIntro : V → V → V → V → V) via exsIntroGraph :=
   .mk fun v ↦ by simp_all [exsIntroGraph, numeral_eq_natCast, exsIntro]
 
-def wkRuleGraph : 𝚺₀.Semisentence 3 :=
+def wkRuleGraph : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 6 d ∧ y = y' + 1”
 
-instance wkRule.defined : 𝚺₀-Function₂ (wkRule : V → V → V) via wkRuleGraph :=
+instance wkRule.defined : 𝚺ᴬ₀-Function₂ (wkRule : V → V → V) via wkRuleGraph :=
   .mk fun v ↦ by simp_all [wkRuleGraph, numeral_eq_natCast, wkRule]
 
-def shiftRuleGraph : 𝚺₀.Semisentence 3 :=
+def shiftRuleGraph : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 7 d ∧ y = y' + 1”
 
-instance shiftRule.defined : 𝚺₀-Function₂ (shiftRule : V → V → V) via shiftRuleGraph :=
+instance shiftRule.defined : 𝚺ᴬ₀-Function₂ (shiftRule : V → V → V) via shiftRuleGraph :=
   .mk fun v ↦ by simp_all [shiftRuleGraph, numeral_eq_natCast, shiftRule]
 
-def cutRuleGraph : 𝚺₀.Semisentence 5 :=
+def cutRuleGraph : 𝚺ᴬ₀.Semisentence 5 :=
   .mkSigma “y s p d₁ d₂. ∃ y' < y, !pair₅Def y' s 8 p d₁ d₂ ∧ y = y' + 1”
 
-instance cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V) via cutRuleGraph :=
+instance cutRule_defined : 𝚺ᴬ₀-Function₄ (cutRule : V → V → V → V → V) via cutRuleGraph :=
   .mk fun v ↦ by simp_all [cutRuleGraph, numeral_eq_natCast, cutRule]
 
-def axmGraph : 𝚺₀.Semisentence 3 :=
+def axmGraph : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 9 p ∧ y = y' + 1”
 
-instance axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph :=
+instance axm_defined : 𝚺ᴬ₀-Function₂ (axm : V → V → V) via axmGraph :=
   .mk fun v ↦ by simp_all [axmGraph, numeral_eq_natCast, axm]
 
-instance (ℌ : HierarchySymbol) : ℌ-Function₄ (orIntro : V → V → V → V → V) :=
+instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₄ (orIntro : V → V → V → V → V) :=
   .of_zero orIntro.defined.to_definable
 
-instance (ℌ : HierarchySymbol) : ℌ-Function₂ (axm : V → V → V) :=
+instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₂ (axm : V → V → V) :=
   .of_zero axm_defined.to_definable
 
 @[simp] lemma seq_lt_axL (s p : V) : s < axL s p := le_iff_lt_succ.mp <| le_pair_left _ _
@@ -473,7 +477,7 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
     )⟩
 
 lemma Phi_definable :
-    𝚫₁.Defined (fun v : Fin 2 → V ↦ Phi T {x | x ∈ v 1} (v 0)) (blueprint T).core := .mk <| by
+    𝚫ᴬ₁.Defined (fun v : Fin 2 → V ↦ Phi T {x | x ∈ v 1} (v 0)) (blueprint T).core := .mk <| by
   constructor
   · intro v; simp [blueprint]
   · intro v; simp [phi_iff, blueprint]
@@ -542,77 +546,78 @@ def Proof (d φ : V) : Prop := DerivationOf T d {φ}
 
 def Provable (φ : V) : Prop := ∃ d, Proof T d φ
 
-noncomputable def derivation : 𝚫₁.Semisentence 1 := (blueprint T).fixpointDefΔ₁
+noncomputable def derivation : 𝚫ᴬ₁.Semisentence 1 := (blueprint T).fixpointDefΔ₁
 
-noncomputable def derivationOf : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def derivationOf : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “d s. !fstIdxDef s d ∧ !(derivation T).sigma d”)
   (.mkPi “d s. !fstIdxDef s d ∧ !(derivation T).pi d”)
 
-noncomputable def derivable : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def derivable : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “Γ. ∃ d, !(derivationOf T).sigma d Γ”
 
-noncomputable def proof : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def proof : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “d φ. ∃ s, !insertDef s φ 0 ∧ !(derivationOf T).sigma d s”)
   (.mkPi “d φ. ∀ s, !insertDef s φ 0 → !(derivationOf T).pi d s”)
 
-noncomputable def provable : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def provable : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “φ. ∃ d, !(proof T).sigma d φ”
 
 noncomputable abbrev provabilityPred (σ : Sentence L) : ArithmeticSentence := (provable T).val/[⌜σ⌝]
 
-noncomputable def provabilityPred' (σ : Sentence L) : 𝚺₁.Sentence := .mkSigma
+noncomputable def provabilityPred' (σ : Sentence L) : 𝚺ᴬ₁.Sentence := .mkSigma
   “!(provable T) !!(⌜σ⌝)”
 
 -- Proving this by `rfl` overflows memory on Lean v4.33.1.
 @[simp] lemma provabilityPred'_val (σ : Sentence L) :
     (provabilityPred' T σ).val = provabilityPred T σ := by
   unfold provabilityPred' provabilityPred
-  simp only [HierarchySymbol.Semiformula.val_mkSigma]
+  simp only [Bounding.HierarchySymbol.Semiformula.val_mkSigma]
 
 variable {T}
 
 section
 
-instance Derivation.defined : 𝚫₁-Predicate[V] Derivation T via derivation T :=
+instance Derivation.defined : 𝚫ᴬ₁-Predicate[V] Derivation T via derivation T :=
   (construction T).fixpoint_definedΔ₁
 
-instance Derivation.definable : 𝚫₁-Predicate[V] Derivation T := Derivation.defined.to_definable
+instance Derivation.definable : 𝚫ᴬ₁-Predicate[V] Derivation T := Derivation.defined.to_definable
 
-instance Derivation.definable' {Γ : Polarity} {m : ℕ} : Γ-[m + 1]-Predicate[V] Derivation T :=
+instance Derivation.definable' {Γ : Polarity} {m : ℕ} : Γᴬ-[m + 1]-Predicate[V] Derivation T :=
   Derivation.definable.of_deltaOne
 
-instance DerivationOf.defined : 𝚫₁-Relation[V] DerivationOf T via derivationOf T := .mk
+instance DerivationOf.defined : 𝚫ᴬ₁-Relation[V] DerivationOf T via derivationOf T := .mk
   ⟨by intro v; simp [derivationOf],
     by intro v; simp [derivationOf, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
-instance DerivationOf.definable : 𝚫₁-Relation[V] DerivationOf T := DerivationOf.defined.to_definable
+instance DerivationOf.definable : 𝚫ᴬ₁-Relation[V] DerivationOf T :=
+  DerivationOf.defined.to_definable
 
-instance DerivationOf.definable' {Γ : Polarity} {m : ℕ} : Γ-[m + 1]-Relation[V] DerivationOf T :=
+instance DerivationOf.definable' {Γ : Polarity} {m : ℕ} : Γᴬ-[m + 1]-Relation[V] DerivationOf T :=
   DerivationOf.definable.of_deltaOne
 
-instance Derivable.defined : 𝚺₁-Predicate[V] Derivable T via derivable T :=
+instance Derivable.defined : 𝚺ᴬ₁-Predicate[V] Derivable T via derivable T :=
   .mk fun v ↦ by simp [derivable, Derivable]
 
-instance Derivable.definable : 𝚺₁-Predicate[V] Derivable T := Derivable.defined.to_definable
+instance Derivable.definable : 𝚺ᴬ₁-Predicate[V] Derivable T := Derivable.defined.to_definable
 
 /-- instance for definability tactic -/
-instance Derivable.definable' : 𝚺-[0 + 1]-Predicate[V] Derivable T := Derivable.definable
+instance Derivable.definable' : 𝚺ᴬ-[0 + 1]-Predicate[V] Derivable T := Derivable.definable
 
-instance Proof.defined : 𝚫₁-Relation[V] Proof T via proof T := .mk
+instance Proof.defined : 𝚫ᴬ₁-Relation[V] Proof T via proof T := .mk
   ⟨by intro v; simp [proof], by intro v; simp [Proof, proof, singleton_eq_insert, emptyset_def]⟩
 
-instance Proof.definable : 𝚫₁-Relation[V] Proof T := Proof.defined.to_definable
+instance Proof.definable : 𝚫ᴬ₁-Relation[V] Proof T := Proof.defined.to_definable
 
-instance Proof.definable' {Γ : Polarity} {m : ℕ} : Γ-[m + 1]-Relation[V] Proof T :=
+instance Proof.definable' {Γ : Polarity} {m : ℕ} : Γᴬ-[m + 1]-Relation[V] Proof T :=
   Proof.definable.of_deltaOne
 
-instance Provable.defined : 𝚺₁-Predicate[V] Provable T via provable T :=
+instance Provable.defined : 𝚺ᴬ₁-Predicate[V] Provable T via provable T :=
   .mk fun v ↦ by simp [provable, Provable]
 
-instance Provable.definable : 𝚺₁-Predicate[V] Provable T := Provable.defined.to_definable
+instance Provable.definable : 𝚺ᴬ₁-Predicate[V] Provable T := Provable.defined.to_definable
 
 /-- instance for definability tactic -/
-instance Provable.definable' : 𝚺-[0 + 1]-Predicate[V] Provable T := Provable.definable
+instance Provable.definable' : 𝚺ᴬ-[0 + 1]-Predicate[V] Provable T := Provable.definable
 
 end
 
@@ -640,7 +645,7 @@ lemma case_iff {d : V} :
 
 alias ⟨case, _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Derivation.mk⟩ := case_iff
 
-lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
     {d} (hd : Derivation T d)
     (hAxL : ∀ s, IsFormulaSet L s → ∀ p ∈ s, neg L p ∈ s → P (axL s p))
     (hVerumIntro : ∀ s, IsFormulaSet L s → ^⊤ ∈ s → P (verumIntro s))
@@ -884,10 +889,10 @@ lemma disjDistr (ps s : V) (d : Derivable T (vecToSet ps ∪ s)) :
       (∀ i < len ps - k, ps.[i] ∈ s') → Derivable T (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
     intro k hk
     induction k using ISigma1.sigma1_succ_induction
-    · apply HierarchySymbol.Definable.imp (by definability)
-      apply HierarchySymbol.Definable.ball_le (by definability)
-      apply HierarchySymbol.Definable.imp (by definability)
-      apply HierarchySymbol.Definable.imp (by definability)
+    · apply Bounding.HierarchySymbol.Definable.imp (by definability)
+      apply Bounding.HierarchySymbol.Definable.arithmetic_ball_le (by definability)
+      apply Bounding.HierarchySymbol.Definable.imp (by definability)
+      apply Bounding.HierarchySymbol.Definable.imp (by definability)
       definability
     case zero =>
       intro s' _ ss hs'

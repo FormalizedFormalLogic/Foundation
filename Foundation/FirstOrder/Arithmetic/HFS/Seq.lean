@@ -11,6 +11,8 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Basic
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 def Seq (s : V) : Prop := IsMapping s ∧ ∃ l, domain s = under l
@@ -26,15 +28,16 @@ private lemma seq_iff (s : V) :
         _ ≤ 2 * s    := by simp), ⟨domain s , by simp,  rfl, h⟩⟩,
    by rintro ⟨hs, l, _, _, _, rfl, h⟩; exact ⟨hs, l, h⟩⟩
 
-def _root_.FFL.FirstOrder.Arithmetic.seqDef : 𝚺₀.Semisentence 1 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.seqDef : 𝚺ᴬ₀.Semisentence 1 := .mkSigma
   “s. !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l”
 
-instance seq_defined : 𝚺₀-Predicate (Seq : V → Prop) via seqDef := .mk <| by
+instance seq_defined : 𝚺ᴬ₀-Predicate (Seq : V → Prop) via seqDef := .mk <| by
   intro v; simp [seqDef, seq_iff, -existsAndEq]
 
-instance seq_definable : 𝚺₀-Predicate (Seq : V → Prop) := seq_defined.to_definable
+instance seq_definable : 𝚺ᴬ₀-Predicate (Seq : V → Prop) := seq_defined.to_definable
 
-instance seq_definable' (ℌ) : ℌ-Predicate (Seq : V → Prop) := seq_definable.of_zero
+instance seq_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Predicate (Seq : V → Prop) := seq_definable.of_zero
 
 section
 
@@ -82,15 +85,16 @@ private lemma lh_graph (l s : V) :
     · rcases h Hs with ⟨_, _, rfl, h⟩; simpa [h] using Hs.domain_eq
     · simp [lh_prop_of_not_seq Hs, hn Hs]⟩
 
-def _root_.FFL.FirstOrder.Arithmetic.lhDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.lhDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “l s. (!seqDef s → ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l) ∧ (¬!seqDef s → l = 0)”
 
-instance lh_defined : 𝚺₀-Function₁ (lh : V → V) via lhDef :=
+instance lh_defined : 𝚺ᴬ₀-Function₁ (lh : V → V) via lhDef :=
   .mk fun v ↦ by simp [lhDef, -exists_eq_right_right, lh_graph]
 
-instance lh_definable : 𝚺₀-Function₁ (lh : V → V) := lh_defined.to_definable
+instance lh_definable : 𝚺ᴬ₀-Function₁ (lh : V → V) := lh_defined.to_definable
 
-instance lh_definable' (ℌ) : ℌ-Function₁ (lh : V → V) := lh_definable.of_zero
+instance lh_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₁ (lh : V → V) := lh_definable.of_zero
 
 instance : Bounded₁ (lh : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp⟩
 
@@ -141,7 +145,7 @@ lemma Seq.znth_eq_of_mem {s i x : V} (h : Seq s) (hi : ⟪i, x⟫ ∈ s) : znth 
 lemma znth_prop_not {s i : V} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
   Classical.choose!_spec (znth_existsUnique s i) |>.2 (by simpa [-not_and, not_and_or] using h)
 
-def _root_.FFL.FirstOrder.Arithmetic.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.znthDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “x s i. ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ∼[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)”
 
 private lemma znth_graph {x s i : V} :
@@ -149,12 +153,13 @@ private lemma znth_graph {x s i : V} :
       x = znth s i := by
   simp [znth, Classical.choose!_eq_iff_right]
 
-instance znth_defined : 𝚺₀-Function₂ (znth : V → V → V) via znthDef := .mk fun v ↦ by
+instance znth_defined : 𝚺ᴬ₀-Function₂ (znth : V → V → V) via znthDef := .mk fun v ↦ by
   simpa [znthDef, -not_and, not_and_or] using znth_graph (V := V)
 
-instance znth_definable : 𝚺₀-Function₂ (znth : V → V → V) := znth_defined.to_definable
+instance znth_definable : 𝚺ᴬ₀-Function₂ (znth : V → V → V) := znth_defined.to_definable
 
-instance znth_definable' (ℌ) : ℌ-Function₂ (znth : V → V → V) := znth_definable.of_zero
+instance znth_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₂ (znth : V → V → V) := znth_definable.of_zero
 
 end znth
 
@@ -215,20 +220,21 @@ lemma seqCons_graph (t x s : V) :
         le_trans (pair_le_pair_left (by simp) x) (pair_polybound (2 * s) x), rfl, by rfl⟩,
    by rintro ⟨l, _, rfl, p, _, rfl, rfl⟩; rfl⟩
 
-def _root_.FFL.FirstOrder.Arithmetic.seqConsDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.seqConsDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “t s x. ∃ l <⁺ 2 * s, !lhDef l s ∧ ∃ p <⁺ (2 * s + x + 1)², !pairDef p l x ∧ !insertDef t p s”
 
-instance seqCons_defined : 𝚺₀-Function₂ (seqCons : V → V → V) via seqConsDef :=
+instance seqCons_defined : 𝚺ᴬ₀-Function₂ (seqCons : V → V → V) via seqConsDef :=
   .mk fun v ↦ by simp [seqConsDef, seqCons_graph]
 
-instance seqCons_definable : 𝚺₀-Function₂ (seqCons : V → V → V) := seqCons_defined.to_definable
+instance seqCons_definable : 𝚺ᴬ₀-Function₂ (seqCons : V → V → V) := seqCons_defined.to_definable
 
-instance seqCons_definable' (ℌ) : ℌ-Function₂ (seqCons : V → V → V) := seqCons_definable.of_zero
+instance seqCons_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₂ (seqCons : V → V → V) := seqCons_definable.of_zero
 
 @[simp] lemma natCast_empty : ((∅ : ℕ) : V) = ∅ := by simp [emptyset_def]
 
 lemma seqCons_absolute (s a : ℕ) : ((s ⁀' a : ℕ) : V) = (s : V) ⁀' (a : V) := by
-  simpa using DefinedFunction.shigmaZero_absolute_func V seqCons_defined seqCons_defined ![s, a]
+  simpa using DefinedFunction.sigmaZero_absolute_func V seqCons_defined seqCons_defined ![s, a]
 
 end
 
@@ -323,7 +329,7 @@ lemma Seq.cases_iff {s : V} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = s' 
 alias ⟨Seq.cases, _⟩ := Seq.cases_iff
 
 @[elab_as_elim]
-theorem seq_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+theorem seq_induction (Γ) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
   (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (s ⁀' x)) :
     ∀ {s : V}, Seq s → P s := by
   intro s sseq
@@ -359,36 +365,37 @@ meta def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.mkSeq₁Def : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.mkSeq₁Def : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “s x. !seqConsDef s 0 x”
 
-instance mkSeq₁_defined : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁Def :=
+instance mkSeq₁_defined : 𝚺ᴬ₀-Function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁Def :=
   .mk fun v ↦ by simp [mkSeq₁Def]; rfl
 
-instance mkSeq₁_definable : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_defined.to_definable
+instance mkSeq₁_definable : 𝚺ᴬ₀-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_defined.to_definable
 
-instance mkSeq₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_definable.of_zero
+instance mkSeq₁_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    Γ-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_definable.of_zero
 
-def _root_.FFL.FirstOrder.Arithmetic.mkSeq₂Def : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.mkSeq₂Def : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “s x y. ∃ sx, !mkSeq₁Def sx x ∧ !seqConsDef s sx y”
 
-instance mkSeq₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂Def :=
+instance mkSeq₂_defined : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂Def :=
   .mk fun v ↦ by simp [mkSeq₂Def]
 
-instance mkSeq₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂_defined.to_definable
+instance mkSeq₂_definable : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂_defined.to_definable
 
-instance mkSeq₂_definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) :=
+instance mkSeq₂_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) :=
   mkSeq₂_definable.of_sigmaOne
 
 end
 
-theorem sigmaOne_skolem_seq {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
+theorem sigmaOne_skolem_seq {R : V → V → Prop} (hP : 𝚺ᴬ₁-Relation R) {l}
     (H : ∀ x < l, ∃ y, R x y) : ∃ s, Seq s ∧ lh s = l ∧ ∀ i x, ⟪i, x⟫ ∈ s → R i x := by
   rcases sigmaOne_skolem hP (show ∀ x ∈ under l, ∃ y, R x y by simpa using H) with ⟨s, ms, sdom, h⟩
   have : Seq s := ⟨ms, l, sdom⟩
   exact ⟨s, this, by simpa [this.domain_eq] using sdom, h⟩
 
-theorem sigmaOne_skolem_seq! {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
+theorem sigmaOne_skolem_seq! {R : V → V → Prop} (hP : 𝚺ᴬ₁-Relation R) {l}
     (H : ∀ x < l, ∃! y, R x y) : ∃! s, Seq s ∧ lh s = l ∧ ∀ i x, ⟪i, x⟫ ∈ s → R i x := by
   have : ∀ x < l, ∃ y, R x y := fun x hx ↦ (H x hx).exists
   rcases sigmaOne_skolem_seq hP this with ⟨s, Ss, rfl, hs⟩

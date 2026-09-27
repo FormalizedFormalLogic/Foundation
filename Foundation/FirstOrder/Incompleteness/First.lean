@@ -9,6 +9,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 # Gödel's first incompleteness theorem for arithmetic theories stronger than $\mathsf{R_0}$
 -/
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment Bootstrapping Bootstrapping.Arithmetic
@@ -20,7 +22,7 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
   let D : ℕ → Prop := fun φ : ℕ ↦
     IsSemiformula ℒₒᵣ 1 φ ∧ Provable T (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ)
   have D_re : REPred D := by
-    have : 𝚺₁-Predicate fun φ : ℕ ↦
+    have : 𝚺ᴬ₁-Predicate fun φ : ℕ ↦
         IsSemiformula ℒₒᵣ 1 φ ∧ Provable T (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ) := by
       definability
     exact rePred_iff_sigma1.mpr this

@@ -8,6 +8,8 @@ public import Foundation.Vorspiel.Computability
 
 @[expose] public section
 open Encodable Denumerable
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
 
@@ -49,10 +51,11 @@ lemma primrecPred_bexs (ε : ξ → ℕ) {n} (t : ArithmeticSemiterm ξ n)
     fun v ↦ by simp [List.Vector.cons_get];
 
 lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
-    (hp : Hierarchy 𝚺 0 φ) :
+    (hp : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ) :
     PrimrecPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε := by
-  apply sigma₁_induction' (P := fun n φ ↦
-    Hierarchy 𝚺 0 φ → PrimrecPred fun v : List.Vector ℕ n ↦ φ.Eval v.get ε) (hp.mono (by simp))
+  apply Bounding.Hierarchy.arithmetic_sigma₁_induction' (P := fun n φ ↦
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ →
+      PrimrecPred fun v : List.Vector ℕ n ↦ φ.Eval v.get ε) (hp.mono (by simp))
   case hVerum => intro _ _; exact (Primrec.const true).primrecPred (p := fun _ ↦ True);
   case hFalsum => intro _ _; exact (Primrec.const false).primrecPred (p := fun _ ↦ False);
   case hEQ =>
@@ -69,28 +72,31 @@ lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
     exact (Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)).not;
   case hAnd =>
     intro n φ ψ _ _ ihp ihq h;
-    exact (ihp (Hierarchy.and_iff.mp h).1).and
-      (ihq (Hierarchy.and_iff.mp h).2) |>.of_eq fun v ↦ by simp;
+    exact (ihp (Bounding.Hierarchy.and_iff (ℬ := ℬ[<, ℒₒᵣ]).mp h).1).and
+      (ihq (Bounding.Hierarchy.and_iff (ℬ := ℬ[<, ℒₒᵣ]).mp h).2) |>.of_eq fun v ↦ by simp;
   case hOr =>
     intro n φ ψ _ _ ihp ihq h;
-    exact (ihp (Hierarchy.or_iff.mp h).1).or
-      (ihq (Hierarchy.or_iff.mp h).2) |>.of_eq fun v ↦ by simp;
+    exact (ihp (Bounding.Hierarchy.or_iff (ℬ := ℬ[<, ℒₒᵣ]).mp h).1).or
+      (ihq (Bounding.Hierarchy.or_iff (ℬ := ℬ[<, ℒₒᵣ]).mp h).2) |>.of_eq fun v ↦ by simp;
   case hBall =>
     intro n t φ _ ih h;
     exact (primrecPred_ball ε t
-      (ih ((Hierarchy.ball_iff (t := Rew.bShift t) (by simp)).mp h))).of_eq fun v ↦ by simp;
+      (ih ((Bounding.Hierarchy.arithmetic_ball_iff (t := Rew.bShift t) (by simp)).mp h))).of_eq
+      fun v ↦ by simp;
   case hExs =>
     intro n ψ _ ih h;
-    cases Hierarchy.zero_iff_delta_zero.mp h with
-    | bexs ht hφ =>
+    cases Bounding.Hierarchy.zero_iff_bounded.mp h with
+    | bexs hR ht hφ =>
+      obtain rfl := Set.mem_singleton_iff.mp hR
       rcases Rew.positive_iff.mp ht with ⟨t, rfl⟩;
       exact (primrecPred_bexs ε t
-        (ih (Hierarchy.and_iff.mpr ⟨by simp, Hierarchy.bounded _ _ _ hφ⟩))).of_eq fun v ↦ by simp;
+        (ih (Bounding.Hierarchy.and_iff (ℬ := ℬ[<, ℒₒᵣ]).mpr
+          ⟨by simp, Bounding.Hierarchy.bounded _ _ _ hφ⟩))).of_eq fun v ↦ by simp;
   exact hp;
 
-lemma sigma1_re (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k} (hp : Hierarchy 𝚺 1 φ) :
+lemma sigma1_re (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k} (hp : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) :
     REPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε := by
-  apply sigma₁_induction' hp
+  apply Bounding.Hierarchy.arithmetic_sigma₁_induction' hp
   case hVerum => simp;
   case hFalsum => simp
   case hEQ =>
@@ -187,7 +193,8 @@ def codeAux {k : ℕ} : Nat.ArithPart₁.Code k → ArithmeticFormula (Fin (k + 
 def code (c : Code k) : ArithmeticSemisentence (k + 1) :=
   (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#0 :> (#·.succ))) ▹ (codeAux c)
 
-private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (codeAux c) := by
+private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (codeAux c) := by
   induction c
   case zero => simp [codeAux]
   case one => simp [codeAux]
@@ -197,11 +204,11 @@ private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy �
   case equal => simp [codeAux, Matrix.fun_eq_vec_two]
   case proj => simp [codeAux]
   case comp c d ihc ihg =>
-    exact Hierarchy.exsClosure (by simp [ihc, ihg])
+    exact Bounding.Hierarchy.exsClosure (ℬ := ℬ[<, ℒₒᵣ]) (by simp [ihc, ihg])
   case rfind k c ih => simp [codeAux, Matrix.fun_eq_vec_two]; simp [ih]
 
-@[simp] lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (code c) :=
-  Hierarchy.rew _ (codeAux_sigma_one c)
+@[simp] lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (code c) :=
+  (codeAux_sigma_one c).rew _
 
 @[simp] lemma natCast_nat' (n : ℕ) : Nat.cast n = n := by rfl
 
@@ -372,7 +379,7 @@ noncomputable def codeOfComputablePred (p : ℕ → Prop) : ArithmeticSemisenten
   (codeOfPartrec' (fun v ↦ Part.some (if p (v.get 0) then 1 else 0)))/[‘1’, #0]
 
 @[simp] lemma codeOfComputablePred_sigma1 (p : ℕ → Prop) :
-    Hierarchy 𝚺 1 (codeOfComputablePred p) := by
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (codeOfComputablePred p) := by
   simp [codeOfComputablePred, codeOfPartrec']
 
 variable {p : ℕ → Prop}
@@ -434,7 +441,7 @@ end codeOfComputablePred
 
 section
 
-theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺₁-Predicate p := by
+theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺ᴬ₁-Predicate p := by
   constructor
   · intro h
     refine ⟨.mkSigma (codeOfREPred p) (by simp [codeOfREPred, codeOfPartrec']), ?_⟩
@@ -446,21 +453,21 @@ theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺₁-Predicate p 
         (Primrec.to_comp <| Primrec.vector_cons.comp .id <| .const _)
     exact this.of_eq <| by intro x; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
 
-theorem computablePred_iff_delta1 {p : ℕ → Prop} : ComputablePred p ↔ 𝚫₁-Predicate p := by
+theorem computablePred_iff_delta1 {p : ℕ → Prop} : ComputablePred p ↔ 𝚫ᴬ₁-Predicate p := by
   classical
   constructor
   · intro hp
-    change 𝚫₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0))
-    rw [HierarchySymbol.Definable.delta_iff_sigma_and_pi]
+    change 𝚫ᴬ₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0))
+    apply Bounding.HierarchySymbol.Definable.delta_iff_sigma_and_pi.mpr
     rcases ComputablePred.computable_iff_re_compl_re'.mp hp with ⟨hp, hnp⟩
     exact ⟨(rePred_iff_sigma1.mp hnp).notSigma.of_iff (by intro v; simp), rePred_iff_sigma1.mp hp⟩
   · intro h
-    change 𝚫₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0)) at h
-    rw [HierarchySymbol.Definable.delta_iff_sigma_and_pi] at h
+    change 𝚫ᴬ₁.Definable (fun v : Fin 1 → ℕ ↦ p (v 0)) at h
+    have h := Bounding.HierarchySymbol.Definable.delta_iff_sigma_and_pi.mp h
     exact ComputablePred.computable_iff_re_compl_re'.mpr
       ⟨rePred_iff_sigma1.mpr h.2, rePred_iff_sigma1.mpr h.1.notPi⟩
 
-theorem computable_iff_sigma1 {f : ℕ → ℕ} : Computable f ↔ 𝚺₁-Function₁ f := by
+theorem computable_iff_sigma1 {f : ℕ → ℕ} : Computable f ↔ 𝚺ᴬ₁-Function₁ f := by
   constructor
   · intro hf
     let F : List.Vector ℕ 1 →. ℕ := fun v ↦ Part.some (f (v.get 0))
@@ -481,7 +488,7 @@ theorem computable_iff_sigma1 {f : ℕ → ℕ} : Computable f ↔ 𝚺₁-Funct
       intro p
       simpa [List.Vector.cons_get] using hφ ![p.2, p.1]
 
-theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔ 𝚺₁-Function₂ f := by
+theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔ 𝚺ᴬ₁-Function₂ f := by
   constructor
   · intro hf
     let F : List.Vector ℕ 2 →. ℕ := fun v ↦ Part.some (f (v.get 0) (v.get 1))

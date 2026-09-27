@@ -5,6 +5,10 @@ public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 @[expose] public section
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Bounding
+
+open scoped FFL.FirstOrder.Arithmetic
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
 namespace Nuon
@@ -62,7 +66,7 @@ lemma ext_graph (z S L i : V) : z = S{L}[i] ↔
     · rintro ⟨b, hb, Hb, hL, _, HhL, _, _, rfl, rfl⟩
       exact ⟨b, hb, Hb, by rw [HhL.uniq (exponential_smash_one L)]⟩
 
-def extDef : 𝚺₀.Semisentence 4 := .mkSigma
+def extDef : 𝚺ᴬ₀.Semisentence 4 := .mkSigma
   “z L S i.
     ∃ lS <⁺ S, !lengthDef lS S ∧ ∃ lL <⁺ L, !lengthDef lL L ∧
       (lS ≤ i * lL → z = 0) ∧
@@ -81,10 +85,10 @@ def extDef : 𝚺₀.Semisentence 4 := .mkSigma
 @[simp] lemma cons_app_nine {α : Type*} {n : ℕ} (a : α)
     (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
 
-instance ext_defined : 𝚺₀-Function₃ (ext : V → V → V → V) via extDef := .mk fun v ↦ by
+instance ext_defined : 𝚺ᴬ₀-Function₃ (ext : V → V → V → V) via extDef := .mk fun v ↦ by
   simp [extDef, ext_graph]
 
-instance ext_Definable : 𝚺₀-Function₃ (ext : V → V → V → V) := ext_defined.to_definable
+instance ext_Definable : 𝚺ᴬ₀-Function₃ (ext : V → V → V → V) := ext_defined.to_definable
 
 instance : Bounded₃ (ext : V → V → V → V) := ⟨#1, fun _ ↦ by simp⟩
 
@@ -568,7 +572,7 @@ lemma sq_polyI_smash_polyL_polybounded {A : V} (pos : 0 < A) :
 
 def NuonAux (A k n : V) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
 
-def isSegmentDef : 𝚺₀.Semisentence 5 := .mkSigma
+def isSegmentDef : 𝚺ᴬ₀.Semisentence 5 := .mkSigma
   “L A start intv S.
     ∀ i < intv,
       ∃ S_L_i_succ <⁺ S, !extDef S_L_i_succ L S (i + 1) ∧
@@ -579,7 +583,7 @@ def isSegmentDef : 𝚺₀.Semisentence 5 := .mkSigma
 
 set_option linter.flexible false in
 instance isSegmentDef_defined :
-    𝚺₀.Defined (V := V) (fun v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef :=
+    𝚺ᴬ₀.Defined (V := V) (fun v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef :=
     .mk fun v ↦ by
   simp [IsSegment, isSegmentDef]
   apply forall₂_congr; intro x _
@@ -587,16 +591,16 @@ instance isSegmentDef_defined :
   · rintro ⟨_, h⟩; exact h.symm
   · intro h; exact ⟨by simp [←h], h.symm⟩
 
-def segmentDef : 𝚺₀.Semisentence 7 := .mkSigma
+def segmentDef : 𝚺ᴬ₀.Semisentence 7 := .mkSigma
   “U L A start intv nₛ nₑ.
     ∃ S < U, !isSegmentDef L A start intv S ∧ !extDef nₛ L S 0 ∧ !extDef nₑ L S intv”
 
 instance segmentDef_defined :
-    𝚺₀.Defined (V := V) (fun v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef :=
+    𝚺ᴬ₀.Defined (V := V) (fun v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef :=
     .mk fun v ↦ by
   simp [Segment, segmentDef, @Eq.comm _ (v 5), @Eq.comm _ (v 6)]
 
-def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
+def isSeriesDef : 𝚺ᴬ₀.Semisentence 6 := .mkSigma
   “U I L A iter T.
     ∀ l < iter,
       ∃ lI <⁺ I, !lengthDef lI I ∧
@@ -615,17 +619,17 @@ lemma bexs_eq_lt_iff {p : V → Prop} {z b : V} :
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
 instance isSerieDef_defined :
-    𝚺₀.Defined (V := V) (fun v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef :=
+    𝚺ᴬ₀.Defined (V := V) (fun v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef :=
     .mk fun v ↦ by
   simp [IsSeries, isSeriesDef]
 
-def seriesDef : 𝚺₀.Semisentence 6 := .mkSigma
+def seriesDef : 𝚺ᴬ₀.Semisentence 6 := .mkSigma
   “U I L A iter n.
     ∃ T < U, !isSeriesDef U I L A iter T ∧ !extDef 0 L T 0 ∧ !extDef n L T iter”
 
 set_option linter.flexible false in
 instance seriesDef_defined :
-    𝚺₀.Defined (V := V) (fun v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef :=
+    𝚺ᴬ₀.Defined (V := V) (fun v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef :=
     .mk fun v ↦ by
   simp [Series, seriesDef]
   apply exists_congr; intro T
@@ -633,7 +637,7 @@ instance seriesDef_defined :
   apply and_congr_right; intros
   simp [Eq.comm]
 
-def seriesSegmentDef : 𝚺₀.Semisentence 6 := .mkSigma
+def seriesSegmentDef : 𝚺ᴬ₀.Semisentence 6 := .mkSigma
   “U I L A k n.
     ∃ nₖ <⁺ n,
       ∃ l <⁺ I, !lengthDef l I ∧
@@ -643,11 +647,11 @@ def seriesSegmentDef : 𝚺₀.Semisentence 6 := .mkSigma
   (by simp)
 
 instance seriesSegmentDef_defined :
-    𝚺₀.Defined (V := V) (fun v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5))
+    𝚺ᴬ₀.Defined (V := V) (fun v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5))
       seriesSegmentDef := .mk fun v ↦ by
   simp [SeriesSegment, seriesSegmentDef]
 
-def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
+def nuonAuxDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “A k n.
     ∃ lA <⁺ A, !lengthDef lA A ∧
     ∃ sA <⁺ lA, !sqrtDef sA lA ∧
@@ -655,11 +659,11 @@ def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
     ∃ lg <⁺ g, !lengthDef lg g ∧
       !seriesSegmentDef ((2 * A + 1) ^' 128) g (lg ²) A k n”
 
-instance nuonAux_defined : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) via nuonAuxDef :=
+instance nuonAux_defined : 𝚺ᴬ₀-Relation₃ (NuonAux : V → V → V → Prop) via nuonAuxDef :=
     .mk fun v ↦ by
   simp [NuonAux, polyU, polyI, polyL, nuonAuxDef]
 
-instance nuonAux_definable : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) :=
+instance nuonAux_definable : 𝚺ᴬ₀-Relation₃ (NuonAux : V → V → V → Prop) :=
   nuonAux_defined.to_definable
 
 instance : Bounded₃ (ext : V → V → V → V) := ⟨#1, fun _ ↦ by simp⟩
@@ -775,12 +779,12 @@ lemma nuon_bit1 (a : V) : nuon (2 * a + 1) = nuon a + 1 := by
 
 @[simp] lemma nuon_zero : nuon (0 : V) = 0 := Nuon.nuon_eq (by simp [Nuon])
 
-def _root_.FFL.FirstOrder.Arithmetic.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.nuonDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “n A. ∃ l <⁺ A, !lengthDef l A ∧ !Nuon.nuonAuxDef A l n”
 
-instance nuon_defined : 𝚺₀-Function₁ (nuon : V → V) via nuonDef := .mk fun v ↦ by
+instance nuon_defined : 𝚺ᴬ₀-Function₁ (nuon : V → V) via nuonDef := .mk fun v ↦ by
   simp [Nuon.nuon_eq_iff, Nuon, nuonDef]
 
-instance nuon_definable : 𝚺₀-Function₁ (nuon : V → V) := nuon_defined.to_definable
+instance nuon_definable : 𝚺ᴬ₀-Function₁ (nuon : V → V) := nuon_defined.to_definable
 
 end FFL.FirstOrder.Arithmetic

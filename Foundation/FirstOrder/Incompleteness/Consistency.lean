@@ -7,6 +7,8 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 # Consistency predicate
 -/
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -31,7 +33,7 @@ lemma _root_.FFL.FirstOrder.Theory.ConsistentWith.quote_iff {σ : Sentence L} :
 
 section
 
-noncomputable def _root_.FFL.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
+noncomputable def _root_.FFL.FirstOrder.Theory.consistent : 𝚷ᴬ₁.Sentence :=
   .mkPi (∼provabilityPred T ⊥)
 
 @[simp] lemma consistent.defined :
@@ -39,22 +41,24 @@ noncomputable def _root_.FFL.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
   classical
   simp [Theory.consistent, Theory.Consistent]
 
-noncomputable def _root_.FFL.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi
+noncomputable def _root_.FFL.FirstOrder.Theory.consistentWith : 𝚷ᴬ₁.Semisentence 1 := .mkPi
   “φ. ∀ nφ, !(negGraph L) nφ φ → ¬!(provable T) nφ”
 
-instance consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith :=
+instance consistentWith.defined :
+    𝚷ᴬ₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith :=
   .mk fun v ↦ by
   classical
   simp [Theory.ConsistentWith, Theory.consistentWith]
 
-instance consistentWith.definable : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) :=
+instance consistentWith.definable : 𝚷ᴬ₁-Predicate (T.ConsistentWith : V → Prop) :=
   (consistentWith.defined T).to_definable
 
 noncomputable abbrev _root_.FFL.FirstOrder.Theory.consistentWithPred (σ : Sentence L) :
     ArithmeticSentence :=
   T.consistentWith.val/[⌜σ⌝]
 
-noncomputable def _root_.FFL.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) : 𝚷₁.Sentence :=
+noncomputable def _root_.FFL.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) :
+    𝚷ᴬ₁.Sentence :=
   .mkPi
   “!T.consistentWith !!(⌜σ⌝)”
 

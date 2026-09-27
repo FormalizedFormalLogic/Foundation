@@ -16,6 +16,8 @@ public import Mathlib.Data.ENat.SuccOrder
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 open FFL.Entailment
 
 namespace FFL.FirstOrder.ProvabilityAbstraction
@@ -180,19 +182,20 @@ lemma NegativeSuccessor.quote_iff_provabilityComparisonLE {φ ψ : ArithmeticSen
     NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparisonLE (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
   simp [NegativeSuccessor, Sentence.quote_def, Semiformula.quote_def];
 
-def negativeSuccessor : 𝚺₁.Semisentence 2 := .mkSigma
+def negativeSuccessor : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ nφ, ∃ nψ, !(negGraph ℒₒᵣ) nφ φ ∧ !(negGraph ℒₒᵣ) nψ ψ ∧ !T.provabilityComparisonLE nφ nψ”
 
 instance negativeSuccessor_defined :
-    𝚺₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := .mk fun v ↦ by
+    𝚺ᴬ₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := .mk fun v ↦ by
   simp [negativeSuccessor, NegativeSuccessor];
 
-instance negativeSuccessor_definable : 𝚺₁-Relation (NegativeSuccessor T : V → V → Prop) :=
+instance negativeSuccessor_definable :
+    𝚺ᴬ₁-Relation (NegativeSuccessor T : V → V → Prop) :=
   (negativeSuccessor_defined T).to_definable
 
 /-- Instance for the definability tactic. -/
 instance negativeSuccessor_definable' :
-    𝚺-[0 + 1]-Relation (NegativeSuccessor T : V → V → Prop) :=
+    𝚺ᴬ-[0 + 1]-Relation (NegativeSuccessor T : V → V → Prop) :=
   (negativeSuccessor_defined T).to_definable
 
 end model
@@ -277,13 +280,17 @@ lemma solovay_diag (i : M.World) :
 @[simp] lemma solovay_exclusive {i j : M.World} : T.solovay M i = T.solovay M j ↔ i = j := by
   simp [Theory.solovay];
 
-@[simp] lemma θ_sigma1 (i : M.World) : Hierarchy 𝚺 1 (θ T M i) := by
-  have h {N} {t : M.World → ArithmeticSemiterm Empty N} (ε : List M.World) :
-      Hierarchy 𝚺 1 (θChainAux T M t ε) := by
-    induction ε with
-    | nil => simp [θChainAux];
-    | cons j ε ih => rcases ε with _ | ⟨i, ε⟩ <;> simp_all [θChainAux, twoPointAux];
-  simp [θ, θAux, h];
+omit [M.IsGL] in
+private lemma θChainAux_sigma1 {N : ℕ} {t : M.World → FirstOrder.ArithmeticSemiterm Empty N}
+    (ε : List M.World) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (θChainAux T M t ε) := by
+  match ε with
+  |          [] => simp [θChainAux];
+  |         [_] => simp [θChainAux];
+  | _ :: i :: ε =>
+    simp [θChainAux, twoPointAux, θChainAux_sigma1 (i :: ε)];
+
+@[simp] lemma θ_sigma1 (i : M.World) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (θ T M i) := by
+  simp [θ, θAux, θChainAux_sigma1];
 
 end stx
 
@@ -487,7 +494,8 @@ section
 variable {M : RootedModel κ α} [Fintype M.World] [M.IsGL]
 
 /-- - [Sol76] -/
-theorem solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (Arithmetic.Hierarchy 𝚷 2)] :
+theorem solovay_root_sound [𝗜𝚺₁ ⪯ T]
+    [sound : T.SoundOn (ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2)] :
     T.Solovay M ℕ M.root := by
   classical
   obtain H | ⟨i, hri, H⟩ := Θ.disjunction (V := ℕ) (T := T) M.root ⟨[M.root], by simp⟩;
@@ -498,7 +506,8 @@ theorem solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (Arithmetic.Hi
     (provable_iff_provable (T := T)).mp (Solovay.refute (ne_of_irrefl hri) H);
   have h₂ : ¬ℕ ⊧/![] π := by
     simpa [models_iff] using! sound.sound (σ := ∼π) h₁ (by simp [π,
-      (show Hierarchy 𝚷 1 T.consistentWith.val by simp).strict_mono 𝚺 (show 1 < 2 by simp),
+      (show ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 T.consistentWith.val by simp).strict_mono 𝚺
+        (show 1 < 2 by simp),
       (θ_sigma1 T M i).mono (show 1 ≤ 2 by simp)]);
   have h₃ : T.Solovay M ℕ i ↔ ℕ ⊧/![] π := by
     simpa [models_iff] using! consequence_iff.mp (Theory.Proof.sound sπ) ℕ inferInstance;
