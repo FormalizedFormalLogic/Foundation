@@ -4,7 +4,15 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Hierarchy
 
 /-!
-# Formulas sorted by the arithmetical hierarchy
+# Arithmetical Formula Sorted by Arithmetical Hierarchy
+
+This file defines the $\Sigma_n / \Pi_n / \Delta_n$ formulas of arithmetic of first-order logic.
+
+- `𝚺ᴬ-[m].Semiformula ξ n` is a `ArithmeticSemiformula ξ n` which is $\Sigma_m$.
+- `𝚷ᴬ-[m].Semiformula ξ n` is a `ArithmeticSemiformula ξ n` which is $\Pi_m$.
+- `𝚫ᴬ-[m].Semiformula ξ n` is a pair of `𝚺ᴬ-[m].Semiformula ξ n` and `𝚷ᴬ-[m].Semiformula ξ n`.
+- `ProperOn` : `φ.ProperOn M` iff `φ`'s two element `φ.sigma` and `φ.pi` are equivalent on
+  model `M`
 -/
 
 @[expose] public section
