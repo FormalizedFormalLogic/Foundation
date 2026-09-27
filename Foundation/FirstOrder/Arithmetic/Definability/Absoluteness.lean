@@ -58,23 +58,23 @@ lemma modelsWithParam_iff_models_substs {k : ℕ} {v : Fin k → ℕ}
       V↓[ℒₒᵣ] ⊧ (φ ⇜ fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i)) := by
   simp [models_iff, Function.comp_def, Matrix.empty_eq, numeral_eq_natCast]
 
-lemma shigmaZero_absolute {k} (φ : 𝚺ᴬ₀.Semisentence k) (v : Fin k → ℕ) :
+lemma sigmaZero_absolute {k} (φ : 𝚺ᴬ₀.Semisentence k) (v : Fin k → ℕ) :
     φ.val.Evalb v ↔ φ.val.Evalb (M := V) (Nat.cast ∘ v) :=
-  Bounding.shigmaZero_absolute (natCastEmbedding V) φ v
+  Bounding.sigmaZero_absolute (natCastEmbedding V) φ v
 
-lemma Defined.shigmaZero_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop}
+lemma Defined.sigmaZero_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop}
     {φ : 𝚺ᴬ₀.Semisentence k}
     (hR : HierarchySymbol.Defined R φ) (hR' : HierarchySymbol.Defined R' φ)
     (v : Fin k → ℕ) :
     R v ↔ R' (Nat.cast ∘ v) :=
-  HierarchySymbol.Defined.shigmaZero_absolute (natCastEmbedding V) hR hR' v
+  HierarchySymbol.Defined.sigmaZero_absolute (natCastEmbedding V) hR hR' v
 
-lemma DefinedFunction.shigmaZero_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V}
+lemma DefinedFunction.sigmaZero_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V}
     {φ : 𝚺ᴬ₀.Semisentence (k + 1)}
     (hf : HierarchySymbol.DefinedFunction f φ)
     (hf' : HierarchySymbol.DefinedFunction f' φ) (v : Fin k → ℕ) :
     (f v : V) = f' (Nat.cast ∘ v) :=
-  HierarchySymbol.DefinedFunction.shigmaZero_absolute_func (natCastEmbedding V) hf hf' v
+  HierarchySymbol.DefinedFunction.sigmaZero_absolute_func (natCastEmbedding V) hf hf' v
 
 lemma sigmaOne_upward_absolute {k} (φ : 𝚺ᴬ₁.Semisentence k) (v : Fin k → ℕ) :
     φ.val.Evalb v → φ.val.Evalb (M := V) (Nat.cast ∘ v) :=

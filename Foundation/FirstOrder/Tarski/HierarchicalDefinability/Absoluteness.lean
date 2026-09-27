@@ -119,7 +119,7 @@ lemma pi_one_downward {n} {φ : Semiformula L ξ n} (hφ : ℬ.Hierarchy 𝚷 1 
   have h₁ : ¬φ.Eval e ε → ¬φ.Eval (ι ∘ e) (ι ∘ ε) := by simpa using h
   exact not_imp_not.mp h₁
 
-lemma shigmaZero_absolute {k} (φ : 𝚺-[ℬ, 0].Semisentence k) (v : Fin k → M) :
+lemma sigmaZero_absolute {k} (φ : 𝚺-[ℬ, 0].Semisentence k) (v : Fin k → M) :
     φ.val.Evalb v ↔ φ.val.Evalb (ι ∘ v) := by
   simpa [Semiformula.Evalb, Function.comp_def, Empty.eq_elim] using
     bounded_absolute ι (Hierarchy.zero_iff_bounded.mp φ.sigma_prop) v Empty.elim
@@ -142,18 +142,18 @@ lemma deltaOne_absolute {k} (φ : 𝚫-[ℬ, 1].Semisentence k)
    by simpa [properM.iff', properN.iff'] using
       piOne_downward_absolute ι φ.pi v⟩
 
-lemma HierarchySymbol.Defined.shigmaZero_absolute {k}
+lemma HierarchySymbol.Defined.sigmaZero_absolute {k}
     {R : (Fin k → M) → Prop} {R' : (Fin k → N) → Prop} {φ : 𝚺-[ℬ, 0].Semisentence k}
     (hR : 𝚺-[ℬ, 0].Defined R φ) (hR' : 𝚺-[ℬ, 0].Defined R' φ) (v : Fin k → M) :
     R v ↔ R' (ι ∘ v) := by
-  simpa [hR.iff, hR'.iff] using Bounding.shigmaZero_absolute ι φ v
+  simpa [hR.iff, hR'.iff] using Bounding.sigmaZero_absolute ι φ v
 
-lemma HierarchySymbol.DefinedFunction.shigmaZero_absolute_func {k}
+lemma HierarchySymbol.DefinedFunction.sigmaZero_absolute_func {k}
     {f : (Fin k → M) → M} {f' : (Fin k → N) → N} {φ : 𝚺-[ℬ, 0].Semisentence (k + 1)}
     (hf : 𝚺-[ℬ, 0].DefinedFunction f φ) (hf' : 𝚺-[ℬ, 0].DefinedFunction f' φ) (v : Fin k → M) :
     ι (f v) = f' (ι ∘ v) := by
   simpa [Function.comp_def] using
-    HierarchySymbol.Defined.shigmaZero_absolute ι hf hf' (f v :> v)
+    HierarchySymbol.Defined.sigmaZero_absolute ι hf hf' (f v :> v)
 
 lemma HierarchySymbol.Defined.shigmaOne_absolute {k}
     {R : (Fin k → M) → Prop} {R' : (Fin k → N) → Prop} {φ : 𝚫-[ℬ, 1].Semisentence k}

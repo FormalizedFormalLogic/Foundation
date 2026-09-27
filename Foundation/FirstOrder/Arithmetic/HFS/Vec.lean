@@ -295,7 +295,7 @@ instance nth_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (nth : V → V → V)
 end
 
 lemma adjoin_absolute (a v : ℕ) : ((a ∷ v : ℕ) : V) = (a : V) ∷ (v : V) := by
-  simpa using DefinedFunction.shigmaZero_absolute_func V adjoin_defined adjoin_defined ![a, v]
+  simpa using DefinedFunction.sigmaZero_absolute_func V adjoin_defined adjoin_defined ![a, v]
 
 /-- TODO: move -/
 lemma pi₁_zero : π₁ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₁_le_self 0)

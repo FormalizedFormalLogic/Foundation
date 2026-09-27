@@ -234,7 +234,7 @@ instance seqCons_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 @[simp] lemma natCast_empty : ((∅ : ℕ) : V) = ∅ := by simp [emptyset_def]
 
 lemma seqCons_absolute (s a : ℕ) : ((s ⁀' a : ℕ) : V) = (s : V) ⁀' (a : V) := by
-  simpa using DefinedFunction.shigmaZero_absolute_func V seqCons_defined seqCons_defined ![s, a]
+  simpa using DefinedFunction.sigmaZero_absolute_func V seqCons_defined seqCons_defined ![s, a]
 
 end
 

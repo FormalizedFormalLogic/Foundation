@@ -47,7 +47,7 @@ instance mem_definable'' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
   simpa using (mem_definable' ℌ).retraction ![1, 0]
 
 lemma mem_absolute (i a : ℕ) : i ∈ a ↔ (i : V) ∈ (a : V) := by
-  simpa using Defined.shigmaZero_absolute V bit_defined bit_defined ![i, a]
+  simpa using Defined.sigmaZero_absolute V bit_defined bit_defined ![i, a]
 
 lemma mem_iff_bit {i a : V} : i ∈ a ↔ Bit i a := iff_of_eq rfl
 
@@ -334,7 +334,7 @@ lemma insert_le_of_le_of_le {i j a b : V} (hij : i ≤ j) (hab : a ≤ b) :
 
 lemma insert_absolute (x s : ℕ) :
     ((insert x s : ℕ) : V) = insert (x : V) (s : V) := by
-  have := DefinedFunction.shigmaZero_absolute_func V (k := 2) (f := fun v ↦ insert (v 0) (v 1))
+  have := DefinedFunction.sigmaZero_absolute_func V (k := 2) (f := fun v ↦ insert (v 0) (v 1))
       (f' := fun v ↦ insert (v 0) (v 1))
       (φ := insertDef) insert_defined insert_defined ![x, s]
   simpa using this
