@@ -3,11 +3,6 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Operator
 public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 
-/-!
-Bounded formulas with bounds supplied by a set of operators; this set-parametric presentation
-and its rewriting lemmas are specific to this formalization.
--/
-
 @[expose] public section
 
 namespace FFL.FirstOrder

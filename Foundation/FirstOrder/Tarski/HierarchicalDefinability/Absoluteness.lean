@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Tarski.Elementary
 
 Bounded formulas are absolute along embeddings whose image contains every element bounded
 by an image element. $\Sigma_1$ formulas are upward absolute and $\Pi_1$ formulas downward
-absolute.
+absolute. $\Delta_1$ formulas are both upward and downward absolute.
 -/
 
 @[expose] public section

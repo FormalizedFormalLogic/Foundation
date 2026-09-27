@@ -5,10 +5,6 @@ public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Hierarchy
 
 /-!
 # Formulas sorted by the arithmetical hierarchy
-
-This module specializes the bounding hierarchy to the strict-order operator of the language of
-arithmetic. The hierarchy wrappers themselves are defined in
-`FirstOrder.Bounding.HierarchySymbol`.
 -/
 
 @[expose] public section

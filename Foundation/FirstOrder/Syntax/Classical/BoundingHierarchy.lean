@@ -12,9 +12,6 @@ variable {ξ : Type*} {n m s : ℕ} {Γ Γ' : Polarity}
 
 namespace Bounding
 
-/-! This formalization generalizes the syntactic arithmetical hierarchy
-using a set of operators for bounds. -/
-
 inductive Hierarchy (ℬ : Bounding L) : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | bounded (Γ : Polarity) (s n : ℕ) {φ : Semiformula L ξ n} :
     ℬ.Closure φ → ℬ.Hierarchy Γ s φ

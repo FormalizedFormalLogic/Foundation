@@ -5,11 +5,6 @@ public import Foundation.FirstOrder.Tarski.Definability
 
 /-!
 # Definability in a bounding hierarchy
-
-This set-parametric formulation follows the arithmetical definability API. Delta formulas
-are pairs of Sigma and Pi formulas, with equivalence required separately on the structure.
-The closure properties are standard elementary facts about definability; their formulation
-with bounding operators and the semantic induction principle are specific to this formalization.
 -/
 
 @[expose] public section

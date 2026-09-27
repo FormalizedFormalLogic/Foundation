@@ -6,13 +6,6 @@ public import Foundation.FirstOrder.LK.Soundness
 
 /-!
 # Formulas sorted by a bounding hierarchy
-
-This generalizes the arithmetic hierarchy's formula wrappers to an arbitrary set of bounding
-operators. Delta formulas retain separate Sigma and Pi representatives; their equivalence
-is expressed by `ProperOn` or `ProperWithParamOn`.
-
-The definitions and lemmas are technical bridges between the existing syntactic bounding
-hierarchy and Tarski semantics, following the arithmetic formalization.
 -/
 
 @[expose] public section

@@ -5,9 +5,6 @@ public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Basic
 
 /-!
 # Arithmetical definability
-
-This module specializes the common definability API to the strict-order bounding on
-the language of arithmetic.
 -/
 
 @[expose] public section
