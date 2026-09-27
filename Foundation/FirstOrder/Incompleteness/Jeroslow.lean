@@ -18,6 +18,9 @@ is not provable in `T` itself.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder
 
 open _root_.FFL.FirstOrder.Entailment
@@ -37,7 +40,7 @@ variable [L.Encodable] [L.LORDefinable]
 def Refutable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (T : Theory L) [T.Δ₁] (φ : V) : Prop
   := Provable T (neg L φ)
 
-noncomputable def refutable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisentence 1
+noncomputable def refutable (T : Theory L) [T.Δ₁] : 𝚺ᴬ₁.Semisentence 1
   := .mkSigma “φ. ∃ nφ, !(negGraph L) nφ φ ∧ !(provable T) nφ”
 
 section
@@ -47,10 +50,10 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 lemma Refutable.quote_iff {σ : Sentence L} : T.Refutable (⌜σ⌝ : V) ↔ Provable T (⌜∼σ⌝ : V) := by
   simp [Theory.Refutable, Sentence.quote_def, Semiformula.quote_def]
 
-instance refutable_defined : 𝚺₁-Predicate[V] T.Refutable via T.refutable := .mk fun v ↦ by
+instance refutable_defined : 𝚺ᴬ₁-Predicate[V] T.Refutable via T.refutable := .mk fun v ↦ by
   simp [Theory.refutable, Theory.Refutable]
 
-instance refutable_definable : 𝚺₁-Predicate[V] T.Refutable := refutable_defined.to_definable
+instance refutable_definable : 𝚺ᴬ₁-Predicate[V] T.Refutable := refutable_defined.to_definable
 
 end
 

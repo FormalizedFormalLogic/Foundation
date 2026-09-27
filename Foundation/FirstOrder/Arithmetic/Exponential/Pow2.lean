@@ -11,6 +11,10 @@ $\mathrm{Pow2}(n)$ is a property that holds iff $n = 2^i$ for some $i$.
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Bounding
+
+open scoped FFL.FirstOrder.Arithmetic
+
 variable {V : Type*} [ORingStructure V]
 
 section IOpen
@@ -19,13 +23,13 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
 
 def Pow2 (a : V) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def _root_.FFL.FirstOrder.Arithmetic.pow2Def : 𝚺₀.Semisentence 1 :=
+def _root_.FFL.FirstOrder.Arithmetic.pow2Def : 𝚺ᴬ₀.Semisentence 1 :=
   .mkSigma “a. 0 < a ∧ ∀ r <⁺ a, 1 < r → r ∣ a → 2 ∣ r”
 
-instance pow2_defined : 𝚺₀-Predicate (Pow2 : V → Prop) via pow2Def := .mk fun v ↦ by
+instance pow2_defined : 𝚺ᴬ₀-Predicate (Pow2 : V → Prop) via pow2Def := .mk fun v ↦ by
   simp [Semiformula.eval_substs, Pow2, pow2Def, le_iff_lt_succ]
 
-instance pow2_definable : 𝚺₀-Predicate (Pow2 : V → Prop) := pow2_defined.to_definable
+instance pow2_definable : 𝚺ᴬ₀-Predicate (Pow2 : V → Prop) := pow2_defined.to_definable
 
 lemma Pow2.pos {a : V} (h : Pow2 a) : 0 < a := h.1
 
@@ -112,13 +116,13 @@ section LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (i a : V) : Prop := ¬2 ∣ (a / i)
 
-def _root_.FFL.FirstOrder.Arithmetic.lenbitDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.lenbitDef : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “i a. ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z”
 
-instance lenbit_defined : 𝚺₀-Relation (LenBit : V → V → Prop) via lenbitDef := .mk fun v ↦ by
+instance lenbit_defined : 𝚺ᴬ₀-Relation (LenBit : V → V → Prop) via lenbitDef := .mk fun v ↦ by
   simp [lenbitDef, LenBit]
 
-instance lenbit_definable : 𝚺₀-Relation (LenBit : V → V → Prop) := lenbit_defined.to_definable
+instance lenbit_definable : 𝚺ᴬ₀-Relation (LenBit : V → V → Prop) := lenbit_defined.to_definable
 
 lemma LenBit.le {i a : V} (h : LenBit i a) : i ≤ a := by
   by_contra A; simp [LenBit, show a < i from by simpa using A] at h

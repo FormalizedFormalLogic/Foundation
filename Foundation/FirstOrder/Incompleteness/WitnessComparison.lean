@@ -3,6 +3,9 @@ module
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 /-!
 # Witness comparisons of provability
 -/
@@ -26,37 +29,39 @@ def _root_.FFL.FirstOrder.Theory.ProvabilityComparisonLT (φ ψ : V) : Prop :=
 section
 
 noncomputable def _root_.FFL.FirstOrder.Theory.provabilityComparisonLE :
-    𝚺₁.Semisentence 2 := .mkSigma
+    𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ b, !(proof T).sigma b φ ∧ ∀ b' < b, ¬!(proof T).pi b' ψ”
 
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_defined :
-    𝚺₁-Relation[V] T.ProvabilityComparisonLE via T.provabilityComparisonLE := .mk fun v ↦ by
+    𝚺ᴬ₁-Relation[V] T.ProvabilityComparisonLE via T.provabilityComparisonLE :=
+      .mk fun v ↦ by
   simp [Theory.provabilityComparisonLE, Theory.ProvabilityComparisonLE]
 
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_definable :
-    𝚺₁-Relation[V] T.ProvabilityComparisonLE :=
+    𝚺ᴬ₁-Relation[V] T.ProvabilityComparisonLE :=
   T.provability_comparison_le_defined.to_definable
 
 /-- instance for definability tactic -/
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_definable' :
-    𝚺-[0 + 1]-Relation[V] T.ProvabilityComparisonLE := T.provability_comparison_le_definable
+    𝚺ᴬ-[0 + 1]-Relation[V] T.ProvabilityComparisonLE := T.provability_comparison_le_definable
 
 
 noncomputable def _root_.FFL.FirstOrder.Theory.provabilityComparisonLT :
-    𝚺₁.Semisentence 2 := .mkSigma
+    𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ b, !(proof T).sigma b φ ∧ ∀ b' <⁺ b, ¬!(proof T).pi b' ψ”
 
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_defined :
-    𝚺₁-Relation[V] T.ProvabilityComparisonLT via T.provabilityComparisonLT := .mk fun v ↦ by
+    𝚺ᴬ₁-Relation[V] T.ProvabilityComparisonLT via T.provabilityComparisonLT :=
+      .mk fun v ↦ by
   simp [Theory.provabilityComparisonLT, Theory.ProvabilityComparisonLT]
 
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_definable :
-    𝚺₁-Relation[V] T.ProvabilityComparisonLT :=
+    𝚺ᴬ₁-Relation[V] T.ProvabilityComparisonLT :=
   T.provability_comparison_lt_defined.to_definable
 
 /-- instance for definability tactic -/
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_definable' :
-    𝚺-[0 + 1]-Relation[V] T.ProvabilityComparisonLT := T.provability_comparison_lt_definable
+    𝚺ᴬ-[0 + 1]-Relation[V] T.ProvabilityComparisonLT := T.provability_comparison_lt_definable
 
 end
 

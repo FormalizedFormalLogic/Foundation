@@ -9,6 +9,10 @@ public import Foundation.FirstOrder.Arithmetic.HFS
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Bounding
+
+open scoped FFL.FirstOrder.Arithmetic
+
 variable {V : Type*} [ORingStructure V]
 
 section ISigma1
@@ -16,7 +20,7 @@ section ISigma1
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 @[elab_as_elim] lemma sigma1_pos_succ_induction
-    {P : V → Prop} (hP : 𝚺₁-Predicate P)
+    {P : V → Prop} (hP : 𝚺ᴬ₁-Predicate P)
     (zero : P 0) (one : P 1) (succ : ∀ x, P (x + 1) → P (x + 2)) : ∀ x, P x := by
   have : ∀ x, P (x + 1) := by
     intro x
@@ -30,10 +34,10 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
   · exact zero
   · exact this x
 
-open HierarchySymbol
+open Bounding.HierarchySymbol
 
-theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Function₂ f)
-    {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺ᴬ₁-Function₂ f)
+    {P : V → V → Prop} (hP : 𝚺ᴬ₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f x y, P x' y') → P x y) : ∀ x y, P x y := by
   have maxf : ∀ x y, ∃ m, ∀ x' ≤ x, ∀ y' ≤ y, f x' y' ≤ m := by
     intro x y;
@@ -57,19 +61,19 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
           (DefinableFunction₁.comp (.var _)))
       apply Definable.and
         (Definable.comp₂ (.var 0) (by definability))
-      apply Definable.ball_lt (.var _)
-      apply Definable.ball_lt (.var _)
-      apply Definable.ball_lt (.var _)
+      apply Definable.arithmetic_ball_lt (.var _)
+      apply Definable.arithmetic_ball_lt (.var _)
+      apply Definable.arithmetic_ball_lt (.var _)
       apply Definable.imp
         (Definable.comp₂ (.var _) (DefinableFunction₂.comp (.var _) (.var _)))
       apply Definable.imp
         (Definable.comp₂ (.var _)
           (DefinableFunction₂.comp (DefinableFunction₂.comp (.var _) (.const _)) (.var _)))
-      apply Definable.ball_le
+      apply Definable.arithmetic_ball_le
         (Definable.comp₂
           (.var _)
           (DefinableFunction₂.comp (.const _) (.var _)))
-      apply Definable.ball_le (.var _)
+      apply Definable.arithmetic_ball_le (.var _)
       apply Definable.comp₂
         (DefinableFunction₂.comp
           (.var _) (.var _)) (.var _)
@@ -96,15 +100,15 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
     induction i using ISigma1.sigma1_succ_induction
     · apply Definable.imp
         (Definable.comp₂ (.var _) (.const _))
-      apply Definable.ball_lt (.const _)
+      apply Definable.arithmetic_ball_lt (.const _)
       apply Definable.imp
         (Definable.comp₂
           (.const _)
           (DefinableFunction₂.comp
             (DefinableFunction₂.comp
               (.const _) (.var _)) (.var _)))
-      apply Definable.ball_le (.var _)
-      apply Definable.ball_le (.var _)
+      apply Definable.arithmetic_ball_le (.var _)
+      apply Definable.arithmetic_ball_le (.var _)
       apply Definable.comp₂ (.var _) (.var _)
     case zero =>
       intro _ _ _ _ _ h y' _
@@ -129,23 +133,23 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
         (lt_succ_iff_le.mp (lt_of_lt_of_le hx'' hx')) y'' (le_trans hy'' this)
   exact this x (by rfl) y (lt_of_mem_rng hW₀) (by simpa using hW₀) x (by rfl) y (by rfl)
 
-lemma bounded_all_sigma1_order_induction' {f : V → V} (hf : 𝚺₁-Function₁ f)
-    {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+lemma bounded_all_sigma1_order_induction' {f : V → V} (hf : 𝚺ᴬ₁-Function₁ f)
+    {P : V → V → Prop} (hP : 𝚺ᴬ₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f y, P x' y') → P x y) : ∀ x y, P x y :=
-  have : 𝚺₁-Function₂ (fun _ ↦ f) := DefinableFunction₁.comp (by simp)
+  have : 𝚺ᴬ₁-Function₂ (fun _ ↦ f) := DefinableFunction₁.comp (by simp)
   bounded_all_sigma1_order_induction this hP ind
 
 lemma bounded_all_sigma1_order_induction₂ {fy fz : V → V → V → V}
-    (hfy : 𝚺₁-Function₃ fy) (hfz : 𝚺₁-Function₃ fz) {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
+    (hfy : 𝚺ᴬ₁-Function₃ fy) (hfz : 𝚺ᴬ₁-Function₃ fz) {P : V → V → V → Prop} (hP : 𝚺ᴬ₁-Relation₃ P)
     (ind : ∀ x y z, (∀ x' < x, ∀ y' ≤ fy x y z, ∀ z' ≤ fz x y z, P x' y' z') → P x y z) :
     ∀ x y z, P x y z := by
   let Q : V → V → Prop := fun x w ↦ P x (π₁ w) (π₂ w)
-  have hQ : 𝚺₁-Relation Q := by
+  have hQ : 𝚺ᴬ₁-Relation Q := by
     apply Definable.comp₃ (.var _)
       (DefinableFunction₁.comp (.var _))
       (DefinableFunction₁.comp (.var _))
   let f : V → V → V := fun x w ↦ ⟪fy x (π₁ w) (π₂ w), fz x (π₁ w) (π₂ w)⟫
-  have hf : 𝚺₁-Function₂ f := by
+  have hf : 𝚺ᴬ₁-Function₂ f := by
     simp only [f]
     apply DefinableFunction₂.comp
     · apply DefinableFunction₃.comp (.var _)
@@ -161,14 +165,14 @@ lemma bounded_all_sigma1_order_induction₂ {fy fz : V → V → V → V}
     x ⟪y, z⟫
 
 lemma bounded_all_sigma1_order_induction₃ {fy fz fw : V → V → V → V → V}
-    (hfy : 𝚺₁-Function₄ fy) (hfz : 𝚺₁-Function₄ fz) (hfw : 𝚺₁-Function₄ fw)
-    {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
+    (hfy : 𝚺ᴬ₁-Function₄ fy) (hfz : 𝚺ᴬ₁-Function₄ fz) (hfw : 𝚺ᴬ₁-Function₄ fw)
+    {P : V → V → V → V → Prop} (hP : 𝚺ᴬ₁-Relation₄ P)
     (ind : ∀ x y z w,
       (∀ x' < x, ∀ y' ≤ fy x y z w, ∀ z' ≤ fz x y z w, ∀ w' ≤ fw x y z w, P x' y' z' w') →
         P x y z w) :
     ∀ x y z w, P x y z w := by
   let Q : V → V → Prop := fun x v ↦ P x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))
-  have hQ : 𝚺₁-Relation Q := by
+  have hQ : 𝚺ᴬ₁-Relation Q := by
     apply Definable.comp₄
       (.var _)
       (DefinableFunction₁.comp <| .var _)
@@ -177,7 +181,7 @@ lemma bounded_all_sigma1_order_induction₃ {fy fz fw : V → V → V → V → 
   let f : V → V → V := fun x v ↦
     ⟪fy x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fz x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)),
       fw x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))⟫
-  have hf : 𝚺₁-Function₂ f := by
+  have hf : 𝚺ᴬ₁-Function₂ f := by
     simp only [f]
     apply DefinableFunction₂.comp
     · apply DefinableFunction₄.comp
@@ -204,10 +208,10 @@ lemma bounded_all_sigma1_order_induction₃ {fy fz fw : V → V → V → V → 
   simpa [Q] using this
 
 lemma measured_bounded_sigma1_order_induction {m : V → V} {f : V → V} {P : V → Prop}
-    (hm : 𝚺₁-Function₁ m) (hf : 𝚺₁-Function₁ f) (hP : 𝚺₁-Predicate P)
+    (hm : 𝚺ᴬ₁-Function₁ m) (hf : 𝚺ᴬ₁-Function₁ f) (hP : 𝚺ᴬ₁-Predicate P)
     (H : ∀ a, (∀ b ≤ f a, m b < m a → P b) → P a) : ∀ a, P a := by
   let Q : V → V → Prop := fun k x ↦ m x ≤ k → P x
-  have hQ : 𝚺₁-Relation Q := by unfold Q; definability
+  have hQ : 𝚺ᴬ₁-Relation Q := by unfold Q; definability
   have : ∀ x y, Q x y := bounded_all_sigma1_order_induction' hf hQ fun k a ih hm ↦
     H a fun b hb hba ↦ ih (m b) (lt_of_le_of_lt' hm hba) b hb (by rfl)
   intro a
@@ -219,7 +223,8 @@ section Induction
 
 variable (m : ℕ) [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 m]
 
-lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ : 𝚷-[m]-Predicate Q)
+lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺ᴬ-[m]-Predicate P)
+    (hQ : 𝚷ᴬ-[m]-Predicate Q)
     (zero : P 0 ∨ Q 0) (succ : ∀ x, P x ∨ Q x → P (x + 1) ∨ Q (x + 1)) : ∀ x, P x ∨ Q x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a
@@ -242,7 +247,8 @@ lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) 
   have := this a (by rfl)
   simpa [hp, hq] using this
 
-lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ : 𝚷-[m]-Predicate Q)
+lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺ᴬ-[m]-Predicate P)
+    (hQ : 𝚷ᴬ-[m]-Predicate Q)
     (ind : ∀ x, (∀ y < x, P y ∨ Q y) → P x ∨ Q x) : ∀ x, P x ∨ Q x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a
@@ -256,16 +262,16 @@ lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
     intro x hx
     induction x using ISigma1.sigma1_order_induction
     · clear hp hq ind
-      apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.imp
+      apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-        apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+        apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.comp₂
         · simp [Fin.isValue]
         · simp
-      · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.or
-        · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+      · apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.or
+        · apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.comp₂
           · simp
           · simp
-        · apply FFL.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+        · apply FFL.FirstOrder.Bounding.HierarchySymbol.Definable.comp₂
           · simp
           · simp
     case ind z ih =>

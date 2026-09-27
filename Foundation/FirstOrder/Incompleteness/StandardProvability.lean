@@ -7,6 +7,9 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 /-!
 # Derivability conditions of standard provability predicate
 -/
@@ -102,7 +105,7 @@ lemma soundOnHierarchy_iff_models_reflection :
 
 open FFL.Entailment in
 /--
-If `π` is equivalent to some 𝚺₁ sentence `σ`,
+If `π` is equivalent to some 𝚺ᴬ₁ sentence `σ`,
 then `π 🡒 □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
 -/
 lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]

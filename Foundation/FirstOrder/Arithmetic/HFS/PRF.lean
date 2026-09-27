@@ -11,15 +11,19 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Bounding
+
+open scoped FFL.FirstOrder.Arithmetic
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace PR
 
 structure Blueprint (k : ℕ) where
-  zero : 𝚺₁.Semisentence (k + 1)
-  succ : 𝚺₁.Semisentence (k + 3)
+  zero : 𝚺ᴬ₁.Semisentence (k + 1)
+  succ : 𝚺ᴬ₁.Semisentence (k + 3)
 
-def Blueprint.cseqDef {k : ℕ} (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSigma
+def Blueprint.cseqDef {k : ℕ} (p : Blueprint k) : 𝚺ᴬ₁.Semisentence (k + 1) := .mkSigma
   “s.
     :Seq s
     ∧ (∃ z < s, !p.zero z ⋯ ∧ 0 ∼[s] z)
@@ -27,10 +31,10 @@ def Blueprint.cseqDef {k : ℕ} (p : Blueprint k) : 𝚺₁.Semisentence (k + 1)
         (∃ l <⁺ 2 * s, !lhDef l s ∧ i + 1 < l) →
         ∀ z < s, i ∼[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ∼[s] u)”
 
-def Blueprint.resultDef {k : ℕ} (p : Blueprint k) : 𝚺₁.Semisentence (k + 2) := .mkSigma
+def Blueprint.resultDef {k : ℕ} (p : Blueprint k) : 𝚺ᴬ₁.Semisentence (k + 2) := .mkSigma
   “z u. ∃ s, !p.cseqDef s ⋯ ∧ u ∼[s] z”
 
-def Blueprint.resultDeltaDef {k : ℕ} (p : Blueprint k) : 𝚫₁.Semisentence (k + 2) :=
+def Blueprint.resultDeltaDef {k : ℕ} (p : Blueprint k) : 𝚫ᴬ₁.Semisentence (k + 2) :=
   p.resultDef.graphDelta
 
 variable (V)
@@ -38,8 +42,8 @@ variable (V)
 structure Construction {k : ℕ} (p : Blueprint k) where
   zero : (Fin k → V) → V
   succ : (Fin k → V) → V → V → V
-  zero_defined : 𝚺₁.DefinedFunction zero p.zero
-  succ_defined : 𝚺₁.DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
+  zero_defined : 𝚺ᴬ₁.DefinedFunction zero p.zero
+  succ_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
 
 variable {V}
 
@@ -69,7 +73,7 @@ private lemma cseq_iff (s : V) : c.CSeq v s ↔
           (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
         exact h⟩⟩
 
-lemma cseq_defined : 𝚺₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop)
+lemma cseq_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop)
     p.cseqDef := .mk fun v ↦ by
   simp [Blueprint.cseqDef, cseq_iff, c.zero_defined.iff, c.succ_defined.iff]
 
@@ -197,11 +201,11 @@ lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
         (by simp [←hu]) h' h⟩
 
 set_option linter.flexible false in
-lemma result_defined : 𝚺₁.DefinedFunction
+lemma result_defined : 𝚺ᴬ₁.DefinedFunction
     (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
   simp [Blueprint.resultDef, result_graph, c.cseq_defined_iff]
 
-lemma result_defined_delta : 𝚫₁.DefinedFunction
+lemma result_defined_delta : 𝚫ᴬ₁.DefinedFunction
     (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
   c.result_defined.graph_delta
 
@@ -209,11 +213,11 @@ lemma result_defined_delta : 𝚫₁.DefinedFunction
     p.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) :=
   c.result_defined.iff
 
-instance result_definable : 𝚺₁.DefinableFunction
+instance result_definable : 𝚺ᴬ₁.DefinableFunction
     (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable
 
-instance result_definable_delta₁ : 𝚫₁.DefinableFunction
+instance result_definable_delta₁ : 𝚫ᴬ₁.DefinableFunction
     (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined_delta.to_definable
 

@@ -34,10 +34,10 @@ private lemma models_PrenexBase_of_models_CollectionOnHierarchy {V : Type*} [ORi
   | 0, h => models_of_ss h Set.subset_union_left
   | s + 1, h => models_of_ss h (CollectionOnHierarchy_subset_of_lt (Nat.lt_succ_self s))
 
-/-- A formula in `Γ`-prenex form of level `s`, stored as the `𝚺₀` matrix that remains after
+/-- A formula in `Γ`-prenex form of level `s`, stored as the `𝚺ᴬ₀` matrix that remains after
 stripping the `s` leading alternating quantifiers. -/
 structure Prenex (Γ : Polarity) (s : ℕ) (ξ : Type*) (n : ℕ) where
-  matrix : 𝚺₀.Semiformula ξ (n + s)
+  matrix : 𝚺ᴬ₀.Semiformula ξ (n + s)
 
 namespace Prenex
 
@@ -74,7 +74,7 @@ def altUp (φ : Prenex Γ s ξ n) : Prenex Γ.alt (s + 1) ξ n := by
   · exact (φ.rew Rew.bShift).pi
   · exact (φ.rew Rew.bShift).sigma
 
-def ofΔ₀ (φ : 𝚺₀.Semiformula ξ n) : (Γ : Polarity) → (s : ℕ) → Prenex Γ s ξ n
+def ofΔ₀ (φ : 𝚺ᴬ₀.Semiformula ξ n) : (Γ : Polarity) → (s : ℕ) → Prenex Γ s ξ n
   | Γ, 0     => ⟨φ⟩
   | Γ, s + 1 => by simpa using altUp (ofΔ₀ φ Γ.alt s)
 
@@ -165,7 +165,7 @@ lemma models_altUp (φ : Prenex Γ s ξ n) (e : Fin n → V) :
     Semiformula.eval_all, Nat.succ_eq_add_one
   ]
 
-lemma models_ofΔ₀ (φ : 𝚺₀.Semiformula ξ n) (e : Fin n → V) :
+lemma models_ofΔ₀ (φ : 𝚺ᴬ₀.Semiformula ξ n) (e : Fin n → V) :
     Semiformula.Eval e f (ofΔ₀ φ Γ s).val ↔ Semiformula.Eval e f φ.val := by
   induction s generalizing Γ with
   | zero => rfl
@@ -601,7 +601,7 @@ theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSem
     exact hφ' V e f;
   induction h with
   | @bounded Γ s n φ h =>
-    let φ₀ : 𝚺₀.Semiformula ξ n := .mkSigma φ (Hierarchy.bounded 𝚺 0 n h);
+    let φ₀ : 𝚺ᴬ₀.Semiformula ξ n := .mkSigma φ (Hierarchy.bounded 𝚺 0 n h);
     use ofΔ₀ φ₀ Γ s;
     intro V _ _ e f;
     exact (models_ofΔ₀ φ₀ e).symm;
@@ -698,7 +698,7 @@ theorem exists_prenex_of_hierarchy (h : Hierarchy Γ s φ) :
   exact hφ' V e Empty.elim;
 
 theorem exists_matrix_provable (h : Hierarchy Γ s φ) :
-  ∃ φ₀ : 𝚺₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
+  ∃ φ₀ : 𝚺ᴬ₀.Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
   obtain ⟨_, hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨_, by simpa [Prenex.val] using hφ'⟩;
 
@@ -710,7 +710,7 @@ theorem exists_strictHierarchy_of_hierarchy (h : Hierarchy Γ s φ) :
 end
 
 lemma StrictDefinable.of_definable {V : Type*} [ORingStructure V] {Γ Γ' : Polarity} {s k : ℕ}
-    [V↓[ℒₒᵣ] ⊧* 𝗕 Γ' s] {P : (Fin k → V) → Prop} (hP : Γ-[s].Definable P) :
+    [V↓[ℒₒᵣ] ⊧* 𝗕 Γ' s] {P : (Fin k → V) → Prop} (hP : Γᴬ-[s].Definable P) :
     StrictDefinable Γ s P := by
   obtain ⟨φ, hφ⟩ := hP;
   obtain ⟨θ, hθ⟩ := Prenex.models_exists_prenex (Γ' := Γ') φ.polarity_prop;

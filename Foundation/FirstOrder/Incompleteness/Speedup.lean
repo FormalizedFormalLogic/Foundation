@@ -15,6 +15,9 @@ public import Mathlib.Data.Nat.Log
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 section Provability
@@ -68,8 +71,10 @@ lemma computablePred_proof : ComputablePred fun p : ℕ × ℕ ↦ Proof T p.1 p
 
 
 omit [L.DecidableEq] in
-private lemma definable_bddExists_proof : 𝚫₁-Predicate fun n : ℕ ↦ ∃ d ≤ π₁ n, Proof T d (π₂ n) :=
-  (HierarchySymbol.Definable.bexs_ble (ℌ := 𝚫₁) (f := fun v : Fin 1 → ℕ ↦ π₁ (v 0))
+private lemma definable_bddExists_proof :
+    𝚫ᴬ₁-Predicate fun n : ℕ ↦ ∃ d ≤ π₁ n, Proof T d (π₂ n) :=
+  (Bounding.HierarchySymbol.Definable.arithmetic_bexs_ble (ℌ := 𝚫ᴬ₁)
+    (f := fun v : Fin 1 → ℕ ↦ π₁ (v 0))
     (P := fun v x ↦ Proof T x (π₂ (v 0))) (by simp) (by definability)).of_iff <| fun v ↦
       exists_congr fun d ↦ and_congr_left' (by simp only [Arithmetic.le_def]; omega)
 

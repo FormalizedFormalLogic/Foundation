@@ -16,6 +16,9 @@ public import Mathlib.Data.ENat.SuccOrder
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
+
 open FFL.Entailment
 
 namespace FFL.FirstOrder.ProvabilityAbstraction
@@ -237,19 +240,20 @@ lemma NegativeSuccessor.quote_iff_provabilityComparisonLE {φ ψ : ArithmeticSen
 
 section
 
-def negativeSuccessor : 𝚺₁.Semisentence 2 := .mkSigma
+def negativeSuccessor : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ nφ, ∃ nψ, !(negGraph ℒₒᵣ) nφ φ ∧ !(negGraph ℒₒᵣ) nψ ψ ∧ !T.provabilityComparisonLE nφ nψ”
 
 instance negativeSuccessor_defined :
-    𝚺₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := .mk fun v ↦ by
+    𝚺ᴬ₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := .mk fun v ↦ by
   simp [negativeSuccessor, NegativeSuccessor];
 
-instance negativeSuccessor_definable : 𝚺₁-Relation (NegativeSuccessor T : V → V → Prop) :=
+instance negativeSuccessor_definable :
+    𝚺ᴬ₁-Relation (NegativeSuccessor T : V → V → Prop) :=
   (negativeSuccessor_defined T).to_definable
 
 /-- Instance for the definability tactic. -/
 instance negativeSuccessor_definable' :
-    𝚺-[0 + 1]-Relation (NegativeSuccessor T : V → V → Prop) :=
+    𝚺ᴬ-[0 + 1]-Relation (NegativeSuccessor T : V → V → Prop) :=
   (negativeSuccessor_defined T).to_definable
 
 end

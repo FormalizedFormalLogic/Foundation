@@ -4,6 +4,9 @@ public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
 /-!
 # Rosser's provability predicate
 -/
@@ -24,15 +27,16 @@ def _root_.FFL.FirstOrder.Theory.RosserProvable (φ : V) : Prop :=
 
 section
 
-noncomputable def _root_.FFL.FirstOrder.Theory.rosserProvable : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.rosserProvable :
+    𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “φ. ∃ nφ, !(negGraph L) nφ φ ∧ !T.provabilityComparisonLE φ nφ”
 
 instance _root_.FFL.FirstOrder.Theory.RosserProvable_defined :
-    𝚺₁-Predicate (T.RosserProvable : V → Prop) via T.rosserProvable := .mk fun v ↦ by
+    𝚺ᴬ₁-Predicate (T.RosserProvable : V → Prop) via T.rosserProvable := .mk fun v ↦ by
   simp [Theory.rosserProvable, Theory.RosserProvable]
 
 instance _root_.FFL.FirstOrder.Theory.rosserProvable_definable :
-    𝚺₁-Predicate (T.RosserProvable : V → Prop) := T.RosserProvable_defined.to_definable
+    𝚺ᴬ₁-Predicate (T.RosserProvable : V → Prop) := T.RosserProvable_defined.to_definable
 
 noncomputable abbrev _root_.FFL.FirstOrder.Theory.rosserPred (σ : Sentence L) :
     ArithmeticSentence :=

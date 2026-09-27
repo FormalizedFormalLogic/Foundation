@@ -5,6 +5,9 @@ public import Foundation.FirstOrder.LK.Simplified
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder
 
 open Arithmetic Bootstrapping
@@ -312,7 +315,7 @@ lemma quote_proof_def {φ : Sentence L} (b : T.Proof φ) : (⌜b⌝ : V) = ⌜b.
   suffices DerivationOf T x.val ⌜Γ.toFinset⌝ from this
   exact ⟨x.derivationOf.1, x.derivationOf.2.of_ss (by
     intro p hp
-    change V ⊧/![p] (⊥ : 𝚫₁.Semisentence 1).val at hp
+    change V ⊧/![p] (⊥ : 𝚫ᴬ₁.Semisentence 1).val at hp
     simp at hp)⟩
 
 @[simp] lemma proof_of_quote_proof2 {φ : Sentence L} (d : T ⊢₂! (φ : Proposition L)) :

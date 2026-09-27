@@ -25,6 +25,9 @@ At each world the traveler passes the gate with the cheapest toll.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding
+
 namespace FFL
 
 open Entailment
@@ -221,18 +224,21 @@ def WitnessLE (P Q : V → Prop) : Prop := ∃ w, P w ∧ ∀ v < w, ¬Q v
 /-- A witness of `P` appears strictly before any witness of `Q`. -/
 def WitnessLT (P Q : V → Prop) : Prop := ∃ w, P w ∧ ∀ v ≤ w, ¬Q v
 
-def cmpLE (P : 𝚺₁.Semisentence 2) (Q : 𝚷₁.Semisentence 2) : 𝚺₁.Semisentence 2 := .mkSigma
+def cmpLE (P : 𝚺ᴬ₁.Semisentence 2) (Q : 𝚷ᴬ₁.Semisentence 2) :
+    𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a b. ∃ w, !P.val w a ∧ ∀ v < w, ¬!Q.val v b”
 
-def cmpLT (P : 𝚺₁.Semisentence 2) (Q : 𝚷₁.Semisentence 2) : 𝚺₁.Semisentence 2 := .mkSigma
+def cmpLT (P : 𝚺ᴬ₁.Semisentence 2) (Q : 𝚷ᴬ₁.Semisentence 2) :
+    𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a b. ∃ w, !P.val w a ∧ ∀ v <⁺ w, ¬!Q.val v b”
 
-@[simp] lemma val_cmpLE {P : 𝚺₁.Semisentence 2} {Q : 𝚷₁.Semisentence 2} {a b : V} :
+@[simp] lemma val_cmpLE {P : 𝚺ᴬ₁.Semisentence 2} {Q : 𝚷ᴬ₁.Semisentence 2} {a b : V} :
     V ⊧/![a, b] (cmpLE P Q).val ↔
       WitnessLE (fun w ↦ V ⊧/![w, a] P.val) (fun w ↦ V ⊧/![w, b] Q.val) := by
   simp [cmpLE, WitnessLE]
 
-@[simp] lemma val_cmpLT [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : 𝚺₁.Semisentence 2} {Q : 𝚷₁.Semisentence 2} {a b : V} :
+@[simp] lemma val_cmpLT [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+    {P : 𝚺ᴬ₁.Semisentence 2} {Q : 𝚷ᴬ₁.Semisentence 2} {a b : V} :
     V ⊧/![a, b] (cmpLT P Q).val ↔
       WitnessLT (fun w ↦ V ⊧/![w, a] P.val) (fun w ↦ V ⊧/![w, b] Q.val) := by
   simp [cmpLT, WitnessLT, Semiformula.ballLTSucc, lt_succ_iff_le]
@@ -248,7 +254,7 @@ lemma WitnessLE.not_witnessLT [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : WitnessLE P Q
   · exact h' w hge hw;
 
 lemma exists_cheapest [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finite ι] (P : ι → V → Prop)
-    (hP : ∀ i, 𝚺₁-Predicate (P i)) (o : ι → ℕ) (h : ∃ i w, P i w) :
+    (hP : ∀ i, 𝚺ᴬ₁-Predicate (P i)) (o : ι → ℕ) (h : ∃ i w, P i w) :
     ∃ j, (∀ i, o i < o j → WitnessLT (P j) (P i)) ∧ ∀ i, o j ≤ o i → WitnessLE (P j) (P i) := by
   classical
   let := Fintype.ofFinite ι
@@ -272,7 +278,7 @@ end comparison
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Formula α}
   (T : ArithmeticTheory) [T.Δ₁] (M : StrongReflexiveCountermodel κ A) [Fintype M.World]
-  (σ : ArithmeticSentence) (θ : 𝚺₀.Semisentence 1)
+  (σ : ArithmeticSentence) (θ : 𝚺ᴬ₀.Semisentence 1)
 
 section stx
 
@@ -308,19 +314,19 @@ lemma ord_injective : Function.Injective (ord M) := by
   · exact absurd h (Fintype.equivFin _ a).isLt.ne;
   · exact (Fintype.equivFin _).injective (Fin.val_injective h);
 
-def prfNegSigma : 𝚺₁.Semisentence 2 := .mkSigma
+def prfNegSigma : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “w e. ∃ n, !(negGraph ℒₒᵣ) n e ∧ !(proof T).sigma w n”
 
-def prfNegPi : 𝚷₁.Semisentence 2 := .mkPi
+def prfNegPi : 𝚷ᴬ₁.Semisentence 2 := .mkPi
   “w e. ∀ n, !(negGraph ℒₒᵣ) n e → !(proof T).pi w n”
 
 open Classical in
 /-- The tolls of the gate into `z`. -/
-def tollSigma (z : M.extendRoot.World) : 𝚺₁.Semisentence 2 :=
+def tollSigma (z : M.extendRoot.World) : 𝚺ᴬ₁.Semisentence 2 :=
   if z = some M.u then .mkSigma “w e. !θ.val w” else prfNegSigma T
 
 open Classical in
-def tollPi (z : M.extendRoot.World) : 𝚷₁.Semisentence 2 :=
+def tollPi (z : M.extendRoot.World) : 𝚷ᴬ₁.Semisentence 2 :=
   if z = some M.u then .mkPi “w e. !θ.val w” else prfNegPi T
 
 variable {n : ℕ} (t : M.extendRoot.World → ArithmeticSemiterm Empty n)
@@ -507,7 +513,7 @@ lemma payable_iff_exists_toll (hθσ : V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val
   split_ifs;
   exacts [hθσ, .rfl];
 
-lemma toll_definable (z : M.extendRoot.World) : 𝚺₁-Predicate (Toll T M σ θ V z) :=
+lemma toll_definable (z : M.extendRoot.World) : 𝚺ᴬ₁-Predicate (Toll T M σ θ V z) :=
   Bounding.HierarchySymbol.Defined.to_definable
     (.mkSigma ((tollSigma T M θ z).val/[#0, ⌜T.modifiedSolovay M σ θ z⌝])) (.mk fun v ↦ by simp)
 
