@@ -36,8 +36,6 @@ lemma strictlyWeakerThan_localReflection [𝗜𝚺₁ ⪯ T] [Consistent T] :
     (Provability.con_of_localReflection _ trivial)
 
 theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[Hierarchy 𝚷 1] T ≊ T ∪ T.Con := by
-  have : 𝗜𝚺₁ ⪯ T ∪ T.Con :=
-    (inferInstance : 𝗜𝚺₁ ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left);
   apply Equiv.antisymm;
   constructor;
   · apply WeakerThan.ofAxm!;

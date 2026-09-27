@@ -92,6 +92,8 @@ open _root_.FFL.FirstOrder.Entailment
 
 variable (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁]
 
+instance : 𝗜𝚺₁ ⪯ T ∪ T.Con := Entailment.WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ T) inferInstance
+
 instance [ℕ↓[ℒₒᵣ] ⊧* T] : ℕ↓[ℒₒᵣ] ⊧* T ∪ T.Con := by
   have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance
   have : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans this inferInstance
