@@ -70,8 +70,8 @@ The following proofs and definitions are bad examples. Rewrite them into the bet
 
 - ```lean
   refine ⟨x, y, ?_, z, ?_⟩
-  . tactic1
-  . tactic2
+  · tactic1
+  · tactic2
   ```
 
   Prefer:

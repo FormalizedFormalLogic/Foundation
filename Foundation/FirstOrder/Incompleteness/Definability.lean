@@ -7,10 +7,12 @@ public import Foundation.FirstOrder.Incompleteness.Second
 # Definability of arithmetical syntax
 
 This file constructs internal recognizers for arithmetical syntax and recursively enumerable
-presentations of `𝗣𝗔` and `𝗜𝚺₁`.
+presentations of `𝗣𝗔` and `𝗜𝚺⁺₁`.
 -/
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -40,15 +42,17 @@ noncomputable def qqAlls (p k : V) : V := qqAlls.construction.result ![p] k
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.qqAllsDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqAllsDef : 𝚺ᴬ₁.Semisentence 3 :=
   qqAlls.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
-instance qqAlls_defined : 𝚺₁-Function₂ (qqAlls : V → V → V) via qqAllsDef := .mk
+instance qqAlls_defined : 𝚺ᴬ₁-Function₂ (qqAlls : V → V → V) via qqAllsDef := .mk
   fun v ↦ by simp [qqAlls.construction.result_defined_iff, qqAllsDef]; rfl
 
-instance qqAlls_definable : 𝚺₁-Function₂ (qqAlls : V → V → V) := qqAlls_defined.to_definable
+instance qqAlls_definable : 𝚺ᴬ₁-Function₂ (qqAlls : V → V → V) :=
+  qqAlls_defined.to_definable
 
-instance qqAlls_definable' (Γ) : Γ-[m + 1]-Function₂ (qqAlls : V → V → V) := qqAlls_definable.of_sigmaOne
+instance qqAlls_definable' {Γ : Polarity} {m : ℕ} :
+    Γᴬ-[m + 1]-Function₂ (qqAlls : V → V → V) := qqAlls_definable.of_sigmaOne
 
 end
 
@@ -170,7 +174,8 @@ lemma _root_.FFL.FirstOrder.Semiterm.quote_castLE {n : ℕ} (t : SyntacticSemite
 
 omit [L.Encodable] [L.LORDefinable] in
 lemma _root_.FFL.FirstOrder.Semiterm.freeVariables_castLE {n : ℕ} (t : SyntacticSemiterm L n) :
-    ∀ {n' : ℕ} (h : n ≤ n'), (Rew.castLE h t : SyntacticSemiterm L n').freeVariables = t.freeVariables := by
+    ∀ {n' : ℕ} (h : n ≤ n'),
+      (Rew.castLE h t : SyntacticSemiterm L n').freeVariables = t.freeVariables := by
   induction t with
   | bvar x => intro n' h; simp
   | fvar x => intro n' h; simp
@@ -189,20 +194,30 @@ lemma _root_.FFL.FirstOrder.Semiformula.quote_castLE {n : ℕ} (φ : Semiproposi
       intro n' h
       simp only [Semiformula.rew_rel, Semiformula.quote_rel]
       rw [semitermVec_val_congr (fun i ↦ ⌜Rew.castLE h (v i)⌝) (fun i ↦ ⌜v i⌝)
-        (fun i ↦ by rw [← Semiterm.quote_def, ← Semiterm.quote_def]; exact Semiterm.quote_castLE _ h)]
+        (fun i ↦ by
+          rw [← Semiterm.quote_def, ← Semiterm.quote_def]; exact Semiterm.quote_castLE _ h)]
   | hnrel r v =>
       intro n' h
       simp only [Semiformula.rew_nrel, Semiformula.quote_nrel]
       rw [semitermVec_val_congr (fun i ↦ ⌜Rew.castLE h (v i)⌝) (fun i ↦ ⌜v i⌝)
-        (fun i ↦ by rw [← Semiterm.quote_def, ← Semiterm.quote_def]; exact Semiterm.quote_castLE _ h)]
-  | hand φ ψ ihp ihq => intro n' h; simp only [LogicalConnective.HomClass.map_and, Semiformula.quote_and, ihp h, ihq h]
-  | hor φ ψ ihp ihq => intro n' h; simp only [LogicalConnective.HomClass.map_or, Semiformula.quote_or, ihp h, ihq h]
-  | hall φ ih => intro n' h; rw [Rewriting.app_all, Semiformula.quote_all, Rew.q_castLE, ih, Semiformula.quote_all]
-  | hexs φ ih => intro n' h; rw [Rewriting.app_exs, Semiformula.quote_ex, Rew.q_castLE, ih, Semiformula.quote_ex]
+        (fun i ↦ by
+          rw [← Semiterm.quote_def, ← Semiterm.quote_def]; exact Semiterm.quote_castLE _ h)]
+  | hand φ ψ ihp ihq =>
+      intro n' h; simp only [LogicalConnective.HomClass.map_and, Semiformula.quote_and,
+        ihp h, ihq h]
+  | hor φ ψ ihp ihq =>
+      intro n' h; simp only [LogicalConnective.HomClass.map_or, Semiformula.quote_or, ihp h, ihq h]
+  | hall φ ih =>
+      intro n' h; rw [Rewriting.app_all, Semiformula.quote_all, Rew.q_castLE, ih,
+        Semiformula.quote_all]
+  | hexs φ ih =>
+      intro n' h; rw [Rewriting.app_exs, Semiformula.quote_ex, Rew.q_castLE, ih,
+        Semiformula.quote_ex]
 
 omit [L.Encodable] [L.LORDefinable] in
 lemma _root_.FFL.FirstOrder.Semiformula.freeVariables_castLE {n : ℕ} (φ : Semiproposition L n) :
-    ∀ {n' : ℕ} (h : n ≤ n'), (Rew.castLE h ▹ φ : Semiproposition L n').freeVariables = φ.freeVariables := by
+    ∀ {n' : ℕ} (h : n ≤ n'),
+      (Rew.castLE h ▹ φ : Semiproposition L n').freeVariables = φ.freeVariables := by
   induction φ using Semiformula.rec' with
   | hverum => intro n' h; simp
   | hfalsum => intro n' h; simp
@@ -214,10 +229,16 @@ lemma _root_.FFL.FirstOrder.Semiformula.freeVariables_castLE {n : ℕ} (φ : Sem
       intro n' h
       simp only [Semiformula.rew_nrel, Semiformula.freeVariables_nrel]
       apply Finset.biUnion_congr rfl; intro i _; exact Semiterm.freeVariables_castLE _ h
-  | hand φ ψ ihp ihq => intro n' h; simp only [LogicalConnective.HomClass.map_and, Semiformula.freeVariables_and, ihp h, ihq h]
-  | hor φ ψ ihp ihq => intro n' h; simp only [LogicalConnective.HomClass.map_or, Semiformula.freeVariables_or, ihp h, ihq h]
-  | hall φ ih => intro n' h; simp only [Rewriting.app_all, Semiformula.freeVariables_all, Rew.q_castLE, ih]
-  | hexs φ ih => intro n' h; simp only [Rewriting.app_exs, Semiformula.freeVariables_exs, Rew.q_castLE, ih]
+  | hand φ ψ ihp ihq =>
+      intro n' h; simp only [LogicalConnective.HomClass.map_and, Semiformula.freeVariables_and,
+        ihp h, ihq h]
+  | hor φ ψ ihp ihq =>
+      intro n' h; simp only [LogicalConnective.HomClass.map_or, Semiformula.freeVariables_or,
+        ihp h, ihq h]
+  | hall φ ih =>
+      intro n' h; simp only [Rewriting.app_all, Semiformula.freeVariables_all, Rew.q_castLE, ih]
+  | hexs φ ih =>
+      intro n' h; simp only [Rewriting.app_exs, Semiformula.freeVariables_exs, Rew.q_castLE, ih]
 
 end castLE
 
@@ -240,14 +261,16 @@ lemma not_fvar?_fixitr (χ : Semiproposition L 0) (x : ℕ) :
     simp [this] at hx
 
 lemma quote_shift_fixitr (χ : Semiproposition L 0) :
-    Bootstrapping.shift (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
+    Bootstrapping.shift (V := ℕ) L
+        (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
       = ⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ := by
   have hshift : Rewriting.shift (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))
       = (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)) :=
     Semiformula.rew_eq_self_of (by simp) (fun x hx ↦ absurd hx (not_fvar?_fixitr χ x))
   rw [← Semiformula.quote_shift (V := ℕ) (Rew.fixitr 0 χ.fvSup ▹ χ), hshift]
 
-/-- Pins the number of leading universals `m` recognized by the induction-scheme code to `fvSup χ`. -/
+/-- Pins the number of leading universals `m` recognized by the induction-scheme code to
+`fvSup χ`. -/
 lemma bv_quote_fixitr (χ : Semiproposition L 0) :
     bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
       = χ.fvSup := by
@@ -262,9 +285,11 @@ lemma bv_quote_fixitr (χ : Semiproposition L 0) :
       < χ.fvSup) with heq | hlt
   · exact heq
   exfalso
-  set j := bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) with hj
+  set j := bv (V := ℕ) L
+    (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) with hj
   have hpos : 0 < χ.fvSup := by omega
-  have hsemi : IsSemiformula L j (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) := by
+  have hsemi : IsSemiformula L j
+      (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) := by
     have := IsUFormula.isSemiformula hbU; rwa [← hj] at this
   obtain ⟨γ, hγ⟩ := IsSemiformula.sound hsemi
   have hjle : j ≤ 0 + χ.fvSup := by omega
@@ -279,8 +304,10 @@ lemma bv_quote_fixitr (χ : Semiproposition L 0) :
     rw [hcast, hb] at this; exact this.symm
   have hχeq : χ = γ ⇜ (fun i : Fin j ↦ (&↑i : SyntacticTerm L)) := by
     have e1 : (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))
-        ⇜ (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L)) = χ := Semiformula.subst_comp_fixitr χ
-    have hRewEq : (Rew.subst (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L))).comp (Rew.castLE hjle)
+        ⇜ (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L)) = χ :=
+      Semiformula.subst_comp_fixitr χ
+    have hRewEq :
+        (Rew.subst (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L))).comp (Rew.castLE hjle)
         = Rew.subst (fun i : Fin j ↦ (&↑i : SyntacticTerm L)) := by
       ext x <;> simp [Rew.comp_app]
     symm
@@ -321,14 +348,17 @@ noncomputable def fvarVec (k : V) : V := fvarVec.construction.result ![] k
 @[simp] lemma fvarVec_succ (k : V) : fvarVec (k + 1) = concat (fvarVec k) (^&k) := by
   simp [fvarVec, fvarVec.construction]
 
-def _root_.FFL.FirstOrder.Arithmetic.fvarVecDef : 𝚺₁.Semisentence 2 := fvarVec.blueprint.resultDef
+def _root_.FFL.FirstOrder.Arithmetic.fvarVecDef : 𝚺ᴬ₁.Semisentence 2 :=
+  fvarVec.blueprint.resultDef
 
-instance fvarVec_defined : 𝚺₁-Function₁ (fvarVec : V → V) via fvarVecDef := .mk
+instance fvarVec_defined : 𝚺ᴬ₁-Function₁ (fvarVec : V → V) via fvarVecDef := .mk
   fun v ↦ by simp [fvarVec.construction.result_defined_iff, fvarVecDef]; rfl
 
-instance fvarVec_definable : 𝚺₁-Function₁ (fvarVec : V → V) := fvarVec_defined.to_definable
+instance fvarVec_definable : 𝚺ᴬ₁-Function₁ (fvarVec : V → V) :=
+  fvarVec_defined.to_definable
 
-instance fvarVec_definable' (Γ) : Γ-[m + 1]-Function₁ (fvarVec : V → V) := fvarVec_definable.of_sigmaOne
+instance fvarVec_definable' {Γ : Polarity} {m : ℕ} :
+    Γᴬ-[m + 1]-Function₁ (fvarVec : V → V) := fvarVec_definable.of_sigmaOne
 
 @[simp] lemma len_fvarVec (k : V) : len (fvarVec k) = k := by
   induction k using ISigma1.sigma1_succ_induction
@@ -348,14 +378,16 @@ lemma nth_fvarVec (k : V) : ∀ i < k, (fvarVec k).[i] = ^&i := by
 
 lemma fvarVec_val_eq (m : ℕ) :
     fvarVec ((m : ℕ) : V)
-      = SemitermVec.val (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) := by
+      = SemitermVec.val
+          (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) := by
   apply nth_ext (by simp)
   intro i hi
   rw [len_fvarVec] at hi
   obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat hi
   have hj : j < m := by exact_mod_cast hi
   rw [nth_fvarVec _ _ hi, show ((j : ℕ) : V) = ((⟨j, hj⟩ : Fin m) : ℕ) from rfl]
-  rw [SemitermVec.val_nth_eq (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) ⟨j, hj⟩]
+  rw [SemitermVec.val_nth_eq
+    (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) ⟨j, hj⟩]
   simp
 
 lemma subst_fvarVec_quote' {m : ℕ} (β : ArithmeticSemiproposition m) :
@@ -368,14 +400,15 @@ lemma subst_fvarVec_quote' {m : ℕ} (β : ArithmeticSemiproposition m) :
     show (⌜β⌝ : V) = Kt.val from rfl,
     show Bootstrapping.subst ℒₒᵣ w.val Kt.val = (Kt.subst w).val from rfl]
   rw [show (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ : V)
-      = (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ : Bootstrapping.Semiformula V ℒₒᵣ 0).val from rfl]
+      = (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ :
+          Bootstrapping.Semiformula V ℒₒᵣ 0).val from rfl]
   congr 1
   rw [hKt]
   simp only [FirstOrder.Semiformula.typed_quote_substs, hw, Semiterm.typed_quote_fvar]
 
 end fvarVec
 
-/-! ## Σ₁ side condition: internal `IsSigma1` predicate (for `C = Hierarchy 𝚺 1`) -/
+/-! ## Σ₁ side condition: internal `IsSigma1` predicate (for `C = ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1`) -/
 
 section isSigma1
 
@@ -441,18 +474,19 @@ noncomputable def qqBall (u q : V) : V := qqAll (qqOr (Arithmetic.qqNLT (qqBvar 
 @[simp] lemma lt_u_qqBall (u q : V) : u < qqBall u q :=
   lt_trans (Arithmetic.lt_qqNLT_right _ _) (lt_trans (lt_or_left _ _) (lt_forall _))
 
-def _root_.FFL.FirstOrder.Arithmetic.qqBallDef : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.qqBallDef : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “p u q. ∃ bv, !qqBvarDef bv 0 ∧ ∃ nlt, !qqNLTDef nlt bv u ∧ ∃ g, !qqOrDef g nlt q ∧ !qqAllDef p g”
 
-instance qqBall_defined : 𝚺₁-Function₂ (qqBall : V → V → V) via Arithmetic.qqBallDef := .mk fun v ↦ by
+instance qqBall_defined :
+    𝚺ᴬ₁-Function₂ (qqBall : V → V → V) via Arithmetic.qqBallDef := .mk fun v ↦ by
   simp [Arithmetic.qqBallDef, qqBall, (Arithmetic.qqNLT_defined (V := V)).df]
 
-instance qqBall_definable (Γ m) : Γ-[m + 1]-Function₂ (qqBall : V → V → V) :=
+instance qqBall_definable (Γ m) : Γᴬ-[m + 1]-Function₂ (qqBall : V → V → V) :=
   .of_sigmaOne qqBall_defined.to_definable
 
 namespace IsSigma1F
 
-/-- Single-step operator: `p` is `𝚺₁` given that its immediate subformulas in `C` are. -/
+/-- Single-step operator: `p` is `𝚺ᴬ₁` given that its immediate subformulas in `C` are. -/
 def Phi (C : Set V) (p : V) : Prop :=
   (p = ^⊤) ∨
   (p = ^⊥) ∨
@@ -482,7 +516,8 @@ private lemma phi_iff (C p : V) :
     · exact Or.inr (Or.inr (Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩))
     · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩)))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩)))))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+        (Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩)))))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, by simp, hp, rfl⟩))))))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
         ⟨termBShift ℒₒᵣ t, lt_u_qqBall _ _, q, lt_q_qqBall _ _,
@@ -520,11 +555,11 @@ def construction : Fixpoint.Construction V blueprint where
   defined := .mk <| by
     constructor
     · intro v
-      simp [blueprint, HierarchySymbol.Semiformula.val_sigma, eq_comm,
+      simp [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
         (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df]
     · intro v
       symm
-      simpa [blueprint, HierarchySymbol.Semiformula.val_sigma, eq_comm,
+      simpa [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
         (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df]
         using phi_iff (V := V) _ _
   monotone := by
@@ -552,13 +587,14 @@ instance : construction.StrongFinite V where
 
 end IsSigma1F
 
-/-- `IsSigma1 p`: `p` codes a `𝚺₁` formula over `ℒₒᵣ` (assuming `p` is a semiformula). -/
+/-- `IsSigma1 p`: `p` codes a `𝚺ᴬ₁` formula over `ℒₒᵣ` (assuming `p` is a
+semiformula). -/
 def IsSigma1 (p : V) : Prop := IsSigma1F.construction.Fixpoint ![] p
 
-/-- Concrete `𝚫₁`-recognizer for `IsSigma1`. -/
-noncomputable def isSigma1 : 𝚫₁.Semisentence 1 := IsSigma1F.blueprint.fixpointDefΔ₁
+/-- Concrete `𝚫ᴬ₁`-recognizer for `IsSigma1`. -/
+noncomputable def isSigma1 : 𝚫ᴬ₁.Semisentence 1 := IsSigma1F.blueprint.fixpointDefΔ₁
 
-instance IsSigma1.defined : 𝚫₁-Predicate (IsSigma1 (V := V)) via isSigma1 :=
+instance IsSigma1.defined : 𝚫ᴬ₁-Predicate (IsSigma1 (V := V)) via isSigma1 :=
   IsSigma1F.construction.fixpoint_definedΔ₁
 
 lemma IsSigma1.case_iff {p : V} :
@@ -576,45 +612,48 @@ lemma IsSigma1.case_iff {p : V} :
 
 alias ⟨IsSigma1.case, IsSigma1.mk⟩ := IsSigma1.case_iff
 
-@[simp] lemma IsSigma1.verum : IsSigma1 (V := V) (^⊤) := IsSigma1.mk $ by grind;
-@[simp] lemma IsSigma1.falsum : IsSigma1 (V := V) (^⊥) := IsSigma1.mk $ by grind;
-@[simp] lemma IsSigma1.rel {k r v : V} : IsSigma1 (^rel k r v) := IsSigma1.mk $ by grind;
-@[simp] lemma IsSigma1.nrel {k r v : V} : IsSigma1 (^nrel k r v) := IsSigma1.mk $ by grind;
+@[simp] lemma IsSigma1.verum : IsSigma1 (V := V) (^⊤) := IsSigma1.mk <| by grind;
+@[simp] lemma IsSigma1.falsum : IsSigma1 (V := V) (^⊥) := IsSigma1.mk <| by grind;
+@[simp] lemma IsSigma1.rel {k r v : V} : IsSigma1 (^rel k r v) := IsSigma1.mk <| by grind;
+@[simp] lemma IsSigma1.nrel {k r v : V} : IsSigma1 (^nrel k r v) := IsSigma1.mk <| by grind;
 
 @[simp]
 lemma IsSigma1.and_iff {p q : V} : IsSigma1 (p ^⋏ q) ↔ IsSigma1 p ∧ IsSigma1 q := by
   constructor;
   · intro h
-    rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,h⟩ | ⟨u,q',_,_,h⟩) <;>
-      simp only [qqAnd, qqVerum, qqFalsum, qqRel, qqNRel, qqOr, qqExs, qqBall, qqAll, add_left_inj, pair_ext_iff,
-        OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero, OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and,
-        true_and] at h
+    rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,h⟩ |
+        ⟨u,q',_,_,h⟩) <;>
+      simp only [qqAnd, qqVerum, qqFalsum, qqRel, qqNRel, qqOr, qqExs, qqBall, qqAll, add_left_inj,
+        pair_ext_iff, OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero,
+        OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
-    exact IsSigma1.mk $ by grind;
+    exact IsSigma1.mk <| by grind;
 
 @[simp]
 lemma IsSigma1.or_iff {p q : V} : IsSigma1 (p ^⋎ q) ↔ IsSigma1 p ∧ IsSigma1 q := by
   constructor
   · intro h
-    rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,h⟩ | ⟨u,q',_,_,h⟩) <;>
-      simp only [qqOr, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqExs, qqBall, qqAll, add_left_inj, pair_ext_iff,
-        OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero, OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and,
-        true_and] at h
+    rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,h⟩ |
+        ⟨u,q',_,_,h⟩) <;>
+      simp only [qqOr, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqExs, qqBall, qqAll, add_left_inj,
+        pair_ext_iff, OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero,
+        OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
-    exact IsSigma1.mk $ by grind;
+    exact IsSigma1.mk <| by grind;
 
 @[simp] lemma IsSigma1.ex_iff {p : V} : IsSigma1 (^∃ p) ↔ IsSigma1 p := by
   constructor
   · intro h
-    rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,hp,h⟩ | ⟨u,q',_,_,h⟩) <;>
-      simp only [qqExs, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqBall, qqAll, add_left_inj, pair_ext_iff,
-        OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero, OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and,
-        true_and] at h
+    rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,hp,h⟩ |
+        ⟨u,q',_,_,h⟩) <;>
+      simp only [qqExs, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqBall, qqAll, add_left_inj,
+        pair_ext_iff, OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero,
+        OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
     · obtain rfl := h; exact hp
   · rintro hp
-    exact IsSigma1.mk $ by grind;
+    exact IsSigma1.mk <| by grind;
 
 lemma IsSigma1.of_all {p : V} (h : IsSigma1 (^∀ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsSigma1 q
@@ -661,7 +700,8 @@ lemma typed_quote_succInd (φ : ArithmeticSemiproposition 1) :
   simp
 
 /-- The typed `succInd` shape as a function of the (typed) core code `K = ⌜ψ⌝`. -/
-noncomputable def indBody (K : Bootstrapping.Semiformula V ℒₒᵣ 1) : Bootstrapping.Semiformula V ℒₒᵣ 0 :=
+noncomputable def indBody (K : Bootstrapping.Semiformula V ℒₒᵣ 1) :
+    Bootstrapping.Semiformula V ℒₒᵣ 0 :=
   (K.subst ![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝])
     🡒 ((∀¹ (K 🡒 K.subst ![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝])) 🡒 ∀¹ K)
 
@@ -673,32 +713,36 @@ lemma indBody_quote (φ : ArithmeticSemiproposition 1) :
 noncomputable def indBodyVal (k : V) : V :=
   Bootstrapping.imp ℒₒᵣ
     (Bootstrapping.subst ℒₒᵣ
-      (Bootstrapping.SemitermVec.val (![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 0)) k)
+      (Bootstrapping.SemitermVec.val
+        (![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 0)) k)
     (Bootstrapping.imp ℒₒᵣ
       (Bootstrapping.qqAll (Bootstrapping.imp ℒₒᵣ k
         (Bootstrapping.subst ℒₒᵣ
-          (Bootstrapping.SemitermVec.val (![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 1)) k)))
+          (Bootstrapping.SemitermVec.val
+            (![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 1)) k)))
       (Bootstrapping.qqAll k))
 
-lemma indBodyVal_eq (K : Bootstrapping.Semiformula V ℒₒᵣ 1) : indBodyVal K.val = (indBody K).val := by
-  simp only [indBodyVal, indBody, Bootstrapping.Semiformula.val_imp, Bootstrapping.Semiformula.val_all,
-    Bootstrapping.Semiformula.val_substs]
+lemma indBodyVal_eq (K : Bootstrapping.Semiformula V ℒₒᵣ 1) :
+    indBodyVal K.val = (indBody K).val := by
+  simp only [indBodyVal, indBody, Bootstrapping.Semiformula.val_imp,
+    Bootstrapping.Semiformula.val_all, Bootstrapping.Semiformula.val_substs]
 
 lemma le_indBodyVal (k : V) : k ≤ indBodyVal k := by
   unfold indBodyVal Bootstrapping.imp
   exact (Bootstrapping.le_qqAll _).trans
     (le_of_lt ((Bootstrapping.lt_or_right _ _).trans (Bootstrapping.lt_or_right _ _)))
 
-lemma indBodyVal_quote (γ : ArithmeticSemiproposition 1) : indBodyVal (⌜γ⌝ : ℕ) = (⌜succInd γ⌝ : ℕ) := by
+lemma indBodyVal_quote (γ : ArithmeticSemiproposition 1) :
+    indBodyVal (⌜γ⌝ : ℕ) = (⌜succInd γ⌝ : ℕ) := by
   rw [show (⌜γ⌝ : ℕ) = (⌜γ⌝ : Bootstrapping.Semiformula ℕ ℒₒᵣ 1).val from rfl, indBodyVal_eq,
     indBody_quote]
   rfl
 
-instance indBodyVal_definable : 𝚺₁-Function₁ (indBodyVal : V → V) := by
+instance indBodyVal_definable : 𝚺ᴬ₁-Function₁ (indBodyVal : V → V) := by
   unfold indBodyVal
   definability
 
-/-! ### A concrete `𝚺₁`-graph for `indBodyVal` -/
+/-! ### A concrete `𝚺ᴬ₁`-graph for `indBodyVal` -/
 
 /-- Standard `ℕ`-code of the substitution vector `![⌜‘0’⌝]` (the `ψ(0)` instance). -/
 def indSubstConst0 : ℕ :=
@@ -710,18 +754,22 @@ def indSubstConst1 : ℕ :=
 
 lemma val_indSubstConst0 :
     (↑indSubstConst0 : V)
-      = Bootstrapping.SemitermVec.val (![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 0) := by
-  rw [indSubstConst0, ← FFL.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘0’ : ArithmeticSemiterm ℕ 0)])]
+      = Bootstrapping.SemitermVec.val
+          (![⌜(‘0’ : ArithmeticSemiterm ℕ 0)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 0) := by
+  rw [indSubstConst0,
+    ← FFL.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘0’ : ArithmeticSemiterm ℕ 0)])]
   congr 1; funext i; simp [Matrix.cons_val_fin_one]
 
 lemma val_indSubstConst1 :
     (↑indSubstConst1 : V)
-      = Bootstrapping.SemitermVec.val (![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 1) := by
-  rw [indSubstConst1, ← FFL.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)])]
+      = Bootstrapping.SemitermVec.val
+          (![⌜(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)⌝] : Bootstrapping.SemitermVec V ℒₒᵣ 1 1) := by
+  rw [indSubstConst1,
+    ← FFL.FirstOrder.Semiterm.quote_eq_encode' (V := V) (![(‘#0 + 1’ : ArithmeticSemiterm ℕ 1)])]
   congr 1; funext i; simp [Matrix.cons_val_fin_one]
 
-/-- Concrete `𝚺₁`-graph of `indBodyVal`, a chain of the `subst`/`imp`/`qqAll` graphs. -/
-noncomputable def indBodyValGraph : 𝚺₁.Semisentence 2 := .mkSigma
+/-- Concrete `𝚺ᴬ₁`-graph of `indBodyVal`, a chain of the `subst`/`imp`/`qqAll` graphs. -/
+noncomputable def indBodyValGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “y k.
     ∃ a, !(Bootstrapping.substsGraph ℒₒᵣ) a ↑indSubstConst0 k ∧
     ∃ s1, !(Bootstrapping.substsGraph ℒₒᵣ) s1 ↑indSubstConst1 k ∧
@@ -731,7 +779,8 @@ noncomputable def indBodyValGraph : 𝚺₁.Semisentence 2 := .mkSigma
     ∃ i2, !(Bootstrapping.impGraph ℒₒᵣ) i2 qa1 qak ∧
     !(Bootstrapping.impGraph ℒₒᵣ) y a i2”
 
-instance indBodyVal.defined : 𝚺₁-Function₁ (indBodyVal : V → V) via indBodyValGraph := .mk fun v ↦ by
+instance indBodyVal.defined :
+    𝚺ᴬ₁-Function₁ (indBodyVal : V → V) via indBodyValGraph := .mk fun v ↦ by
   simp [indBodyValGraph, numeral_eq_natCast, val_indSubstConst0, val_indSubstConst1, indBodyVal]
 
 end succInd
@@ -754,8 +803,8 @@ def InductionR (S : V → Prop) (p : V) : Prop :=
 
 end ch
 
-/-- Concrete `𝚫₁.Semisentence 1` recognizer for `InductionR cond`. -/
-noncomputable def chInd (cond : 𝚫₁.Semisentence 1) : 𝚫₁.Semisentence 1 := .mkDelta
+/-- Concrete `𝚫ᴬ₁.Semisentence 1` recognizer for `InductionR cond`. -/
+noncomputable def chInd (cond : 𝚫ᴬ₁.Semisentence 1) : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
   (.mkSigma “p.
     ∃ m < p + 1, ∃ b < p + 1,
       !qqAllsDef p b m ∧ !(Bootstrapping.isUFormula ℒₒᵣ).sigma b
@@ -766,14 +815,15 @@ noncomputable def chInd (cond : 𝚫₁.Semisentence 1) : 𝚫₁.Semisentence 1
   (.mkPi “p.
     ∃ m < p + 1, ∃ b < p + 1,
       (∀ y, !qqAllsDef y b m → y = p) ∧ !(Bootstrapping.isUFormula ℒₒᵣ).pi b
-      ∧ (∀ y, !(Bootstrapping.shiftGraph ℒₒᵣ) y b → y = b) ∧ (∀ y, !(Bootstrapping.bvGraph ℒₒᵣ) y b → y = m)
+      ∧ (∀ y, !(Bootstrapping.shiftGraph ℒₒᵣ) y b → y = b)
+      ∧ (∀ y, !(Bootstrapping.bvGraph ℒₒᵣ) y b → y = m)
       ∧ ∀ fv, !fvarVecDef fv m → ∀ s, !(Bootstrapping.substsGraph ℒₒᵣ) s fv b
         → ∃ K < s + 1, !(Bootstrapping.isSemiformula ℒₒᵣ).pi 1 K
           ∧ !cond.pi K ∧ ∀ ib, !indBodyValGraph ib K → s = ib”)
 
-noncomputable def chUniv : 𝚫₁.Semisentence 1 := chInd ⊤
+noncomputable def chUniv : 𝚫ᴬ₁.Semisentence 1 := chInd ⊤
 
-noncomputable def chSigma1 : 𝚫₁.Semisentence 1 := chInd Bootstrapping.isSigma1
+noncomputable def chSigma1 : 𝚫ᴬ₁.Semisentence 1 := chInd Bootstrapping.isSigma1
 
 section chDefined
 
@@ -781,25 +831,27 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping
 
-instance InductionR.defined {S : V → Prop} {cond : 𝚫₁.Semisentence 1}
-    [hcond : 𝚫₁-Predicate[V] S via cond] :
-    𝚫₁-Predicate[V] (InductionR S : V → Prop) via chInd cond := .mk <| by
+instance InductionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}
+    [hcond : 𝚫ᴬ₁-Predicate[V] S via cond] :
+    𝚫ᴬ₁-Predicate[V] (InductionR S : V → Prop) via chInd cond := .mk <| by
   constructor
-  · intro v; simp [chInd, HierarchySymbol.Semiformula.val_sigma, eq_comm]
+  · intro v; simp [chInd, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm]
   · intro v
-    simp [chInd, HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le, eq_comm]
+    simp [chInd, Bounding.HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le,
+      eq_comm]
 
 noncomputable instance InductionR.univ_defined :
-    𝚫₁-Predicate[V] (InductionR (fun _ ↦ True) : V → Prop) via chUniv :=
+    𝚫ᴬ₁-Predicate[V] (InductionR (fun _ ↦ True) : V → Prop) via chUniv :=
   InductionR.defined (hcond := ⟨by simp, by intro v; simp⟩)
 
 noncomputable instance InductionR.sigma1_defined :
-    𝚫₁-Predicate[V] (InductionR IsSigma1 : V → Prop) via chSigma1 :=
+    𝚫ᴬ₁-Predicate[V] (InductionR IsSigma1 : V → Prop) via chSigma1 :=
   InductionR.defined
 
 end chDefined
 
-lemma mem_inductionScheme_iff {C : ArithmeticSemiproposition 1 → Prop} (φ : ArithmeticSemiproposition 0) :
+lemma mem_inductionScheme_iff {C : ArithmeticSemiproposition 1 → Prop}
+    (φ : ArithmeticSemiproposition 0) :
     (∃ σ ∈ InductionScheme ℒₒᵣ C, φ = (σ : ArithmeticSemiproposition 0))
       ↔ ∃ ψ : ArithmeticSemiproposition 1, C ψ ∧ φ = (succInd ψ).univCl' := by
   simp only [InductionScheme, Set.mem_ofPred_eq]
@@ -812,7 +864,8 @@ lemma mem_inductionScheme_iff {C : ArithmeticSemiproposition 1 → Prop} (φ : A
 
 /-- A freevar-free, `bv`-pinned formula `β` that substitutes back to `succInd γ` is exactly the
 `fixitr`-image, so its `m`-fold closure equals `(succInd γ).univCl'`. -/
-theorem closure_inversion {m : ℕ} (β : ArithmeticSemiproposition m) (γ : ArithmeticSemiproposition 1)
+theorem closure_inversion {m : ℕ} (β : ArithmeticSemiproposition m)
+    (γ : ArithmeticSemiproposition 1)
     (hfree : β.freeVariables = ∅) (hbv : Bootstrapping.bv (V := ℕ) ℒₒᵣ (⌜β⌝ : ℕ) = m)
     (hβγ : β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)) = succInd γ) :
     (∀¹* β : ArithmeticSemiproposition 0) = (succInd γ).univCl' := by
@@ -903,7 +956,8 @@ theorem inductionR_quote_iff {S : ℕ → Prop} {C : ArithmeticSemiproposition 1
     exact closure_inversion β γ hβfree hbv hβγ
   · rintro ⟨ψ, hψ, rfl⟩
     set χ : ArithmeticSemiproposition 0 := succInd ψ with hχ
-    set b : ℕ := (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))⌝ : ℕ) with hb
+    set b : ℕ :=
+      (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))⌝ : ℕ) with hb
     have hcode : (⌜χ.univCl'⌝ : ℕ) = Bootstrapping.qqAlls b ((0 + χ.fvSup : ℕ)) := by
       rw [hb, Bootstrapping.quote_univCl' (V := ℕ) χ]; simp
     have hs : Bootstrapping.subst ℒₒᵣ (Bootstrapping.fvarVec (0 + χ.fvSup : ℕ)) b
@@ -938,11 +992,14 @@ noncomputable instance InductionScheme.delta1_univ :
     have h : (ℕ ⊧/![(⌜φ⌝ : ℕ)] chUniv.val) ↔ InductionR (fun _ ↦ True) (⌜φ⌝ : ℕ) := by
       simp
     rw [h]
-    exact (inductionR_quote_iff (C := Set.univ) (fun _ ↦ Iff.rfl) φ).trans (mem_inductionScheme_iff φ).symm
-  isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
-    have := InductionR.univ_defined (V := V); simp
+    exact (inductionR_quote_iff (C := Set.univ) (fun _ ↦ Iff.rfl) φ).trans
+      (mem_inductionScheme_iff φ).symm
+  isDelta1 :=
+    Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
+      (fun V _ _ ↦ by
+        have := InductionR.univ_defined (V := V); simp)
 
-/-! ## Correctness of `IsSigma1`: `IsSigma1 ⌜ψ⌝ ↔ Hierarchy 𝚺 1 ψ` -/
+/-! ## Correctness of `IsSigma1`: `IsSigma1 ⌜ψ⌝ ↔ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ` -/
 
 open Bootstrapping in
 lemma quote_ball {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposition (n + 1)) :
@@ -961,8 +1018,11 @@ lemma termBShift_quote {n : ℕ} (s : SyntacticSemiterm ℒₒᵣ n) :
   simp [Semiterm.quote_def, Semiterm.typed_quote_bShift]
 
 open Bootstrapping in
-lemma isSigma1_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hierarchy 𝚺 1 ψ) : IsSigma1 (⌜ψ⌝ : ℕ) := by
-  apply sigma₁_induction' h (P := fun n φ => IsSigma1 (⌜φ⌝ : ℕ));
+lemma isSigma1_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n}
+    (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ) :
+    IsSigma1 (⌜ψ⌝ : ℕ) := by
+  apply Bounding.Hierarchy.arithmetic_sigma₁_induction' h
+    (P := fun n φ => IsSigma1 (⌜φ⌝ : ℕ))
   · intro n; simp
   · intro n; simp
   · intro n t₁ t₂; simp [Semiformula.quote_rel]
@@ -979,18 +1039,19 @@ lemma isSigma1_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hi
   · intro n φ hφ ihφ; simpa [Semiformula.quote_ex] using ihφ
 
 open Bootstrapping in
-lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : ArithmeticSemiproposition n) : IsSigma1 (⌜ψ⌝ : ℕ) → Hierarchy 𝚺 1 ψ := by
+lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
+    IsSigma1 (⌜ψ⌝ : ℕ) → ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ := by
   induction ψ using Semiformula.rec' with
   | hverum => intro _; simp
   | hfalsum => intro _; simp
-  | hrel R v => intro _; exact Hierarchy.rel _ _ _ _
-  | hnrel R v => intro _; exact Hierarchy.nrel _ _ _ _
+  | hrel R v => intro _; exact Bounding.Hierarchy.rel (ℬ := ℬ[<, ℒₒᵣ]) _ _ _ _
+  | hnrel R v => intro _; exact Bounding.Hierarchy.nrel (ℬ := ℬ[<, ℒₒᵣ]) _ _ _ _
   | hand φ ψ ihφ ihψ =>
     intro h; rw [Semiformula.quote_and (V := ℕ) φ ψ, IsSigma1.and_iff] at h
-    exact Hierarchy.and (ihφ h.1) (ihψ h.2)
+    exact Bounding.Hierarchy.and (ℬ := ℬ[<, ℒₒᵣ]) (ihφ h.1) (ihψ h.2)
   | hor φ ψ ihφ ihψ =>
     intro h; rw [Semiformula.quote_or (V := ℕ) φ ψ, IsSigma1.or_iff] at h
-    exact Hierarchy.or (ihφ h.1) (ihψ h.2)
+    exact Bounding.Hierarchy.or (ℬ := ℬ[<, ℒₒᵣ]) (ihφ h.1) (ihψ h.2)
   | hall φ ihφ =>
     intro h
     rw [Semiformula.quote_all (V := ℕ) φ] at h
@@ -1010,46 +1071,51 @@ lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : ArithmeticSemiproposition n) : IsSig
       apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
       rw [Semiformula.quote_all (V := ℕ) φ, hφeq, quote_ball, hs, hφ₂]
       rfl
-    have hφ : Hierarchy 𝚺 1 φ := ihφ (by rw [hφeq]; simp [IsSigma1.or_iff, hq, Arithmetic.qqNLT])
-    have hφ2 : Hierarchy 𝚺 1 φ₂ := by
+    have hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ :=
+      ihφ (by rw [hφeq]; simp [IsSigma1.or_iff, hq, Arithmetic.qqNLT])
+    have hφ2 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ₂ := by
       have hform : φ = (“#0 < !!(Rew.bShift s)” 🡒 φ₂) :=
         (Semiformula.all_inj _ _).mp (by rw [← Semiformula.ball_eq]; exact heq)
-      rw [hform, Semiformula.imp_eq, Hierarchy.or_iff] at hφ
+      rw [hform, Semiformula.imp_eq, Bounding.Hierarchy.or_iff] at hφ
       exact hφ.2
     rw [heq]
-    exact Hierarchy.ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
+    exact Bounding.Hierarchy.arithmetic_ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
   | hexs φ ihφ =>
     intro h; rw [Semiformula.quote_ex (V := ℕ) φ, IsSigma1.ex_iff] at h
-    exact Hierarchy.exs (ihφ h)
+    exact Bounding.Hierarchy.exs (ℬ := ℬ[<, ℒₒᵣ]) (ihφ h)
 
-/-- Correctness of the `𝚺₁`-code recognizer. -/
+/-- Correctness of the `𝚺ᴬ₁`-code recognizer. -/
 lemma isSigma1_iff_hierarchy {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-  Bootstrapping.IsSigma1 (⌜ψ⌝ : ℕ) ↔ Hierarchy 𝚺 1 ψ :=
+  Bootstrapping.IsSigma1 (⌜ψ⌝ : ℕ) ↔ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ :=
   ⟨hierarchy_of_isSigma1 ψ, isSigma1_of_hierarchy⟩
 
-/-- The induction schema `InductionScheme ℒₒᵣ (Hierarchy 𝚺 1)` is `Δ₁`, via `chSigma1`. -/
-noncomputable instance InductionScheme.delta1_sigma1 : (InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)).Δ₁ where
+/-- The induction schema `InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)` is `Δ₁`, via `chSigma1`. -/
+noncomputable instance InductionScheme.delta1_sigma1 :
+    (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)).Δ₁ where
   ch := chSigma1
   mem_iff φ := by
     have h : (ℕ ⊧/![(⌜φ⌝ : ℕ)] chSigma1.val) ↔ InductionR Bootstrapping.IsSigma1 (⌜φ⌝ : ℕ) := by
       simp
     rw [h]
     exact (inductionR_quote_iff isSigma1_iff_hierarchy φ).trans (mem_inductionScheme_iff φ).symm
-  isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
-    have := InductionR.sigma1_defined (V := V); simp
+  isDelta1 :=
+    Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
+      (fun V _ _ ↦ by
+        have := InductionR.sigma1_defined (V := V); simp)
 
-/-! ## `𝗣𝗔` and `𝗜𝚺₁` are recursively enumerable -/
+/-! ## `𝗣𝗔` and `𝗜𝚺⁺₁` are recursively enumerable -/
 
 lemma inductionScheme_re_univ : REPred (· ∈ InductionScheme ℒₒᵣ Set.univ) := by
   have hR : REPred (InductionR fun _ : ℕ ↦ True) := rePred_iff_sigma1.mpr (by definability)
-  refine (hR.comp Computable.encode).of_eq $ fun σ ↦ ?_;
+  refine (hR.comp Computable.encode).of_eq <| fun σ ↦ ?_;
   simpa [Semiformula.quote_eq_encode] using
     (inductionR_quote_iff (S := fun _ : ℕ ↦ True) (C := Set.univ)
       (fun _ ↦ Iff.rfl) σ).trans (mem_inductionScheme_iff σ).symm
 
-lemma inductionScheme_re_sigma1 : REPred (· ∈ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)) := by
+lemma inductionScheme_re_sigma1 :
+    REPred (· ∈ InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)) := by
   have hR : REPred (InductionR Bootstrapping.IsSigma1) :=
-    rePred_iff_sigma1.mpr <| HierarchySymbol.Definable.of_deltaOne
+    rePred_iff_sigma1.mpr <| Bounding.HierarchySymbol.Definable.of_deltaOne
       InductionR.sigma1_defined.to_definable
   refine (hR.comp Computable.encode).of_eq fun σ ↦ ?_
   simpa [Semiformula.quote_eq_encode] using
@@ -1057,18 +1123,19 @@ lemma inductionScheme_re_sigma1 : REPred (· ∈ InductionScheme ℒₒᵣ (Arit
 
 instance : (InductionScheme ℒₒᵣ Set.univ).RE := ⟨inductionScheme_re_univ⟩
 
-instance : (InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)).RE := ⟨inductionScheme_re_sigma1⟩
+instance : (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)).RE :=
+  ⟨inductionScheme_re_sigma1⟩
 
 instance : 𝗣𝗔.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
 
-instance : 𝗜𝚺₁.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
+instance : 𝗜𝚺⁺₁.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
 
-/-! ## `𝗣𝗔` and `𝗜𝚺₁` are `Δ₁`
+/-! ## `𝗣𝗔` and `𝗜𝚺⁺₁` are `Δ₁`
 
 TODO: remove. Not mathematically essential — `RE` above already suffices. -/
 
 noncomputable instance : 𝗣𝗔.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_univ
 
-noncomputable instance : 𝗜𝚺₁.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_sigma1
+noncomputable instance : 𝗜𝚺⁺₁.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_sigma1
 
 end FFL.FirstOrder.Arithmetic

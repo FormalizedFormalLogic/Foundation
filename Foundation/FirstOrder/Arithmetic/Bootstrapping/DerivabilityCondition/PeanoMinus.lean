@@ -27,7 +27,7 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 -- reverts automatically at `end FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic`).
 set_option linter.dupNamespace false
 
-open Classical FFL.Entailment
+open FFL.Entailment
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -83,8 +83,10 @@ lemma numeral_add (n m : V) :
     · simp [numeral_succ_pos' pos]
   case succ m ih =>
     suffices
-      T.internalize V ⊢ 𝕹 n + (𝕹 (m + 1) + 𝕹 1) ≐ 𝕹 (n + m + 1) + 𝕹 1 by simpa [←one_add_one_eq_two, ←add_assoc]
-    have e1 : T.internalize V ⊢ 𝕹 n + (𝕹 (m + 1) + 𝕹 1) ≐ (𝕹 n + 𝕹 (m + 1)) + 𝕹 1 := term_add_assoc T _ _ _
+      T.internalize V ⊢ 𝕹 n + (𝕹 (m + 1) + 𝕹 1) ≐ 𝕹 (n + m + 1) + 𝕹 1 by
+        simpa [←one_add_one_eq_two, ←add_assoc]
+    have e1 : T.internalize V ⊢ 𝕹 n + (𝕹 (m + 1) + 𝕹 1) ≐ (𝕹 n + 𝕹 (m + 1)) + 𝕹 1 :=
+      term_add_assoc T _ _ _
     have e2 : T.internalize V ⊢ (𝕹 n + 𝕹 (m + 1)) + 𝕹 1 ≐ 𝕹 (n + (m + 1)) + 𝕹 1 :=
       subst_add_eq_add T _ _ _ _ ⨀ ih ⨀ (eq_refl T (𝕹 1))
     simpa [add_assoc] using eq_trans e1 e2
@@ -187,6 +189,7 @@ lemma numeral_nlt {n m : V} :
       simpa using TProof.specialize₂! this (𝕹 n) (𝕹 m)
     exact l₂ ⨀ l₁
 
+open scoped Classical in
 lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
     T.internalize V ⊢ (t <' 𝕹 m) 🡘 substItrDisj ![t] (#'1 ≐ #'0) m := by
   induction m using sigma1_pos_succ_induction
@@ -228,6 +231,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
       simpa using TProof.specialize₂! this t 𝕹(m + 1)
     cl_prover [ih, this]
 
+open scoped Classical in
 lemma ball_intro (φ : Semiformula V ℒₒᵣ 1) (n : V)
     (bs : ∀ i < n, T.internalize V ⊢ φ.subst ![𝕹 i]) :
     T.internalize V ⊢ φ.ball (𝕹 n) := by
@@ -246,6 +250,7 @@ lemma ball_intro (φ : Semiformula V ℒₒᵣ 1) (n : V)
     have ec : T.internalize V ⊢ (&'0 ≐ 𝕹 i) 🡒 (𝕹 i ≐ &'0) := eq_symm T (Semiterm.fvar 0) (𝕹 i)
     cl_prover [hi, rl, ec]
 
+open scoped Classical in
 lemma bexs_intro (φ : Semiformula V ℒₒᵣ 1) (n : V) {i}
     (hi : i < n) (b : T.internalize V ⊢ φ.subst ![𝕹 i]) :
     T.internalize V ⊢ φ.bexs (𝕹 n) := by

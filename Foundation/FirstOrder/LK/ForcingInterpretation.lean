@@ -50,7 +50,7 @@ structure ForcingTranslation {L : Language} [L.Eq] (T : Theory L) [𝗘𝗤 L �
 
 namespace ForcingTranslation
 
-variable {L K : Language} [L.Eq] {T : Theory L} [𝗘𝗤 L ⪯ T]
+variable {L K : Language} [L.Eq] {T : Theory L} [𝗘𝗤 L ⪯ T] {ξ : Type*} {n : ℕ}
 
 variable (ℙ : ForcingTranslation T K)
 
@@ -76,9 +76,12 @@ namespace BinderNotation
 
 open Lean
 
-syntax:max "∀ " ident " ≤[" term "] " first_order_term ", " first_order_formula:0 : first_order_formula
-syntax:max "∀ " ident " ∈[" term "] " first_order_term ", " first_order_formula:0 : first_order_formula
-syntax:max "∃ " ident " ∈[" term "] " first_order_term ", " first_order_formula:0 : first_order_formula
+syntax:max "∀ " ident " ≤[" term "] " first_order_term ", "
+  first_order_formula:0 : first_order_formula
+syntax:max "∀ " ident " ∈[" term "] " first_order_term ", "
+  first_order_formula:0 : first_order_formula
+syntax:max "∃ " ident " ∈[" term "] " first_order_term ", "
+  first_order_formula:0 : first_order_formula
 
 macro_rules
   | `(⤫formula($type)[ $binders* | $fbinders* | ∀ $q ≤[$ℙ] $p, $φ ]) => do
@@ -98,7 +101,7 @@ end BinderNotation
 
 namespace ForcingTranslation
 
-variable {L K : Language} [L.Eq] {T : Theory L} [𝗘𝗤 L ⪯ T]
+variable {L K : Language} [L.Eq] {T : Theory L} [𝗘𝗤 L ⪯ T] {ξ : Type*} {n : ℕ}
 variable (ℙ : ForcingTranslation T K)
 
 /-- The value of a term, with the condition and value preceding the original variables. -/
@@ -136,7 +139,8 @@ def translationᵢ {n} : Semiformulaᵢ K ξ n → Semiformula L ξ (n + 1)
 
 def translation {n} : Semiformula K ξ n → Semiformula L ξ (n + 1) := fun φ ↦ ℙ.translationᵢ φᴺ
 
-def interpret (φ : Semiformula K ξ n) : Semiformula L ξ n := “∀ p, %ℙ.isCond p → !(ℙ.translation φ) p ⋯”
+def interpret (φ : Semiformula K ξ n) : Semiformula L ξ n :=
+  “∀ p, %ℙ.isCond p → !(ℙ.translation φ) p ⋯”
 
 section semantics
 
@@ -248,10 +252,11 @@ private lemma eval_translationᵢ_rel {k} (R : K.Rel k) (v : Fin k → Semiterm 
   have h : ∀ i, ℙ.domain.val ![(p : M), (v i).relationalVal bv fv] := by
     intro i
     rcases (v i).bvar_or_fvar_of_relational with (⟨j, hj⟩ | ⟨j, hj⟩)
-    . simpa [hj, forcesExists_iff] using hbv j
-    . simpa [hj, forcesExists_iff] using hfv j
+    · simpa [hj, forcesExists_iff] using hbv j
+    · simpa [hj, forcesExists_iff] using hfv j
   simp [translationᵢ, translateRel, Matrix.comp_vecCons', Function.comp_def,
-    eval_varEqual, forall_and, ← funext_iff, h, Kripke.Model.Forces, Kripke.Model.Rel, forcesExists_iff]
+    eval_varEqual, forall_and, ← funext_iff, h, Kripke.Model.Forces, Kripke.Model.Rel,
+    forcesExists_iff]
 
 lemma eval_translationᵢ_iff_kripke {φ : Semiformulaᵢ K ξ n}
     (hbv : ∀ i, p ⊩↓ bv i) (hfv : ∀ i, p ⊩↓ fv i) :
@@ -307,7 +312,7 @@ variable [K.Relational] {V : Theory K}
 structure Interpret (V : Theory K) : Prop where
   proves_interpret : ∀ ψ ∈ V, T ⊢ ℙ.interpret ψ
 
-theorem soundness (H : ℙ.Interpret V) : V ⊢ φ → T ⊢ ℙ.interpret φ := fun h ↦ by
+theorem soundness {φ : Sentence K} (H : ℙ.Interpret V) : V ⊢ φ → T ⊢ ℙ.interpret φ := fun h ↦ by
   apply Theory.Proof.complete_on_eq_models.{_,0}
   intro M _ _ _ _
   apply ℙ.models_interpret.mpr

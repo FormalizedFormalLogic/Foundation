@@ -11,15 +11,18 @@ Main reference: Jeremy Avigad, "Forcing in proof theory" [Avi04]
 
 namespace FFL.FirstOrder
 
-variable {L : Language.{u}} [L.Relational]
+variable {L : Language} [L.Relational]
 
 namespace Kripke.Model
 
 variable {ℙ : Type*} [Preorder ℙ] {Name : Type*} [Kripke.Model L ℙ Name]
+variable {n : ℕ} {ξ : Type*}
 
-def WeaklyForces (p : ℙ) (bv : Fin n → Name) (fv : ξ → Name) (φ : Semiformula L ξ n) : Prop := Forces p bv fv φᴺ
+def WeaklyForces (p : ℙ) (bv : Fin n → Name) (fv : ξ → Name) (φ : Semiformula L ξ n) : Prop :=
+  Forces p bv fv φᴺ
 
-scoped[FFL.FirstOrder.KripkeModel] notation:45 p " ⊩ᶜ[" bv "|" fv "] " φ:46 => FFL.FirstOrder.Kripke.Model.WeaklyForces p bv fv φ
+scoped[FFL.FirstOrder.KripkeModel] notation:45 p " ⊩ᶜ[" bv "|" fv "] " φ:46 =>
+  FFL.FirstOrder.Kripke.Model.WeaklyForces p bv fv φ
 
 open scoped FFL.FirstOrder.KripkeModel
 
@@ -29,11 +32,13 @@ namespace WeaklyForces
 
 variable {p q r : ℙ} {bv : Fin n → Name} {fv : ξ → Name}
 
-@[simp] lemma rel {R : L.Rel k} {t : Fin k → Semiterm L ξ n} :
-    p ⊩ᶜ[bv|fv] Semiformula.rel R t ↔ ∀ q ≤ p, ∃ r ≤ q, Rel r R fun i ↦ (t i).relationalVal bv fv := by simp [WeaklyForces]
+@[simp] lemma rel {k : ℕ} {R : L.Rel k} {t : Fin k → Semiterm L ξ n} :
+    p ⊩ᶜ[bv|fv] Semiformula.rel R t ↔
+      ∀ q ≤ p, ∃ r ≤ q, Rel r R fun i ↦ (t i).relationalVal bv fv := by simp [WeaklyForces]
 
-@[simp] lemma nrel {R : L.Rel k} {t : Fin k → Semiterm L ξ n} :
-    p ⊩ᶜ[bv|fv] Semiformula.nrel R t ↔ ∀ q ≤ p, ¬Rel q R fun i ↦ (t i).relationalVal bv fv := by simp [WeaklyForces]
+@[simp] lemma nrel {k : ℕ} {R : L.Rel k} {t : Fin k → Semiterm L ξ n} :
+    p ⊩ᶜ[bv|fv] Semiformula.nrel R t ↔
+      ∀ q ≤ p, ¬Rel q R fun i ↦ (t i).relationalVal bv fv := by simp [WeaklyForces]
 
 @[simp] lemma verum : p ⊩ᶜ[bv|fv] (⊤ : Semiformula L ξ n) := by simp [WeaklyForces]
 
@@ -56,7 +61,8 @@ variable {p q r : ℙ} {bv : Fin n → Name} {fv : ξ → Name}
 @[simp] lemma all_of_constantDomain [ConstantDomain ℙ] {φ : Semiformula L ξ (n + 1)} :
     p ⊩ᶜ[bv|fv] ∀¹ φ ↔ ∀ x : Name, p ⊩ᶜ[x :> bv|fv] φ := by simp [WeaklyForces, -Forces.all]
 
-lemma rew {bv : Fin n₂ → Name} {fv : ξ₂ → Name} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
+lemma rew {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {bv : Fin n₂ → Name} {fv : ξ₂ → Name}
+    {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
     p ⊩ᶜ[bv|fv] (ω ▹ φ) ↔
     p ⊩ᶜ[fun x ↦ (ω #x).relationalVal bv fv|fun x ↦ (ω &x).relationalVal bv fv] φ := by
   simp [WeaklyForces, ←Semiformula.rew_doubleNegation, Forces.rew]
@@ -106,7 +112,8 @@ lemma generic {p : ℙ} {n} {bv : Fin n → Name} {fv : ξ → Name} {φ : Semif
   | ⊤ => by simp
   | ⊥ => by simp
   | φ ⋏ ψ => by
-    suffices (∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ[bv|fv] φ ∧ r ⊩ᶜ[bv|fv] ψ) → p ⊩ᶜ[bv|fv] φ ∧ p ⊩ᶜ[bv|fv] ψ by simpa
+    suffices
+      (∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ[bv|fv] φ ∧ r ⊩ᶜ[bv|fv] ψ) → p ⊩ᶜ[bv|fv] φ ∧ p ⊩ᶜ[bv|fv] ψ by simpa
     intro h
     refine ⟨generic fun q hqp ↦ ?_, generic fun q hqp ↦ ?_⟩
     · rcases h q hqp with ⟨r, hrq, h, _⟩
@@ -268,6 +275,8 @@ lemma weaklyForces₀_iff_forces {p : ℙ} {φ : Sentence L} :
 
 namespace WeaklyForces₀
 
+variable {φ : Sentence L}
+
 lemma monotone {p : ℙ} : p ⊩ᶜ φ → ∀ q ≤ p, q ⊩ᶜ φ := WeaklyForces.monotone
 
 lemma generic {p : ℙ} :
@@ -286,12 +295,19 @@ instance : WeakForcingRelation.ClassicalKripke ℙ (· ≥ ·) where
   monotone := monotone
   generic := generic
 
-lemma sound [L.DecidableEq] : 𝐋𝐊¹ ⊢ φ → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) → p ⊩ᶜ[![] | fv] φ := fun b p fv Hfv ↦ by
-  rcases Provable.gödel_gentzen b with ⟨d⟩
-  exact Forces.sound d p fv Hfv (by simp)
+lemma sound [L.DecidableEq] :
+    𝐋𝐊¹ ⊢ (φ : Proposition L) → ∀ p : ℙ, ∀ fv, (∀ i, p ⊩↓ fv i) →
+      p ⊩ᶜ[![] | fv] φ := fun b p fv _ ↦ by
+  have hfv : fv = Empty.elim := Subsingleton.elim _ _
+  subst fv
+  rcases Provable.gödel_gentzen (φ := (φ : Proposition L)) b with ⟨d⟩
+  have hd := Kripke.Model.Forces.sound d p (fun _ ↦ (Classical.ofNonempty : p).val)
+    (by simp) (by simp)
+  simpa [WeaklyForces, ← Semiformula.rew_doubleNegation, Kripke.Model.Forces.rew,
+    Empty.eq_elim] using hd
 
 lemma sound₀ [L.DecidableEq] {σ : Sentence L} : 𝐋𝐊¹ ⊢ (σ : Proposition L) → ℙ ∀⊩ᶜ σ := fun b p ↦ by
-  simpa using! sound b p (fun _ ↦ (Classical.ofNonempty : p).val) fun _ ↦ by simp
+  exact sound b p Empty.elim fun i ↦ i.elim
 
 variable {T : Theory L} {σ : Sentence L}
 
@@ -304,7 +320,7 @@ lemma sound_theory (h : T ⊢ σ) : ℙ ∀⊩ᶜ* T → ℙ ∀⊩ᶜ σ := by
     | empty => exact fun _ ↦ sound₀ (Theory.Proof.empty_provable_iff_eprovable.mp hSσ)
     | @insert ψ S hψ hS ih =>
       intro HS p
-      have h₁ : S ⊢ ψ 🡒 σ := Entailment.deduction! hSσ
+      have h₁ : S ⊢ ψ 🡒 σ := Entailment.deduction hSσ
       have h₂ : ℙ ∀⊩ᶜ ψ 🡒 σ := ih h₁ fun χ hχ ↦ HS χ (Set.mem_insert_of_mem ψ hχ)
       exact (WeaklyForces.imply.mp (h₂ p)) p le_rfl (HS ψ (Set.mem_insert ψ S) p)
   obtain ⟨S, hST, hS, hSσ⟩ := Entailment.Compact.finite_provable h
@@ -343,6 +359,8 @@ variable {ℙ}
 
 open Kripke.Model
 open scoped FFL.FirstOrder.KripkeModel
+
+variable {φ : Sentence L}
 
 instance : Semantics (Kripke.ForcingNotion L) (Sentence L) := ⟨fun ℙ φ ↦ ℙ ∀⊩ᶜ φ⟩
 

@@ -28,7 +28,8 @@ def shift₀ (Γ : LK.Sequent L) : LK.Sequent L := Γ.map Semiproposition.shift�
 @[simp] lemma shift₀_add (Γ Δ : LK.Sequent L) :
     shift₀ (Γ + Δ) = shift₀ Γ + shift₀ Δ := Multiset.map_add _ _ _
 
-@[simp] lemma shift₀_atom (φ : Proposition L) : shift₀ ⦃φ⦄ = ⦃Semiproposition.shift₀ φ⦄ := Multiset.map_atom _ _
+@[simp] lemma shift₀_atom (φ : Proposition L) : shift₀ ⦃φ⦄ = ⦃Semiproposition.shift₀ φ⦄ :=
+  Multiset.map_atom _ _
 
 def shift₁ (Γ : LK.Sequent L) : LK.Sequent L := Γ.map Semiproposition.shift₁
 
@@ -37,7 +38,8 @@ def shift₁ (Γ : LK.Sequent L) : LK.Sequent L := Γ.map Semiproposition.shift�
 @[simp] lemma shift₁_add (Γ Δ : LK.Sequent L) :
     shift₁ (Γ + Δ) = shift₁ Γ + shift₁ Δ := Multiset.map_add _ _ _
 
-@[simp] lemma shift₁_atom (φ : Proposition L) : shift₁ ⦃φ⦄ = ⦃Semiproposition.shift₁ φ⦄ := Multiset.map_atom _ _
+@[simp] lemma shift₁_atom (φ : Proposition L) : shift₁ ⦃φ⦄ = ⦃Semiproposition.shift₁ φ⦄ :=
+  Multiset.map_atom _ _
 
 instance : Tilde (LK.Sequent L) := ⟨Multiset.map (∼·)⟩
 
@@ -51,17 +53,26 @@ end LK.Sequent
 
 /-- Second-order one-sided $\mathbf{LK}$-derivation -/
 inductive LK.Derivation : LK.Sequent L → Type _
-| identity : LK.Derivation ⦃φ, ∼φ⦄
-| cut : LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Δ + ⦃∼φ⦄) → LK.Derivation (Γ + Δ)
-| contraction : LK.Derivation (Γ + ⦃φ, φ⦄) → LK.Derivation (Γ + ⦃φ⦄)
-| weakening : LK.Derivation Γ → LK.Derivation (Γ + ⦃φ⦄)
+| identity {φ : Proposition L} : LK.Derivation ⦃φ, ∼φ⦄
+| cut {Γ Δ : LK.Sequent L} {φ : Proposition L} :
+  LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Δ + ⦃∼φ⦄) → LK.Derivation (Γ + Δ)
+| contraction {Γ : LK.Sequent L} {φ : Proposition L} :
+  LK.Derivation (Γ + ⦃φ, φ⦄) → LK.Derivation (Γ + ⦃φ⦄)
+| weakening {Γ : LK.Sequent L} {φ : Proposition L} :
+  LK.Derivation Γ → LK.Derivation (Γ + ⦃φ⦄)
 | verum : LK.Derivation ⦃⊤⦄
-| and : LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Γ + ⦃ψ⦄) → LK.Derivation (Γ + ⦃φ ⋏ ψ⦄)
-| or : LK.Derivation (Γ + ⦃φ, ψ⦄) → LK.Derivation (Γ + ⦃φ ⋎ ψ⦄)
-| all₁ {φ : Semiproposition L 0 1} : LK.Derivation (LK.Sequent.shift₀ Γ + ⦃φ.free₀⦄) → LK.Derivation (Γ + ⦃∀¹ φ⦄)
-| exs₁ {φ : Semiproposition L 0 1} : LK.Derivation (Γ + ⦃φ/[t]⦄) → LK.Derivation (Γ + ⦃∃¹ φ⦄)
-| all₂ {φ : Semiproposition L 1 0} : LK.Derivation (LK.Sequent.shift₁ Γ + ⦃φ.free₁⦄) → LK.Derivation (Γ + ⦃∀² φ⦄)
-| exs₂ {φ : Semiproposition L 1 0} : LK.Derivation (Γ + ⦃φ/⟦ψ⟧⦄) → LK.Derivation (Γ + ⦃∃² φ⦄)
+| and {Γ : LK.Sequent L} {φ ψ : Proposition L} :
+  LK.Derivation (Γ + ⦃φ⦄) → LK.Derivation (Γ + ⦃ψ⦄) → LK.Derivation (Γ + ⦃φ ⋏ ψ⦄)
+| or {Γ : LK.Sequent L} {φ ψ : Proposition L} :
+  LK.Derivation (Γ + ⦃φ, ψ⦄) → LK.Derivation (Γ + ⦃φ ⋎ ψ⦄)
+| all₁ {Γ : LK.Sequent L} {φ : Semiproposition L 0 1} :
+  LK.Derivation (LK.Sequent.shift₀ Γ + ⦃φ.free₀⦄) → LK.Derivation (Γ + ⦃∀¹ φ⦄)
+| exs₁ {Γ : LK.Sequent L} {φ : Semiproposition L 0 1} {t : Semiterm L ℕ 0} :
+  LK.Derivation (Γ + ⦃φ/[t]⦄) → LK.Derivation (Γ + ⦃∃¹ φ⦄)
+| all₂ {Γ : LK.Sequent L} {φ : Semiproposition L 1 0} :
+  LK.Derivation (LK.Sequent.shift₁ Γ + ⦃φ.free₁⦄) → LK.Derivation (Γ + ⦃∀² φ⦄)
+| exs₂ {Γ : LK.Sequent L} {φ : Semiproposition L 1 0} {ψ : Semiproposition L 0 1} :
+  LK.Derivation (Γ + ⦃φ/⟦ψ⟧⦄) → LK.Derivation (Γ + ⦃∃² φ⦄)
 
 prefix:45 "⊢ᴸᴷ² " => LK.Derivation
 
@@ -117,7 +128,7 @@ inductive LK.Proof.Symbol (L : Language) : Type
 
 notation "𝐋𝐊²" => LK.Proof.Symbol.symbol
 
-instance : Entailment (LK.Proof.Symbol L) (Sentence L) := ⟨fun _ ↦ LK.Proof⟩
+instance : Entailment (LK.Proof.Symbol L) (Sentence L) := ⟨fun _ φ ↦ Nonempty (LK.Proof φ)⟩
 
 /-! ## Proof system with axioms -/
 
@@ -133,28 +144,27 @@ structure Theory.Proof (T : Theory L) (σ : Sentence L) where
 namespace Theory.Proof
 
 instance : Entailment (Theory L) (Sentence L) where
-  Prf := Theory.Proof
+  Entails 𝓢 φ := Nonempty (Theory.Proof 𝓢 φ)
 
 attribute [simp] Theory.Proof.axioms_mem
 
 /-- A singleton derivation gives a theory proof without using any axioms. -/
-def ofDerivation {T : Theory L} {φ : Sentence L}
-    (d : ⊢ᴸᴷ² ⦃(φ : Proposition L)⦄) : T ⊢! φ :=
-  ⟨0, by simp, by simpa [OneSidedLK.Pullback] using d⟩
+lemma ofDerivation {T : Theory L} {φ : Sentence L}
+    (d : ⊢ᴸᴷ² ⦃(φ : Proposition L)⦄) : T ⊢ φ :=
+  ⟨⟨0, by simp, by simpa [OneSidedLK.Pullback] using d⟩⟩
 
 instance : Entailment.Compact (Theory L) where
-  core b := {φ | φ ∈ b.axioms}
-  corePrf b := ⟨b.axioms, by simp, b.derivation⟩
-  core_finite b := by simp [AdjunctiveSet.Finite, AdjunctiveSet.set];
-  core_subset b := by simpa [AdjunctiveSet.subset_iff] using b.axioms_mem;
+  finite_provable {𝓢 φ} h := by
+    obtain ⟨b⟩ := h;
+    exact ⟨{ψ | ψ ∈ b.axioms}, by simpa [AdjunctiveSet.subset_iff] using b.axioms_mem,
+      by simp [AdjunctiveSet.Finite, AdjunctiveSet.set], ⟨⟨b.axioms, by simp, b.derivation⟩⟩⟩
 
 instance : Entailment.Axiomatized (Theory L) where
   prfAxm {𝓢 φ} h :=
-    ⟨⦃φ⦄, by simpa using h, by
+    ⟨⟨⦃φ⦄, by simpa using h, by
       simpa [OneSidedLK.Pullback, Multiset.tilde_def] using
-        (LK.Derivation.identity (φ := (φ : Proposition L)))⟩
-  weakening h b :=
-    ⟨b.axioms, fun ψ hψ ↦ h (b.axioms_mem ψ hψ), b.derivation⟩
+        (LK.Derivation.identity (φ := (φ : Proposition L)))⟩⟩
+  weakening h := fun ⟨b⟩ ↦ ⟨⟨b.axioms, fun ψ hψ ↦ h (b.axioms_mem ψ hψ), b.derivation⟩⟩
 
 end Theory.Proof
 

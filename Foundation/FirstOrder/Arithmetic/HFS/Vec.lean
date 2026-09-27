@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 
 @[expose] public section
+set_option autoImplicit true
 /-!
 
 # Vec
@@ -10,6 +11,8 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 -/
 
 namespace FFL.FirstOrder.Arithmetic
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -63,32 +66,38 @@ lemma adjoin_le_adjoin {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.adjoinDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.adjoinDef : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “w x v. ∃ xv < w, !pairDef xv x v ∧ w = xv + 1”
 
-instance adjoin_defined : 𝚺₀-Function₂ (adjoin : V → V → V) via adjoinDef := .mk fun v ↦ by simp_all [adjoinDef, adjoin_def]
+instance adjoin_defined : 𝚺ᴬ₀-Function₂ (adjoin : V → V → V) via adjoinDef := .mk fun v ↦ by
+  simp_all [adjoinDef, adjoin_def]
 
-instance adjoin_definable : 𝚺₀-Function₂ (adjoin : V → V → V) := adjoin_defined.to_definable
+instance adjoin_definable : 𝚺ᴬ₀-Function₂ (adjoin : V → V → V) := adjoin_defined.to_definable
 
-instance adjoin_definable' (ℌ) : ℌ-Function₂ (adjoin : V → V → V) := adjoin_definable.of_zero
+instance adjoin_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₂ (adjoin : V → V → V) := adjoin_definable.of_zero
 
-def _root_.FFL.FirstOrder.Arithmetic.mkVec₁Def : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.mkVec₁Def : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “s x. !adjoinDef s x 0”
 
-instance mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := .mk fun v ↦ by simp [mkVec₁Def]
+instance mkVec₁_defined : 𝚺ᴬ₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := .mk fun v ↦ by
+  simp [mkVec₁Def]
 
-instance mkVec₁_definable : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_defined.to_definable
+instance mkVec₁_definable : 𝚺ᴬ₀-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_defined.to_definable
 
-instance mkVec₁_definable' (ℌ) : ℌ-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_definable.of_zero
+instance mkVec₁_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_definable.of_zero
 
-def _root_.FFL.FirstOrder.Arithmetic.mkVec₂Def : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.mkVec₂Def : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “s x y. ∃ sy, !mkVec₁Def sy y ∧ !adjoinDef s x sy”
 
-instance mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := .mk fun v ↦ by simp [mkVec₂Def]
+instance mkVec₂_defined : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := .mk fun v ↦ by
+  simp [mkVec₂Def]
 
-instance mkVec₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) := mkVec₂_defined.to_definable
+instance mkVec₂_definable : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ ?[x, y]) := mkVec₂_defined.to_definable
 
-instance mkVec₂_definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ ?[x, y]) := mkVec₂_definable.of_sigmaOne
+instance mkVec₂_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (fun x y : V ↦ ?[x, y]) :=
+  mkVec₂_definable.of_sigmaOne
 
 end
 
@@ -108,7 +117,8 @@ def Phi (C : Set V) (pr : V) : Prop :=
 private lemma phi_iff (C pr : V) :
     Phi {x | x ∈ C} pr ↔
     (∃ v ≤ pr, ∃ fst ≤ v, fst = fstIdx v ∧ pr = ⟪v, 0, fst⟫) ∨
-    (∃ v ≤ pr, ∃ i ≤ pr, ∃ x ≤ pr, pr = ⟪v, i + 1, x⟫ ∧ ∃ snd ≤ v, snd = sndIdx v ∧ ∃ six < C, six = ⟪snd, i, x⟫ ∧ six ∈ C) := by
+    (∃ v ≤ pr, ∃ i ≤ pr, ∃ x ≤ pr, pr = ⟪v, i + 1, x⟫ ∧
+      ∃ snd ≤ v, snd = sndIdx v ∧ ∃ six < C, six = ⟪snd, i, x⟫ ∧ six ∈ C) := by
   constructor
   · rintro (⟨v, rfl⟩ | ⟨v, i, x, rfl, hC⟩)
     · left; exact ⟨v, by simp, _, by simp, rfl, rfl⟩
@@ -146,17 +156,18 @@ def Graph : V → Prop := adjointruction.Fixpoint ![]
 
 section
 
-def graphDef : 𝚺₁.Semisentence 1 := blueprint.fixpointDef
+def graphDef : 𝚺ᴬ₁.Semisentence 1 := blueprint.fixpointDef
 
-instance graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef := adjointruction.fixpoint_defined
+instance graph_defined : 𝚺ᴬ₁-Predicate (Graph : V → Prop) via graphDef :=
+  adjointruction.fixpoint_defined
 
-instance graph_definable : 𝚺₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
+instance graph_definable : 𝚺ᴬ₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
 
-instance graph_definable' : 𝚺-[0 + 1]-Predicate (Graph : V → Prop) := graph_definable
+instance graph_definable' : 𝚺ᴬ-[0 + 1]-Predicate (Graph : V → Prop) := graph_definable
 
 end
 
-/-- TODO: move-/
+/-- TODO: move -/
 @[simp] lemma zero_ne_add_one (x : V) : 0 ≠ x + 1 := ne_of_lt (by simp)
 
 lemma graph_case {pr : V} :
@@ -222,11 +233,13 @@ scoped notation:max v:max ".[" i "]" => nth v i
 lemma nth_graph (v i : V) : Graph ⟪v, i, v.[i]⟫ :=
   Classical.choose!_spec (graph_existsUnique v i)
 
-lemma nth_eq_of_graph {v i x : V} (h : Graph ⟪v, i, x⟫) : nth v i = x := graph_unique (nth_graph v i) h
+lemma nth_eq_of_graph {v i x : V} (h : Graph ⟪v, i, x⟫) : nth v i = x :=
+  graph_unique (nth_graph v i) h
 
 lemma nth_zero (v : V) : v.[0] = fstIdx v := nth_eq_of_graph (graph_zero.mpr rfl)
 
-lemma nth_succ (v i : V) : v.[i + 1] = (sndIdx v).[i] := nth_eq_of_graph (graph_succ.mpr <| nth_graph _ _)
+lemma nth_succ (v i : V) : v.[i + 1] = (sndIdx v).[i] :=
+  nth_eq_of_graph (graph_succ.mpr <| nth_graph _ _)
 
 @[simp] lemma nth_adjoin_zero (x v : V) : (x ∷ v).[0] = x := by
   simp [nth_zero]
@@ -245,7 +258,7 @@ lemma adjoin_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
   · simp
   · right; exact ⟨π₁ z, π₂ z, by simp [adjoin]⟩
 
-lemma adjoin_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma adjoin_induction (Γ) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
     (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   ISigma1.order_induction Γ hP (by
     intro v ih
@@ -254,37 +267,37 @@ lemma adjoin_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     · exact adjoin _ _ (ih v (by simp)))
 
 @[elab_as_elim]
-lemma adjoin_ISigma1.sigma1_succ_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
+lemma adjoin_ISigma1.sigma1_succ_induction {P : V → Prop} (hP : 𝚺ᴬ₁-Predicate P)
     (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   adjoin_induction 𝚺 hP nil adjoin
 
 @[elab_as_elim]
-lemma adjoin_ISigma1.pi1_succ_induction {P : V → Prop} (hP : 𝚷₁-Predicate P)
+lemma adjoin_ISigma1.pi1_succ_induction {P : V → Prop} (hP : 𝚷ᴬ₁-Predicate P)
     (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   adjoin_induction 𝚷 hP nil adjoin
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.nthDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.nthDef : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “y v i. ∃ pr, !pair₃Def pr v i y ∧ !graphDef pr”
 
 set_option linter.flexible false in
-instance nth_defined : 𝚺₁-Function₂ (nth : V → V → V) via nthDef := .mk fun v ↦ by
+instance nth_defined : 𝚺ᴬ₁-Function₂ (nth : V → V → V) via nthDef := .mk fun v ↦ by
   simp [nthDef]
   constructor
   · intro h; simp [nth_eq_of_graph h]
   · intro h; rw [h]; exact nth_graph _ _
 
-instance nth_definable : 𝚺₁-Function₂ (nth : V → V → V) := nth_defined.to_definable
+instance nth_definable : 𝚺ᴬ₁-Function₂ (nth : V → V → V) := nth_defined.to_definable
 
-instance nth_definable' (Γ m) : Γ-[m + 1]-Function₂ (nth : V → V → V) := nth_definable.of_sigmaOne
+instance nth_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (nth : V → V → V) := nth_definable.of_sigmaOne
 
 end
 
 lemma adjoin_absolute (a v : ℕ) : ((a ∷ v : ℕ) : V) = (a : V) ∷ (v : V) := by
-  simpa using DefinedFunction.shigmaZero_absolute_func V adjoin_defined adjoin_defined ![a, v]
+  simpa using DefinedFunction.sigmaZero_absolute_func V adjoin_defined adjoin_defined ![a, v]
 
-/-- TODO: move-/
+/-- TODO: move -/
 lemma pi₁_zero : π₁ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₁_le_self 0)
 
 lemma pi₂_zero : π₂ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₂_le_self 0)
@@ -327,8 +340,8 @@ end nth
 namespace VecRec
 
 structure Blueprint (arity : ℕ) where
-  nil : 𝚺₁.Semisentence (arity + 1)
-  adjoin : 𝚺₁.Semisentence (arity + 4)
+  nil : 𝚺ᴬ₁.Semisentence (arity + 1)
+  adjoin : 𝚺ᴬ₁.Semisentence (arity + 4)
 
 namespace Blueprint
 
@@ -351,9 +364,9 @@ def blueprint : Fixpoint.Blueprint arity where
           !pairDef pr xxs adjoin ∧ :⟪xs, ih⟫:∈ C)”
       (by simp))
 
-def graphDef : 𝚺₁.Semisentence (arity + 1) := β.blueprint.fixpointDef
+def graphDef : 𝚺ᴬ₁.Semisentence (arity + 1) := β.blueprint.fixpointDef
 
-def resultDef : 𝚺₁.Semisentence (arity + 2) :=
+def resultDef : 𝚺ᴬ₁.Semisentence (arity + 2) :=
   .mkSigma “y xs. ∃ pr, !pairDef pr xs y ∧ !β.graphDef pr ⋯”
 
 end Blueprint
@@ -363,8 +376,9 @@ variable (V)
 structure Construction {arity : ℕ} (β : Blueprint arity) where
   nil (param : Fin arity → V) : V
   adjoin (param : Fin arity → V) (x xs ih) : V
-  nil_defined : 𝚺₁.DefinedFunction nil β.nil
-  adjoin_defined : 𝚺₁.DefinedFunction (fun v ↦ adjoin (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.adjoin
+  nil_defined : 𝚺ᴬ₁.DefinedFunction nil β.nil
+  adjoin_defined :
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ adjoin (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.adjoin
 
 variable {V}
 
@@ -377,7 +391,8 @@ def Phi (param : Fin arity → V) (C : Set V) (pr : V) : Prop :=
 
 private lemma phi_iff (param : Fin arity → V) (C pr : V) :
     c.Phi param {x | x ∈ C} pr ↔
-    pr = ⟪0, c.nil param⟫ ∨ (∃ x < pr, ∃ xs < pr, ∃ ih < C, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C) := by
+    pr = ⟪0, c.nil param⟫ ∨
+    (∃ x < pr, ∃ xs < pr, ∃ ih < C, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C) := by
   constructor
   · rintro (h | ⟨x, xs, ih, rfl, hC⟩)
     · left; exact h
@@ -412,22 +427,26 @@ def Graph : V → Prop := c.adjointruction.Fixpoint param
 
 section
 
-lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
+lemma graph_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
   c.adjointruction.fixpoint_defined
 
-instance graph_definable : 𝚺₁.Definable (fun v ↦ c.Graph (v ·.succ) (v 0)) := c.graph_defined.to_definable
+instance graph_definable : 𝚺ᴬ₁.Definable (fun v ↦ c.Graph (v ·.succ) (v 0)) :=
+  c.graph_defined.to_definable
 
-instance graph_definable' (param) : 𝚺₁-Predicate (c.Graph param) := by
-  simpa using HierarchySymbol.Definable.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
+instance graph_definable' (param) : 𝚺ᴬ₁-Predicate (c.Graph param) := by
+  simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 1)
+    c.graph_definable (#0 :> fun i ↦ &(param i))
 
-instance graph_definable'' (param) : 𝚺-[0 + 1]-Predicate (c.Graph param) := c.graph_definable' param
+instance graph_definable'' (param) : 𝚺ᴬ-[0 + 1]-Predicate (c.Graph param) :=
+  c.graph_definable' param
 
 end
 
 variable {param}
 
 lemma graph_case {pr : V} :
-    c.Graph param pr ↔ pr = ⟪0, c.nil param⟫ ∨ (∃ x xs ih, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ c.Graph param ⟪xs, ih⟫) :=
+    c.Graph param pr ↔ pr = ⟪0, c.nil param⟫ ∨
+      (∃ x xs ih, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ c.Graph param ⟪xs, ih⟫) :=
   c.adjointruction.case
 
 lemma graph_nil {l : V} :
@@ -445,7 +464,8 @@ lemma graph_adjoin {x xs y : V} :
   · intro h
     rcases c.graph_case.mp h with (h | ⟨z, zs, v, h, hg⟩)
     · simp at h
-    · rcases show (x = z ∧ xs = zs) ∧ y = c.adjoin param z zs v by simpa using h with ⟨⟨rfl, rfl⟩, rfl⟩
+    · rcases show (x = z ∧ xs = zs) ∧ y = c.adjoin param z zs v by simpa using h with
+        ⟨⟨rfl, rfl⟩, rfl⟩
       exact ⟨v, rfl, hg⟩
   · rintro ⟨y, rfl, h⟩; exact c.graph_case.mpr <| Or.inr ⟨x, xs, y, rfl, h⟩
 
@@ -486,7 +506,8 @@ lemma result_graph (xs : V) : c.Graph param ⟪xs, c.result param xs⟫ :=
 lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result param xs = y :=
   c.graph_unique (c.result_graph param xs) h
 
-@[simp] lemma result_nil : c.result param (0 : V) = c.nil param := c.result_eq_of_graph param (c.graph_nil.mpr rfl)
+@[simp] lemma result_nil : c.result param (0 : V) = c.nil param :=
+  c.result_eq_of_graph param (c.graph_nil.mpr rfl)
 
 @[simp] lemma result_adjoin (x xs : V) :
     c.result param (x ∷ xs) = c.adjoin param x xs (c.result param xs) :=
@@ -495,7 +516,8 @@ lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result p
 section
 
 set_option linter.flexible false in
-lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) β.resultDef := .mk fun v ↦ by
+lemma result_defined :
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) β.resultDef := .mk fun v ↦ by
   simp [Blueprint.resultDef, c.graph_defined.iff]
   constructor
   · intro h; symm; simpa using c.result_eq_of_graph _ h
@@ -504,11 +526,12 @@ lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (
 @[simp] lemma eval_resultDef (v : Fin (arity + 2) → V) :
     β.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
 
-instance result_definable : 𝚺₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
+instance result_definable : 𝚺ᴬ₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
   c.result_defined.to_definable
 
 instance result_definable' (Γ m) :
-    Γ-[m + 1].DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) := c.result_definable.of_sigmaOne
+    Γᴬ-[m + 1].DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
+  c.result_definable.of_sigmaOne
 
 end
 
@@ -548,13 +571,13 @@ noncomputable def len (v : V) : V := adjointruction.result ![] v
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.lenDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def _root_.FFL.FirstOrder.Arithmetic.lenDef : 𝚺ᴬ₁.Semisentence 2 := blueprint.resultDef
 
-instance len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := adjointruction.result_defined
+instance len_defined : 𝚺ᴬ₁-Function₁ (len : V → V) via lenDef := adjointruction.result_defined
 
-instance len_definable : 𝚺₁-Function₁ (len : V → V) := len_defined.to_definable
+instance len_definable : 𝚺ᴬ₁-Function₁ (len : V → V) := len_defined.to_definable
 
-instance len_definable' (Γ m) : Γ-[m + 1]-Function₁ (len : V → V) := len_definable.of_sigmaOne
+instance len_definable' (Γ m) : Γᴬ-[m + 1]-Function₁ (len : V → V) := len_definable.of_sigmaOne
 
 end
 
@@ -590,13 +613,16 @@ lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, 
     rcases nil_or_adjoin v₂ with (rfl | ⟨x₂, v₂, rfl⟩)
     · simp at hl
     have hx : x₁ = x₂ := by simpa using H 0 (by simp)
-    have hv : v₁ = v₂ := ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
+    have hv : v₁ = v₂ :=
+      ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
     simp [hx, hv]
 
-lemma nth_ext' (l : V) {v₁ v₂ : V} (hl₁ : len v₁ = l) (hl₂ : len v₂ = l) (H : ∀ i < l, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
+lemma nth_ext' (l : V) {v₁ v₂ : V} (hl₁ : len v₁ = l) (hl₂ : len v₂ = l)
+    (H : ∀ i < l, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
   rcases hl₂; exact nth_ext hl₁ (by simpa [hl₁] using H)
 
-lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) : v₁ ≤ v₂ := by
+lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) :
+    v₁ ≤ v₂ := by
   induction v₁ using adjoin_ISigma1.pi1_succ_induction generalizing v₂
   · definability
   case nil => simp
@@ -604,7 +630,8 @@ lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < l
     rcases nil_or_adjoin v₂ with (rfl | ⟨x₂, v₂, rfl⟩)
     · simp at hl
     have hx : x₁ ≤ x₂ := by simpa using H 0 (by simp)
-    have hv : v₁ ≤ v₂ := ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
+    have hv : v₁ ≤ v₂ :=
+      ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
     exact adjoin_le_adjoin hx hv
 
 lemma nth_lt_self {v i : V} (hi : i < len v) : v.[i] < v := by
@@ -616,7 +643,7 @@ lemma nth_lt_self {v i : V} (hi : i < len v) : v.[i] < v := by
     · simp
     · simpa using lt_trans (ih (by simpa using hi)) (by simp)
 
-theorem sigmaOne_skolem_vec {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
+theorem sigmaOne_skolem_vec {R : V → V → Prop} (hP : 𝚺ᴬ₁-Relation R) {l}
     (H : ∀ x < l, ∃ y, R x y) : ∃ v, len v = l ∧ ∀ i < l, R i v.[i] := by
   have : ∀ k ≤ l, ∃ v, len v = k ∧ ∀ i < k, R (l - k + i) v.[i] := by
     intro k hk
@@ -641,7 +668,8 @@ lemma eq_singleton_iff_len_eq_one {v : V} : len v = 1 ↔ ∃ x, v = ?[x] := by
 lemma eq_doubleton_of_len_eq_two {v : V} : len v = 2 ↔ ∃ x y, v = ?[x, y] := by
   constructor
   · intro h; exact ⟨v.[0], v.[1],
-      nth_ext (by simp [h, one_add_one_eq_two]) (by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h])⟩
+      nth_ext (by simp [h, one_add_one_eq_two])
+        (by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h])⟩
   · rintro ⟨x, y, rfl⟩; simp [one_add_one_eq_two]
 
 
@@ -673,17 +701,20 @@ noncomputable def listMax (v : V) : V := adjointruction.result ![] v
 
 @[simp] lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, adjointruction]
 
-@[simp] lemma listMax_adjoin (x v : V) : listMax (x ∷ v) = max x (listMax v) := by simp [listMax, adjointruction]
+@[simp] lemma listMax_adjoin (x v : V) : listMax (x ∷ v) = max x (listMax v) := by
+  simp [listMax, adjointruction]
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.listMaxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def _root_.FFL.FirstOrder.Arithmetic.listMaxDef : 𝚺ᴬ₁.Semisentence 2 := blueprint.resultDef
 
-instance listMax_defined : 𝚺₁-Function₁ (listMax : V → V) via listMaxDef := adjointruction.result_defined
+instance listMax_defined : 𝚺ᴬ₁-Function₁ (listMax : V → V) via listMaxDef :=
+  adjointruction.result_defined
 
-instance listMax_definable : 𝚺₁-Function₁ (listMax : V → V) := listMax_defined.to_definable
+instance listMax_definable : 𝚺ᴬ₁-Function₁ (listMax : V → V) := listMax_defined.to_definable
 
-instance listMax_definable' (Γ m) : Γ-[m + 1]-Function₁ (listMax : V → V) := listMax_definable.of_sigmaOne
+instance listMax_definable' (Γ m) : Γᴬ-[m + 1]-Function₁ (listMax : V → V) :=
+  listMax_definable.of_sigmaOne
 
 end
 
@@ -760,17 +791,20 @@ noncomputable def takeLast (v k : V) : V := adjointruction.result ![k] v
 @[simp] lemma takeLast_nil : takeLast (0 : V) k = 0 := by simp [takeLast, adjointruction]
 
 lemma takeLast_adjoin (x v : V) :
-    takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by simp [takeLast, adjointruction]
+    takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by
+  simp [takeLast, adjointruction]
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.takeLastDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
+def _root_.FFL.FirstOrder.Arithmetic.takeLastDef : 𝚺ᴬ₁.Semisentence 3 := blueprint.resultDef
 
-instance takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via takeLastDef := adjointruction.result_defined
+instance takeLast_defined : 𝚺ᴬ₁-Function₂ (takeLast : V → V → V) via takeLastDef :=
+  adjointruction.result_defined
 
-instance takeLast_definable : 𝚺₁-Function₂ (takeLast : V → V → V) := takeLast_defined.to_definable
+instance takeLast_definable : 𝚺ᴬ₁-Function₂ (takeLast : V → V → V) := takeLast_defined.to_definable
 
-instance takeLast_definable' (Γ m) : Γ-[m + 1]-Function₂ (takeLast : V → V → V) := takeLast_definable.of_sigmaOne
+instance takeLast_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (takeLast : V → V → V) :=
+  takeLast_definable.of_sigmaOne
 
 end
 
@@ -791,7 +825,8 @@ lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
   rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp [takeLast_adjoin]
 
 /-- TODO: move -/
-@[simp] lemma add_sub_add (a b c : V) : (a + c) - (b + c) = a - b := add_tsub_add_eq_tsub_right a c b
+@[simp] lemma add_sub_add (a b c : V) : (a + c) - (b + c) = a - b :=
+  add_tsub_add_eq_tsub_right a c b
 
 @[simp] lemma takeLast_zero (v : V) : takeLast v 0 = 0 := by
   induction v using adjoin_ISigma1.sigma1_succ_induction
@@ -799,12 +834,14 @@ lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
   case nil => simp
   case adjoin x v ih => simp [takeLast_adjoin, ih]
 
-lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[len v - (i + 1)] ∷ takeLast v i := by
+lemma takeLast_succ_of_lt {i v : V} (h : i < len v) :
+    takeLast v (i + 1) = v.[len v - (i + 1)] ∷ takeLast v i := by
   induction v using adjoin_ISigma1.sigma1_succ_induction generalizing i
   · definability
   case nil => simp at h
   case adjoin x v ih =>
-    rcases show i = len v ∨ i < len v from eq_or_lt_of_le (by simpa [lt_succ_iff_le] using h) with (rfl | hi)
+    rcases show i = len v ∨ i < len v from eq_or_lt_of_le (by simpa [lt_succ_iff_le] using h) with
+      (rfl | hi)
     · simp [takeLast_adjoin]
     · have : len v - i = len v - (i + 1) + 1 := by
         rw [←Arithmetic.sub_sub, sub_add_self_of_le (le_tsub_of_add_le_left (lt_iff_succ_le.mp hi))]
@@ -840,17 +877,20 @@ noncomputable def concat (v z : V) : V := adjointruction.result ![z] v
 
 @[simp] lemma concat_nil (z : V) : concat 0 z = ?[z] := by simp [concat, adjointruction]
 
-@[simp] lemma concat_adjoin (x v z : V) : concat (x ∷ v) z = x ∷ concat v z := by simp [concat, adjointruction]
+@[simp] lemma concat_adjoin (x v z : V) : concat (x ∷ v) z = x ∷ concat v z := by
+  simp [concat, adjointruction]
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.concatDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
+def _root_.FFL.FirstOrder.Arithmetic.concatDef : 𝚺ᴬ₁.Semisentence 3 := blueprint.resultDef
 
-instance concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDef := adjointruction.result_defined
+instance concat_defined : 𝚺ᴬ₁-Function₂ (concat : V → V → V) via concatDef :=
+  adjointruction.result_defined
 
-instance concat_definable : 𝚺₁-Function₂ (concat : V → V → V) := concat_defined.to_definable
+instance concat_definable : 𝚺ᴬ₁-Function₂ (concat : V → V → V) := concat_defined.to_definable
 
-instance concat_definable' (Γ m) : Γ-[m + 1]-Function₂ (concat : V → V → V) := concat_definable.of_sigmaOne
+instance concat_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (concat : V → V → V) :=
+  concat_definable.of_sigmaOne
 
 end
 
@@ -914,16 +954,17 @@ lemma le_of_memVec {x v : V} (h : x ∈ᵥ v) : x ≤ v := by
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.memVecDef : 𝚫₁.Semisentence 2 := .mkDelta
+def _root_.FFL.FirstOrder.Arithmetic.memVecDef : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “x v. ∃ l, !lenDef l v ∧ ∃ i < l, !nthDef x v i”)
   (.mkPi “x v. ∀ l, !lenDef l v → ∃ i < l, ∀ vi, !nthDef vi v i → x = vi”)
 
-instance memVec_defined : 𝚫₁-Relation (MemVec : V → V → Prop) via memVecDef :=
+instance memVec_defined : 𝚫ᴬ₁-Relation (MemVec : V → V → Prop) via memVecDef :=
   ⟨by intro v; simp [memVecDef], by intro v; simp [memVecDef, MemVec]⟩
 
-instance memVec_definable : 𝚫₁-Relation (MemVec : V → V → Prop) := memVec_defined.to_definable
+instance memVec_definable : 𝚫ᴬ₁-Relation (MemVec : V → V → Prop) := memVec_defined.to_definable
 
-instance memVec_definable' (Γ m) : Γ-[m + 1]-Relation (MemVec : V → V → Prop) := memVec_definable.of_deltaOne
+instance memVec_definable' (Γ m) : Γᴬ-[m + 1]-Relation (MemVec : V → V → Prop) :=
+  memVec_definable.of_deltaOne
 
 end
 
@@ -947,22 +988,26 @@ scoped infix:30 " ⊆ᵥ " => SubsetVec
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.subsetVecDef : 𝚫₁.Semisentence 2 := .mkDelta
+def _root_.FFL.FirstOrder.Arithmetic.subsetVecDef : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “v w. ∀ x <⁺ v, !memVecDef.pi x v → !memVecDef.sigma x w”)
   (.mkPi “v w. ∀ x <⁺ v, !memVecDef.sigma x v → !memVecDef.pi x w”)
 
 set_option linter.flexible false in
-instance subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
-  ⟨by intro v; simp [subsetVecDef, HierarchySymbol.Semiformula.val_sigma, memVec_defined.proper.iff'],
+instance subsetVec_defined : 𝚫ᴬ₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
+  ⟨by intro v; simp [subsetVecDef, Bounding.HierarchySymbol.Semiformula.val_sigma,
+    memVec_defined.proper.iff'],
    by intro v
-      simp [subsetVecDef, HierarchySymbol.Semiformula.val_sigma, memVec_defined.proper.iff']
+      simp [subsetVecDef, Bounding.HierarchySymbol.Semiformula.val_sigma,
+        memVec_defined.proper.iff']
       constructor
       · intro h x hx; exact h x (le_of_memVec hx) hx
       · intro h x _; exact h x⟩
 
-instance subsetVec_definable : 𝚫₁-Relation (SubsetVec : V → V → Prop) := subsetVec_defined.to_definable
+instance subsetVec_definable : 𝚫ᴬ₁-Relation (SubsetVec : V → V → Prop) :=
+  subsetVec_defined.to_definable
 
-instance subsetVec_definable' (Γ m) : Γ-[m + 1]-Relation (SubsetVec : V → V → Prop) := subsetVec_definable.of_deltaOne
+instance subsetVec_definable' (Γ m) : Γᴬ-[m + 1]-Relation (SubsetVec : V → V → Prop) :=
+  subsetVec_definable.of_deltaOne
 
 end
 
@@ -986,23 +1031,28 @@ noncomputable def repeatVec.adjointruction : PR.Construction V repeatVec.bluepri
   zero_defined := .mk fun v ↦ by simp [blueprint]
   succ_defined := .mk fun v ↦ by simp [blueprint]
 
-/-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0`-/
+/-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0` -/
 noncomputable def repeatVec (x k : V) : V := repeatVec.adjointruction.result ![x] k
 
-@[simp] lemma repeatVec_zero (x : V) : repeatVec x 0 = 0 := by simp [repeatVec, repeatVec.adjointruction]
+@[simp] lemma repeatVec_zero (x : V) : repeatVec x 0 = 0 := by
+  simp [repeatVec, repeatVec.adjointruction]
 
-@[simp] lemma repeatVec_succ (x k : V) : repeatVec x (k + 1) = x ∷ repeatVec x k := by simp [repeatVec, repeatVec.adjointruction]
+@[simp] lemma repeatVec_succ (x k : V) : repeatVec x (k + 1) = x ∷ repeatVec x k := by
+  simp [repeatVec, repeatVec.adjointruction]
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.repeatVecDef : 𝚺₁.Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
+def _root_.FFL.FirstOrder.Arithmetic.repeatVecDef : 𝚺ᴬ₁.Semisentence 3 :=
+  repeatVec.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
-instance repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via repeatVecDef := .mk
+instance repeatVec_defined : 𝚺ᴬ₁-Function₂ (repeatVec : V → V → V) via repeatVecDef := .mk
   fun v ↦ by simp [repeatVec.adjointruction.result_defined_iff, repeatVecDef]; rfl
 
-instance repeatVec_definable : 𝚺₁-Function₂ (repeatVec : V → V → V) := repeatVec_defined.to_definable
+instance repeatVec_definable : 𝚺ᴬ₁-Function₂ (repeatVec : V → V → V) :=
+  repeatVec_defined.to_definable
 
-instance repeatVec_definable' (Γ) : Γ-[m + 1]-Function₂ (repeatVec : V → V → V) := repeatVec_definable.of_sigmaOne
+instance repeatVec_definable' (Γ) : Γᴬ-[m + 1]-Function₂ (repeatVec : V → V → V) :=
+  repeatVec_definable.of_sigmaOne
 
 end
 
@@ -1062,13 +1112,15 @@ noncomputable def vecToSet (v : V) : V := adjointruction.result ![] v
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.vecToSetDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def _root_.FFL.FirstOrder.Arithmetic.vecToSetDef : 𝚺ᴬ₁.Semisentence 2 := blueprint.resultDef
 
-instance vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDef := adjointruction.result_defined
+instance vecToSet_defined : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) via vecToSetDef :=
+  adjointruction.result_defined
 
-instance vecToSet_definable : 𝚺₁-Function₁ (vecToSet : V → V) := vecToSet_defined.to_definable
+instance vecToSet_definable : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) := vecToSet_defined.to_definable
 
-instance vecToSet_definable' (Γ) : Γ-[m + 1]-Function₁ (vecToSet : V → V) := vecToSet_definable.of_sigmaOne
+instance vecToSet_definable' (Γ) : Γᴬ-[m + 1]-Function₁ (vecToSet : V → V) :=
+  vecToSet_definable.of_sigmaOne
 
 end
 

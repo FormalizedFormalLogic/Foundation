@@ -6,7 +6,7 @@ public import Mathlib.Data.Fintype.Basic
 
 namespace Empty
 
-lemma eq_elim {α : Sort u} (f : Empty → α) : f = elim := funext (by rintro ⟨⟩)
+lemma eq_elim {α : Sort*} (f : Empty → α) : f = elim := funext (by rintro ⟨⟩)
 
 end Empty
 

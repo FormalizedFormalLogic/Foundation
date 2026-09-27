@@ -17,7 +17,7 @@ namespace NNFormula
 section val
 
 variable {F : Type*} [LogicalConnective F] [LogicalNeutral F]
-  [TildeInvolutive F] [LogicalNeutral.DeMorgan F] [LogicalConnective.DeMorgan F] (v : α → F)
+  [TildeInvolutive F] [LogicalNeutral.DeMorgan F] [LogicalConnective.DeMorgan F] (v : α → F) {a : α}
 
 def valAux : NNFormula α → F
   | .atom a  => v a
@@ -49,14 +49,16 @@ end val
 
 section semantics
 
-variable {v : Valuation α}
+variable {v : Valuation α} {a : α}
 
 -- `Valuation α` is also the model type of `Formula.semantics` and the formula parameter of
 -- `Semantics` is an `outParam`, so an explicit priority is needed to pin down which of the two
 -- instances a valuation resolves to.
-instance (priority := high) semantics : Semantics (Valuation α) (NNFormula α) := ⟨fun v ↦ NNFormula.val v⟩
+instance (priority := high) semantics : Semantics (Valuation α) (NNFormula α) :=
+  ⟨fun v ↦ NNFormula.val v⟩
 
-lemma models_iff_val {v : Valuation α} {f : NNFormula α} : v ⊧ f ↔ NNFormula.val v f := iff_of_eq rfl
+lemma models_iff_val {v : Valuation α} {f : NNFormula α} : v ⊧ f ↔ NNFormula.val v f :=
+  iff_of_eq rfl
 
 instance : Semantics.Tarski (Valuation α) where
   models_verum := by simp [models_iff_val]

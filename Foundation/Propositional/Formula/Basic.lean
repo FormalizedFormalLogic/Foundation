@@ -10,7 +10,7 @@ namespace FFL.Propositional
 
 variable {α : Type*}
 
-inductive Formula (α : Type u) : Type u
+inductive Formula (α : Type*) : Type _
   | atom   : α → Formula α
   | falsum : Formula α
   | and    : Formula α → Formula α → Formula α
@@ -22,7 +22,7 @@ abbrev FormulaSet (α) := Set (Formula α)
 
 abbrev FormulaFinset (α) := Finset (Formula α)
 
-variable {φ ψ φ₁ ψ₁ φ₂ ψ₂ : Formula α}
+variable {φ ψ φ₁ ψ₁ φ₂ ψ₂ : Formula α} {a : α}
 
 
 namespace Formula
@@ -83,38 +83,40 @@ def complexity : Formula α → ℕ
 
 @[simp, grind =] lemma complexity_bot : (⊥ : Formula α).complexity = 0 := rfl
 @[simp, grind =] lemma complexity_atom : (atom a).complexity = 0 := rfl
-@[simp, grind =] lemma complexity_imp : complexity (φ 🡒 ψ) = max φ.complexity ψ.complexity + 1 := rfl
-@[simp, grind =] lemma complexity_and : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp, grind =]
+lemma complexity_imp : complexity (φ 🡒 ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp, grind =]
+lemma complexity_and : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 @[simp, grind =] lemma complexity_or : complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
 
 @[elab_as_elim]
-def cases' {C : Formula α → Sort w}
+def cases' {C : Formula α → Sort*}
     (hfalsum : C ⊥)
-    (hatom   : ∀ a : α, C (atom a))
-    (himp    : ∀ (φ ψ : Formula α), C (φ 🡒 ψ))
-    (hand    : ∀ (φ ψ : Formula α), C (φ ⋏ ψ))
-    (hor     : ∀ (φ ψ : Formula α), C (φ ⋎ ψ))
+    (hatom : ∀ a : α, C (atom a))
+    (himp : ∀ (φ ψ : Formula α), C (φ 🡒 ψ))
+    (hand : ∀ (φ ψ : Formula α), C (φ ⋏ ψ))
+    (hor : ∀ (φ ψ : Formula α), C (φ ⋎ ψ))
     : (φ : Formula α) → C φ
-  | ⊥       => hfalsum
-  | atom a  => hatom a
-  | φ 🡒 ψ   => himp φ ψ
-  | φ ⋏ ψ   => hand φ ψ
-  | φ ⋎ ψ   => hor φ ψ
+  | ⊥ => hfalsum
+  | atom a => hatom a
+  | φ 🡒 ψ => himp φ ψ
+  | φ ⋏ ψ => hand φ ψ
+  | φ ⋎ ψ => hor φ ψ
 
 @[induction_eliminator]
-def rec' {C : Formula α → Sort w}
+def rec' {C : Formula α → Sort*}
   (hfalsum : C ⊥)
-  (hatom   : ∀ a : α, C (atom a))
-  (himp    : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ 🡒 ψ))
-  (hand    : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ⋏ ψ))
-  (hor     : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ⋎ ψ))
+  (hatom : ∀ a : α, C (atom a))
+  (himp : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ 🡒 ψ))
+  (hand : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ⋏ ψ))
+  (hor : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ⋎ ψ))
   : (φ : Formula α) → C φ
-  | ⊥       => hfalsum
-  | atom a  => hatom a
-  | φ 🡒 ψ  => himp φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
-  | φ ⋏ ψ   => hand φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
-  | φ ⋎ ψ   => hor φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
+  | ⊥ => hfalsum
+  | atom a => hatom a
+  | φ 🡒 ψ => himp φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
+  | φ ⋏ ψ => hand φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
+  | φ ⋎ ψ => hor φ ψ (rec' hfalsum hatom himp hand hor φ) (rec' hfalsum hatom himp hand hor ψ)
 
 section Decidable
 
@@ -180,22 +182,28 @@ def ofNat : ℕ → Option (Formula α)
     | 0 => some ⊥
     | 1 => (decode c).map Formula.atom
     | 2 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
         let φ <- ofNat c.unpair.1
         let ψ <- ofNat c.unpair.2
         return φ 🡒 ψ
     | 3 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
         let φ <- ofNat c.unpair.1
         let ψ <- ofNat c.unpair.2
         return φ ⋏ ψ
     | 4 =>
-      have : c.unpair.1 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 := Nat.lt_succ_iff.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 :=
+        Nat.lt_succ_iff.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
         let φ <- ofNat c.unpair.1
         let ψ <- ofNat c.unpair.2
@@ -232,10 +240,15 @@ attribute [grind =] NegAbbrev.neg
 @[grind .] lemma not_letterless_atom {a : α} : ¬(Formula.Letterless (.atom a)) := by grind;
 @[grind .] lemma letterless_falsum : (⊥ : Formula α).Letterless := by simp [Letterless];
 @[grind .] lemma letterless_verum : (⊤ : Formula α).Letterless := by simp [Letterless];
-@[grind =] lemma letterless_imp {φ ψ : Formula α} : (φ 🡒 ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
-@[grind =] lemma letterless_and : (φ ⋏ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
-@[grind =] lemma letterless_or : (φ ⋎ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
-@[grind =] lemma letterless_neg : (∼φ).Letterless ↔ φ.Letterless ∧ (⊥ : Formula α).Letterless := by grind;
+@[grind =]
+lemma letterless_imp {φ ψ : Formula α} : (φ 🡒 ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by
+  simp [Letterless];
+@[grind =]
+lemma letterless_and : (φ ⋏ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
+@[grind =]
+lemma letterless_or : (φ ⋎ ψ).Letterless ↔ φ.Letterless ∧ ψ.Letterless := by simp [Letterless];
+@[grind =]
+lemma letterless_neg : (∼φ).Letterless ↔ φ.Letterless ∧ (⊥ : Formula α).Letterless := by grind;
 
 end Letterless
 
@@ -256,7 +269,7 @@ def Formula.subformulas : Formula α → Finset (Formula α)
 
 namespace Formula.subformulas
 
-variable {φ ψ χ : Formula α}
+variable {φ ψ χ ξ : Formula α}
 
 @[simp, grind .] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas];
 
@@ -315,12 +328,18 @@ namespace FormulaFinset.SubformulaClosed
 
 variable {φ ψ χ : Formula α} {Γ : FormulaFinset α} [Γ.SubformulaClosed]
 
-@[grind ⇒] lemma mem_and₁ (h : φ ⋏ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_and₂ (h : φ ⋏ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_or₁ (h : φ ⋎ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_or₂ (h : φ ⋎ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_imp₁ (h : φ 🡒 ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_imp₂ (h : φ 🡒 ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+@[grind ⇒] lemma mem_and₁ (h : φ ⋏ ψ ∈ Γ) : φ ∈ Γ := by
+  apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+@[grind ⇒] lemma mem_and₂ (h : φ ⋏ ψ ∈ Γ) : ψ ∈ Γ := by
+  apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+@[grind ⇒] lemma mem_or₁ (h : φ ⋎ ψ ∈ Γ) : φ ∈ Γ := by
+  apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+@[grind ⇒] lemma mem_or₂ (h : φ ⋎ ψ ∈ Γ) : ψ ∈ Γ := by
+  apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+@[grind ⇒] lemma mem_imp₁ (h : φ 🡒 ψ ∈ Γ) : φ ∈ Γ := by
+  apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+@[grind ⇒] lemma mem_imp₂ (h : φ 🡒 ψ ∈ Γ) : ψ ∈ Γ := by
+  apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
 
 instance subformulaClosed_subformulas {φ : Formula α} : SubformulaClosed (φ.subformulas) := ⟨by
   induction φ with
@@ -329,33 +348,33 @@ instance subformulaClosed_subformulas {φ : Formula α} : SubformulaClosed (φ.s
   | himp φ ψ ihφ ihψ =>
     rintro ξ hξ;
     rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ);
-    . tauto;
-    . trans φ.subformulas;
-      . exact ihφ _ hξ;
-      . intro; simp_all [Formula.subformulas];
-    . trans ψ.subformulas;
-      . exact ihψ _ hξ;
-      . intro; simp_all [Formula.subformulas];
+    · tauto;
+    · trans φ.subformulas;
+      · exact ihφ _ hξ;
+      · intro; simp_all [Formula.subformulas];
+    · trans ψ.subformulas;
+      · exact ihψ _ hξ;
+      · intro; simp_all [Formula.subformulas];
   | hand φ ψ ihφ ihψ =>
     rintro ξ hξ;
     rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ);
-    . tauto;
-    . trans φ.subformulas;
-      . exact ihφ _ hξ;
-      . intro; simp_all [Formula.subformulas];
-    . trans ψ.subformulas;
-      . exact ihψ _ hξ;
-      . intro; simp_all [Formula.subformulas];
+    · tauto;
+    · trans φ.subformulas;
+      · exact ihφ _ hξ;
+      · intro; simp_all [Formula.subformulas];
+    · trans ψ.subformulas;
+      · exact ihψ _ hξ;
+      · intro; simp_all [Formula.subformulas];
   | hor φ ψ ihφ ihψ =>
     rintro ξ hξ;
     rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ);
-    . tauto;
-    . trans φ.subformulas;
-      . exact ihφ _ hξ;
-      . intro; simp_all [Formula.subformulas];
-    . trans ψ.subformulas;
-      . exact ihψ _ hξ;
-      . intro; simp_all [Formula.subformulas];
+    · tauto;
+    · trans φ.subformulas;
+      · exact ihφ _ hξ;
+      · intro; simp_all [Formula.subformulas];
+    · trans ψ.subformulas;
+      · exact ihψ _ hξ;
+      · intro; simp_all [Formula.subformulas];
 ⟩
 
 end FormulaFinset.SubformulaClosed
@@ -369,12 +388,18 @@ namespace FormulaSet.SubformulaClosed
 
 variable {φ ψ χ : Formula α} {T : FormulaSet α} [T.SubformulaClosed]
 
-@[grind ⇒] protected lemma mem_and₁ (h : φ ⋏ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_and₂ (h : φ ⋏ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_or₁ (h : φ ⋎ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_or₂ (h : φ ⋎ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_imp₁ (h : φ 🡒 ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_imp₂ (h : φ 🡒 ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+@[grind ⇒] protected lemma mem_and₁ (h : φ ⋏ ψ ∈ T) : φ ∈ T := by
+  apply closed _ h; simp [Formula.subformulas];
+@[grind ⇒] protected lemma mem_and₂ (h : φ ⋏ ψ ∈ T) : ψ ∈ T := by
+  apply closed _ h; simp [Formula.subformulas];
+@[grind ⇒] protected lemma mem_or₁ (h : φ ⋎ ψ ∈ T) : φ ∈ T := by
+  apply closed _ h; simp [Formula.subformulas];
+@[grind ⇒] protected lemma mem_or₂ (h : φ ⋎ ψ ∈ T) : ψ ∈ T := by
+  apply closed _ h; simp [Formula.subformulas];
+@[grind ⇒] protected lemma mem_imp₁ (h : φ 🡒 ψ ∈ T) : φ ∈ T := by
+  apply closed _ h; simp [Formula.subformulas];
+@[grind ⇒] protected lemma mem_imp₂ (h : φ 🡒 ψ ∈ T) : ψ ∈ T := by
+  apply closed _ h; simp [Formula.subformulas];
 
 instance {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
   simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;
@@ -396,7 +421,7 @@ section Substitution
 
 abbrev Substitution (α) := α → (Formula α)
 
-abbrev Substitution.id {α} : Substitution α := λ a => .atom a
+abbrev Substitution.id {α} : Substitution α := fun a => .atom a
 
 namespace Formula
 
@@ -437,7 +462,7 @@ end Formula
 
 
 @[grind]
-def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
+def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := fun a => (s₁ a)⟦s₂⟧
 infixr:80 " ∘ " => Substitution.comp
 
 @[simp, grind =]
@@ -452,7 +477,7 @@ instance : Coe (ZeroSubstitution α) (Substitution α) := ⟨Subtype.val⟩
 lemma Formula.letterless_zeroSubst {s : ZeroSubstitution α} : (φ⟦s⟧).Letterless := by
   induction φ;
   case hatom => exact s.2;
-  all_goals. simp_all [Formula.Letterless];
+  all_goals · simp_all [Formula.Letterless];
 
 class SubstitutionClosed (S : Set (Formula α)) where
   closed : ∀ φ ∈ S, (∀ s : Substitution α, φ⟦s⟧ ∈ S)

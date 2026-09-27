@@ -3,11 +3,15 @@ module
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 /-!
 # Witness comparisons of provability
 -/
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+
+open Bounding (HierarchySymbol)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -25,34 +29,40 @@ def _root_.FFL.FirstOrder.Theory.ProvabilityComparisonLT (φ ψ : V) : Prop :=
 
 section
 
-noncomputable def _root_.FFL.FirstOrder.Theory.provabilityComparisonLE : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.provabilityComparisonLE :
+    𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ b, !(proof T).sigma b φ ∧ ∀ b' < b, ¬!(proof T).pi b' ψ”
 
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_defined :
-    𝚺₁-Relation[V] T.ProvabilityComparisonLE via T.provabilityComparisonLE := .mk fun v ↦ by
+    𝚺ᴬ₁-Relation[V] T.ProvabilityComparisonLE via T.provabilityComparisonLE :=
+      .mk fun v ↦ by
   simp [Theory.provabilityComparisonLE, Theory.ProvabilityComparisonLE]
 
-instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_definable : 𝚺₁-Relation[V] T.ProvabilityComparisonLE :=
+instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_definable :
+    𝚺ᴬ₁-Relation[V] T.ProvabilityComparisonLE :=
   T.provability_comparison_le_defined.to_definable
 
 /-- instance for definability tactic -/
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_definable' :
-    𝚺-[0 + 1]-Relation[V] T.ProvabilityComparisonLE := T.provability_comparison_le_definable
+    𝚺ᴬ-[0 + 1]-Relation[V] T.ProvabilityComparisonLE := T.provability_comparison_le_definable
 
 
-noncomputable def _root_.FFL.FirstOrder.Theory.provabilityComparisonLT : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.provabilityComparisonLT :
+    𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ b, !(proof T).sigma b φ ∧ ∀ b' <⁺ b, ¬!(proof T).pi b' ψ”
 
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_defined :
-    𝚺₁-Relation[V] T.ProvabilityComparisonLT via T.provabilityComparisonLT := .mk fun v ↦ by
+    𝚺ᴬ₁-Relation[V] T.ProvabilityComparisonLT via T.provabilityComparisonLT :=
+      .mk fun v ↦ by
   simp [Theory.provabilityComparisonLT, Theory.ProvabilityComparisonLT]
 
-instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_definable : 𝚺₁-Relation[V] T.ProvabilityComparisonLT :=
+instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_definable :
+    𝚺ᴬ₁-Relation[V] T.ProvabilityComparisonLT :=
   T.provability_comparison_lt_defined.to_definable
 
 /-- instance for definability tactic -/
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_definable' :
-    𝚺-[0 + 1]-Relation[V] T.ProvabilityComparisonLT := T.provability_comparison_lt_definable
+    𝚺ᴬ-[0 + 1]-Relation[V] T.ProvabilityComparisonLT := T.provability_comparison_lt_definable
 
 end
 
@@ -93,12 +103,13 @@ lemma iff_le_refl_provable : φ ≼ φ ↔ □φ := by
   · exact le_to_provable
   · rintro ⟨b, hb⟩
     have : ∃ b, Proof T b φ ∧ ∀ z < b, ¬Proof T z φ :=
-      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := (Proof T · φ)) (by definability) hb
+      InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (P := (Proof T · φ)) (by definability) hb
     rcases this with ⟨b, bd, h⟩
     exact ⟨b, bd, h⟩
 
 @[grind .]
-lemma lt_irrefl : ¬φ ≺ φ := by rintro ⟨b, hb, h⟩; have : ¬Proof T b φ := h b (by simp); contradiction
+lemma lt_irrefl : ¬φ ≺ φ := by
+  rintro ⟨b, hb, h⟩; have : ¬Proof T b φ := h b (by simp); contradiction
 
 @[grind =>]
 lemma lt_trans : φ ≺ ψ → ψ ≺ χ → φ ≺ χ := by rintro ⟨b, hb, h⟩ ⟨d, hd, H⟩; use b; grind;
@@ -108,12 +119,13 @@ lemma lt_trans : φ ≺ ψ → ψ ≺ χ → φ ≺ χ := by rintro ⟨b, hb, h�
 lemma not_lt_of_le : φ ≼ ψ → ¬ψ ≺ φ := by grind;
 
 
-lemma find_minimal_proof_fintype [Fintype ι] (φ : ι → V) (H : □(φ i)) :
+lemma find_minimal_proof_fintype {ι : Type*} [Finite ι] (φ : ι → V) {i : ι} (H : □(φ i)) :
     ∃ j, ∀ k, (φ j) ≼ (φ k) := by
-  rcases show ∃ dᵢ, Proof T dᵢ (φ i)from H with ⟨dᵢ, Hdᵢ⟩
+  have : Fintype ι := Fintype.ofFinite ι
+  rcases show ∃ dᵢ, Proof T dᵢ (φ i) from H with ⟨dᵢ, Hdᵢ⟩
   have : ∃ z, (∃ j, Proof T z (φ j)) ∧ ∀ w < z, ∀ x, ¬Proof T w (φ x) := by
     simpa using
-      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, Proof T z (φ j))
+      InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, Proof T z (φ j))
         (HierarchySymbol.Definable.fintype_exs fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
   rcases this with ⟨z, ⟨j, hj⟩, H⟩
   exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩

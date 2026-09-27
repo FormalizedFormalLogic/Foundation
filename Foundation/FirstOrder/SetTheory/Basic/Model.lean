@@ -21,7 +21,8 @@ instance Subset.definable : ℒₛₑₜ-relation[V] Subset := defined_isSubsetO
 
 @[simp, refl] lemma subset_refl (x : V) : x ⊆ x := by simp [subset_def]
 
-@[simp, trans] lemma subset_trans {x y z : V} : x ⊆ y → y ⊆ z → x ⊆ z := fun hxy hyz v hv ↦ hyz v (hxy v hv)
+@[simp, trans] lemma subset_trans {x y z : V} : x ⊆ y → y ⊆ z → x ⊆ z :=
+  fun hxy hyz v hv ↦ hyz v (hxy v hv)
 
 instance : Std.Refl (α := V) Subset := ⟨subset_refl⟩
 
@@ -62,7 +63,8 @@ lemma ssubset_def {x y : V} : x ⊊ y ↔ x ⊆ y ∧ x ≠ y := by rfl
 
 def SSubset.dfn : SetTheorySemisentence 2 := “x y. x ⊆ y ∧ x ≠ y”
 
-instance SSubset.defined : ℒₛₑₜ-relation[V] SSubset via SSubset.dfn := ⟨fun v ↦ by simp [ssubset_def, SSubset.dfn]⟩
+instance SSubset.defined : ℒₛₑₜ-relation[V] SSubset via SSubset.dfn :=
+  ⟨fun v ↦ by simp [ssubset_def, SSubset.dfn]⟩
 
 instance SSubset.definable : ℒₛₑₜ-relation[V] SSubset := SSubset.defined.to_definable
 

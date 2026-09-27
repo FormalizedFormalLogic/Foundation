@@ -36,49 +36,50 @@ instance : Semantics.Tarski (Valuation α) where
   models_not := by simp [models_iff_val, val]
   models_imply := by simp [models_iff_val, val]
 
-@[simp] protected lemma models_atom : v ⊧ (.atom a) ↔ v a := iff_of_eq rfl
+@[simp] protected lemma models_atom {a : α} : v ⊧ (.atom a) ↔ v a := iff_of_eq rfl
 
-lemma eq_fml_of_eq_atom {v u : Valuation α} (h : ∀ {a : α}, v a ↔ u a) : (∀ {φ : Formula α}, v ⊧ φ ↔ u ⊧ φ) := by
+lemma eq_fml_of_eq_atom {v u : Valuation α} (h : ∀ {a : α}, v a ↔ u a) :
+    (∀ {φ : Formula α}, v ⊧ φ ↔ u ⊧ φ) := by
   intro φ;
   induction φ with
   | hatom => apply h;
   | _ => simp [*]
 
 lemma iff_subst_self (s) :
-  ((λ a => val v ((.atom a)⟦s⟧)) : Valuation α) ⊧ φ ↔ v ⊧ (φ⟦s⟧) := by
+  ((fun a => val v ((.atom a)⟦s⟧)) : Valuation α) ⊧ φ ↔ v ⊧ (φ⟦s⟧) := by
   induction φ with
   | hatom a => simp [val, models_iff_val];
   | hfalsum => simp;
   | himp φ ψ ihφ ihψ =>
     constructor;
-    . intro hφψ hφ;
+    · intro hφψ hφ;
       apply ihψ.mp;
       apply hφψ;
       apply ihφ.mpr;
       exact hφ;
-    . intro hφψs hφ;
+    · intro hφψs hφ;
       apply ihψ.mpr;
       apply hφψs;
       apply ihφ.mp;
       exact hφ;
   | hand φ ψ ihφ ihψ =>
     constructor;
-    . rintro ⟨hφ, hψ⟩;
+    · rintro ⟨hφ, hψ⟩;
       constructor;
-      . apply ihφ.mp hφ;
-      . apply ihψ.mp hψ;
-    . rintro ⟨hφ, hψ⟩;
+      · apply ihφ.mp hφ;
+      · apply ihψ.mp hψ;
+    · rintro ⟨hφ, hψ⟩;
       constructor;
-      . apply ihφ.mpr hφ;
-      . apply ihψ.mpr hψ;
+      · apply ihφ.mpr hφ;
+      · apply ihψ.mpr hψ;
   | hor φ ψ ihφ ihψ =>
     constructor;
-    . rintro (hφ | hψ);
-      . left; apply ihφ.mp hφ;
-      . right; apply ihψ.mp hψ;
-    . rintro (hφ | hψ);
-      . left; apply ihφ.mpr hφ;
-      . right; apply ihψ.mpr hψ;
+    · rintro (hφ | hψ);
+      · left; apply ihφ.mp hφ;
+      · right; apply ihψ.mp hψ;
+    · rintro (hφ | hψ);
+      · left; apply ihφ.mpr hφ;
+      · right; apply ihψ.mpr hψ;
 
 @[grind =>]
 lemma equiv_of_letterless (hl : φ.Letterless) : ∀ v w : Valuation _, v ⊧ φ ↔ w ⊧ φ := by
@@ -125,11 +126,11 @@ lemma subst_isTautology (h : φ.IsTautology) : ∀ s, (φ⟦s⟧).IsTautology :=
 @[grind =]
 lemma iff_and_isTautology : (φ ⋏ ψ).IsTautology ↔ (φ.IsTautology) ∧ (ψ.IsTautology) := by
   constructor;
-  . intro h;
+  · intro h;
     constructor;
-    . intro v; exact h v |>.1;
-    . intro v; exact h v |>.2;
-  . rintro ⟨hφ, hψ⟩ v;
+    · intro v; exact h v |>.1;
+    · intro v; exact h v |>.2;
+  · rintro ⟨hφ, hψ⟩ v;
     have := hφ v;
     have := hψ v;
     tauto;
@@ -137,8 +138,8 @@ lemma iff_and_isTautology : (φ ⋏ ψ).IsTautology ↔ (φ.IsTautology) ∧ (ψ
 @[grind <=]
 lemma or_isTautology_of : φ.IsTautology ∨ ψ.IsTautology → (φ ⋎ ψ).IsTautology := by
   rintro (hφ | hψ) v;
-  . left; exact hφ v;
-  . right; exact hψ v;
+  · left; exact hφ v;
+  · right; exact hψ v;
 
 @[grind <=]
 lemma imp_isTautology_of : (ψ.IsTautology) → (φ 🡒 ψ).IsTautology := by
@@ -149,14 +150,15 @@ alias tautology_afortiori := imp_isTautology_of
 @[simp, grind .]
 lemma not_bot_isTautology : ¬((⊥ : Formula α).IsTautology) := by
   intro h;
-  have := @h (λ _ => True);
+  have := @h (fun _ => True);
   simp at this;
 
 @[simp, grind .]
 lemma top_isTautology : (⊤ : Formula α).IsTautology := by intro v; simp;
 
 @[grind =>]
-lemma tautology_of_letterless_of_not_neg_isTautology (hl : φ.Letterless) : ¬((∼φ).IsTautology) → φ.IsTautology := by
+lemma tautology_of_letterless_of_not_neg_isTautology (hl : φ.Letterless) :
+    ¬((∼φ).IsTautology) → φ.IsTautology := by
   intro h v;
   obtain ⟨w, hw⟩ : ∃ x : Tarski.Valuation _, x ⊧ φ := by simpa [IsTautology, Valid] using h;
   have H := Formula.equiv_of_letterless hl;
@@ -164,7 +166,8 @@ lemma tautology_of_letterless_of_not_neg_isTautology (hl : φ.Letterless) : ¬((
   assumption;
 
 @[grind =>]
-lemma neg_isTautology_of_letterless_of_isTautology (hl : φ.Letterless) : ¬φ.IsTautology → (∼φ).IsTautology := by
+lemma neg_isTautology_of_letterless_of_isTautology (hl : φ.Letterless) :
+    ¬φ.IsTautology → (∼φ).IsTautology := by
   contrapose!;
   apply tautology_of_letterless_of_not_neg_isTautology hl;
 

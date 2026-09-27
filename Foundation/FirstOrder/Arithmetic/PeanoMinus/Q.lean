@@ -3,12 +3,12 @@ module
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 @[expose] public section
-lemma Nat.iff_lt_exists_add_succ : n < m ↔ ∃ k, m = n + (k + 1) := by
+lemma Nat.iff_lt_exists_add_succ {n m : ℕ} : n < m ↔ ∃ k, m = n + (k + 1) := by
   constructor;
-  . intro h;
+  · intro h;
     use m - n - 1;
     omega;
-  . rintro ⟨k, rfl⟩;
+  · rintro ⟨k, rfl⟩;
     apply Nat.lt_add_of_pos_right;
     omega;
 
@@ -63,16 +63,20 @@ instance : ORingStructure OmegaAddOne where
 
 @[simp] lemma top_lt_top : (⊤ : OmegaAddOne) < ⊤ := by trivial
 
-@[simp] lemma top_add : (⊤ : OmegaAddOne) + a = ⊤ := by match a with | ⊤ | .some n => rfl
+@[simp] lemma top_add {a : OmegaAddOne} : (⊤ : OmegaAddOne) + a = ⊤ := by
+  match a with | ⊤ | .some n => rfl
 
-@[simp] lemma add_top : a + (⊤ : OmegaAddOne) = ⊤ := by match a with | ⊤ | .some n => rfl
+@[simp] lemma add_top {a : OmegaAddOne} : a + (⊤ : OmegaAddOne) = ⊤ := by
+  match a with | ⊤ | .some n => rfl
 
 
 variable {a b : OmegaAddOne}
 
 @[simp] lemma add_zero : a + 0 = a := by match a with | ⊤ | .some n => trivial;
 
-@[simp] lemma add_succ : a + (b + 1) = a + b + 1 := by match a, b with | ⊤, ⊤ | ⊤, .some n | .some m, ⊤ | .some n, .some m => tauto;
+@[simp] lemma add_succ : a + (b + 1) = a + b + 1 := by
+  match a, b with
+  | ⊤, ⊤ | ⊤, .some n | .some m, ⊤ | .some n, .some m => tauto;
 
 @[simp] lemma mul_zero : a * 0 = 0 := by match a with | ⊤ | .some 0 | .some (n + 1) => rfl;
 
@@ -122,11 +126,11 @@ lemma lt_def : a < b ↔ ∃ c, a + c + 1 = b := by
     apply Iff.trans (show some m < some n ↔ m < n by rfl);
     apply Iff.trans Nat.iff_lt_exists_add_succ;
     constructor;
-    . intro h;
+    · intro h;
       obtain ⟨k, rfl⟩ : ∃ k : ℕ, m + (k + 1) = n := by tauto;
       use k;
       tauto;
-    . rintro ⟨c, hc⟩;
+    · rintro ⟨c, hc⟩;
       match c with
       | .none => simp at hc;
       | .some c => use c; exact Option.mem_some_iff.mp hc |>.symm;

@@ -21,10 +21,12 @@ variable {L : Language} [L.LT] {ξ : Type*}
 
 inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | zero {Γ n} {φ : Semiformula L ξ n} :
-      Semiformula.Bounded BoundingOperator φ → StrictHierarchy Γ 0 φ
+      ℬ[<, L].Closure φ → StrictHierarchy Γ 0 φ
   | ofAlt {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ.alt s φ → StrictHierarchy Γ (s + 1) φ
-  | exs {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚺 (s + 1) φ → StrictHierarchy 𝚺 (s + 1) (∃¹ φ)
-  | all {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚷 (s + 1) φ → StrictHierarchy 𝚷 (s + 1) (∀¹ φ)
+  | exs {s n} {φ : Semiformula L ξ (n + 1)} :
+      StrictHierarchy 𝚺 (s + 1) φ → StrictHierarchy 𝚺 (s + 1) (∃¹ φ)
+  | all {s n} {φ : Semiformula L ξ (n + 1)} :
+      StrictHierarchy 𝚷 (s + 1) φ → StrictHierarchy 𝚷 (s + 1) (∀¹ φ)
 
 namespace StrictHierarchy
 
@@ -32,7 +34,7 @@ section
 
 variable {Γ : Polarity} {n : ℕ} {φ : Semiformula L ξ n}
 
-lemma zero_iff_bounded : StrictHierarchy Γ 0 φ ↔ Semiformula.Bounded BoundingOperator φ :=
+lemma zero_iff_bounded : StrictHierarchy Γ 0 φ ↔ ℬ[<, L].Closure φ :=
   ⟨fun | .zero h => h, .zero⟩
 
 end
@@ -40,8 +42,9 @@ end
 -- Recursive lemmas over `StrictHierarchy` bind `Γ s n φ` in their own signature rather than
 -- via `variable`: otherwise the equation compiler cannot generalize them.
 
-lemma hierarchy {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → Hierarchy Γ s φ
-  | zero h => Hierarchy.bounded _ _ _ h
+lemma hierarchy {Γ s n} {φ : Semiformula L ξ n} :
+    StrictHierarchy Γ s φ → ℬ[<, L].Hierarchy Γ s φ
+  | zero h => Bounding.Hierarchy.bounded _ _ _ h
   | ofAlt h => (hierarchy h).accum _
   | exs h => (hierarchy h).exs
   | all h => (hierarchy h).all
@@ -53,7 +56,8 @@ lemma neg {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → Stric
   | all h => by simpa using (neg h).exs
 
 @[simp, grind =]
-lemma neg_iff {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s (∼φ) ↔ StrictHierarchy Γ.alt s φ := ⟨
+lemma neg_iff {Γ s n} {φ : Semiformula L ξ n} :
+    StrictHierarchy Γ s (∼φ) ↔ StrictHierarchy Γ.alt s φ := ⟨
   fun h ↦ by simpa using neg h,
   fun h ↦ by simpa using neg h
 ⟩
@@ -96,21 +100,21 @@ lemma toPrenex {j} {φ : Semiformula L ξ (n + s)} (h : StrictHierarchy (Γ.altI
   | zero => simpa using h;
   | succ s ih =>
     rw [Polarity.altItr_succ] at h;
-    show StrictHierarchy Γ (j + (s + 1)) (Polarity.quantItr Γ (s + 1) φ);
+    change StrictHierarchy Γ (j + (s + 1)) (Polarity.quantItr Γ (s + 1) φ);
     rw [Polarity.quantItr_succ', show j + (s + 1) = j + 1 + s by omega];
     rcases hΓ : Γ.altItr s with _ | _;
-    . apply ih;
+    · apply ih;
       rw [hΓ] at h ⊢;
       exact (ofAlt h).exs;
-    . apply ih;
+    · apply ih;
       rw [hΓ] at h ⊢;
       exact (ofAlt h).all;
 
 lemma toPrenex_of_deltaZero {φ : Semiformula L ξ (n + s)}
-    (h : Semiformula.Bounded BoundingOperator φ) :
+    (h : ℬ[<, L].Closure φ) :
     StrictHierarchy Γ s (φ.toPrenex Γ s) := by simpa using toPrenex (Γ := Γ) (zero h)
 
-lemma mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (hs : s ≤ s') :
+lemma mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) {s' : ℕ} (hs : s ≤ s') :
     StrictHierarchy Γ s' φ := by
   induction h generalizing s' with
   | @zero Γ₀ n₀ φ₀ h =>
@@ -134,23 +138,28 @@ lemma strict_mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (Γ') 
     StrictHierarchy Γ' s' φ := by
   obtain ⟨t, rfl⟩ : ∃ t, s' = t + 1 := ⟨s' - 1, by omega⟩;
   rcases Γ' with _ | _ <;> rcases Γ with _ | _;
-  . exact h.mono (by omega);
-  . exact ofAlt (h.mono (by omega));
-  . exact ofAlt (h.mono (by omega));
-  . exact h.mono (by omega);
+  · exact h.mono (by omega);
+  · exact ofAlt (h.mono (by omega));
+  · exact ofAlt (h.mono (by omega));
+  · exact h.mono (by omega);
 
-lemma of_deltaZero {φ : Semiformula L ξ n} (h : Hierarchy 𝚺 0 φ) : StrictHierarchy Γ s φ :=
-  (zero (Hierarchy.zero_iff_delta_zero.mp h)).mono (Nat.zero_le s)
+lemma of_deltaZero {φ : Semiformula L ξ n} (h : ℬ[<, L].Hierarchy 𝚺 0 φ) :
+    StrictHierarchy Γ s φ :=
+  (zero (Bounding.Hierarchy.zero_iff_bounded.mp h)).mono (Nat.zero_le s)
 
-lemma zero_iff {φ : Semiformula L ξ n} : StrictHierarchy Γ 0 φ ↔ Hierarchy 𝚺 0 φ := by
+lemma of_open {φ : Semiformula L ξ n} (h : φ.Open) : StrictHierarchy Γ s φ :=
+  of_deltaZero (Bounding.Hierarchy.of_open h)
+
+lemma zero_iff {φ : Semiformula L ξ n} :
+    StrictHierarchy Γ 0 φ ↔ ℬ[<, L].Hierarchy 𝚺 0 φ := by
   constructor;
-  . intro h;
+  · intro h;
     generalize hs : 0 = s at h;
     rcases h with @⟨_, _, _, h⟩ | _ | _ | _;
-    . exact Hierarchy.bounded _ _ _ h;
+    · exact Bounding.Hierarchy.bounded _ _ _ h;
     all_goals omega;
-  . intro h;
-    exact zero (Hierarchy.zero_iff_delta_zero.mp h);
+  · intro h;
+    exact zero (Bounding.Hierarchy.zero_iff_bounded.mp h);
 
 end
 

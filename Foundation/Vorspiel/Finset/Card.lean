@@ -14,8 +14,8 @@ lemma ssubset_of_subset_lt_card
   (h_subset : s ⊆ t)
   (h_card_le : s.card < t.card) : s ⊂ t := by
   constructor;
-  . assumption;
-  . by_contra hC;
+  · assumption;
+  · by_contra hC;
     have : t = s := Finset.eq_iff_card_le_of_subset hC |>.mp (by omega);
     subst this;
     simp at h_card_le;

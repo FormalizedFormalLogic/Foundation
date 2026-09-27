@@ -11,13 +11,15 @@ public import Mathlib.Computability.Reduce
 /-!
 # Church's undecidability theorem
 
-The set of sentences provable in an arithmetic theory `T ⊇ 𝗥₀` is not computable, whether `T` is
-sound on `𝚺₁` sentences (`uncomputable_theory_of_sigma1Sound`) or merely consistent and extends
-`𝗜𝚺₁` (`uncomputable_theory_of_consistent`). Provability in pure first-order logic is likewise
-undecidable (`undecidability_first_order_logic`).
+The set of sentences provable in an arithmetic theory `T ⊇ 𝗥₀` is not computable,
+whether `T` is sound on `𝚺ᴬ₁` sentences (`uncomputable_theory_of_sigma1Sound`) or merely
+consistent and extends `𝗜𝚺₁` (`uncomputable_theory_of_consistent`). Provability in pure
+first-order logic is likewise undecidable (`undecidability_first_order_logic`).
 -/
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
 
@@ -26,7 +28,7 @@ open Bootstrapping Bootstrapping.Arithmetic
 section Diagonalization
 
 lemma computable_iff_sigma1_simulate {α β : Type*} [Primcodable α] [Primcodable β]
-    {f : ℕ → ℕ} (hf : 𝚺₁-Function₁ f)
+    {f : ℕ → ℕ} (hf : 𝚺ᴬ₁-Function₁ f)
     {F : α → β} (h : ∀ a, f (Encodable.encode a) = Encodable.encode (F a)) :
     Computable F := by
   have hCode : Computable fun a : α ↦ f (Encodable.encode a) :=
@@ -35,9 +37,11 @@ lemma computable_iff_sigma1_simulate {α β : Type*} [Primcodable α] [Primcodab
     Computable.ofOption ((Computable.decode (α := β)).comp hCode)
   exact hDecode.of_eq_tot fun a ↦ by simp [h a]
 
-lemma computable₂_iff_sigma1_simulate {α β γ : Type*} [Primcodable α] [Primcodable β] [Primcodable γ]
-    {f : ℕ → ℕ → ℕ} (hf : 𝚺₁-Function₂ f)
-    {F : α → β → γ} (h : ∀ a b, f (Encodable.encode a) (Encodable.encode b) = Encodable.encode (F a b)) :
+lemma computable₂_iff_sigma1_simulate {α β γ : Type*} [Primcodable α] [Primcodable β]
+    [Primcodable γ]
+    {f : ℕ → ℕ → ℕ} (hf : 𝚺ᴬ₁-Function₂ f)
+    {F : α → β → γ}
+    (h : ∀ a b, f (Encodable.encode a) (Encodable.encode b) = Encodable.encode (F a b)) :
     Computable₂ F := by
   have hCode : Computable fun p : α × β ↦ f (Encodable.encode p.1) (Encodable.encode p.2) :=
     (computable₂_iff_sigma1.mpr hf).comp
@@ -78,7 +82,8 @@ variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 
 theorem uncomputable_theory_of_consistent : ¬ComputablePred T.theory := by
   by_contra hC
-  let p : ℕ → Prop := fun n ↦ (Encodable.decode (α := ArithmeticSentence) n).elim False (fun σ ↦ T ⊢ σ)
+  let p : ℕ → Prop :=
+    fun n ↦ (Encodable.decode (α := ArithmeticSentence) n).elim False (fun σ ↦ T ⊢ σ)
   have hp : ComputablePred p := ComputablePred.iff_decoded_pred.mp hC
   let ψ : ArithmeticSemisentence 1 := codeOfComputablePred p
   let δ : ArithmeticSentence := fixedpoint (∼ψ)
@@ -114,10 +119,11 @@ theorem undecidability_first_order_logic : ¬ComputablePred ((∅ : ArithmeticTh
       fun σ ↦ by
       simp [nat_pair_eq, c, Semiformula.imp_eq, Semiformula.encode_or,
         ← Semiformula.encode_eq_toNat, ← Semiformula.encode_eq_toNat]
-  apply uncomputable_theory_of_sigma1Sound (T := 𝗣𝗔⁻) (ComputablePred.computable_of_manyOneReducible ?_ hC)
+  apply uncomputable_theory_of_sigma1Sound (T := 𝗣𝗔⁻)
+    (ComputablePred.computable_of_manyOneReducible ?_ hC)
   refine ⟨fun σ ↦ PeanoMinus.finite.toFinset.conj 🡒 σ, ?_, ?_⟩
-  . exact hImpIntro
-  . exact hDeduction
+  · exact hImpIntro
+  · exact hDeduction
 
 end PeanoMinusReduction
 

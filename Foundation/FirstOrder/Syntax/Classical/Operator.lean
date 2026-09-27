@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Rew
 
 @[expose] public section
+set_option autoImplicit true
 
 namespace FFL
 
@@ -37,7 +38,8 @@ instance : Coe (Const L) (Semiterm L ξ n) := ⟨Operator.const⟩
 def comp (o : Operator L k) (w : Fin k → Operator L l) : Operator L l :=
   ⟨o.operator (fun x => (w x).term)⟩
 
-@[simp] lemma operator_comp (o : Operator L k) (w : Fin k → Operator L l) (v : Fin l → Semiterm L ξ n) :
+@[simp] lemma operator_comp (o : Operator L k) (w : Fin k → Operator L l)
+  (v : Fin l → Semiterm L ξ n) :
   (o.comp w).operator v = o.operator (fun x ↦ (w x).operator v) := by
     simp only [operator, comp, Rew.emb_eq_id, Rew.id_app, ← Rew.comp_app]; congr 1
     ext
@@ -62,7 +64,8 @@ lemma positive_operator_iff {k} {o : Operator L k} {v : Fin k → Semiterm L ξ 
     (o.operator v).Positive ↔ ∀ i ∈ o.term.bv, (v i).Positive := by
   simpa [Positive, bv_operator] using ⟨fun h i hi x hx ↦ h x i hi hx, fun h x i hi hx ↦ h i hi x hx⟩
 
-@[simp] lemma positive_const (c : Const L) : (c : Semiterm L ξ (n + 1)).Positive := by simp [const, positive_operator_iff]
+@[simp] lemma positive_const (c : Const L) : (c : Semiterm L ξ (n + 1)).Positive := by
+  simp [const, positive_operator_iff]
 
 -- f.operator ![ ... f.operator ![f.operator ![z, t 0], t 1], ... ,t (n-1)]
 def foldr (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operator L k
@@ -71,7 +74,8 @@ def foldr (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operat
 
 @[simp] lemma foldr_nil (f : Operator L 2) (z : Operator L k) : f.foldr z [] = z := rfl
 
-@[simp] lemma operator_foldr_cons (f : Operator L 2) (z : Operator L k) (o : Operator L k) (os : List (Operator L k))
+@[simp] lemma operator_foldr_cons (f : Operator L 2) (z : Operator L k) (o : Operator L k)
+  (os : List (Operator L k))
   (v : Fin k → Semiterm L ξ n) :
     (f.foldr z (o :: os)).operator v = f.operator ![(f.foldr z os).operator v, o.operator v] := by
   simp [foldr, operator_comp, Matrix.fun_eq_vec_two]
@@ -143,11 +147,14 @@ lemma Zero.term_eq [L.Zero] : (@Zero.zero L _).term = Semiterm.func Language.Zer
 
 lemma One.term_eq [L.One] : (@One.one L _).term = Semiterm.func Language.One.one ![] := rfl
 
-lemma Add.term_eq [L.Add] : (@Add.add L _).term = Semiterm.func Language.Add.add Semiterm.bvar := rfl
+lemma Add.term_eq [L.Add] : (@Add.add L _).term = Semiterm.func Language.Add.add Semiterm.bvar :=
+  rfl
 
-lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Semiterm.func Language.Mul.mul Semiterm.bvar := rfl
+lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Semiterm.func Language.Mul.mul Semiterm.bvar :=
+  rfl
 
-lemma Exp.term_eq [L.Exp] : (@Exp.exp L _).term = Semiterm.func Language.Exp.exp Semiterm.bvar := rfl
+lemma Exp.term_eq [L.Exp] : (@Exp.exp L _).term = Semiterm.func Language.Exp.exp Semiterm.bvar :=
+  rfl
 
 lemma Star.term_eq [L.Star] : (@Star.star L _).term = Semiterm.func Language.Star.star ![] := rfl
 
@@ -163,11 +170,12 @@ lemma numeral_zero : numeral L 0 = Zero.zero := by rfl
 
 lemma numeral_one : numeral L 1 = One.one := by rfl
 
-lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Operator.Add.add.comp ![numeral L z, One.one] := by
-  simp [numeral]
-  cases' z with z
-  · simp at hz
-  · rfl
+lemma numeral_succ (hz : z ≠ 0) :
+    numeral L (z + 1) = Operator.Add.add.comp ![numeral L z, One.one] := by
+  simp only [numeral]
+  cases z with
+  | zero => simp at hz
+  | succ z => rfl
 
 lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z + 1), One.one] :=
   numeral_succ (by simp)
@@ -222,7 +230,8 @@ abbrev gödelNumber' (a : α) : Semiterm L ξ n := const (gödelNumber a)
 
 instance : GödelQuote α (Semiterm L ξ n) := ⟨gödelNumber'⟩
 
-abbrev ofEncodable [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Encodable α] : GödelNumber L α := ⟨Operator.encode L⟩
+abbrev ofEncodable [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Encodable α] :
+    GödelNumber L α := ⟨Operator.encode L⟩
 
 end GödelNumber
 
@@ -232,21 +241,25 @@ section complexity
 
 variable {L : Language}
 
-@[simp] lemma complexity_zero [L.Zero] : ((Operator.Zero.zero : Const L) : Semiterm L ξ n).complexity = 1 := by
+@[simp] lemma complexity_zero [L.Zero] :
+    ((Operator.Zero.zero : Const L) : Semiterm L ξ n).complexity = 1 := by
   simp [Operator.const, Operator.operator, Operator.Zero.term_eq, complexity_func]
 
-@[simp] lemma complexity_one [L.One] : ((Operator.One.one : Const L) : Semiterm L ξ n).complexity = 1 := by
+@[simp] lemma complexity_one [L.One] :
+    ((Operator.One.one : Const L) : Semiterm L ξ n).complexity = 1 := by
   simp [Operator.const, Operator.operator, Operator.One.term_eq, complexity_func]
 
 @[simp] lemma complexity_add [L.Add] (t u : Semiterm L ξ n) :
     (Operator.Add.add.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.operator, Operator.Add.term_eq, complexity_func, Rew.func]
-  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by
+    ext i; cases i using Fin.cases <;> simp]
 
 @[simp] lemma complexity_mul [L.Mul] (t u : Semiterm L ξ n) :
     (Operator.Mul.mul.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.operator, Operator.Mul.term_eq, complexity_func, Rew.func]
-  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by
+    ext i; cases i using Fin.cases <;> simp]
 
 end complexity
 
@@ -262,7 +275,8 @@ abbrev Const (L : Language.{u}) := Operator L 0
 
 namespace Operator
 
-def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L ξ n) : Semiformula L ξ n :=
+def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L ξ n) :
+    Semiformula L ξ n :=
   Rewriting.emb o.sentence ⇜ v
 
 /-- Auxiliary condition for this formalization: rewriting to an application of `o` recovers an
@@ -281,7 +295,8 @@ instance : Coe (Const L) (Semiformula L ξ n) := ⟨Operator.const⟩
 def comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) : Operator L l :=
   ⟨o.operator (fun x => (w x).term)⟩
 
-lemma operator_comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) (v : Fin l → Semiterm L ξ n) :
+lemma operator_comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l)
+  (v : Fin l → Semiterm L ξ n) :
   (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
     unfold operator Rewriting.emb Rewriting.subst comp
     simp only [operator, ← TransitiveRewriting.comp_app, Rew.emb_eq_id, Rew.comp_id];
@@ -336,11 +351,14 @@ instance [L.Mem] : Operator.Mem L := ⟨⟨Semiformula.rel Language.Mem.mem Semi
 
 instance [Operator.Eq L] [Operator.LT L] : Operator.LE L := ⟨Eq.eq.or LT.lt⟩
 
-lemma Eq.sentence_eq [L.Eq] : (@Eq.eq L _).sentence = Semiformula.rel Language.Eq.eq Semiterm.bvar := rfl
+lemma Eq.sentence_eq [L.Eq] :
+    (@Eq.eq L _).sentence = Semiformula.rel Language.Eq.eq Semiterm.bvar := rfl
 
-lemma LT.sentence_eq [L.LT] : (@LT.lt L _).sentence = Semiformula.rel Language.LT.lt Semiterm.bvar := rfl
+lemma LT.sentence_eq [L.LT] :
+    (@LT.lt L _).sentence = Semiformula.rel Language.LT.lt Semiterm.bvar := rfl
 
-lemma Mem.sentence_eq [L.Mem] : (@Mem.mem L _).sentence = Semiformula.rel Language.Mem.mem Semiterm.bvar := rfl
+lemma Mem.sentence_eq [L.Mem] :
+    (@Mem.mem L _).sentence = Semiformula.rel Language.Mem.mem Semiterm.bvar := rfl
 
 lemma LE.sentence_eq [L.Eq] [L.LT] : (@LE.le L _).sentence = Eq.eq.sentence ⋎ LT.lt.sentence := rfl
 
@@ -377,34 +395,45 @@ lemma mem_def [L.Mem] (t u : Semiterm L ξ n) :
   simp [operator, Mem.sentence_eq, Matrix.fun_eq_vec_two]
 
 lemma le_def [L.Eq] [L.LT] (t u : Semiterm L ξ n) :
-    LE.le.operator ![t, u] = Semiformula.rel Language.Eq.eq ![t, u] ⋎ Semiformula.rel Language.LT.lt ![t, u] := by
+    LE.le.operator ![t, u] = Semiformula.rel Language.Eq.eq ![t, u] ⋎
+        Semiformula.rel Language.LT.lt ![t, u] := by
   simp [operator, Eq.sentence_eq, LT.sentence_eq, LE.sentence_eq, Matrix.fun_eq_vec_two]
 
 variable {L : Language}
 
-@[simp] lemma Eq.open [L.Eq] (t u : Semiterm L ξ n) : (Eq.eq.operator ![t, u]).Open := by simp [Operator.operator, Operator.Eq.sentence_eq]
+@[simp] lemma Eq.open [L.Eq] (t u : Semiterm L ξ n) : (Eq.eq.operator ![t, u]).Open := by
+  simp [Operator.operator, Operator.Eq.sentence_eq]
 
-@[simp] lemma LT.open [L.LT] (t u : Semiterm L ξ n) : (LT.lt.operator ![t, u]).Open := by simp [Operator.operator, Operator.LT.sentence_eq]
+@[simp] lemma LT.open [L.LT] (t u : Semiterm L ξ n) : (LT.lt.operator ![t, u]).Open := by
+  simp [Operator.operator, Operator.LT.sentence_eq]
 
-@[simp] lemma Mem.open [L.Mem] (t u : Semiterm L ξ n) : (Mem.mem.operator ![t, u]).Open := by simp [Operator.operator, Operator.Mem.sentence_eq]
+@[simp] lemma Mem.open [L.Mem] (t u : Semiterm L ξ n) : (Mem.mem.operator ![t, u]).Open := by
+  simp [Operator.operator, Operator.Mem.sentence_eq]
 
 @[simp] lemma LE.open [L.Eq] [L.LT] (t u : Semiterm L ξ n) : (LE.le.operator ![t, u]).Open := by
-  simp [Operator.operator, Operator.LE.sentence_eq, Operator.Eq.sentence_eq, Operator.LT.sentence_eq]
+  simp [Operator.operator, Operator.LE.sentence_eq, Operator.Eq.sentence_eq,
+      Operator.LT.sentence_eq]
 
 end Operator
 
 
-def ballLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀¹[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
+def ballLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
+  ∀¹[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
 
-def bexsLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃¹[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
+def bexsLT [Operator.LT L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
+  ∃¹[Operator.LT.lt.operator ![#0, Rew.bShift t]] φ
 
-def ballLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀¹[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
+def ballLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
+  ∀¹[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
 
-def bexsLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃¹[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
+def bexsLE [Operator.LE L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
+  ∃¹[Operator.LE.le.operator ![#0, Rew.bShift t]] φ
 
-def ballMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∀¹[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
+def ballMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) :
+    Semiformula L ξ n := ∀¹[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
 
-def bexsMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := ∃¹[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
+def bexsMem [Operator.Mem L] (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) :
+    Semiformula L ξ n := ∃¹[Operator.Mem.mem.operator ![#0, Rew.bShift t]] φ
 
 end Semiformula
 
@@ -462,7 +491,8 @@ lemma hom_operator' (o : Semiformula.Operator L k) (v : Fin k → Semiterm L ξ�
 @[simp] lemma hom_finitary3 (o : Semiformula.Operator L 3) (t₁ t₂ t₃ : Semiterm L ξ₁ n₁) :
     ω ▹ (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp [ω.hom_operator']
 
-@[simp] lemma hom_const : ω ▹ (Semiformula.Operator.const c : Semiformula L ξ₁ n₁) = Semiformula.Operator.const c := by
+@[simp] lemma hom_const : ω ▹ (Semiformula.Operator.const c : Semiformula L ξ₁ n₁) =
+    Semiformula.Operator.const c := by
   simp [Semiformula.Operator.const, ω.hom_operator']
 
 open Semiformula
