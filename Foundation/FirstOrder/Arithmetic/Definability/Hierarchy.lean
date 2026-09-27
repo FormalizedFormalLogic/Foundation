@@ -33,6 +33,7 @@ universe w
 
 open FFL.FirstOrder.Arithmetic
 open scoped FFL.FirstOrder.Arithmetic
+open FFL.FirstOrder.Semiformula (Operator)
 
 variable {ξ : Type*} {n m : ℕ}
 
@@ -40,25 +41,21 @@ variable {Γ : HierarchySymbol ℬ[<, ℒₒᵣ]}
 
 def arithmetic_ball (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) :
     Γ.Semiformula ξ n :=
-  Bounding.HierarchySymbol.Semiformula.ball
-    (R := FFL.FirstOrder.Semiformula.Operator.LT.lt) (by rfl) t φ
+  ball (R := Operator.LT.lt) (by rfl) t φ
 
 def arithmetic_bexs (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1)) :
     Γ.Semiformula ξ n :=
-  Bounding.HierarchySymbol.Semiformula.bexs
-    (R := FFL.FirstOrder.Semiformula.Operator.LT.lt) (by rfl) t φ
+  bexs (R := Operator.LT.lt) (by rfl) t φ
 
 @[simp] lemma val_arithmetic_ball (t : ArithmeticSemiterm ξ n)
     (φ : Γ.Semiformula ξ (n + 1)) :
   (arithmetic_ball t φ).val = ∀¹[“#0 < !!(Rew.bShift t)”] φ.val :=
-  Bounding.HierarchySymbol.Semiformula.val_ball
-    (R := FFL.FirstOrder.Semiformula.Operator.LT.lt) (by rfl) t φ
+  val_ball (R := Operator.LT.lt) (by rfl) t φ
 
 @[simp] lemma val_arithmetic_bexs (t : ArithmeticSemiterm ξ n)
     (φ : Γ.Semiformula ξ (n + 1)) :
   (arithmetic_bexs t φ).val = ∃¹[“#0 < !!(Rew.bShift t)”] φ.val :=
-  Bounding.HierarchySymbol.Semiformula.val_bexs
-    (R := FFL.FirstOrder.Semiformula.Operator.LT.lt) (by rfl) t φ
+  val_bexs (R := Operator.LT.lt) (by rfl) t φ
 
 lemma ProvablyProperOn.arithmetic_ofProperOn (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T]
     {φ : 𝚫ᴬ-[m].Semisentence n}

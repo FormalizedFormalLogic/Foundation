@@ -7,6 +7,7 @@ public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Absoluteness
 namespace FFL.FirstOrder.Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic
+open Bounding (HierarchySymbol)
 open PeanoMinus R0
 
 lemma nat_modelsWithParam_iff_models_substs {k : ℕ} {v : Fin k → ℕ} {φ : ArithmeticSemisentence k} :
@@ -63,17 +64,17 @@ lemma shigmaZero_absolute {k} (φ : 𝚺ᴬ₀.Semisentence k) (v : Fin k → �
 
 lemma Defined.shigmaZero_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop}
     {φ : 𝚺ᴬ₀.Semisentence k}
-    (hR : Bounding.HierarchySymbol.Defined R φ)
-    (hR' : Bounding.HierarchySymbol.Defined R' φ) (v : Fin k → ℕ) :
+    (hR : HierarchySymbol.Defined R φ) (hR' : HierarchySymbol.Defined R' φ)
+    (v : Fin k → ℕ) :
     R v ↔ R' (Nat.cast ∘ v) :=
-  Bounding.HierarchySymbol.Defined.shigmaZero_absolute (natCastEmbedding V) hR hR' v
+  HierarchySymbol.Defined.shigmaZero_absolute (natCastEmbedding V) hR hR' v
 
 lemma DefinedFunction.shigmaZero_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V}
     {φ : 𝚺ᴬ₀.Semisentence (k + 1)}
-    (hf : Bounding.HierarchySymbol.DefinedFunction f φ)
-    (hf' : Bounding.HierarchySymbol.DefinedFunction f' φ) (v : Fin k → ℕ) :
+    (hf : HierarchySymbol.DefinedFunction f φ)
+    (hf' : HierarchySymbol.DefinedFunction f' φ) (v : Fin k → ℕ) :
     (f v : V) = f' (Nat.cast ∘ v) :=
-  Bounding.HierarchySymbol.DefinedFunction.shigmaZero_absolute_func (natCastEmbedding V) hf hf' v
+  HierarchySymbol.DefinedFunction.shigmaZero_absolute_func (natCastEmbedding V) hf hf' v
 
 lemma sigmaOne_upward_absolute {k} (φ : 𝚺ᴬ₁.Semisentence k) (v : Fin k → ℕ) :
     φ.val.Evalb v → φ.val.Evalb (M := V) (Nat.cast ∘ v) :=
@@ -90,17 +91,17 @@ lemma deltaOne_absolute {k} (φ : 𝚫ᴬ₁.Semisentence k)
 
 lemma Defined.shigmaOne_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop}
     {φ : 𝚫ᴬ₁.Semisentence k}
-    (hR : Bounding.HierarchySymbol.Defined R φ)
-    (hR' : Bounding.HierarchySymbol.Defined R' φ) (v : Fin k → ℕ) :
+    (hR : HierarchySymbol.Defined R φ) (hR' : HierarchySymbol.Defined R' φ)
+    (v : Fin k → ℕ) :
     R v ↔ R' (Nat.cast ∘ v) :=
-  Bounding.HierarchySymbol.Defined.shigmaOne_absolute (natCastEmbedding V) hR hR' v
+  HierarchySymbol.Defined.shigmaOne_absolute (natCastEmbedding V) hR hR' v
 
 lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V}
     {φ : 𝚺ᴬ₁.Semisentence (k + 1)}
-    (hf : Bounding.HierarchySymbol.DefinedFunction f φ)
-    (hf' : Bounding.HierarchySymbol.DefinedFunction f' φ) (v : Fin k → ℕ) :
+    (hf : HierarchySymbol.DefinedFunction f φ)
+    (hf' : HierarchySymbol.DefinedFunction f' φ) (v : Fin k → ℕ) :
     (f v : V) = f' (Nat.cast ∘ v) :=
-  Bounding.HierarchySymbol.DefinedFunction.shigmaOne_absolute_func (natCastEmbedding V) hf hf' v
+  HierarchySymbol.DefinedFunction.shigmaOne_absolute_func (natCastEmbedding V) hf hf' v
 
 variable {V}
 
@@ -142,10 +143,10 @@ lemma models_iff_provable_of_Delta1_param [V↓[ℒₒᵣ] ⊧* T] {n : ℕ}
     V ⊧/(Nat.cast ∘ e) σ.val ↔ ℕ ⊧/e σ.val        := by
       simp [models_iff_of_Delta1 hσ hσV]
   _                 ↔ ℕ ⊧/e σ.sigma.val  := by
-      simp [Bounding.HierarchySymbol.Semiformula.val_sigma]
+      simp [HierarchySymbol.Semiformula.val_sigma]
   _                 ↔ T ⊢ (σ.sigma.val ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := by
       apply sigma_one_completeness_iff_param (by simp)
   _                 ↔ T ⊢ (σ.val ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x))       := by
-      simp [Bounding.HierarchySymbol.Semiformula.val_sigma]
+      simp [HierarchySymbol.Semiformula.val_sigma]
 
 end FFL.FirstOrder.Arithmetic
