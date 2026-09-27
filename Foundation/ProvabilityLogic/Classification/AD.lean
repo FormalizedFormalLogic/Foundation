@@ -62,7 +62,7 @@ variable [𝗜𝚺₁ ⪯ U]
 
 theorem provable_sigma1_reflection_of_mem_of_not_A
     (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
-    (hAL : A ∈ T.provabilityLogicRelativeTo U) (hAA : 𝐀 ⊬ A) (hσ : Arithmetic.Hierarchy 𝚺 1 σ) :
+    (hAL : A ∈ T.provabilityLogicRelativeTo U) (hAA : 𝐀 ⊬ A) (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
     U ⊢ T.standardProvability.refl σ := by
   classical
   obtain ⟨κ, _, N, _, v, hN, Rv, hv⟩ := Logic.A.exists_countermodel hAA;
@@ -80,7 +80,7 @@ theorem provable_sigma1_reflection_of_mem_of_not_A
 lemma provable_localReflectionOn_sigma1_of_mem_of_not_A
     (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
     (hAL : A ∈ T.provabilityLogicRelativeTo U) (hAA : 𝐀 ⊬ A) :
-    U ⊢* T.standardProvability.reflOn (Arithmetic.Hierarchy 𝚺 1) := by
+    U ⊢* T.standardProvability.reflOn (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1) := by
   rintro _ ⟨σ, hσ, rfl⟩;
   apply provable_sigma1_reflection_of_mem_of_not_A hT hAL hAA hσ;
 

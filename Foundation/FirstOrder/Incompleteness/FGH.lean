@@ -152,7 +152,7 @@ open FFL.Entailment
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
 
-theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
+theorem fgh_theorem (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
   ∃ π : 𝚺ᴬ₁.Sentence,
     𝗜𝚺₁ ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := by
   obtain ⟨θ, hwit⟩ := ISigma1.exists_matrix_provable_of_sentence hσ;
@@ -163,7 +163,7 @@ theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   simp [models_iff, show V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val from
     by simpa [Semiformula.eval_ex] using models_iff_of_provable_iff hwit V ![]];
 
-theorem fgh_theorem_con (hσ : Hierarchy 𝚺 1 σ) :
+theorem fgh_theorem_con (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
   ∃ π : 𝚺ᴬ₁.Sentence, 𝗜𝚺₁ ∪ T.Con ⊢ σ 🡘 provabilityPred T π.val := by
   obtain ⟨π, heq⟩ := fgh_theorem T hσ;
   use π;

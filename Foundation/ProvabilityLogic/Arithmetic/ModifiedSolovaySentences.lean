@@ -413,8 +413,8 @@ abbrev H (x : M.extendRoot.World) : ArithmeticSentence :=
 abbrev notPayable (z : M.extendRoot.World) : ArithmeticSentence :=
   notPayableAux T M σ (fun z ↦ ⌜T.modifiedSolovay M σ θ z⌝) z
 
-lemma H_sigma_one (x : M.extendRoot.World) : Hierarchy 𝚺 1 (H T M σ θ x) := by
-  have h (ε : List M.extendRoot.World) : Hierarchy 𝚺 1 (chain T M σ θ ε) := by
+lemma H_sigma_one (x : M.extendRoot.World) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (H T M σ θ x) := by
+  have h (ε : List M.extendRoot.World) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (chain T M σ θ ε) := by
     induction ε with
     | nil => simp [chainAux]
     | cons y ε ih => rcases ε with _ | ⟨x, ε⟩ <;> simp_all [chainAux, moveAux];
@@ -661,7 +661,7 @@ sentence `σ`.
 -/
 def standardModifiedSolovaySentences
     (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] (M : StrongReflexiveCountermodel κ A)
-    [Fintype M.World] [M.IsGL] {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+    [Fintype M.World] [M.IsGL] {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
     T.standardProvability.ModifiedSolovaySentences M σ :=
   have hex := ISigma1.exists_matrix_provable_of_sentence hσ;
   have hθσ : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁],

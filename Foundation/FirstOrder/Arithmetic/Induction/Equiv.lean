@@ -38,7 +38,8 @@ lemma strictDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺
     (hR : Γᴬ-[s].DefinableRel R) : StrictDefinableRel Γ s R := by
   rcases s with _ | t;
   · obtain ⟨φ, hφ⟩ := hR;
-    exact ⟨φ.val, StrictHierarchy.zero_iff.mpr (Hierarchy.zero_iff.mp φ.polarity_prop),
+    exact ⟨φ.val, StrictHierarchy.zero_iff.mpr
+      (Bounding.Hierarchy.zero_iff (ℬ := ℬ[<, ℒₒᵣ]).mp φ.polarity_prop),
       fun v ↦ hφ.iff⟩;
   · have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := IBroadSigma.models_BSigma_succ;
     exact StrictDefinable.of_definable (Γ' := 𝚺) hR;
@@ -181,7 +182,7 @@ private lemma models_IBroadSigma_succ_of_models_InductionOnHierarchy (Γ : Polar
   have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_ss (U := 𝗜𝗡𝗗 Γ (s + 1)) inferInstance Set.subset_union_left;
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := models_BPi_of_models_InductionOnHierarchy Γ;
-  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy 𝚺 (s + 1)) by
+  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (s + 1)) by
     simpa [InductionOnBroadHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩;
   simp only [InductionScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;

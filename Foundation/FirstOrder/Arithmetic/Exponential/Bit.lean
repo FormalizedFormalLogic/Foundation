@@ -100,18 +100,22 @@ def ballIn (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) 
 def bexsIn (t : ArithmeticSemiterm ξ n) (p : ArithmeticSemiformula ξ (n + 1)) :
     ArithmeticSemiformula ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
 
-@[simp] lemma Hierarchy.bit {t u : ArithmeticSemiterm μ n} : Hierarchy Γ s “!!t ∈ !!u” := by
+@[simp] lemma _root_.FFL.FirstOrder.Bounding.Hierarchy.arithmetic_bit
+    {t u : ArithmeticSemiterm μ n} :
+    ℬ[<, ℒₒᵣ].Hierarchy Γ s “!!t ∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def]
 
-@[simp] lemma Hieralchy.ballIn {Γ m} (t : ArithmeticSemiterm ξ n)
+@[simp] lemma _root_.FFL.FirstOrder.Bounding.Hierarchy.arithmetic_ballIn_iff {Γ m}
+    (t : ArithmeticSemiterm ξ n)
     (p : ArithmeticSemiformula ξ (n + 1)) :
-    Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
+    ℬ[<, ℒₒᵣ].Hierarchy Γ m (ballIn t p) ↔ ℬ[<, ℒₒᵣ].Hierarchy Γ m p := by
   simp only [Arithmetic.ballIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
-@[simp] lemma Hieralchy.bexsIn {Γ m} (t : ArithmeticSemiterm ξ n)
+@[simp] lemma _root_.FFL.FirstOrder.Bounding.Hierarchy.arithmetic_bexsIn_iff {Γ m}
+    (t : ArithmeticSemiterm ξ n)
     (p : ArithmeticSemiformula ξ (n + 1)) :
-    Hierarchy Γ m (bexsIn t p) ↔ Hierarchy Γ m p := by
+    ℬ[<, ℒₒᵣ].Hierarchy Γ m (bexsIn t p) ↔ ℬ[<, ℒₒᵣ].Hierarchy Γ m p := by
   simp only [Arithmetic.bexsIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
@@ -172,12 +176,14 @@ macro_rules
       ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂],
       ⤫term(lit)[$binders* | $fbinders* | $t₃]])
 
-@[simp] lemma Hierarchy.memRel {t₁ t₂ u : ArithmeticSemiterm μ n} :
-    Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
+@[simp] lemma _root_.FFL.FirstOrder.Bounding.Hierarchy.arithmetic_memRel
+    {t₁ t₂ u : ArithmeticSemiterm μ n} :
+    ℬ[<, ℒₒᵣ].Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRelOpr]
 
-@[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : ArithmeticSemiterm μ n} :
-    Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
+@[simp] lemma _root_.FFL.FirstOrder.Bounding.Hierarchy.arithmetic_memRel₃
+    {t₁ t₂ t₃ u : ArithmeticSemiterm μ n} :
+    ℬ[<, ℒₒᵣ].Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRel₃Opr]
 
 end notations

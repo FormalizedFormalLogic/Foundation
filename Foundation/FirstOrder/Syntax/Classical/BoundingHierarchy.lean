@@ -43,9 +43,6 @@ inductive Hierarchy (ℬ : Bounding L) : Polarity → ℕ → {n : ℕ} → Semi
 
 namespace Hierarchy
 
-/-! TODO: remove this and replace with `ℬ.Closure` -/
-abbrev DeltaZero (ℬ : Bounding L) (φ : Semiformula L ξ n) : Prop := ℬ.Closure φ
-
 variable {ℬ : Bounding L}
 
 @[simp] lemma verum (Γ s n) : ℬ.Hierarchy Γ s (⊤ : Semiformula L ξ n) :=
@@ -114,10 +111,6 @@ where
     | .or hp hq => .or (go hp) (go hq)
     | .ball hR ht hp => .ball hR ht (go hp)
     | .bexs hR ht hp => .bexs hR ht (go hp)
-
-lemma zero_iff_delta_zero {Γ} {φ : Semiformula L ξ n} :
-    ℬ.Hierarchy Γ 0 φ ↔ DeltaZero ℬ φ :=
-  zero_iff_bounded
 
 @[simp] lemma alt_zero_iff_zero {φ : Semiformula L ξ n} :
     ℬ.Hierarchy Γ.alt 0 φ ↔ ℬ.Hierarchy Γ 0 φ := by
@@ -356,6 +349,22 @@ lemma sigma_of_sigma_ex [Small ℬ ξ] {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚺 (s + 1) (∃¹ φ) ↔ ℬ.Hierarchy 𝚺 (s + 1) φ :=
   ⟨sigma_of_sigma_ex, exs⟩
 
+@[simp] lemma equal [L.Eq] {t u : Semiterm L ξ n} :
+    ℬ.Hierarchy Γ s “!!t = !!u” := by
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two,
+    Semiformula.Operator.Eq.sentence_eq]
+
+@[simp] lemma lt [L.LT] {t u : Semiterm L ξ n} :
+    ℬ.Hierarchy Γ s “!!t < !!u” := by
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two,
+    Semiformula.Operator.LT.sentence_eq]
+
+@[simp] lemma le [L.Eq] [L.LT] {t u : Semiterm L ξ n} :
+    ℬ.Hierarchy Γ s “!!t ≤ !!u” := by
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two,
+    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq,
+    Semiformula.Operator.LE.sentence_eq]
+
 @[simp] lemma exsItr_iff [Small ℬ ξ] {k : ℕ} {φ : Semiformula L ξ (n + k)} :
     ℬ.Hierarchy 𝚺 (s + 1) (∃¹^[k] φ) ↔ ℬ.Hierarchy 𝚺 (s + 1) φ := by
   induction k <;> simp [exsItr_succ, *]
@@ -570,6 +579,23 @@ lemma sigma₁_induction [Small ℬ ξ]
   |                    Hierarchy.exs hp =>
     hExs _ _ hp
       (sigma₁_induction hVerum hFalsum hRel hNRel hAnd hOr hBall hExs hOperator _ _ hp)
+
+lemma toPrenex {j : ℕ} {φ : Semiformula L ξ (n + s)}
+    (h : ℬ.Hierarchy (Γ.altItr s) j φ) :
+    ℬ.Hierarchy Γ (j + s) (φ.toPrenex Γ s) := by
+  induction s generalizing n j with
+  | zero => simpa using h
+  | succ s ih =>
+    rw [Polarity.altItr_succ] at h
+    change ℬ.Hierarchy Γ (j + (s + 1)) (Polarity.quantItr Γ (s + 1) φ)
+    rw [Polarity.quantItr_succ', (show j + (s + 1) = (j + 1) + s by omega)]
+    rcases hΓ : Γ.altItr s with _ | _
+    · apply ih
+      rw [hΓ] at h ⊢
+      exact h.sigma
+    · apply ih
+      rw [hΓ] at h ⊢
+      exact h.pi
 
 end Hierarchy
 

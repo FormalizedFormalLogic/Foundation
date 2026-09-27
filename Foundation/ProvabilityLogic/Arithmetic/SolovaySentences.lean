@@ -350,14 +350,14 @@ lemma solovay_diag (i : M.World) :
 
 omit [M.IsGL] in
 private lemma θChainAux_sigma1 {N : ℕ} {t : M.World → FirstOrder.ArithmeticSemiterm Empty N}
-    (ε : List M.World) : Hierarchy 𝚺 1 (θChainAux T M t ε) := by
+    (ε : List M.World) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (θChainAux T M t ε) := by
   match ε with
   |          [] => simp [θChainAux];
   |         [_] => simp [θChainAux];
   | _ :: i :: ε =>
     simp [θChainAux, twoPointAux, θChainAux_sigma1 (i :: ε)];
 
-@[simp] lemma θ_sigma1 (i : M.World) : Hierarchy 𝚺 1 (θ T M i) := by
+@[simp] lemma θ_sigma1 (i : M.World) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (θ T M i) := by
   simp [θ, θAux, θChainAux_sigma1];
 
 end stx
@@ -597,7 +597,8 @@ lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : M.World} (ne : M.root ≠
           simpa [models_iff] using! Θ.disjunction i;
       exact Entailment.WeakerThan.pbl this;
   have Tθ : T.internalize V ⊢ ⌜θ T M i⌝ :=
-    Bootstrapping.Arithmetic.sigma_one_provable_of_models T (show Hierarchy 𝚺 1 (θ T M i) by simp)
+    Bootstrapping.Arithmetic.sigma_one_provable_of_models T
+      (show ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (θ T M i) by simp)
       (by simpa [models_iff] using! hS.1);
   have hP : T.internalize V ⊢
       (⌜T.solovay M i⌝ ⋎ ⌜⩖ j ∈ {j : M.World | i ≺ j}, T.solovay M j⌝ :
@@ -616,7 +617,7 @@ section
 variable {M : RootedModel κ α} [Fintype M.World] [M.IsGL]
 
 /-- - [Sol76] -/
-lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (Arithmetic.Hierarchy 𝚷 2)] :
+lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2)] :
     T.Solovay M ℕ M.root := by
   classical
   have NS : ∀ i, M.root ≠ i → ¬T.Solovay M ℕ i := by
@@ -627,9 +628,12 @@ lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [sound : T.SoundOn (Arithmetic.Hier
     have h₁ : T ⊢ ∼π :=
       Entailment.K_left (Entailment.ENN_of_E (Entailment.WeakerThan.wk inferInstance sπ)) ⨀ Bi;
     have h₂ : ¬ℕ ⊧/![] π := by
-      simpa [models_iff] using! sound.sound (σ := ∼π) h₁ (by simp [π,
-        (show Hierarchy 𝚷 1 T.consistentWith.val by simp).strict_mono 𝚺 (show 1 < 2 by simp),
-        (show Hierarchy 𝚺 1 (θ T M i) by simp).mono (show 1 ≤ 2 by simp)]);
+      simpa [models_iff] using! sound.sound (σ := ∼π) h₁ (by
+        simp [π,
+          (show ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 T.consistentWith.val by simp).strict_mono 𝚺
+            (show 1 < 2 by simp),
+          (show ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (θ T M i) by simp).mono
+            (show 1 ≤ 2 by simp)]);
     have h₃ : T.Solovay M ℕ i ↔ ℕ ⊧/![] π := by
       simpa [models_iff] using! consequence_iff.mp (Theory.Proof.sound sπ) ℕ inferInstance;
     exact h₂ (h₃.mp H);

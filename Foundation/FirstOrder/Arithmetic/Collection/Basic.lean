@@ -50,7 +50,7 @@ end CollectionScheme
 lemma CollectionScheme.models_of_collection
   (H : ∀ {R : V → V → Prop}, Γᴬ-[s].DefinableRel R →
       ∀ a, (∀ x < a, ∃ y, R x y) → ∃ b, ∀ x < a, ∃ y < b, R x y) :
-  V↓[ℒₒᵣ] ⊧* CollectionScheme (Hierarchy Γ s) := by
+  V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s) := by
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
   suffices ∀ e : ℕ → V, ∀ a : V,

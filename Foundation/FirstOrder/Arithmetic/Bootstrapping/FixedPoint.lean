@@ -216,13 +216,14 @@ theorem exclusiveMultidiagonal (θ : Fin k → ArithmeticSemisentence k) :
   exact Entailment.E_trans this (Entailment.padding_iff _ _)
 
 lemma multifixedpoint_pi
-    {θ : Fin k → ArithmeticSemisentence k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :
-    Hierarchy 𝚷 (m + 1) (multifixedpoint θ i) := by
-  simpa [multifixedpoint, multidiag, h] using fun _ ↦ Hierarchy.mono (s := 1) (by simp) (by simp)
+    {θ : Fin k → ArithmeticSemisentence k} (h : ∀ i, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (θ i)) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (multifixedpoint θ i) := by
+  simpa [multifixedpoint, multidiag, h] using fun _ ↦
+    Bounding.Hierarchy.mono (ℬ := ℬ[<, ℒₒᵣ]) (s := 1) (by simp) (by simp)
 
 lemma exclusiveMultifixedpoint_pi
-    {θ : Fin k → ArithmeticSemisentence k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :
-    Hierarchy 𝚷 (m + 1) (exclusiveMultifixedpoint θ i) := by
+    {θ : Fin k → ArithmeticSemisentence k} (h : ∀ i, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (θ i)) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (exclusiveMultifixedpoint θ i) := by
   apply multifixedpoint_pi; simp [h]
 
 end Multidiagonalization

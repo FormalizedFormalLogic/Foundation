@@ -35,7 +35,8 @@ lemma strictlyWeakerThan_localReflection [𝗜𝚺₁ ⪯ T] [Consistent T] :
     (consistent_unprovable T)
     (Provability.con_of_localReflection _ trivial)
 
-theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[Hierarchy 𝚷 1] T ≊ T ∪ T.Con := by
+theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] :
+    T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1] T ≊ T ∪ T.Con := by
   have : 𝗜𝚺₁ ⪯ T ∪ T.Con :=
     (inferInstance : 𝗜𝚺₁ ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left);
   apply Equiv.antisymm;
@@ -113,7 +114,7 @@ variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
 
 lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
     {S : ArithmeticTheory} (hTS : T ⪯ S) (h : S ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ n] T) :
-    S ⊢* 𝗥𝗳𝗻[Hierarchy Γ n] T := by
+    S ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ n] T := by
   have : 𝗜𝚺₁ ⪯ S := (inferInstance : 𝗜𝚺₁ ⪯ T).trans hTS;
   have : 𝗕𝚺 n ⪯ T := by
     rcases n with _ | m;
@@ -131,7 +132,7 @@ lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
   cl_prover [hinst, hext, he'];
 
 theorem inconsistent_of_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
-    (hπ : Hierarchy Γ n π) (h : insert π T ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T) :
+    (hπ : ℬ[<, ℒₒᵣ].Hierarchy Γ n π) (h : insert π T ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T) :
     Inconsistent (insert π T) :=
   T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
     (fun _ hσ ↦ by simpa using hσ) hπ
@@ -139,19 +140,21 @@ theorem inconsistent_of_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
       (WeakerThan.ofSubset (Set.subset_insert _ _)) h)
 
 theorem not_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
-    (hπ : Hierarchy Γ n π) [Consistent (insert π T)] :
+    (hπ : ℬ[<, ℒₒᵣ].Hierarchy Γ n π) [Consistent (insert π T)] :
     ¬insert π T ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T :=
   fun h ↦ (inconsistent_of_provable_localReflectionOn_insert hπ h).not_con
     inferInstance
 
 theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n ⪯ T]
-    {U U' : ArithmeticTheory} (e : U ≊ U') (hU' : U'.Finite) (hΓ : ∀ σ ∈ U', Hierarchy Γ n σ)
+    {U U' : ArithmeticTheory} (e : U ≊ U') (hU' : U'.Finite)
+    (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].Hierarchy Γ n σ)
     (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T) : Inconsistent (T ∪ U) := by
   classical
   have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right e T;
   have hmem : ∀ σ, σ ∈ hU'.toFinset.toList ↔ σ ∈ U' := by simp;
-  have hconj : Hierarchy Γ n (⋀hU'.toFinset.toList) :=
-    Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ);
+  have hconj : ℬ[<, ℒₒᵣ].Hierarchy Γ n (⋀hU'.toFinset.toList) :=
+    Bounding.Hierarchy.list_conj₂_iff (ℬ := ℬ[<, ℒₒᵣ]).mpr fun σ hσ ↦
+      hΓ σ ((hmem σ).mp hσ);
   have hle : T ∪ U' ⪯ insert (⋀hU'.toFinset.toList) T := WeakerThan.ofAxm! <| by
     rintro φ (hφ | hφ);
     · exact by_axm (Set.mem_insert_of_mem _ hφ);

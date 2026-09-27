@@ -6,8 +6,9 @@ public import Foundation.FirstOrder.Arithmetic.TA.Basic
 /-!
 # Induction and least number schemata of Arithmetic
 
-The schemata come in two flavours, following [Bus98, p. 85]: the plain one is taken over the
-strict hierarchy `StrictHierarchy Γ s`, and the `⁺` one over the broad hierarchy `Hierarchy Γ s`.
+The schemata come in two flavours, following [Bus98, p. 85]: the plain one is taken over
+the strict hierarchy `StrictHierarchy Γ s`, and the `⁺` one over the broad hierarchy
+`ℬ[<, ℒₒᵣ].Hierarchy Γ s`.
 Buss writes these `IΓ_s` and `IΓ_s⁺`. The strict scheme is contained in the broad one; the converse
 needs the collection scheme and is not available here.
 
@@ -77,9 +78,9 @@ notation "𝗜𝚷₀" => IPi 0
 
 notation "𝗜𝚷₁" => IPi 1
 
-/-- The induction scheme for the broad hierarchy `Hierarchy Γ s`, i.e. Buss's `IΓ_s⁺`. -/
+/-- The induction scheme for the broad hierarchy `ℬ[<, ℒₒᵣ].Hierarchy Γ s`, i.e. Buss's `IΓ_s⁺`. -/
 abbrev InductionOnBroadHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ s)
+  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ s)
 
 prefix:max "𝗜𝗡𝗗⁺ " => InductionOnBroadHierarchy
 
@@ -123,9 +124,9 @@ abbrev LPi (s : ℕ) : ArithmeticTheory := 𝗟 𝚷 s
 
 prefix:max "𝗟𝚷" => LPi
 
-/-- The least number scheme for the broad hierarchy `Hierarchy Γ s`. -/
+/-- The least number scheme for the broad hierarchy `ℬ[<, ℒₒᵣ].Hierarchy Γ s`. -/
 abbrev LeastNumberOnBroadHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ LeastNumberScheme (Arithmetic.Hierarchy Γ s)
+  𝗣𝗔⁻ ∪ LeastNumberScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s)
 
 prefix:max "𝗟⁺ " => LeastNumberOnBroadHierarchy
 
@@ -157,9 +158,9 @@ abbrev BPi (s : ℕ) : ArithmeticTheory := 𝗕 𝚷 s
 
 prefix:max "𝗕𝚷" => BPi
 
-/-- The collection scheme for the broad hierarchy `Hierarchy Γ s`, i.e. Buss's `BΓ_s⁺`. -/
+/-- The collection scheme for the broad hierarchy `ℬ[<, ℒₒᵣ].Hierarchy Γ s`, i.e. Buss's `BΓ_s⁺`. -/
 abbrev CollectionOnBroadHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.Hierarchy Γ s)
+  𝗜𝚺₀ ∪ CollectionScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s)
 
 prefix:max "𝗕⁺ " => CollectionOnBroadHierarchy
 
@@ -338,7 +339,7 @@ instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗 Γ s :=
 
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗⁺ Γ s :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _ <|
-    InductionScheme_subset Arithmetic.Hierarchy.of_open
+    InductionScheme_subset Bounding.Hierarchy.of_open
 
 instance InductionOnHierarchy_weakerThan_InductionOnBroadHierarchy (Γ : Polarity) (s : ℕ) :
     𝗜𝗡𝗗 Γ s ⪯ 𝗜𝗡𝗗⁺ Γ s :=
@@ -492,7 +493,7 @@ section
 
 variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s]
 
-instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy Γ s) :=
+instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ s) :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   models_of_subtheory this
 
@@ -500,7 +501,7 @@ lemma succ_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
-  InductionScheme.succ_induction (P := P) (C := Hierarchy Γ s) (by
+  InductionScheme.succ_induction (P := P) (C := ℬ[<, ℒₒᵣ].Hierarchy Γ s) (by
     rcases hP with ⟨φ, hp⟩
     have : Inhabited V := Classical.inhabited_of_nonempty'
     exact ⟨φ.val.enumerateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val, by simp,
@@ -557,9 +558,9 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred 
   contradiction
 
 instance models_InductionScheme_alt :
-    V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ.alt s) := by
+    V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ.alt s) := by
   suffices
-      ∀ (φ : ArithmeticSemiformula ℕ 1), Hierarchy Γ.alt s φ →
+      ∀ (φ : ArithmeticSemiformula ℕ 1), ℬ[<, ℒₒᵣ].Hierarchy Γ.alt s φ →
       ∀ (f : ℕ → V),
         φ.Eval ![0] f →
         (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →

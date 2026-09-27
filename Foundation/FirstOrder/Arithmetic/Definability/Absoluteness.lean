@@ -106,7 +106,7 @@ lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} 
 variable {V}
 
 lemma models_iff_of_Sigma0 {n : ℕ} {σ : ArithmeticSemisentence n}
-    (hσ : Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
+    (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
     σ.Evalb (M := V) (Nat.cast ∘ e) ↔ σ.Evalb e :=
   Bounding.models_iff_of_Sigma0 (natCastEmbedding V) hσ
 
@@ -121,19 +121,19 @@ noncomputable instance : 𝗥₀ ⪯ T :=
   Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
 
 theorem sigma_one_completeness_iff_param {n : ℕ} {σ : ArithmeticSemisentence n}
-    (hσ : Hierarchy 𝚺 1 σ) {e : Fin n → ℕ} :
+    (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) {e : Fin n → ℕ} :
     ℕ ⊧/e σ ↔ T ⊢ (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := Iff.trans
   (by simp [models_iff, Semiformula.eval_substs, Function.comp_def, Matrix.empty_eq])
   (sigma_one_completeness_iff (T := T) (by simp [hσ]))
 
 lemma models_iff_provable_of_Sigma0_param [V↓[ℒₒᵣ] ⊧* T] {n : ℕ} {σ : ArithmeticSemisentence n}
-    (hσ : Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
+    (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
     V ⊧/(Nat.cast ∘ e) σ ↔ T ⊢ (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := by
   calc
     V ⊧/(Nat.cast ∘ e) σ ↔ ℕ ⊧/e σ        := by
       simp [models_iff_of_Sigma0 hσ]
   _             ↔ T ⊢ (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := by
-      apply sigma_one_completeness_iff_param (by simp [Hierarchy.of_zero hσ])
+      apply sigma_one_completeness_iff_param (by simp [hσ.of_zero])
 
 lemma models_iff_provable_of_Delta1_param [V↓[ℒₒᵣ] ⊧* T] {n : ℕ}
     {σ : 𝚫ᴬ₁.Semisentence n}

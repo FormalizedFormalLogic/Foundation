@@ -56,7 +56,7 @@ private noncomputable abbrev restrictedGödel' (fDef : 𝚺ᴬ₁.Semisentence 2
   ∼(T.restrictedProvable fDef e).val/[⌜restrictedGödel fDef e T⌝]
 
 private lemma restrictedGödel'_sigmaOne {fDef : 𝚺ᴬ₁.Semisentence 2} {e : ℕ} :
-    Hierarchy 𝚺 1 (T.restrictedGödel' fDef e) := by definability
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (T.restrictedGödel' fDef e) := by definability
 
 end Theory
 

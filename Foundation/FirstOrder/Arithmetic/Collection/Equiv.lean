@@ -316,7 +316,7 @@ lemma models_IBroadSigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s 
       (CollectionOnHierarchy_subset_mono (by omega)));
     have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1) := models_of_ss hn
       (CollectionOnHierarchy_subset_BSigma_succ 𝚷 (s + 1));
-    suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy 𝚺 (s + 1)) by
+    suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (s + 1)) by
       apply Semantics.ModelsSet.union_iff.mpr;
       simp_all;
     apply Semantics.ModelsSet.setOf_iff.mpr;

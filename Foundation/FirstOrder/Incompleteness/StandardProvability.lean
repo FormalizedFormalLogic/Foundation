@@ -60,7 +60,8 @@ variable {T U : ArithmeticTheory} [T.Δ₁]
 
 local prefix:90 "□" => provabilityPred T
 
-lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : ArithmeticSentence}
+    (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
     𝗜𝚺₁ ⊢ σ 🡒 □σ :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using Bootstrapping.Arithmetic.sigma_one_complete (T := T) (V := V) hσ
@@ -79,7 +80,7 @@ lemma provable_D3_context [𝗣𝗔⁻ ⪯ T] [𝗜𝚺₁ ⪯ U] {Γ σ} (hσπ
 
 lemma provable_sound [U.SoundOnHierarchy 𝚺 1] {σ} : U ⊢ □σ → T ⊢ σ := fun h ↦ by
   have : ℕ↓[ℒₒᵣ] ⊧ provabilityPred T σ :=
-    ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h (by simp)
+    ArithmeticTheory.SoundOn.sound (F := ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1) h (by simp)
   simpa [models_iff] using this
 
 lemma provable_complete [U.SoundOnHierarchy 𝚺 1] [𝗜𝚺₁ ⪯ U] {σ} : T ⊢ σ ↔ U ⊢ □σ :=
@@ -97,7 +98,7 @@ lemma models_standardProvability_iff {σ} : ℕ↓[ℒₒᵣ] ⊧ T.standardProv
 
 lemma soundOnHierarchy_iff_models_reflection :
     T.SoundOnHierarchy 𝚺 1 ↔
-      ∀ σ, Hierarchy 𝚺 1 σ → ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ 🡒 σ :=
+      ∀ σ, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ → ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ 🡒 σ :=
   ⟨fun _ _ hσ ↦ Semantics.Imp.models_imply.mpr fun h ↦
       T.soundOnHierarchy 𝚺 1 (models_standardProvability_iff.mp h) hσ,
     fun h ↦ ⟨fun hσ hσ' ↦
@@ -109,7 +110,7 @@ If `π` is equivalent to some 𝚺ᴬ₁ sentence `σ`,
 then `π 🡒 □π` is provable in `T` (note: not `𝗜𝚺₁`, compare `provable_sigma_one_complete`)
 -/
 lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
-  (hσ : Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π 🡒 □π := by
+  (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) (hσπ : 𝗜𝚺₁ ⊢ σ 🡘 π) : 𝗜𝚺₁ ⊢ π 🡒 □π := by
   apply C_replace ?_ ?_ <| provable_sigma_one_complete (T := T) <| hσ;
   · cl_prover [hσπ]
   · apply T.standardProvability.mono'

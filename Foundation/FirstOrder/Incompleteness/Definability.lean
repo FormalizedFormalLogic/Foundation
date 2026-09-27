@@ -408,7 +408,7 @@ lemma subst_fvarVec_quote' {m : ℕ} (β : ArithmeticSemiproposition m) :
 
 end fvarVec
 
-/-! ## Σ₁ side condition: internal `IsSigma1` predicate (for `C = Hierarchy 𝚺 1`) -/
+/-! ## Σ₁ side condition: internal `IsSigma1` predicate (for `C = ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1`) -/
 
 section isSigma1
 
@@ -999,7 +999,7 @@ noncomputable instance InductionScheme.delta1_univ :
       (fun V _ _ ↦ by
         have := InductionR.univ_defined (V := V); simp)
 
-/-! ## Correctness of `IsSigma1`: `IsSigma1 ⌜ψ⌝ ↔ Hierarchy 𝚺 1 ψ` -/
+/-! ## Correctness of `IsSigma1`: `IsSigma1 ⌜ψ⌝ ↔ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ` -/
 
 open Bootstrapping in
 lemma quote_ball {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposition (n + 1)) :
@@ -1018,9 +1018,11 @@ lemma termBShift_quote {n : ℕ} (s : SyntacticSemiterm ℒₒᵣ n) :
   simp [Semiterm.quote_def, Semiterm.typed_quote_bShift]
 
 open Bootstrapping in
-lemma isSigma1_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hierarchy 𝚺 1 ψ) :
+lemma isSigma1_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n}
+    (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ) :
     IsSigma1 (⌜ψ⌝ : ℕ) := by
-  apply sigma₁_induction' h (P := fun n φ => IsSigma1 (⌜φ⌝ : ℕ));
+  apply Bounding.Hierarchy.arithmetic_sigma₁_induction' h
+    (P := fun n φ => IsSigma1 (⌜φ⌝ : ℕ))
   · intro n; simp
   · intro n; simp
   · intro n t₁ t₂; simp [Semiformula.quote_rel]
@@ -1038,18 +1040,18 @@ lemma isSigma1_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hi
 
 open Bootstrapping in
 lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    IsSigma1 (⌜ψ⌝ : ℕ) → Hierarchy 𝚺 1 ψ := by
+    IsSigma1 (⌜ψ⌝ : ℕ) → ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ := by
   induction ψ using Semiformula.rec' with
   | hverum => intro _; simp
   | hfalsum => intro _; simp
-  | hrel R v => intro _; exact Hierarchy.rel _ _ _ _
-  | hnrel R v => intro _; exact Hierarchy.nrel _ _ _ _
+  | hrel R v => intro _; exact Bounding.Hierarchy.rel (ℬ := ℬ[<, ℒₒᵣ]) _ _ _ _
+  | hnrel R v => intro _; exact Bounding.Hierarchy.nrel (ℬ := ℬ[<, ℒₒᵣ]) _ _ _ _
   | hand φ ψ ihφ ihψ =>
     intro h; rw [Semiformula.quote_and (V := ℕ) φ ψ, IsSigma1.and_iff] at h
-    exact Hierarchy.and (ihφ h.1) (ihψ h.2)
+    exact Bounding.Hierarchy.and (ℬ := ℬ[<, ℒₒᵣ]) (ihφ h.1) (ihψ h.2)
   | hor φ ψ ihφ ihψ =>
     intro h; rw [Semiformula.quote_or (V := ℕ) φ ψ, IsSigma1.or_iff] at h
-    exact Hierarchy.or (ihφ h.1) (ihψ h.2)
+    exact Bounding.Hierarchy.or (ℬ := ℬ[<, ℒₒᵣ]) (ihφ h.1) (ihψ h.2)
   | hall φ ihφ =>
     intro h
     rw [Semiformula.quote_all (V := ℕ) φ] at h
@@ -1069,26 +1071,27 @@ lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
       apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
       rw [Semiformula.quote_all (V := ℕ) φ, hφeq, quote_ball, hs, hφ₂]
       rfl
-    have hφ : Hierarchy 𝚺 1 φ := ihφ (by rw [hφeq]; simp [IsSigma1.or_iff, hq, Arithmetic.qqNLT])
-    have hφ2 : Hierarchy 𝚺 1 φ₂ := by
+    have hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ :=
+      ihφ (by rw [hφeq]; simp [IsSigma1.or_iff, hq, Arithmetic.qqNLT])
+    have hφ2 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ₂ := by
       have hform : φ = (“#0 < !!(Rew.bShift s)” 🡒 φ₂) :=
         (Semiformula.all_inj _ _).mp (by rw [← Semiformula.ball_eq]; exact heq)
-      rw [hform, Semiformula.imp_eq, Hierarchy.or_iff] at hφ
+      rw [hform, Semiformula.imp_eq, Bounding.Hierarchy.or_iff] at hφ
       exact hφ.2
     rw [heq]
-    exact Hierarchy.ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
+    exact Bounding.Hierarchy.arithmetic_ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
   | hexs φ ihφ =>
     intro h; rw [Semiformula.quote_ex (V := ℕ) φ, IsSigma1.ex_iff] at h
-    exact Hierarchy.exs (ihφ h)
+    exact Bounding.Hierarchy.exs (ℬ := ℬ[<, ℒₒᵣ]) (ihφ h)
 
 /-- Correctness of the `𝚺ᴬ₁`-code recognizer. -/
 lemma isSigma1_iff_hierarchy {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-  Bootstrapping.IsSigma1 (⌜ψ⌝ : ℕ) ↔ Hierarchy 𝚺 1 ψ :=
+  Bootstrapping.IsSigma1 (⌜ψ⌝ : ℕ) ↔ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ :=
   ⟨hierarchy_of_isSigma1 ψ, isSigma1_of_hierarchy⟩
 
-/-- The induction schema `InductionScheme ℒₒᵣ (Hierarchy 𝚺 1)` is `Δ₁`, via `chSigma1`. -/
+/-- The induction schema `InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)` is `Δ₁`, via `chSigma1`. -/
 noncomputable instance InductionScheme.delta1_sigma1 :
-    (InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)).Δ₁ where
+    (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)).Δ₁ where
   ch := chSigma1
   mem_iff φ := by
     have h : (ℕ ⊧/![(⌜φ⌝ : ℕ)] chSigma1.val) ↔ InductionR Bootstrapping.IsSigma1 (⌜φ⌝ : ℕ) := by
@@ -1109,7 +1112,8 @@ lemma inductionScheme_re_univ : REPred (· ∈ InductionScheme ℒₒᵣ Set.uni
     (inductionR_quote_iff (S := fun _ : ℕ ↦ True) (C := Set.univ)
       (fun _ ↦ Iff.rfl) σ).trans (mem_inductionScheme_iff σ).symm
 
-lemma inductionScheme_re_sigma1 : REPred (· ∈ InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)) := by
+lemma inductionScheme_re_sigma1 :
+    REPred (· ∈ InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)) := by
   have hR : REPred (InductionR Bootstrapping.IsSigma1) :=
     rePred_iff_sigma1.mpr <| Bounding.HierarchySymbol.Definable.of_deltaOne
       InductionR.sigma1_defined.to_definable
@@ -1119,7 +1123,8 @@ lemma inductionScheme_re_sigma1 : REPred (· ∈ InductionScheme ℒₒᵣ (Arit
 
 instance : (InductionScheme ℒₒᵣ Set.univ).RE := ⟨inductionScheme_re_univ⟩
 
-instance : (InductionScheme ℒₒᵣ (Arithmetic.Hierarchy 𝚺 1)).RE := ⟨inductionScheme_re_sigma1⟩
+instance : (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)).RE :=
+  ⟨inductionScheme_re_sigma1⟩
 
 instance : 𝗣𝗔.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
 
