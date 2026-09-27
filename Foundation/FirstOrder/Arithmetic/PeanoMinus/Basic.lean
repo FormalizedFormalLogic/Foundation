@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Q.Basic
+public import Foundation.FirstOrder.Tarski.Monotone
 
 @[expose] public section
 /-!

@@ -4,6 +4,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Basi
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 set_option autoImplicit true
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -59,20 +61,20 @@ variable (L)
 
 noncomputable def neg (p : V) : V := construction.result L 0 p
 
-noncomputable def negGraph : 𝚺₁.Semisentence 2 :=
+noncomputable def negGraph : 𝚺ᴬ₁.Semisentence 2 :=
   (blueprint.result L).rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
 
 section
 
-instance neg.defined : 𝚺₁-Function₁ neg (V := V) L via negGraph L  := .mk fun v ↦ by
+instance neg.defined : 𝚺ᴬ₁-Function₁ neg (V := V) L via negGraph L  := .mk fun v ↦ by
   simpa [negGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
       using! construction.result_defined.defined ![v 0, 0, v 1]
 
-instance neg.definable : 𝚺₁-Function₁ neg (V := V) L := neg.defined.to_definable
+instance neg.definable : 𝚺ᴬ₁-Function₁ neg (V := V) L := neg.defined.to_definable
 
-instance neg.definable' (Γ m) : Γ-[m + 1]-Function₁ neg (V := V) L := .of_sigmaOne neg.definable
+instance neg.definable' (Γ m) : Γᴬ-[m + 1]-Function₁ neg (V := V) L := .of_sigmaOne neg.definable
 
 end
 
@@ -174,12 +176,12 @@ noncomputable def imp (p q : V) : V := neg L p ^⋎ q
 
 notation:60 p:61 " ^→[" L "] " q:60 => Language.imp L p q
 
-noncomputable def impGraph : 𝚺₁.Semisentence 3 :=
+noncomputable def impGraph : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “r p q. ∃ np, !(negGraph L) np p ∧ !qqOrDef r np q”
 
 noncomputable def iff (p q : V) : V := (imp L p q) ^⋏ (imp L q p)
 
-noncomputable def iffGraph : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def iffGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “r p q. ∃ pq, !(impGraph L) pq p q ∧ ∃ qp, !(impGraph L) qp q p ∧ !qqAndDef r pq qp”
 
 variable {L}
@@ -196,12 +198,12 @@ section imp
 
 section
 
-instance imp.defined : 𝚺₁-Function₂ imp (V := V) L via impGraph L :=
+instance imp.defined : 𝚺ᴬ₁-Function₂ imp (V := V) L via impGraph L :=
   .mk fun v ↦ by simp [impGraph]; rfl
 
-instance imp.definable : 𝚺₁-Function₂ imp (V := V) L := imp.defined.to_definable
+instance imp.definable : 𝚺ᴬ₁-Function₂ imp (V := V) L := imp.defined.to_definable
 
-instance imp.definable' (Γ m) : Γ-[m + 1]-Function₂ imp (V := V) L := imp.definable.of_sigmaOne
+instance imp.definable' (Γ m) : Γᴬ-[m + 1]-Function₂ imp (V := V) L := imp.definable.of_sigmaOne
 
 end
 
@@ -225,12 +227,12 @@ section iff
 
 section
 
-instance iff.defined : 𝚺₁-Function₂ iff (V := V) L via iffGraph L :=
+instance iff.defined : 𝚺ᴬ₁-Function₂ iff (V := V) L via iffGraph L :=
   .mk fun v ↦ by simp [iffGraph]; rfl
 
-instance iff.definable : 𝚺₁-Function₂ iff (V := V) L := iff.defined.to_definable
+instance iff.definable : 𝚺ᴬ₁-Function₂ iff (V := V) L := iff.defined.to_definable
 
-instance iff_definable' (Γ m) : Γ-[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
+instance iff_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
 
 end
 
@@ -286,20 +288,20 @@ variable (L)
 
 noncomputable def shift (p : V) : V := (construction L).result L 0 p
 
-noncomputable def shiftGraph : 𝚺₁.Semisentence 2 :=
+noncomputable def shiftGraph : 𝚺ᴬ₁.Semisentence 2 :=
   blueprint L |>.result L |>.rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
 
 section
 
-instance shift.defined : 𝚺₁-Function₁[V] shift L via shiftGraph L := .mk fun v ↦ by
+instance shift.defined : 𝚺ᴬ₁-Function₁[V] shift L via shiftGraph L := .mk fun v ↦ by
   simpa [shiftGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
       using! (construction L).result_defined.defined ![v 0, 0, v 1]
 
-instance shift.definable : 𝚺₁-Function₁[V] shift L := shift.defined.to_definable
+instance shift.definable : 𝚺ᴬ₁-Function₁[V] shift L := shift.defined.to_definable
 
-instance shift.definable' (Γ m) : Γ-[m + 1]-Function₁[V] shift L := shift.definable.of_sigmaOne
+instance shift.definable' (Γ m) : Γᴬ-[m + 1]-Function₁[V] shift L := shift.definable.of_sigmaOne
 
 end
 
@@ -437,11 +439,11 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   exs_defined := .mk fun v ↦ by simp [blueprint]
   -- Letting `simp` apply `Semiformula.eval_substs` here overflows memory on Lean v4.33.1.
   allChanges_defined := .mk fun v ↦ by
-    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    simp only [blueprint, Bounding.HierarchySymbol.Semiformula.val_mkSigma]
     rw [Semiformula.eval_substs]
     simp [qVec.defined.df]
   exChanges_defined := .mk fun v ↦ by
-    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    simp only [blueprint, Bounding.HierarchySymbol.Semiformula.val_mkSigma]
     rw [Semiformula.eval_substs]
     simp [qVec.defined.df]
 
@@ -453,18 +455,18 @@ variable (L)
 
 noncomputable def subst (w p : V) : V := (construction L).result L w p
 
-noncomputable def substsGraph : 𝚺₁.Semisentence 3 := (blueprint L).result L
+noncomputable def substsGraph : 𝚺ᴬ₁.Semisentence 3 := (blueprint L).result L
 
 variable {L}
 
 section
 
-instance subst.defined : 𝚺₁-Function₂[V] subst L via substsGraph L :=
+instance subst.defined : 𝚺ᴬ₁-Function₂[V] subst L via substsGraph L :=
   (construction L).result_defined
 
-instance subst.definable : 𝚺₁-Function₂[V] subst L := subst.defined.to_definable
+instance subst.definable : 𝚺ᴬ₁-Function₂[V] subst L := subst.defined.to_definable
 
-instance subst.definable' (Γ m) : Γ-[m + 1]-Function₂[V] subst L := subst.definable.of_sigmaOne
+instance subst.definable' (Γ m) : Γᴬ-[m + 1]-Function₂[V] subst L := subst.definable.of_sigmaOne
 
 attribute [irreducible] substsGraph
 
@@ -495,7 +497,7 @@ variable {m w : V}
 @[simp] lemma substs_ex {p} (hp : IsUFormula L p) :
     subst L w (^∃ p) = ^∃ (subst L (qVec L w) p) := by simp [subst, hp, construction]
 
-lemma isUFormula_subst_ISigma1.sigma1_succ_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
+lemma isUFormula_subst_ISigma1.sigma1_succ_induction {P : V → V → V → Prop} (hP : 𝚺ᴬ₁-Relation₃ P)
     (hRel : ∀ w k R v, L.IsRel k R → IsUTermVec L k v →
         P w (^rel k R v) (^rel k R (termSubstVec L k w v)))
     (hNRel : ∀ w k R v, L.IsRel k R → IsUTermVec L k v →
@@ -530,7 +532,7 @@ lemma isUFormula_subst_ISigma1.sigma1_succ_induction {P : V → V → V → Prop
   · intro param p hp ihp
     simpa using! hexs param p hp (by simpa [construction] using! ihp)
 
-lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
+lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺ᴬ₁-Relation₄ P)
     (hRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v →
         P n w (^rel k R v) (^rel k R (termSubstVec L k w v)))
     (hNRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v →
@@ -568,11 +570,11 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
 @[simp] lemma IsSemiformula.subst {n p m w : V} :
     IsSemiformula L n p → IsSemitermVec L n m w → IsSemiformula L m (subst L w p) := by
   let fw : V → V → V → V → V := fun _ w _ _ ↦ Max.max w (qVec L w)
-  have hfw : 𝚺₁-Function₄ fw := by definability
+  have hfw : 𝚺ᴬ₁-Function₄ fw := by definability
   let fn : V → V → V → V → V := fun _ _ n _ ↦ n + 1
-  have hfn : 𝚺₁-Function₄ fn := by definability
+  have hfn : 𝚺ᴬ₁-Function₄ fn := by definability
   let fm : V → V → V → V → V := fun _ _ _ m ↦ m + 1
-  have hfm : 𝚺₁-Function₄ fm := by definability
+  have hfm : 𝚺ᴬ₁-Function₄ fm := by definability
   apply bounded_all_sigma1_order_induction₃ hfw hfn hfm ?_ ?_ p w n m
   · definability
   intro p w n m ih hp hw
@@ -804,7 +806,7 @@ variable (L)
 
 noncomputable def substs1 (t u : V) : V := subst L ?[t] u
 
-noncomputable def substs1Graph : 𝚺₁.Semisentence 3 :=
+noncomputable def substs1Graph : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “ z t p. ∃ v, !adjoinDef v t 0 ∧ !(substsGraph L) z v p”
 
 variable {L}
@@ -813,12 +815,12 @@ section substs1
 
 section
 
-instance substs1.defined : 𝚺₁-Function₂[V] substs1 L via substs1Graph L :=
+instance substs1.defined : 𝚺ᴬ₁-Function₂[V] substs1 L via substs1Graph L :=
   .mk fun v ↦ by simp [substs1Graph]; rfl
 
-instance substs1.definable : 𝚺₁-Function₂[V] substs1 L := substs1.defined.to_definable
+instance substs1.definable : 𝚺ᴬ₁-Function₂[V] substs1 L := substs1.defined.to_definable
 
-instance substs1.definable' (Γ m) : Γ-[m + 1]-Function₂[V] substs1 L :=
+instance substs1.definable' (Γ m) : Γᴬ-[m + 1]-Function₂[V] substs1 L :=
   substs1.definable.of_sigmaOne
 
 end
@@ -833,7 +835,7 @@ variable (L)
 
 noncomputable def free (p : V) : V := substs1 L ^&0 (shift L p)
 
-noncomputable def freeGraph : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def freeGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “q p. ∃ fz, !qqFvarDef fz 0 ∧ ∃ sp, !(shiftGraph L) sp p ∧ !(substs1Graph L) q fz sp”
 
 variable {L}
@@ -844,12 +846,12 @@ section free
 
 section
 
-instance free.defined : 𝚺₁-Function₁[V] free L via freeGraph L :=
+instance free.defined : 𝚺ᴬ₁-Function₁[V] free L via freeGraph L :=
   .mk fun v ↦ by simp [freeGraph, free]
 
-instance free.definable : 𝚺₁-Function₁[V] free L := free.defined.to_definable
+instance free.definable : 𝚺ᴬ₁-Function₁[V] free L := free.defined.to_definable
 
-instance free.definable' (Γ m) : Γ-[m + 1]-Function₁[V] free L := free.definable.of_sigmaOne
+instance free.definable' (Γ m) : Γᴬ-[m + 1]-Function₁[V] free L := free.definable.of_sigmaOne
 
 end
 
@@ -921,7 +923,7 @@ variable (L)
 
 noncomputable def formulaComplexity (p : V) : V := construction.result L 0 p
 
-noncomputable def formulaComplexityGraph : 𝚺₁.Semisentence 2 :=
+noncomputable def formulaComplexityGraph : 𝚺ᴬ₁.Semisentence 2 :=
   (blueprint.result L).rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
@@ -929,14 +931,14 @@ variable {L}
 section
 
 instance formulaComplexity.defined :
-    𝚺₁-Function₁[V] formulaComplexity L via formulaComplexityGraph L := .mk fun v ↦ by
+    𝚺ᴬ₁-Function₁[V] formulaComplexity L via formulaComplexityGraph L := .mk fun v ↦ by
   simpa [formulaComplexityGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
       using! construction.result_defined.defined ![v 0, 0, v 1]
 
-instance formulaComplexity.definable : 𝚺₁-Function₁[V] formulaComplexity L :=
+instance formulaComplexity.definable : 𝚺ᴬ₁-Function₁[V] formulaComplexity L :=
   formulaComplexity.defined.to_definable
 
-instance formulaComplexity.definable' (Γ m) : Γ-[m + 1]-Function₁[V] formulaComplexity L :=
+instance formulaComplexity.definable' (Γ m) : Γᴬ-[m + 1]-Function₁[V] formulaComplexity L :=
   .of_sigmaOne formulaComplexity.definable
 
 end
@@ -1066,7 +1068,7 @@ end complexity
 @[simp] lemma lt_max_succ_right (a b : V) : b < max a b + 1 := lt_succ_iff_le.mpr <| by simp
 
 /-! A structural induction correspondence to `FFL.FirstOrder.Semiformula.formulaRec`.  -/
-lemma IsFormula.sigma1_structural_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
+lemma IsFormula.sigma1_structural_induction {P : V → Prop} (hP : 𝚺ᴬ₁-Predicate P)
     (hrel : ∀ k r v, L.IsRel k r → IsTermVec L k v → P (^rel k r v))
     (hnrel : ∀ k r v, L.IsRel k r → IsTermVec L k v → P (^nrel k r v))
     (hverum : P ^⊤)
@@ -1076,9 +1078,9 @@ lemma IsFormula.sigma1_structural_induction {P : V → Prop} (hP : 𝚺₁-Predi
     (hall : ∀ p, IsSemiformula L 1 p → P (free L p) → P (^∀ p))
     (hexs : ∀ p, IsSemiformula L 1 p → P (free L p) → P (^∃ p)) {p} :
     IsFormula L p → P p := by
-  have hm : 𝚺₁-Function₁[V] formulaComplexity L := inferInstance
+  have hm : 𝚺ᴬ₁-Function₁[V] formulaComplexity L := inferInstance
   let f : V → V := fun p ↦ max p (free L (π₂ (p - 1)))
-  have hf : 𝚺₁-Function₁ f := by unfold f; definability
+  have hf : 𝚺ᴬ₁-Function₁ f := by unfold f; definability
   apply measured_bounded_sigma1_order_induction hm hf ?_ ?_ p
   · definability
   intro p ih hp
@@ -1116,7 +1118,7 @@ lemma IsFormula.sigma1_structural_induction {P : V → Prop} (hP : 𝚺₁-Predi
       (h₁.free)
     exact hexs _ h₁ this
 
-lemma IsFormula.sigma1_structural_induction₂ {P : V → Prop} (hP : 𝚺₁-Predicate P)
+lemma IsFormula.sigma1_structural_induction₂ {P : V → Prop} (hP : 𝚺ᴬ₁-Predicate P)
     (hrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^rel k r v))
     (hnrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^nrel k r v))
     (hverum : P ^⊤)
@@ -1126,9 +1128,9 @@ lemma IsFormula.sigma1_structural_induction₂ {P : V → Prop} (hP : 𝚺₁-Pr
     (hall : ∀ p, IsSemiformula L 2 p → P (free1 L p) → P (^∀ p))
     (hexs : ∀ p, IsSemiformula L 2 p → P (free1 L p) → P (^∃ p)) {p} :
     IsSemiformula L 1 p → P p := by
-  have hm : 𝚺₁-Function₁[V] formulaComplexity L := inferInstance
+  have hm : 𝚺ᴬ₁-Function₁[V] formulaComplexity L := inferInstance
   let f : V → V := fun p ↦ max p (free1 L (π₂ (p - 1)))
-  have hf : 𝚺₁-Function₁ f := by unfold f; definability
+  have hf : 𝚺ᴬ₁-Function₁ f := by unfold f; definability
   apply measured_bounded_sigma1_order_induction hm hf ?_ ?_ p
   · definability
   intro p ih hp
@@ -1166,7 +1168,7 @@ lemma IsFormula.sigma1_structural_induction₂ {P : V → Prop} (hP : 𝚺₁-Pr
       h₁.free1
     exact hexs _ h₁ this
 
-lemma IsFormula.sigma1_structural_induction₂_ss {P : V → Prop} (hP : 𝚺₁-Predicate P)
+lemma IsFormula.sigma1_structural_induction₂_ss {P : V → Prop} (hP : 𝚺ᴬ₁-Predicate P)
     (hrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^rel k r v))
     (hnrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^nrel k r v))
     (hverum : P ^⊤)
@@ -1176,9 +1178,9 @@ lemma IsFormula.sigma1_structural_induction₂_ss {P : V → Prop} (hP : 𝚺₁
     (hall : ∀ p, IsSemiformula L 2 p → P (free1 L <| shift L <| shift L <| p) → P (^∀ p))
     (hexs : ∀ p, IsSemiformula L 2 p → P (free1 L <| shift L <| shift L <| p) → P (^∃ p)) {p} :
     IsSemiformula L 1 p → P p := by
-  have hm : 𝚺₁-Function₁[V] formulaComplexity L := inferInstance
+  have hm : 𝚺ᴬ₁-Function₁[V] formulaComplexity L := inferInstance
   let f : V → V := fun p ↦ max p (free1 L <| shift L <| shift L <| (π₂ (p - 1)))
-  have hf : 𝚺₁-Function₁ f := by unfold f; definability
+  have hf : 𝚺ᴬ₁-Function₁ f := by unfold f; definability
   apply measured_bounded_sigma1_order_induction hm hf ?_ ?_ p
   · definability
   intro p ih hp
@@ -1229,11 +1231,11 @@ def Language.IsFVFree (n p : V) : Prop := IsSemiformula L n p ∧ shift L p = p
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺ᴬ₁.Semisentence 2 :=
   .mkSigma “n p | !(isSemiformula L).sigma n p ∧ !pshift LDef p p”
 
-lemma isFVFree_defined : 𝚺₁-Relation L.IsFVFree via pL.isFVFreeDef := by
-  intro v; simp [LDef.isFVFreeDef, HierarchySymbol.Semiformula.val_sigma,
+lemma isFVFree_defined : 𝚺ᴬ₁-Relation L.IsFVFree via pL.isFVFreeDef := by
+  intro v; simp [LDef.isFVFreeDef, Bounding.HierarchySymbol.Semiformula.val_sigma,
     (semiformula_defined L).df.iff, (shift_defined L).df.iff]
   simp [Language.IsFVFree, eq_comm]
 
@@ -1318,37 +1320,37 @@ notation:78 x:78 " ^≮ " y:79 => qqNLT x y
 @[simp] lemma lt_qqNLT_right (x y : V) : y < x ^≮ y := by
   simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
-def _root_.FFL.FirstOrder.Arithmetic.qqEQDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqEQDef : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑eqIndex v”
 
-def _root_.FFL.FirstOrder.Arithmetic.qqNEQDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqNEQDef : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑eqIndex v”
 
-def _root_.FFL.FirstOrder.Arithmetic.qqLTDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqLTDef : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑ltIndex v”
 
-def _root_.FFL.FirstOrder.Arithmetic.qqNLTDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqNLTDef : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑ltIndex v”
 
-instance qqEQ_defined : 𝚺₁-Function₂ (qqEQ : V → V → V) via qqEQDef :=
+instance qqEQ_defined : 𝚺ᴬ₁-Function₂ (qqEQ : V → V → V) via qqEQDef :=
   .mk fun v ↦ by simp [qqEQDef, numeral_eq_natCast, qqEQ]
 
-instance qqNEQ_defined : 𝚺₁-Function₂ (qqNEQ : V → V → V) via qqNEQDef :=
+instance qqNEQ_defined : 𝚺ᴬ₁-Function₂ (qqNEQ : V → V → V) via qqNEQDef :=
   .mk fun v ↦ by simp [qqNEQDef, numeral_eq_natCast, qqNEQ]
 
-instance qqLT_defined : 𝚺₁-Function₂ (qqLT : V → V → V) via qqLTDef :=
+instance qqLT_defined : 𝚺ᴬ₁-Function₂ (qqLT : V → V → V) via qqLTDef :=
   .mk fun v ↦ by simp [qqLTDef, numeral_eq_natCast, qqLT]
 
-instance qqNLT_defined : 𝚺₁-Function₂ (qqNLT : V → V → V) via qqNLTDef :=
+instance qqNLT_defined : 𝚺ᴬ₁-Function₂ (qqNLT : V → V → V) via qqNLTDef :=
   .mk fun v ↦ by simp [qqNLTDef, numeral_eq_natCast, qqNLT]
 
-instance (Γ m) : Γ-[m + 1]-Function₂ (qqEQ : V → V → V) := .of_sigmaOne qqEQ_defined.to_definable
+instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqEQ : V → V → V) := .of_sigmaOne qqEQ_defined.to_definable
 
-instance (Γ m) : Γ-[m + 1]-Function₂ (qqNEQ : V → V → V) := .of_sigmaOne qqNEQ_defined.to_definable
+instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqNEQ : V → V → V) := .of_sigmaOne qqNEQ_defined.to_definable
 
-instance (Γ m) : Γ-[m + 1]-Function₂ (qqLT : V → V → V) := .of_sigmaOne qqLT_defined.to_definable
+instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqLT : V → V → V) := .of_sigmaOne qqLT_defined.to_definable
 
-instance (Γ m) : Γ-[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne qqNLT_defined.to_definable
+instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne qqNLT_defined.to_definable
 
 lemma neg_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^= u) = t ^≠ u := by
   simp only [qqEQ, qqNEQ]

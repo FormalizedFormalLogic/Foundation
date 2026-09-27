@@ -5,6 +5,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {k : ℕ}
@@ -52,24 +54,24 @@ lemma substNumeralParams_app_quote (σ τ : ArithmeticSemisentence (k + 1)) :
 
 section
 
-noncomputable def ssnum : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def ssnum : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “y φ x. ∃ n, !numeralGraph n x ∧ ∃ v, !adjoinDef v n 0 ∧ !(substsGraph ℒₒᵣ) y v φ”
 
-instance substNumeral.defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum :=
+instance substNumeral.defined : 𝚺ᴬ₁-Function₂ (substNumeral : V → V → V) via ssnum :=
   .mk fun v ↦ by simp [ssnum, substNumeral]
 
-instance substNumeral.definable : 𝚺₁-Function₂ (substNumeral : V → V → V) :=
+instance substNumeral.definable : 𝚺ᴬ₁-Function₂ (substNumeral : V → V → V) :=
   substNumeral.defined.to_definable
 
 attribute [irreducible] ssnum
 
-noncomputable def ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
+noncomputable def ssnums : 𝚺ᴬ₁.Semisentence (k + 2) := .mkSigma
   “y φ. ∃ n, !lenDef ↑k n ∧
     (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k).val ∧ !numeralGraph z #i.succ.succ.succ.succ) ∧
     !(substsGraph ℒₒᵣ) y n φ”
 
 instance substNumerals.defined :
-    Arithmetic.HierarchySymbol.DefinedFunction
+    Bounding.HierarchySymbol.DefinedFunction
       (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := .mk fun v ↦ by
   unfold ssnums
   symm
@@ -93,14 +95,14 @@ instance substNumerals.defined :
 
 attribute [irreducible] ssnums
 
-noncomputable def ssnumParams (k : ℕ) : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def ssnumParams (k : ℕ) : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “y φ x. ∃ v, !lenDef ↑(k + 1) v ∧
     (∃ z, !nthDef z v 0 ∧ !numeralGraph z x) ∧
     (⋀ i, ∃ z, !nthDef z v ↑(i : Fin k).val.succ ∧ !qqBvarDef z ↑i) ∧
     !(substsGraph ℒₒᵣ) y v φ”
 
 instance ssnumParams.defined :
-    𝚺₁-Function₂[V] substNumeralParams k via ssnumParams k := .mk fun v ↦ by
+    𝚺ᴬ₁-Function₂[V] substNumeralParams k via ssnumParams k := .mk fun v ↦ by
   symm
   unfold ssnumParams
   suffices
@@ -214,13 +216,14 @@ theorem exclusiveMultidiagonal (θ : Fin k → ArithmeticSemisentence k) :
   exact Entailment.E_trans this (Entailment.padding_iff _ _)
 
 lemma multifixedpoint_pi
-    {θ : Fin k → ArithmeticSemisentence k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :
-    Hierarchy 𝚷 (m + 1) (multifixedpoint θ i) := by
-  simpa [multifixedpoint, multidiag, h] using fun _ ↦ Hierarchy.mono (s := 1) (by simp) (by simp)
+    {θ : Fin k → ArithmeticSemisentence k} (h : ∀ i, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (θ i)) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (multifixedpoint θ i) := by
+  simpa [multifixedpoint, multidiag, h] using fun _ ↦
+    Bounding.Hierarchy.mono (ℬ := ℬ[<, ℒₒᵣ]) (s := 1) (by simp) (by simp)
 
 lemma exclusiveMultifixedpoint_pi
-    {θ : Fin k → ArithmeticSemisentence k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :
-    Hierarchy 𝚷 (m + 1) (exclusiveMultifixedpoint θ i) := by
+    {θ : Fin k → ArithmeticSemisentence k} (h : ∀ i, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (θ i)) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (exclusiveMultifixedpoint θ i) := by
   apply multifixedpoint_pi; simp [h]
 
 end Multidiagonalization

@@ -3,6 +3,8 @@ module
 public import Foundation.FirstOrder.Arithmetic.HFS
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 /-! # Internalized languages of first-order logic -/
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
@@ -18,8 +20,8 @@ instance (k) : Semiterm.Operator.GödelNumber ℒₒᵣ (L.Rel k) :=
 variable (L)
 
 protected class _root_.FFL.FirstOrder.Language.LORDefinable where
-  func : 𝚺₀.Semisentence 2
-  rel : 𝚺₀.Semisentence 2
+  func : 𝚺ᴬ₀.Semisentence 2
+  rel : 𝚺ᴬ₀.Semisentence 2
   func_iff {k c : ℕ} :
     c ∈ Set.range (Encodable.encode : L.Func k → ℕ) ↔ ℕ ⊧/![k, c] func.val
   rel_iff {k c : ℕ} :
@@ -51,24 +53,28 @@ lemma isRel_def (k R : V) : L.IsRel k R ↔ V ⊧/![k, R] L.isRel.val := by rfl
   simp [Language.IsRel, ← Matrix.fun_eq_vec_two]
 
 instance _root_.FFL.FirstOrder.Language.IsFunc.defined :
-    𝚺₀-Relation (L.IsFunc (V := V)) via L.isFunc := .mk fun v ↦ by simp
+    𝚺ᴬ₀-Relation (L.IsFunc (V := V)) via L.isFunc := .mk fun v ↦ by simp
 
 instance _root_.FFL.FirstOrder.Language.IsRel.defined :
-    𝚺₀-Relation (L.IsRel (V := V)) via L.isRel := .mk fun v ↦ by simp
+    𝚺ᴬ₀-Relation (L.IsRel (V := V)) via L.isRel := .mk fun v ↦ by simp
 
-instance _root_.FFL.FirstOrder.Language.IsFunc.definable : 𝚺₀-Relation (L.IsFunc (V := V)) :=
+instance _root_.FFL.FirstOrder.Language.IsFunc.definable : 𝚺ᴬ₀-Relation (L.IsFunc (V := V)) :=
   Language.IsFunc.defined.to_definable
 
-instance _root_.FFL.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsRel (V := V)) :=
+instance _root_.FFL.FirstOrder.Language.IsRel.definable : 𝚺ᴬ₀-Relation (L.IsRel (V := V)) :=
   Language.IsRel.defined.to_definable
 
-@[simp, definability]
-instance _root_.FFL.FirstOrder.Language.IsFunc.definable' (ℌ) : ℌ-Relation (L.IsFunc (V := V)) :=
-  HierarchySymbol.Definable.of_zero Language.IsFunc.definable
+@[simp,
+  definability] instance _root_.FFL.FirstOrder.Language.IsFunc.definable'
+    (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Relation (L.IsFunc (V := V)) :=
+  Bounding.HierarchySymbol.Definable.of_zero Language.IsFunc.definable
 
-@[simp, definability]
-instance _root_.FFL.FirstOrder.Language.IsRel.definable' (ℌ) : ℌ-Relation (L.IsRel (V := V)) :=
-  HierarchySymbol.Definable.of_zero Language.IsRel.definable
+@[simp,
+  definability] instance _root_.FFL.FirstOrder.Language.IsRel.definable'
+    (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Relation (L.IsRel (V := V)) :=
+  Bounding.HierarchySymbol.Definable.of_zero Language.IsRel.definable
 
 section
 

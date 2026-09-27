@@ -12,6 +12,8 @@ set_option autoImplicit true
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
+
 variable {V : Type*} [ORingStructure V]
 
 section IOpen
@@ -114,10 +116,10 @@ lemma div_graph {a b c : V} :
     c = a / b ↔ ((0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)) :=
   Classical.choose!_eq_iff_right _
 
-def _root_.FFL.FirstOrder.Arithmetic.divDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.divDef : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “c a b. (0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)”
 
-instance div_defined : 𝚺₀-Function₂[V] HDiv.hDiv via divDef := .mk fun v ↦ by
+instance div_defined : 𝚺ᴬ₀-Function₂[V] HDiv.hDiv via divDef := .mk fun v ↦ by
   simp [div_graph, divDef]
 
 lemma div_spec_of_pos' (a : V) (h : 0 < b) : ∃ v < b, a = (a / b) * b + v := by
@@ -171,7 +173,7 @@ lemma div_mul (a b c : V) : a / (b * c) = a / b / c := by
 
 instance div_polybounded : Bounded₂ ((· / ·) : V → V → V) := ⟨#0, fun _ ↦ by simp⟩
 
-instance div_definable : 𝚺₀-Function₂ ((· / ·) : V → V → V) := div_defined.to_definable _
+instance div_definable : 𝚺ᴬ₀-Function₂ ((· / ·) : V → V → V) := div_defined.to_definable _
 
 @[simp] lemma div_mul_le (a b : V) : a / b * b ≤ a := by rw [mul_comm]; exact mul_div_le _ _
 
@@ -277,16 +279,16 @@ noncomputable scoped instance : Mod V := ⟨rem⟩
 
 lemma mod_def (a b : V) : a % b = a - b * (a / b) := rfl
 
-def _root_.FFL.FirstOrder.Arithmetic.remDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.remDef : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “c a b. ∃ d <⁺ a, !divDef.val d a b ∧ !subDef.val c a (b * d)”
 
 lemma rem_graph (a b c : V) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
   simp [mod_def]
 
-instance rem_defined : 𝚺₀-Function₂[V] HMod.hMod via remDef := .mk fun v ↦ by
+instance rem_defined : 𝚺ᴬ₀-Function₂[V] HMod.hMod via remDef := .mk fun v ↦ by
   simp [remDef, rem_graph, Semiformula.eval_substs, le_iff_lt_succ]
 
-instance rem_definable : 𝚺₀-Function₂[V] HMod.hMod := rem_defined.to_definable _
+instance rem_definable : 𝚺ᴬ₀-Function₂[V] HMod.hMod := rem_defined.to_definable _
 
 lemma div_add_mod (a b : V) : b * (a / b) + (a % b) = a :=
   add_tsub_self_of_le (mul_div_le a b)
@@ -448,13 +450,13 @@ prefix:75 "√" => sqrt
 lemma sqrt_graph {a b : V} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) :=
   Classical.choose!_eq_iff_right _
 
-def _root_.FFL.FirstOrder.Arithmetic.sqrtDef : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.sqrtDef : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “b a. b * b ≤ a ∧ a < (b + 1) * (b + 1)”
 
-instance sqrt_defined : 𝚺₀-Function₁[V] sqrt via sqrtDef := .mk fun v ↦ by
+instance sqrt_defined : 𝚺ᴬ₀-Function₁[V] sqrt via sqrtDef := .mk fun v ↦ by
   simp [sqrt_graph, sqrtDef]
 
-instance sqrt_definable : 𝚺₀-Function₁[V] sqrt := sqrt_defined.to_definable
+instance sqrt_definable : 𝚺ᴬ₀-Function₁[V] sqrt := sqrt_defined.to_definable
 
 lemma eq_sqrt (x a : V) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a :=
   Classical.choose_uniq (sqrt_exists_unique a)
@@ -555,13 +557,13 @@ lemma pair_graph {a b c : V} :
   · simp [h, show ¬b ≤ a from by simpa using h]
   · simp [h, show b ≤ a from by simpa using h]
 
-def _root_.FFL.FirstOrder.Arithmetic.pairDef : 𝚺₀.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.pairDef : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “c a b. (a < b ∧ c = b * b + a) ∨ (b ≤ a ∧ c = a * a + a + b)”
 
-instance pair_defined : 𝚺₀-Function₂[V] pair via pairDef := .mk fun v ↦ by
+instance pair_defined : 𝚺ᴬ₀-Function₂[V] pair via pairDef := .mk fun v ↦ by
   simp [pair_graph, pairDef]
 
-instance pair_definable : 𝚺₀-Function₂[V] pair := pair_defined.to_definable
+instance pair_definable : 𝚺ᴬ₀-Function₂[V] pair := pair_defined.to_definable
 
 instance : Bounded₂ (pair : V → V → V) :=
   ⟨‘x y. (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> try simp [*]⟩
@@ -627,29 +629,29 @@ instance : Bounded₁ (pi₁ : V → V) := ⟨#0, by intro v; simp⟩
 
 instance : Bounded₁ (pi₂ : V → V) := ⟨#0, by intro v; simp⟩
 
-def _root_.FFL.FirstOrder.Arithmetic.pi₁Def : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.pi₁Def : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “x p. ∃ y <⁺ p, !pairDef p x y”
 
-def _root_.FFL.FirstOrder.Arithmetic.pi₂Def : 𝚺₀.Semisentence 2 :=
+def _root_.FFL.FirstOrder.Arithmetic.pi₂Def : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “y p. ∃ x <⁺ p, !pairDef p x y”
 
 set_option linter.flexible false in
-instance pi₁_defined : 𝚺₀-Function₁[V] pi₁ via pi₁Def := .mk fun v ↦ by
+instance pi₁_defined : 𝚺ᴬ₀-Function₁[V] pi₁ via pi₁Def := .mk fun v ↦ by
   simp [pi₁Def]
   constructor
   · rintro ⟨a, _, e⟩; simp [show v 1 = ⟪v 0, a⟫ from e]
   · intro h; exact ⟨π₂ v 1, by simp,  by simp [h]⟩
 
-instance pi₁_definable : 𝚺₀-Function₁[V] pi₁ := pi₁_defined.to_definable₀
+instance pi₁_definable : 𝚺ᴬ₀-Function₁[V] pi₁ := pi₁_defined.to_definable₀
 
 set_option linter.flexible false in
-instance pi₂_defined : 𝚺₀-Function₁ (pi₂ : V → V) via pi₂Def := .mk fun v ↦ by
+instance pi₂_defined : 𝚺ᴬ₀-Function₁ (pi₂ : V → V) via pi₂Def := .mk fun v ↦ by
   simp [pi₂Def]
   constructor
   · rintro ⟨a, _, e⟩; simp [show v 1 = ⟪a, v 0⟫ from e]
   · intro h; exact ⟨π₁ v 1, by simp, by simp [h]⟩
 
-instance pi₂_definable : 𝚺₀-Function₁ (pi₂ : V → V) := pi₂_defined.to_definable₀
+instance pi₂_definable : 𝚺ᴬ₀-Function₁ (pi₂ : V → V) := pi₂_defined.to_definable₀
 
 lemma pair_lt_pair_left {a₁ a₂ : V} (h : a₁ < a₂) (b) : ⟪a₁, b⟫ < ⟪a₂, b⟫ := by
   by_cases h₁ : a₁ < b
@@ -710,19 +712,19 @@ lemma pair_lt_pair {a₁ a₂ b₁ b₂ : V} (ha : a₁ < a₂) (hb : b₁ < b�
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.pair₃Def : 𝚺₀.Semisentence 4 :=
+def _root_.FFL.FirstOrder.Arithmetic.pair₃Def : 𝚺ᴬ₀.Semisentence 4 :=
   .mkSigma “p a b c. ∃ bc <⁺ p, !pairDef p a bc ∧ !pairDef bc b c”
 
-def _root_.FFL.FirstOrder.Arithmetic.pair₄Def : 𝚺₀.Semisentence 5 :=
+def _root_.FFL.FirstOrder.Arithmetic.pair₄Def : 𝚺ᴬ₀.Semisentence 5 :=
   .mkSigma “p a b c d.
     ∃ bcd <⁺ p, ∃ cd <⁺ bcd, !pairDef p a bcd ∧ !pairDef bcd b cd ∧ !pairDef cd c d”
 
-def _root_.FFL.FirstOrder.Arithmetic.pair₅Def : 𝚺₀.Semisentence 6 :=
+def _root_.FFL.FirstOrder.Arithmetic.pair₅Def : 𝚺ᴬ₀.Semisentence 6 :=
   .mkSigma “p a b c d e.
     ∃ bcde <⁺ p, ∃ cde <⁺ bcde, ∃ de <⁺ cde,
       !pairDef p a bcde ∧ !pairDef bcde b cde ∧ !pairDef cde c de ∧ !pairDef de d e”
 
-def _root_.FFL.FirstOrder.Arithmetic.pair₆Def : 𝚺₀.Semisentence 7 :=
+def _root_.FFL.FirstOrder.Arithmetic.pair₆Def : 𝚺ᴬ₀.Semisentence 7 :=
   .mkSigma “p a b c d e f. ∃ bcdef <⁺ p, !pair₅Def bcdef b c d e f ∧ !pairDef p a bcdef”
 
 theorem fegergreg (v : Fin 4 → ℕ) : v (0 : Fin (Nat.succ 1)).succ.succ = v 2 := by {
@@ -742,21 +744,21 @@ theorem ss (v : Fin 4 → ℕ) : v (Fin.succ (0 : Fin (Nat.succ 1))).succ = v 2 
     Fin.succ_one_eq_two] }
 
 set_option linter.flexible false in
-instance pair₃_defined : 𝚺₀-Function₃[V] (⟪·, ·, ·⟫) via pair₃Def := .mk fun v ↦ by
+instance pair₃_defined : 𝚺ᴬ₀-Function₃[V] (⟪·, ·, ·⟫) via pair₃Def := .mk fun v ↦ by
   simp [pair₃Def]; intro h; simp [h]
 
 set_option linter.flexible false in
-instance pair₄_defined : 𝚺₀-Function₄[V] (⟪·, ·, ·, ·⟫) via pair₄Def := .mk fun v ↦ by
+instance pair₄_defined : 𝚺ᴬ₀-Function₄[V] (⟪·, ·, ·, ·⟫) via pair₄Def := .mk fun v ↦ by
   simp [pair₄Def]; intro e; simp [e]
 
 set_option linter.flexible false in
 instance pair₅_defined :
-    𝚺₀.DefinedFunction (fun v : Fin 5 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4⟫)) pair₅Def := .mk fun v ↦ by
+    𝚺ᴬ₀.DefinedFunction (fun v : Fin 5 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4⟫)) pair₅Def := .mk fun v ↦ by
   simp [pair₅Def]; intro e; simp [e]
 
 set_option linter.flexible false in
 instance pair₆_defined :
-    𝚺₀.DefinedFunction (fun v : Fin 6 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4, v 5⟫)) pair₆Def :=
+    𝚺ᴬ₀.DefinedFunction (fun v : Fin 6 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4, v 5⟫)) pair₆Def :=
   .mk fun v ↦ by
   simp [pair₆Def]; intro e; simp [e]
 
@@ -781,12 +783,12 @@ noncomputable def unNpair : {n : ℕ} → Fin n → V → V
 
 section
 
-def _root_.FFL.FirstOrder.Arithmetic.unNpairDef : {n : ℕ} → (i : Fin n) → 𝚺₀.Semisentence 2
+def _root_.FFL.FirstOrder.Arithmetic.unNpairDef : {n : ℕ} → (i : Fin n) → 𝚺ᴬ₀.Semisentence 2
   | 0,     i => i.elim0
   | n + 1, i =>
     Fin.cases pi₁Def (fun i ↦ .mkSigma “z v. ∃ r <⁺ v, !pi₂Def r v ∧ !(unNpairDef i) z r”) i
 
-instance unNpair_defined {n} (i : Fin n) : 𝚺₀-Function₁[V] unNpair i via unNpairDef i := by
+instance unNpair_defined {n} (i : Fin n) : 𝚺ᴬ₀-Function₁[V] unNpair i via unNpairDef i := by
   induction n with
   | zero => exact i.elim0
   | succ n ih =>
@@ -796,7 +798,8 @@ instance unNpair_defined {n} (i : Fin n) : 𝚺₀-Function₁[V] unNpair i via 
     | zero => simp [unNpairDef, unNpair]
     | succ i => simp [unNpairDef, unNpair, (ih i).iff]
 
-@[definability, simp] instance unNpair_definable {n} (i : Fin n) (Γ) :
+@[definability, simp] instance unNpair_definable {n} (i : Fin n)
+    (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     Γ-Function₁ (unNpair i : V → V) :=
   (unNpair_defined i).to_definable₀
 
@@ -817,7 +820,7 @@ end IOpen
 
 @[elab_as_elim]
 lemma polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (Γ m) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
-    {P : V → Prop} (hP : Γ-[m]-Predicate P)
+    {P : V → Prop} (hP : Γᴬ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory this
@@ -837,16 +840,17 @@ lemma polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (Γ m) [V↓[ℒ�
       · simpa [←hx] using odd (x / 2) (IH (x / 2) this)
 
 @[elab_as_elim] lemma sigma0_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {P : V → Prop}
-    (hP : 𝚺₀-Predicate P)
+    (hP : 𝚺ᴬ₀-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚺 0 (P := P) hP zero even odd
 
 @[elab_as_elim] lemma sigma1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop}
-    (hP : 𝚺₁-Predicate P)
+    (hP : 𝚺ᴬ₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚺 1 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma pi1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
+@[elab_as_elim] lemma pi1_polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+    {P : V → Prop} (hP : 𝚷ᴬ₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   polynomial_induction 𝚷 1 (P := P) hP zero even odd
 

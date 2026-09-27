@@ -9,6 +9,8 @@ public import Foundation.FirstOrder.Arithmetic.Exponential.Exp
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 variable {V : Type*} [ORingStructure V]
 
 section ISigma0
@@ -75,12 +77,12 @@ lemma log_graph {x y : V} :
     x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') :=
   Classical.choose!_eq_iff_right _
 
-def _root_.FFL.FirstOrder.Arithmetic.logDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.logDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “x y. (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' <⁺ y, !exponentialDef x y' ∧ y < 2 * y')”
 
-instance log_defined : 𝚺₀-Function₁[V] log via logDef := .mk fun v ↦ by simp [logDef, log_graph]
+instance log_defined : 𝚺ᴬ₀-Function₁[V] log via logDef := .mk fun v ↦ by simp [logDef, log_graph]
 
-instance log_definable : 𝚺₀-Function₁ (log : V → V) := log_defined.to_definable
+instance log_definable : 𝚺ᴬ₀-Function₁ (log : V → V) := log_defined.to_definable
 
 instance : Bounded₁ (log : V → V) := ⟨#0, fun _ ↦ by simp⟩
 
@@ -171,13 +173,13 @@ lemma length_graph {i a : V} :
   · simp
   · simp [length_of_pos, pos, pos_iff_ne_zero.mp pos]
 
-def _root_.FFL.FirstOrder.Arithmetic.lengthDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.lengthDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “i a. (0 < a → ∃ k <⁺ a, !logDef k a ∧ i = k + 1) ∧ (a = 0 → i = 0)”
 
-instance length_defined : 𝚺₀-Function₁[V] Length.length via lengthDef := .mk fun v ↦ by
+instance length_defined : 𝚺ᴬ₀-Function₁[V] Length.length via lengthDef := .mk fun v ↦ by
   simp [lengthDef, length_graph]
 
-instance length_definable : 𝚺₀-Function₁ (‖·‖ : V → V) := length_defined.to_definable
+instance length_definable : 𝚺ᴬ₀-Function₁ (‖·‖ : V → V) := length_defined.to_definable
 
 instance : Bounded₁ (‖·‖ : V → V) := ⟨#0, fun _ ↦ by simp⟩
 
@@ -355,13 +357,13 @@ lemma bexp_graph {y a x : V} :
     · exact (hlt lt).uniq (exp_bexp_of_lt lt)
     · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
 
-def _root_.FFL.FirstOrder.Arithmetic.bexpDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.bexpDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “y a x. ∃ l <⁺ a, !lengthDef l a ∧ (x < l → !exponentialDef x y) ∧ (l ≤ x → y = 0)”
 
-instance bexp_defined : 𝚺₀-Function₂[V] bexp via bexpDef := .mk fun v ↦ by
+instance bexp_defined : 𝚺ᴬ₀-Function₂[V] bexp via bexpDef := .mk fun v ↦ by
   simp [bexpDef, bexp_graph]
 
-instance bexp_definable : 𝚺₀-Function₂[V] bexp := bexp_defined.to_definable
+instance bexp_definable : 𝚺ᴬ₀-Function₂[V] bexp := bexp_defined.to_definable
 
 instance : Bounded₂ (bexp : V → V → V) := ⟨#0, fun _ ↦ by simp⟩
 
@@ -443,12 +445,12 @@ lemma fbit_eq_zero_iff {a i : V} : fbit a i = 0 ↔ ¬LenBit (bexp a i) a := by
 lemma fbit_eq_zero_of_le {a i : V} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by
   simp [fbit, bexp_eq_zero_of_le hi]
 
-def _root_.FFL.FirstOrder.Arithmetic.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.fbitDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “b a i. ∃ x <⁺ a, !bexpDef x a i ∧ ∃ y <⁺ a, !divDef y a x ∧ !remDef b y 2”
 
-instance fbit_defined : 𝚺₀-Function₂[V] fbit via fbitDef := .mk fun v ↦ by simp [fbitDef, fbit]
+instance fbit_defined : 𝚺ᴬ₀-Function₂[V] fbit via fbitDef := .mk fun v ↦ by simp [fbitDef, fbit]
 
-instance fbit_definable : 𝚺₀-Function₂[V] fbit := fbit_defined.to_definable
+instance fbit_definable : 𝚺ᴬ₀-Function₂[V] fbit := fbit_defined.to_definable
 
 instance : Bounded₂ (fbit : V → V → V) := ⟨‘1’, fun _ ↦ by simp⟩
 

@@ -18,6 +18,8 @@ collection to a model of the scheme, and the collection available in a model of 
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
+
 open _root_.FFL.Entailment
 
 variable {V : Type*} [ORingStructure V] {R : V → V → Prop}
@@ -46,9 +48,9 @@ lemma collection {R : V → V → Prop}
 end CollectionScheme
 
 lemma CollectionScheme.models_of_collection
-  (H : ∀ {R : V → V → Prop}, Γ-[s].DefinableRel R →
+  (H : ∀ {R : V → V → Prop}, Γᴬ-[s].DefinableRel R →
       ∀ a, (∀ x < a, ∃ y, R x y) → ∃ b, ∀ x < a, ∃ y < b, R x y) :
-  V↓[ℒₒᵣ] ⊧* CollectionScheme (Hierarchy Γ s) := by
+  V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s) := by
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
   suffices ∀ e : ℕ → V, ∀ a : V,
@@ -56,7 +58,7 @@ lemma CollectionScheme.models_of_collection
     simpa [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
       Semiformula.eval_bexsLT, Semiformula.eval_substs] using this;
   intro e a;
-  exact H (definableRel_of_hierarchy hφ e) a;
+  exact H (Bounding.definableRel_of_hierarchy hφ e) a;
 
 namespace CollectionOnHierarchy
 
@@ -103,7 +105,7 @@ section BSigma_ISigma
 variable {s : ℕ}
 
 lemma IBroadSigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(s + 1)] {R : V → V → Prop}
-    (hR : 𝚺-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
+    (hR : 𝚺ᴬ-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_IBroadSigma (s := s + 1);
   have key : ∀ y : V, ∃ b, ∀ x < y, x < a → ∃ u < b, R x u := by

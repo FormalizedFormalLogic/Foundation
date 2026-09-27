@@ -9,51 +9,56 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open FFL.Entailment
+open Bounding (HierarchySymbol)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x : V}
 
-variable (T : ArithmeticTheory) [T.Δ₁] (θ : 𝚺₀.Semisentence 1)
+variable (T : ArithmeticTheory) [T.Δ₁] (θ : 𝚺ᴬ₀.Semisentence 1)
 
 
 def _root_.FFL.FirstOrder.Theory.WitnessedBefore (φ : V) :=
   ∃ b, V ⊧/![b] θ.val ∧ ∀ b' < b, ¬Proof T b' φ
 
-noncomputable def _root_.FFL.FirstOrder.Theory.witnessedBefore : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.witnessedBefore :
+    𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “x. ∃ w, !θ w ∧ ∀ p < w, ¬!(proof T).pi p x”
 
 instance _root_.FFL.FirstOrder.Theory.WitnessedBefore.defined :
-    𝚺₁-Predicate[V] T.WitnessedBefore θ via T.witnessedBefore θ := .mk fun v ↦ by
+    𝚺ᴬ₁-Predicate[V] T.WitnessedBefore θ via T.witnessedBefore θ := .mk fun v ↦ by
   simp [Theory.witnessedBefore, Theory.WitnessedBefore];
 
 instance _root_.FFL.FirstOrder.Theory.WitnessedBefore.definable :
-    𝚺₁-Predicate[V] T.WitnessedBefore θ := (Theory.WitnessedBefore.defined T θ).to_definable
+    𝚺ᴬ₁-Predicate[V] T.WitnessedBefore θ :=
+      (Theory.WitnessedBefore.defined T θ).to_definable
 
 
 def _root_.FFL.FirstOrder.Theory.ProvedBefore (φ : V) :=
   ∃ b, Proof T b φ ∧ ∀ b' ≤ b, ¬V ⊧/![b'] θ.val
 
-noncomputable def _root_.FFL.FirstOrder.Theory.provedBefore : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.provedBefore : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “x. ∃ p, !(proof T).sigma p x ∧ ∀ w <⁺ p, ¬!θ w”
 
 instance _root_.FFL.FirstOrder.Theory.ProvedBefore.defined :
-    𝚺₁-Predicate[V] T.ProvedBefore θ via T.provedBefore θ := .mk fun v ↦ by
+    𝚺ᴬ₁-Predicate[V] T.ProvedBefore θ via T.provedBefore θ := .mk fun v ↦ by
   simp [Theory.provedBefore, Theory.ProvedBefore];
 
 instance _root_.FFL.FirstOrder.Theory.ProvedBefore.definable :
-    𝚺₁-Predicate[V] T.ProvedBefore θ := (Theory.ProvedBefore.defined T θ).to_definable
+    𝚺ᴬ₁-Predicate[V] T.ProvedBefore θ := (Theory.ProvedBefore.defined T θ).to_definable
 
 
 noncomputable def _root_.FFL.FirstOrder.Theory.fghSentence : ArithmeticSentence :=
   fixedpoint (T.witnessedBefore θ).val
 
-noncomputable def _root_.FFL.FirstOrder.Theory.fghSentence' : 𝚺₁.Sentence :=
+noncomputable def _root_.FFL.FirstOrder.Theory.fghSentence' : 𝚺ᴬ₁.Sentence :=
   (T.witnessedBefore θ).rew (Rew.subst ![⌜T.fghSentence θ⌝])
 
 
-variable {T : ArithmeticTheory} [T.Δ₁] {θ : 𝚺₀.Semisentence 1} {σ : ArithmeticSentence}
+variable {T : ArithmeticTheory} [T.Δ₁] {θ : 𝚺ᴬ₀.Semisentence 1} {σ : ArithmeticSentence}
 
 lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.WitnessedBefore θ x := by
   rintro ⟨p, hp, hbound⟩ ⟨w, hw, hbound'⟩;
@@ -147,8 +152,9 @@ open FFL.Entailment
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] {σ : ArithmeticSentence}
 
-theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
-  ∃ π : 𝚺₁.Sentence, 𝗜𝚺₁ ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := by
+theorem fgh_theorem (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
+  ∃ π : 𝚺ᴬ₁.Sentence,
+    𝗜𝚺₁ ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := by
   obtain ⟨θ, hwit⟩ := ISigma1.exists_matrix_provable_of_sentence hσ;
   use T.fghSentence' θ;
   apply E_trans provable_fixedpoint'_iff_exs_or_provable_bot;
@@ -157,8 +163,8 @@ theorem fgh_theorem (hσ : Hierarchy 𝚺 1 σ) :
   simp [models_iff, show V ⊧/![] σ ↔ ∃ w, V ⊧/![w] θ.val from
     by simpa [Semiformula.eval_ex] using models_iff_of_provable_iff hwit V ![]];
 
-theorem fgh_theorem_con (hσ : Hierarchy 𝚺 1 σ) :
-  ∃ π : 𝚺₁.Sentence, 𝗜𝚺₁ ∪ T.Con ⊢ σ 🡘 provabilityPred T π.val := by
+theorem fgh_theorem_con (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
+  ∃ π : 𝚺ᴬ₁.Sentence, 𝗜𝚺₁ ∪ T.Con ⊢ σ 🡘 provabilityPred T π.val := by
   obtain ⟨π, heq⟩ := fgh_theorem T hσ;
   use π;
   have heq' : 𝗜𝚺₁ ∪ T.Con ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := WeakerThan.pbl heq;

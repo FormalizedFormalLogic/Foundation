@@ -3,6 +3,8 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 /-!
 
 # Typed Formalized IsSemiterm/Term
@@ -391,7 +393,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
 lemma replace {P : α → isSemiterm} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx
 
 lemma semiterm_induction (Γ) {n : V} {P : Semiterm V ℒₒᵣ n → isSemiterm}
-    (hP : Γ-[1]-Predicate (fun x ↦ (h : IsSemiterm ℒₒᵣ n x) → P ⟨x, h⟩))
+    (hP : Γᴬ-[1]-Predicate (fun x ↦ (h : IsSemiterm ℒₒᵣ n x) → P ⟨x, h⟩))
     (hBvar : ∀ (z : V) (h : z < n), P (bvar ℒₒᵣ z h))
     (hFvar : ∀ x, P (⌜ℒₒᵣ⌝.fvar x))
     (hZero : P ((0 : V) : Semiterm V ℒₒᵣ n))

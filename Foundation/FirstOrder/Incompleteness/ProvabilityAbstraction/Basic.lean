@@ -8,6 +8,8 @@ public import Foundation.Meta.ClProver
 # Abstract incompleteness theorems and related results
 -/
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL
 
 open FFL.Entailment
@@ -79,7 +81,8 @@ export Rosser (Ros)
 /--
 Abstract version of formalized `Γ`-completeness for provability `𝔅`.
 
-example: `[∀ σ ∈ 𝚺₁, 𝔅.FormalizedCompleteOn σ]` for formalized `𝚺₁`-completeness.
+example: `[∀ σ ∈ 𝚺ᴬ₁, 𝔅.FormalizedCompleteOn σ]` for formalized
+`𝚺ᴬ₁`-completeness.
 -/
 class FormalizedCompleteOn (𝔅 : Provability T₀ T) (σ) where
   formalized_complete_on : T₀ ⊢ σ 🡒 𝔅 σ

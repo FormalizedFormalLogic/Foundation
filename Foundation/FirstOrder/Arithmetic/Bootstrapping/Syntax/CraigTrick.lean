@@ -15,6 +15,8 @@ The Craig companion of a recursively enumerable theory is moreover primitive rec
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Semiformula
 
 open Encodable
@@ -91,12 +93,12 @@ variable [L.Primcodable]
 
 -- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
 -- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
-noncomputable def reCh (T : Theory L) [T.RE] : 𝚺₁.Semisentence 1 :=
+noncomputable def reCh (T : Theory L) [T.RE] : 𝚺ᴬ₁.Semisentence 1 :=
   .mkSigma (codeOfREPred (Encodable.encode '' T)) <| by simp [codeOfREPred, codeOfPartrec']
 
 variable (T : Theory L) [T.RE]
 
-noncomputable def reWitness : 𝚺₀.Semisentence 2 :=
+noncomputable def reWitness : 𝚺ᴬ₀.Semisentence 2 :=
   (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose
 
 lemma reWitness_spec (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
@@ -203,7 +205,7 @@ variable (T : Theory L) [T.RE]
 def _root_.FFL.FirstOrder.Theory.IsCraigAxiom : V → Prop :=
   fun x ↦ ∃ s p : V, x = p ^⋏ qqVerums s ∧ V ⊧/![s, p] T.reWitness.val
 
-noncomputable def _root_.FFL.FirstOrder.Theory.craigCh : 𝚫₁.Semisentence 1 := .mkDelta
+noncomputable def _root_.FFL.FirstOrder.Theory.craigCh : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
   (.mkSigma “x. ∃ s < x, ∃ p < x, ∃ v < x,
     !qqVerumsGraph v s ∧ !qqAndDef x p v ∧ !(T.reWitness.val) s p”
   )
@@ -214,7 +216,7 @@ noncomputable def _root_.FFL.FirstOrder.Theory.craigCh : 𝚫₁.Semisentence 1 
 end
 
 instance Theory.IsCraigAxiom.defined {T : Theory L} [T.RE] :
-    𝚫₁-Predicate[V] (T.IsCraigAxiom : V → Prop) via T.craigCh := .mk <| by
+    𝚫ᴬ₁-Predicate[V] (T.IsCraigAxiom : V → Prop) via T.craigCh := .mk <| by
   have h (v : Fin 1 → V) :
       (∃ s < v 0, ∃ p < v 0, qqVerums s < v 0 ∧ v 0 = p ^⋏ qqVerums s
         ∧ (Semiformula.Eval ![s, p] Empty.elim) T.reWitness.val) ↔
@@ -335,7 +337,8 @@ noncomputable instance : (T.craig).Δ₁ where
   ch := T.craigCh
   mem_iff φ := (Theory.IsCraigAxiom.defined (V := ℕ) (T := T)).iff.trans
     (Theory.isCraigAxiom_quote_iff φ)
-  isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦
+  isDelta1 :=
+    Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _ fun V _ _ ↦
     (Theory.IsCraigAxiom.defined (V := V) (T := T)).proper
 
 variable [L.DecidableEq]

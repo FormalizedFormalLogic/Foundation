@@ -79,10 +79,11 @@ theorem term_complete {n : ℕ} (t : FirstOrder.ClosedSemiterm ℒₒᵣ n) (w :
 
 open FirstOrder.Arithmetic
 
-theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierarchy 𝚺 1 φ) {w} :
+theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n}
+    (hp : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) {w} :
     V ⊧/w φ → T.internalize V ⊢ (toNumVec w ⤔ ⌜φ⌝) := by
   revert w
-  apply sigma₁_induction' hp
+  apply Bounding.Hierarchy.arithmetic_sigma₁_induction' hp
   case hVerum => intro n; simp
   case hFalsum => intro n; simp
   case hEQ =>
@@ -158,7 +159,7 @@ theorem bold_sigma_one_complete {n} {φ : ArithmeticSemisentence n} (hp : Hierar
       simpa [Semiformula.substs_substs, Matrix.vecMap_vecMap_comp']
     exact ih hφ
 
-theorem sigma_one_provable_of_models {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_provable_of_models {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
      V↓[ℒₒᵣ] ⊧ σ → T.internalize V ⊢ ⌜σ⌝ := by
   intro h
   have : T.internalize V ⊢ (toNumVec ![] ⤔ ⌜σ⌝) :=
@@ -166,7 +167,7 @@ theorem sigma_one_provable_of_models {σ : ArithmeticSentence} (hσ : Hierarchy 
   simpa using this
 
 /-- Hilbert–Bernays provability condition D3 -/
-theorem sigma_one_complete {σ : ArithmeticSentence} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_complete {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
     V↓[ℒₒᵣ] ⊧ σ → Provable T (⌜σ⌝ : V) := fun h ↦ by
   simpa [tprovable_iff_provable]
     using! Bootstrapping.Arithmetic.sigma_one_provable_of_models T hσ h

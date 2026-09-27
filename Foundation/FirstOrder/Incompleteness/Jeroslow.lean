@@ -18,6 +18,8 @@ is not provable in `T` itself.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder
 
 open _root_.FFL.FirstOrder.Entailment
@@ -37,7 +39,7 @@ variable [L.Encodable] [L.LORDefinable]
 def Refutable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (T : Theory L) [T.Δ₁] (φ : V) : Prop
   := Provable T (neg L φ)
 
-noncomputable def refutable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisentence 1
+noncomputable def refutable (T : Theory L) [T.Δ₁] : 𝚺ᴬ₁.Semisentence 1
   := .mkSigma “φ. ∃ nφ, !(negGraph L) nφ φ ∧ !(provable T) nφ”
 
 section
@@ -47,10 +49,10 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 lemma Refutable.quote_iff {σ : Sentence L} : T.Refutable (⌜σ⌝ : V) ↔ Provable T (⌜∼σ⌝ : V) := by
   simp [Theory.Refutable, Sentence.quote_def, Semiformula.quote_def]
 
-instance refutable_defined : 𝚺₁-Predicate[V] T.Refutable via T.refutable := .mk fun v ↦ by
+instance refutable_defined : 𝚺ᴬ₁-Predicate[V] T.Refutable via T.refutable := .mk fun v ↦ by
   simp [Theory.refutable, Theory.Refutable]
 
-instance refutable_definable : 𝚺₁-Predicate[V] T.Refutable := refutable_defined.to_definable
+instance refutable_definable : 𝚺ᴬ₁-Predicate[V] T.Refutable := refutable_defined.to_definable
 
 end
 
@@ -72,7 +74,7 @@ noncomputable abbrev jeroslow (T : ArithmeticTheory) [T.Δ₁] : ArithmeticSente
 private noncomputable abbrev jeroslow' (T : ArithmeticTheory) [T.Δ₁] : ArithmeticSentence :=
   (T.refutable)/[⌜T.jeroslow⌝]
 
-private lemma jeroslow'_sigmaOne : Hierarchy 𝚺 1 (T.jeroslow') := by definability;
+private lemma jeroslow'_sigmaOne : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (T.jeroslow') := by definability;
 
 lemma def_jeroslow [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 (T.refutable)/[⌜T.jeroslow⌝] := diagonal _
 
@@ -90,7 +92,7 @@ instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     T.standardRefutability.SoundOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
   constructor;
   intro h;
-  have := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h <| by
+  have := ArithmeticTheory.SoundOn.sound (F := ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1) h <| by
     simp [standardRefutability, Refutability.rf];
   exact provable_iff_provable (L := ℒₒᵣ) |>.mp <| by
     simpa [models_iff, standardRefutability, Refutability.rf, Refutable.quote_iff] using this;
