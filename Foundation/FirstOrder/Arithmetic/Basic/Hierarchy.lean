@@ -130,6 +130,10 @@ end FFL.FirstOrder.Bounding.Hierarchy
 
 namespace FFL.FirstOrder
 
+abbrev ArithmeticBoundedSemiformula (ξ : Type*) (n : ℕ) := BoundedSemiformula ℬ[<, ℒₒᵣ] ξ n
+
+abbrev ArithmeticBoundedSemisentence (n : ℕ) := ArithmeticBoundedSemiformula Empty n
+
 abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) :=
   T.SoundOn (ℬ[<, ℒₒᵣ].Hierarchy Γ k)
 

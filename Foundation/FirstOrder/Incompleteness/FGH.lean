@@ -156,7 +156,7 @@ theorem fgh_theorem (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
   ∃ π : 𝚺ᴬ₁.Sentence,
     𝗜𝚺₁ ⊢ provabilityPred T π.val 🡘 σ ⋎ provabilityPred T ⊥ := by
   obtain ⟨θ, hwit⟩ := ISigma1.exists_matrix_provable_of_sentence hσ;
-  use T.fghSentence' θ;
+  use T.fghSentence' θ.toSigmaZero;
   apply E_trans provable_fixedpoint'_iff_exs_or_provable_bot;
   apply complete.{0};
   intro V _ _;

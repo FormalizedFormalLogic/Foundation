@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 # Prenex normal form theorem over $\mathsf{I\Sigma_1}$
 
 Every `ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1` formula is `𝗜𝚺₁`-provably equivalent to a formula of the form `∃¹ θ`
-with `θ` in `ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0`, and dually for `ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1` and `∀¹ θ`.
+with `θ` bounded, and dually for `ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1` and `∀¹ θ`.
 -/
 
 @[expose] public section
@@ -23,17 +23,17 @@ lemma hasPrenex (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) :
   exists_prenex_of_hierarchy 𝗜𝚺₁ h
 
 lemma exists_matrix_provable (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) :
-    ∃ θ : 𝚺ᴬ₀.Semisentence (n + 1), 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ.val) := by
+    ∃ θ : ArithmeticBoundedSemisentence (n + 1), 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ.val) := by
   obtain ⟨φ', hφ'⟩ := hasPrenex h;
   exact ⟨φ'.sigmaInv.matrix, Prenex.provable_iff_sigmaInv hφ'⟩
 
 lemma exists_matrix_provable_pi (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 φ) :
-    ∃ θ : 𝚺ᴬ₀.Semisentence (n + 1), 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∀¹ θ.val) := by
+    ∃ θ : ArithmeticBoundedSemisentence (n + 1), 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∀¹ θ.val) := by
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy 𝗜𝚺₁ h
   exact ⟨φ'.piInv.matrix, Prenex.provable_iff_piInv hφ'⟩
 
 lemma exists_matrix_provable_of_sentence (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
-    ∃ θ : 𝚺ᴬ₀.Semisentence 1, 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ.val :=
+    ∃ θ : ArithmeticBoundedSemisentence 1, 𝗜𝚺₁ ⊢ σ 🡘 ∃¹ θ.val :=
   exists_matrix_provable h
 
 end FFL.FirstOrder.Arithmetic.ISigma1

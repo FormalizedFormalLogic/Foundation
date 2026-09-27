@@ -99,7 +99,7 @@ noncomputable def reCh (T : Theory L) [T.RE] : 𝚺ᴬ₁.Semisentence 1 :=
 variable (T : Theory L) [T.RE]
 
 noncomputable def reWitness : 𝚺ᴬ₀.Semisentence 2 :=
-  (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose
+  (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose.toSigmaZero
 
 lemma reWitness_spec (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
     V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val :=

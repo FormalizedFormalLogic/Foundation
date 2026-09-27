@@ -596,6 +596,12 @@ lemma toPrenex {j : ℕ} {φ : Semiformula L ξ (n + s)}
 
 end Hierarchy
 
-end FFL.FirstOrder.Bounding
+end Bounding
+
+@[simp] lemma BoundedSemiformula.hierarchy {ℬ : Bounding L} (φ : BoundedSemiformula ℬ ξ n) :
+    ℬ.Hierarchy Γ s φ.val :=
+  .bounded Γ s n φ.bounded
+
+end FFL.FirstOrder
 
 end

@@ -445,3 +445,15 @@ end Semiformula
 end HierarchySymbol
 
 end FFL.FirstOrder.Bounding
+
+namespace FFL.FirstOrder.BoundedSemiformula
+
+open Bounding
+
+variable {L : Language} {ℬ : Bounding L} {ξ : Type*} {n : ℕ}
+
+def toSigmaZero (φ : BoundedSemiformula ℬ ξ n) : 𝚺-[ℬ, 0].Semiformula ξ n := .mkSigma φ.val
+
+@[simp] lemma val_toSigmaZero (φ : BoundedSemiformula ℬ ξ n) : φ.toSigmaZero.val = φ.val := rfl
+
+end FFL.FirstOrder.BoundedSemiformula

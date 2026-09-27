@@ -634,7 +634,7 @@ def standardModifiedSolovaySentences
       V ⊧/![] σ ↔ ∃ w, V ⊧/![w] hex.choose.val := fun V _ _ ↦ by
     simpa [models_iff] using
       consequence_iff.mp (Theory.Proof.sound hex.choose_spec) V inferInstance;
-  { Λ := T.modifiedSolovay M σ hex.choose
+  { Λ := T.modifiedSolovay M σ hex.choose.toSigmaZero
     SC1 _ _ ne := complete _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using! ModifiedSolovay.exclusive (hθσ V) ne
     SC2 _ _ hxy hy := complete _ _ fun (V : Type) _ _ ↦ by
