@@ -19,7 +19,7 @@ namespace Formula
 
 variable {α : Type*}
 
-def TBB (n : ℕ) : Formula α := □^[n + 1]⊥ 🡒 □^[n]⊥
+def alpha (n : ℕ) : Formula α := □^[n + 1]⊥ 🡒 □^[n]⊥
 
 end Formula
 
@@ -46,13 +46,23 @@ instance : Coe LetterlessFormula (Formula α) := ⟨lift⟩
 @[simp, grind =] lemma lift_bot : lift ⊥ = (⊥ : Formula α) := rfl
 @[simp, grind =] lemma lift_imp : lift (A 🡒 B) = (↑A 🡒 ↑B : Formula α) := rfl
 @[simp, grind =] lemma lift_box : lift (□A) = (□↑A : Formula α) := rfl
+lemma lift_neg : lift (∼A) = (∼↑A : Formula α) := rfl
 
 @[simp, grind =]
 lemma lift_boxItr : lift (□^[n]A) = (□^[n]↑A : Formula α) := by
   induction n <;> simp_all;
 
-@[simp, grind =] lemma lift_TBB : lift (TBB n) = (TBB n : Formula α) := by
-  simp [TBB];
+@[simp, grind =] lemma lift_alpha : lift (alpha n) = (alpha n : Formula α) := by
+  simp [alpha];
+
+lemma lift_conj₂ : ∀ {l : List LetterlessFormula}, lift (⋀l) = (⋀l.map lift : Formula α)
+  | []  => rfl
+  | [_] => rfl
+  | A :: B :: l => congrArg (lift A ⋏ ·) (lift_conj₂ (l := B :: l))
+
+lemma lift_conj' {ι : Type*} {s : Finset ι} {f : ι → LetterlessFormula} :
+    lift (s.conj' f) = (s.conj' fun i ↦ ↑(f i) : Formula α) := by
+  simp [Finset.conj', List.conj', lift_conj₂, Function.comp_def];
 
 @[simp] lemma lift_eq_self : ∀ A : LetterlessFormula, A.lift = A
   | #a    => a.elim
@@ -92,15 +102,12 @@ lemma spectrum_boxItr_bot : spectrum (□^[n]⊥) = Set.Iio n := by
     exact ⟨fun h ↦ by by_contra! hk; exact lt_irrefl n (h n hk), fun h i hi ↦ by omega⟩;
 
 @[simp, grind =]
-lemma spectrum_TBB : spectrum (TBB n) = {n}ᶜ := by
+lemma spectrum_alpha : spectrum (alpha n) = {n}ᶜ := by
   ext i;
-  suffices (∃ k < i, n ≤ k) ∨ i < n ↔ i ≠ n by simpa [TBB];
+  suffices (∃ k < i, n ≤ k) ∨ i < n ↔ i ≠ n by simpa [alpha];
   constructor;
   · rintro (⟨k, hk, hn⟩ | h) <;> omega;
-  · intro h;
-    rcases Nat.lt_or_gt_of_ne h with h | h;
-    · exact .inr h;
-    · exact .inl ⟨n, h, le_rfl⟩;
+  · exact fun h ↦ (Nat.lt_or_gt_of_ne h).symm.imp (⟨n, ·, le_rfl⟩) id;
 
 lemma spectrum_conj₂ : ∀ {l : List LetterlessFormula}, spectrum (⋀l) = ⋂ A ∈ l, A.spectrum
   | []  => by simp
@@ -114,8 +121,7 @@ lemma spectrum_conj' {ι : Type*} {s : Finset ι} {f : ι → LetterlessFormula}
 
 @[simp, grind =] lemma mem_trace : n ∈ trace A ↔ n ∉ spectrum A := Iff.rfl
 
-@[simp, grind =] lemma trace_TBB : trace (TBB n) = {n} := by simp [trace]
-
+@[simp, grind =] lemma trace_alpha : trace (alpha n) = {n} := by simp [trace]
 
 @[grind .]
 lemma spectrum_finite_or_cofinite : A.spectrum.Finite ∨ A.spectrumᶜ.Finite := by
@@ -128,8 +134,7 @@ lemma spectrum_finite_or_cofinite : A.spectrum.Finite ∨ A.spectrumᶜ.Finite :
   | box A ih =>
     by_cases h : ∀ i, i ∈ spectrum A;
     · simp [h];
-    · push Not at h;
-      obtain ⟨k, hk⟩ := h;
+    · obtain ⟨k, hk⟩ := not_forall.mp h;
       left;
       apply (Set.finite_Iic k).subset;
       intro n hn;
@@ -172,7 +177,6 @@ lemma exists_finset_of_spectrum_subset (hXA : X.spectrum ⊆ spectrum A)
     (h : (∃ B ∈ X, (spectrum B).Finite) ∨ (trace A).Finite) :
     ∃ Y : Finset LetterlessFormula, ↑Y ⊆ X ∧
       ∀ n, (∀ C ∈ Y, n ∈ spectrum C) → n ∈ spectrum A := by
-  classical
   obtain ⟨Y₀, hY₀, hfin⟩ : ∃ Y₀ : Finset LetterlessFormula, ↑Y₀ ⊆ X ∧
       {n | (∀ C ∈ Y₀, n ∈ spectrum C) ∧ n ∉ spectrum A}.Finite := by
     rcases h with ⟨B, hB, hfin⟩ | hfin;

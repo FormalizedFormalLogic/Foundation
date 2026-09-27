@@ -26,8 +26,8 @@ def extendRoot : RootedModel (Option κ) α where
     | none, some _ => True
     | _, none => False
   Val' x a := match x with
-    | some x => M.Val x a
-    | none => M.Val M.root a
+    | some x => M x a
+    | none => M M.root a
   root := none
   root_rel x hx := by
     rcases x with _ | x;
@@ -80,7 +80,7 @@ instance [M.IsGL] : M.extendRoot.IsGL where
 
 instance [Fintype M.World] : Fintype M.extendRoot.World := inferInstanceAs (Fintype (Option κ))
 
-lemma forces_some : some x ⊩[M.extendRoot.toModel] A ↔ x ⊩[M.toModel] A := by
+lemma forces_some : some x ⊩[M.extendRoot.toModel] A ↔ x ⊩ A := by
   induction A generalizing x with
   | atom | falsum => rfl;
   | imp A B ihA ihB => exact imp_congr ihA ihB;
@@ -111,13 +111,10 @@ variable [Fintype M.World] [M.IsGL]
 lemma rank_some :
     Model.World.rank (M := M.extendRoot.toModel) (some x) =
       Model.World.rank (M := M.toModel) x := by
-  have h : ∀ n, Model.World.rank (M := M.extendRoot.toModel) (some x) < n ↔
-      Model.World.rank (M := M.toModel) x < n := by
-    intro n;
-    simp only [Model.rank_lt_iff, notRelItr_iff, relItr_some_iff];
-    grind;
-  exact le_antisymm (Nat.le_of_lt_succ ((h _).mpr (Nat.lt_succ_self _)))
-    (Nat.le_of_lt_succ ((h _).mp (Nat.lt_succ_self _)));
+  apply eq_of_forall_gt_iff;
+  intro n;
+  simp only [Model.rank_lt_iff, notRelItr_iff, relItr_some_iff];
+  grind;
 
 lemma height_extendRoot : M.extendRoot.height = M.height + 1 := by
   apply le_antisymm;

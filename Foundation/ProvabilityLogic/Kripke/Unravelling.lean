@@ -40,10 +40,8 @@ namespace unravelling.World
 
 variable {M} (x : unravelling.World M)
 
-lemma ne_nil : x.1 ≠ [] := fun h ↦ by simpa [h] using x.2.1
-
 /-- The last point of the chain. -/
-def tip : M.World := x.1.head x.ne_nil
+def tip : M.World := x.1.head fun h ↦ by simpa [h] using x.2.1
 
 end unravelling.World
 
@@ -52,7 +50,7 @@ instance : Nonempty (unravelling.World M) := ⟨⟨[M.root], List.suffix_refl _,
 /-- The unravelling of `M`: chains from the root, ordered by proper extension. -/
 def unravelling : RootedModel (unravelling.World M) α where
   Rel' x y := x.1 <:+ y.1 ∧ x.1.length < y.1.length
-  Val' x p := M.Val x.tip p
+  Val' x p := M x.tip p
   root := ⟨[M.root], List.suffix_refl _, by simp⟩
   root_rel x hx :=
     ⟨x.2.1, x.2.1.length_le.lt_of_ne fun h ↦ hx <| Subtype.ext (x.2.1.eq_of_length h).symm⟩
@@ -86,7 +84,6 @@ instance [M.IsFiniteGL] : M.unravelling.IsFiniteGL where
     exact Finite.of_injective (fun x : M.unravelling.World ↦ {a | a ∈ x.1}) fun x y h ↦
       Subtype.ext <| x.2.2.eq_of_mem_iff y.2.2 <| Set.ext_iff.mp h;
 
-/-- The map to the last point is a pseudo-epimorphism. -/
 def tipMap [IsTrans _ M.Rel] : M.unravelling.toModel →ₚ M.toModel where
   toFun x := x.tip
   forth {x y} h := by
@@ -105,7 +102,7 @@ def tipMap [IsTrans _ M.Rel] : M.unravelling.toModel →ₚ M.toModel where
   atomic := Iff.rfl
 
 lemma forces_root_iff [IsTrans _ M.Rel] {A : Formula α} :
-    M.unravelling.root ⊩[M.unravelling.toModel] A ↔ M.root ⊩[M.toModel] A :=
+    M.unravelling.root ⊩ A ↔ M.root ⊩ A :=
   tipMap.forces_iff
 
 end unravelling

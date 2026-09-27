@@ -26,6 +26,11 @@ name = "zoo_arithmetic"
 root = "Zoo.Arithmetic"
 supportInterpreter = true
 
+[[lean_exe]]
+name = "zoo_provability_logic"
+root = "Zoo.ProvabilityLogic"
+supportInterpreter = true
+
 [[require]]
 scope = "leanprover-community"
 name = "mathlib"

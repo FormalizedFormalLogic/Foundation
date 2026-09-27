@@ -24,7 +24,7 @@ namespace LetterlessFormula
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} [Fintype M.World] [M.IsGL] {x : M.World}
          {A : LetterlessFormula}
 
-lemma forces_lift_iff : x ⊩[M] ↑A ↔ x.rank ∈ spectrum A := by
+lemma forces_lift_iff : x ⊩ ↑A ↔ x.rank ∈ spectrum A := by
   induction A using Formula.rec' generalizing x with
   | atom a => exact a.elim;
   | falsum => simp;
@@ -47,12 +47,9 @@ universe u
 variable {α : Type u} {A : LetterlessFormula} {X : LetterlessFormulaSet}
 
 lemma lift_mem_iff : (A : Formula α) ∈ 𝐆𝐋 ↔ spectrum A = Set.univ := by
-  classical
   constructor;
-  · intro h;
-    apply Set.eq_univ_of_forall;
-    intro n;
-    simpa using forces_lift_iff.mp <| Logic.GL.sound (finiteLineModel n α) h (Fin.last n);
+  · exact fun h ↦ Set.eq_univ_of_forall fun n ↦ by
+      simpa using forces_lift_iff.mp <| sound (finiteLineModel n α) h (Fin.last n);
   · intro h;
     apply iff_valid_finite.mpr;
     intro _ _ M _ x;
@@ -62,31 +59,28 @@ lemma lift_mem_iff : (A : Formula α) ∈ 𝐆𝐋 ↔ spectrum A = Set.univ := 
 lemma mem_iff_spectrum_eq_univ : A ∈ 𝐆𝐋 ↔ spectrum A = Set.univ := by
   simpa using lift_mem_iff (α := Empty) (A := A);
 
-lemma exists_finset_of_mem_sumQuasiNormal {B : Formula α} (h : B ∈ 𝐆𝐋 +ᴸ X.lift) :
-    ∃ Y : Finset LetterlessFormula, ↑Y ⊆ X ∧
-      ∀ {κ : Type} [Nonempty κ] (M : Model κ α) [Fintype M.World] [M.IsGL] (x : M.World),
-        (∀ C ∈ Y, x.rank ∈ spectrum C) → x ⊩[M] B := by
-  classical
-  induction h with
-  | mem₁ h => exact ⟨∅, by simp, fun M _ _ x _ ↦ Logic.GL.sound M h x⟩;
-  | mem₂ h =>
-    obtain ⟨C, hC, rfl⟩ := h;
-    exact ⟨{C}, by simpa, fun M _ _ x hx ↦ forces_lift_iff.mpr (hx C (by simp))⟩;
-  | mdp _ _ ih₁ ih₂ =>
-    obtain ⟨Y₁, hY₁, h₁⟩ := ih₁;
-    obtain ⟨Y₂, hY₂, h₂⟩ := ih₂;
-    use Y₁ ∪ Y₂;
-    and_intros;
-    · simp [hY₁, hY₂];
-    · intro _ _ M _ _ x hx;
-      exact h₁ M x (fun C hC ↦ hx C (by simp [hC])) (h₂ M x fun C hC ↦ hx C (by simp [hC]));
-  | subst _ ih =>
-    obtain ⟨Y, hY, h⟩ := ih;
-    exact ⟨Y, hY, fun M _ _ x hx ↦ forces_subst.mp (h (M.subst _) x hx)⟩;
-
 lemma spectrum_subset_of_lift_mem_sumQuasiNormal (h : ↑A ∈ 𝐆𝐋 +ᴸ X.lift (α := α)) :
     X.spectrum ⊆ spectrum A := by
-  obtain ⟨Y, hY, h⟩ := exists_finset_of_mem_sumQuasiNormal h;
+  have {B : Formula α} (h : B ∈ 𝐆𝐋 +ᴸ X.lift) : ∃ Y : Finset LetterlessFormula, ↑Y ⊆ X ∧
+      ∀ {κ : Type} [Nonempty κ] (M : Model κ α) [Fintype M.World] [M.IsGL] (x : M.World),
+        (∀ C ∈ Y, x.rank ∈ spectrum C) → x ⊩ B := by
+    induction h with
+    | mem₁ h => exact ⟨∅, by simp, fun M _ _ x _ ↦ sound M h x⟩;
+    | mem₂ h =>
+      obtain ⟨C, hC, rfl⟩ := h;
+      exact ⟨{C}, by simpa, fun M _ _ x hx ↦ forces_lift_iff.mpr (hx C (by simp))⟩;
+    | mdp _ _ ih₁ ih₂ =>
+      obtain ⟨Y₁, hY₁, h₁⟩ := ih₁;
+      obtain ⟨Y₂, hY₂, h₂⟩ := ih₂;
+      use Y₁ ∪ Y₂;
+      and_intros;
+      · simp [hY₁, hY₂];
+      · intro _ _ M _ _ x hx;
+        exact h₁ M x (fun C hC ↦ hx C (by simp [hC])) (h₂ M x fun C hC ↦ hx C (by simp [hC]));
+    | subst _ ih =>
+      obtain ⟨Y, hY, h⟩ := ih;
+      exact ⟨Y, hY, fun M _ _ x hx ↦ forces_subst.mp (h (M.subst _) x hx)⟩;
+  obtain ⟨Y, hY, h⟩ := this h;
   intro n hn;
   simpa using forces_lift_iff.mp <|
     h (finiteLineModel n α) (Fin.last n) fun C hC ↦ by
@@ -106,16 +100,15 @@ theorem lift_mem_sumQuasiNormal_iff (h : (∃ B ∈ X, (spectrum B).Finite) ∨ 
     · apply iff_valid_finite.mpr;
       intro _ _ M _ x hx;
       have : Fintype M.World := Fintype.ofFinite _;
-      have hx : ∀ C ∈ Y, x ⊩[M] ↑C :=
-        fun C hC ↦ forces_conj.mp hx _ (Finset.mem_image_of_mem _ hC);
-      exact forces_lift_iff.mpr <| hA _ fun C hC ↦ forces_lift_iff.mp (hx C hC);
+      exact forces_lift_iff.mpr <| hA _ fun C hC ↦
+        forces_lift_iff.mp <| forces_conj.mp hx _ (Finset.mem_image_of_mem _ hC);
 
 variable {Y : LetterlessFormulaSet}
 
-theorem sumQuasiNormal_subset_iff
+theorem sumQuasiNormal_weakerThan_iff
     (h : (∃ B ∈ Y, (spectrum B).Finite) ∨ ∀ A ∈ X, (trace A).Finite) :
-    (𝐆𝐋 +ᴸ X.lift (α := α)) ⊆ (𝐆𝐋 +ᴸ ↑Y) ↔ Y.spectrum ⊆ X.spectrum := by
-  rw [sumQuasiNormal.subset_iff];
+    (𝐆𝐋 +ᴸ X.lift (α := α)) ⪯ (𝐆𝐋 +ᴸ Y.lift (α := α)) ↔ Y.spectrum ⊆ X.spectrum := by
+  rw [Logic.weakerThan_iff, sumQuasiNormal.subset_iff];
   constructor;
   · intro hs n hn;
     exact LetterlessFormulaSet.mem_spectrum.mpr fun A hA ↦
@@ -128,9 +121,9 @@ theorem sumQuasiNormal_eq_iff
     (h : ((∃ B ∈ X, (spectrum B).Finite) ∧ ∃ B ∈ Y, (spectrum B).Finite) ∨
       ((∀ A ∈ X, (trace A).Finite) ∧ ∀ A ∈ Y, (trace A).Finite)) :
     (𝐆𝐋 +ᴸ X.lift (α := α)) = (𝐆𝐋 +ᴸ Y.lift) ↔ X.spectrum = Y.spectrum := by
-  rw [Set.Subset.antisymm_iff, Set.Subset.antisymm_iff,
-    sumQuasiNormal_subset_iff (h.imp And.right And.left),
-    sumQuasiNormal_subset_iff (h.imp And.left And.right)];
+  rw [Set.Subset.antisymm_iff, Set.Subset.antisymm_iff, ← Logic.weakerThan_iff,
+    ← Logic.weakerThan_iff, sumQuasiNormal_weakerThan_iff (h.imp And.right And.left),
+    sumQuasiNormal_weakerThan_iff (h.imp And.left And.right)];
   tauto;
 
 end Logic.GL

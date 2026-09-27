@@ -1,7 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.GL.Gentzen.Basic
-public import Foundation.ProvabilityLogic.Kripke.Sequent
+public import Foundation.ProvabilityLogic.Kripke.Basic
 public import Mathlib.Data.Finset.Powerset
 public import Mathlib.Basic.Finite.Prod
 
@@ -13,24 +13,24 @@ public import Mathlib.Basic.Finite.Prod
 
 namespace FFL.ProvabilityLogic
 
-open Kripke Kripke.Model Kripke.Model.World
+open Formula Kripke Kripke.Model Kripke.Model.World
 
 /-! ### Soundness -/
 
 namespace Kripke
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {M : Model κ α}
-         {Γ Δ : FormulaFinset α} {A B : Formula α}
+         {Γ : FormulaFinset α} {A : Formula α}
 
 @[grind →]
 lemma Model.validateSequent_boxGL [M.IsGL] (h : M ⊧ (insert (□A) (Γ ∪ Γ.box) ⟹ {A})) :
     M ⊧ (Γ.box ⟹ {□A}) := by
   apply validateSequent_singleton_iff.mpr;
   intro x hx;
-  have hΓ : ∀ C ∈ Γ, x ⊩[M] □C := fun C hC ↦ hx _ (Finset.mem_image_of_mem _ hC);
+  have hΓ : ∀ C ∈ Γ, x ⊩ □C := fun C hC ↦ hx _ (Finset.mem_image_of_mem _ hC);
   by_contra hA;
   obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp hA;
-  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[M] A} ⟨y, Rxy, hy⟩;
+  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮ A} ⟨y, Rxy, hy⟩;
   apply ht;
   apply validateSequent_singleton_iff.mp h t;
   simp only [Finset.mem_insert, Finset.mem_union, Finset.mem_image];
@@ -74,7 +74,7 @@ structure SaturatedSequent (BS : Sequent α) extends Sequent α where
 
 namespace SaturatedSequent
 
-variable {BS : Sequent α} {S : SaturatedSequent BS} {A B : Formula α}
+variable {BS : Sequent α} {S : SaturatedSequent BS} {A : Formula α}
 
 @[grind .]
 lemma not_mem_both : ¬(A ∈ S.ant ∧ A ∈ S.suc) := fun h ↦ S.unprovable (Gentzen.union' _ h.1 h.2)
@@ -94,7 +94,6 @@ instance : Finite (SaturatedSequent BS) :=
               ⟨S.suc, Finset.mem_powerset.mpr (by grind [S.subset_subfmls])⟩))
     (fun S T h ↦ by simp only [Prod.mk.injEq, Subtype.mk.injEq] at h; exact ext h.1 h.2)
 
-/-- The Lindenbaum lemma. -/
 lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐆𝐋] S₀) (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls) :
     ∃ S : SaturatedSequent BS, S₀ ⊆ S.toSequent := by
   obtain ⟨S, h₁, h₂, h₃, h₄, -⟩ := Sequent.exists_saturated
@@ -123,7 +122,7 @@ instance : (countermodel BS).IsFiniteGL where
     exact ⟨h₁.trans h₃, h₁.subset.trans h₄⟩;
   irrefl x h := h.1.ne rfl
 
-lemma truthlemma : (A ∈ x.ant → x ⊩[countermodel BS] A) ∧ (A ∈ x.suc → x ⊮[countermodel BS] A) := by
+lemma truthlemma : (A ∈ x.ant → x ⊩ A) ∧ (A ∈ x.suc → x ⊮ A) := by
   induction A generalizing x with
   | atom a => exact ⟨id, fun h hf ↦ not_mem_both ⟨hf, h⟩⟩;
   | falsum => exact ⟨fun h ↦ absurd h bot_not_mem_ant, fun _ ↦ id⟩;
@@ -189,16 +188,23 @@ theorem complete
   obtain ⟨D, hD, hxD⟩ := h (countermodel S) x (fun C hC ↦ countermodel.truthlemma.1 (hS₀.ant hC));
   exact countermodel.truthlemma.2 (hS₀.suc hD) hxD;
 
-theorem iff_valid : ⊢ᴳ[𝐆𝐋] S ↔
+lemma iff_valid : ⊢ᴳ[𝐆𝐋] S ↔
     ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → M ⊧ S :=
   ⟨fun h _ _ M _ ↦ sound M h, complete⟩
 
-variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
+variable {Γ Γ₁ Γ₂ Δ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
-/-- Cut is admissible. -/
 theorem cut (h₁ : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[𝐆𝐋] insert A Γ₂ ⟹ Δ₂) :
     ⊢ᴳ[𝐆𝐋] Γ₁ ∪ Γ₂ ⟹ Δ₁ ∪ Δ₂ :=
   complete fun M _ x ↦ forcesSequent_cut (sound M h₁ x) (sound M h₂ x)
+
+lemma subst (s : Substitution α α) (h : ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ) :
+    ⊢ᴳ[𝐆𝐋] Γ.image (·⟦s⟧) ⟹ Δ.image (·⟦s⟧) := by
+  apply complete;
+  intro _ _ M _ x hx;
+  obtain ⟨D, hD, hxD⟩ := sound (M.subst s) h x
+    fun C hC ↦ forces_subst.mpr (hx _ (Finset.mem_image_of_mem _ hC));
+  exact ⟨_, Finset.mem_image_of_mem _ hD, forces_subst.mp hxD⟩;
 
 end Gentzen
 

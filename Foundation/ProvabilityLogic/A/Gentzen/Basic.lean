@@ -65,7 +65,6 @@ lemma toGL {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐀] T) : T.level = 0 → ⊢�
   | boxGL _ ih => exact fun hl ↦ .boxGL (ih hl);
   | liftUp | boxGP => nofun;
 
-/-- The lower layer is the sequent calculus of `GL`. -/
 theorem iff_GL : ⊢ᴳ[𝐀] Γ ⟹[0] Δ ↔ ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ := ⟨fun h ↦ h.toGL rfl, of_GL⟩
 
 lemma isPropClosed : LayeredSequent.IsPropClosed (Gentzen (α := α)) :=

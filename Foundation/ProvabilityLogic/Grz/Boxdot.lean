@@ -31,6 +31,16 @@ instance [M.IsFiniteGrz] : M.irreflGen.IsFiniteGL where
   irrefl _ h := h.2 rfl
   finite := IsFiniteGrz.finite (M := M)
 
+def reflGen (M : Model κ α) : Model κ α where
+  Rel' x y := x = y ∨ M.Rel x y
+  Val' := M.Val
+
+instance [M.IsFiniteGL] : M.reflGen.IsFiniteGrz where
+  refl _ := .inl rfl
+  trans _ _ _ := by grind [reflGen, IsTrans.trans (r := M.Rel)]
+  antisymm _ _ := by grind [reflGen, Std.Irrefl.irrefl (r := M.Rel), IsTrans.trans (r := M.Rel)]
+  finite := IsFiniteGL.finite (M := M)
+
 lemma forces_irreflGen_boxdotTranslate [Std.Refl M.Rel] {x : M.World} :
     x ⊩[M.irreflGen] Aᵇ ↔ x ⊩[M] A := by
   induction A generalizing x with
@@ -46,64 +56,37 @@ lemma forces_irreflGen_boxdotTranslate [Std.Refl M.Rel] {x : M.World} :
     · intro h;
       exact ⟨h x (Std.Refl.refl x), fun y Rxy ↦ h y Rxy.1⟩;
 
-lemma forces_boxdotTranslate_axiomGrz [M.IsGL] {x : M.World} :
-    x ⊩[M] ⊡(⊡(A 🡒 ⊡A) 🡒 A) 🡒 A := by
-  induction x using WellFounded.induction (IsConverseWellFounded.cwf (rel := M.Rel)) with
-  | _ x ih =>
-    intro hx;
-    obtain ⟨h₁, h₂⟩ := forces_boxdot.mp hx;
-    have h₃ : ∀ z, x ≺ z → z ⊩[M] A := fun z Rxz ↦ ih z Rxz <|
-      forces_boxdot.mpr ⟨h₂ z Rxz, fun w Rzw ↦ h₂ w (IsTrans.trans _ _ _ Rxz Rzw)⟩;
-    apply h₁;
-    apply forces_boxdot.mpr;
-    and_intros;
-    · exact fun hA ↦ forces_boxdot.mpr ⟨hA, h₃⟩;
-    · exact fun y Rxy hy ↦ forces_boxdot.mpr ⟨hy, fun z Ryz ↦ h₃ z (IsTrans.trans _ _ _ Rxy Ryz)⟩;
-
 end Kripke.Model
 
 namespace Logic.Grz
 
 universe u
 
-variable {α : Type u} [DecidableEq α] {A : Formula α}
+variable {α : Type u} {A : Formula α}
 
-omit [DecidableEq α] in
 theorem iff_boxdotTranslate_GL : 𝐆𝐫𝐳 ⊢ A ↔ 𝐆𝐋 ⊢ Aᵇ := by
   constructor;
   · intro h;
     apply GL.iff_valid_finite.mpr;
     intro _ _ M _ x;
-    induction h generalizing x with
-    | axm hA =>
-      rcases hA with ((⟨B, rfl⟩ | ⟨B, rfl⟩) | ⟨B, rfl⟩);
-      · intro h;
-        obtain ⟨-, h₂⟩ := forces_boxdot.mp h;
-        exact forces_boxdot.mpr ⟨h, fun y Rxy ↦
-          forces_boxdot.mpr ⟨h₂ y Rxy, fun z Ryz ↦ h₂ z (IsTrans.trans _ _ _ Rxy Ryz)⟩⟩;
-      · exact fun h ↦ (forces_boxdot.mp h).1;
-      · exact forces_boxdotTranslate_axiomGrz;
-    | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x);
-    | nec _ ih => exact forces_boxdot.mpr ⟨ih x, fun y _ ↦ ih y⟩;
-    | axiomK =>
-      intro h₁ h₂;
-      obtain ⟨h₁, h₁'⟩ := forces_boxdot.mp h₁;
-      obtain ⟨h₂, h₂'⟩ := forces_boxdot.mp h₂;
-      exact forces_boxdot.mpr ⟨h₁ h₂, fun y Rxy ↦ h₁' y Rxy (h₂' y Rxy)⟩;
-    | _ => simp only [Axioms.Verum, Axioms.ImplyK, Axioms.ImplyS, Axioms.AndElim₁, Axioms.AndElim₂,
-        Axioms.AndInst, Axioms.OrInst₁, Axioms.OrInst₂, Axioms.OrElim, Axioms.DNE,
-        Formula.boxdotTranslate_imp, Formula.boxdotTranslate_and, Formula.boxdotTranslate_or,
-        Formula.boxdotTranslate_neg, Formula.boxdotTranslate_top]; grind;
+    have hR : M.reflGen.irreflGen.Rel' = M.Rel' := by
+      ext y z;
+      change (y = z ∨ M.Rel y z) ∧ y ≠ z ↔ M.Rel y z;
+      grind [Std.Irrefl.irrefl (r := M.Rel)];
+    exact (forces_congr hR fun _ _ ↦ Iff.rfl).mp <|
+      forces_irreflGen_boxdotTranslate.mpr (sound M.reflGen h x);
   · intro h;
     apply iff_valid_finite.mpr;
     intro _ _ M _ x;
     exact forces_irreflGen_boxdotTranslate.mp (GL.iff_valid_finite.mp h M.irreflGen x);
 
-omit [DecidableEq α] in
 theorem iff_boxdotTranslate_S : 𝐆𝐫𝐳 ⊢ A ↔ 𝐒 ⊢ Aᵇ :=
   iff_boxdotTranslate_GL.trans S.boxdotTranslate_iff_GL.symm
 
 end Logic.Grz
+
+instance {α : Type*} : Consistent (𝐆𝐫𝐳 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ unprovable_bot (Logic.Grz.iff_boxdotTranslate_GL.mp h)
 
 end FFL.ProvabilityLogic
 

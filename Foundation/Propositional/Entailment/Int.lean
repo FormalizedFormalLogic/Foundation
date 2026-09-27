@@ -25,6 +25,9 @@ attribute [simp] efq
 
 @[grind ⇒] lemma of_O [ModusPonens 𝓢] [Entailment.HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ⊥) : 𝓢 ⊢ φ := efq ⨀ b
 
+lemma unprovable_bot [ModusPonens 𝓢] [HasAxiomEFQ 𝓢] [Consistent 𝓢] : 𝓢 ⊬ ⊥ := fun h ↦
+  have ⟨_, hφ⟩ := Consistent.exists_unprovable ‹_›; hφ (of_O h)
+
 instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : DeductiveExplosion S :=
   ⟨fun b _ ↦ efq ⨀ b⟩
 

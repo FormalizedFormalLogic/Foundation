@@ -213,21 +213,7 @@ lemma subfmls_trans : A ∈ B.subfmls → A.subfmls ⊆ B.subfmls := by
 
 @[grind →]
 lemma atoms_subset_of_mem_subfmls : A ∈ B.subfmls → A.atoms ⊆ B.atoms := by
-  induction B with
-  | imp C D ihC ihD =>
-    intro h;
-    simp only [subfmls, Finset.mem_insert, Finset.mem_union] at h;
-    rcases h with rfl | h | h;
-    · rfl;
-    · exact (ihC h).trans (by simp);
-    · exact (ihD h).trans (by simp);
-  | box C ih =>
-    intro h;
-    simp only [subfmls, Finset.mem_insert] at h;
-    rcases h with rfl | h;
-    · rfl;
-    · exact (ih h).trans (by simp);
-  | _ => intro h; simp_all [subfmls];
+  induction B <;> simp_all [subfmls] <;> grind;
 
 end Formula
 
@@ -286,15 +272,12 @@ lemma atoms_conj_subset (Γ : FormulaFinset α) : Γ.conj.atoms ⊆ Γ.atoms := 
 @[grind]
 def subfmls (Γ : FormulaFinset α) : FormulaFinset α := Γ.biUnion Formula.subfmls
 
-@[grind .] lemma subset_subfmls : Γ ⊆ Γ.subfmls := by
-  intro A hA;
-  simpa [subfmls] using ⟨A, hA, Formula.mem_subfmls_self⟩;
+@[grind .] lemma subset_subfmls : Γ ⊆ Γ.subfmls :=
+  fun A hA ↦ Finset.mem_biUnion.mpr ⟨A, hA, Formula.mem_subfmls_self⟩
 
 @[grind →]
 lemma mem_subfmls_subfmls (hB : B ∈ Γ.subfmls) (hC : C ∈ B.subfmls) : C ∈ Γ.subfmls := by
-  simp only [subfmls, Finset.mem_biUnion] at hB ⊢;
-  obtain ⟨D, hD, hBD⟩ := hB;
-  exact ⟨D, hD, Formula.subfmls_trans hBD hC⟩;
+  grind;
 
 noncomputable def prebox (Γ : FormulaFinset α) : FormulaFinset α :=
   Γ.preimage (□·) (by intro _ _ _ _ h; simpa using h)
@@ -308,11 +291,7 @@ lemma atoms_prebox : Γ.prebox.atoms ⊆ Γ.atoms := by
   simpa [atoms] using fun A hA ha ↦ ⟨□A, hA, ha⟩;
 
 @[grind .]
-lemma box_prebox_subset : Γ.prebox.box ⊆ Γ := by
-  intro A;
-  simp only [Finset.mem_image, mem_prebox];
-  rintro ⟨B, hB, rfl⟩;
-  exact hB;
+lemma box_prebox_subset : Γ.prebox.box ⊆ Γ := by grind;
 
 end FormulaFinset
 

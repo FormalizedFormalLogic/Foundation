@@ -31,9 +31,7 @@ lemma imp_iff_provable_gentzen : 𝐆𝐋 ⊢ A 🡒 B ↔ ⊢ᴳ[𝐆𝐋] {A} 
   · intro h;
     simpa using iff_provable_gentzen.mpr <| Gentzen.impR (Γ := ∅) (Δ := ∅) (by simpa using h);
 
-/-- **Craig interpolation property** of `GL`.
-
-- [SV82] -/
+/-- - [SV82] -/
 theorem CIP (h : 𝐆𝐋 ⊢ A 🡒 B) :
     ∃ C, 𝐆𝐋 ⊢ A 🡒 C ∧ 𝐆𝐋 ⊢ C 🡒 B ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by
   obtain ⟨C, hC⟩ := Gentzen.exists_interpolant (Γ₁ := {A}) (Γ₂ := ∅) (Δ₁ := ∅) (Δ₂ := {B})
