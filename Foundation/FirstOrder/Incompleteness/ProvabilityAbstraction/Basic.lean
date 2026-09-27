@@ -8,8 +8,7 @@ public import Foundation.Meta.ClProver
 # Abstract incompleteness theorems and related results
 -/
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL
 

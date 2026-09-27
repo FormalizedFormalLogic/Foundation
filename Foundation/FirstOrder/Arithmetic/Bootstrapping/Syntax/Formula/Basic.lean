@@ -5,10 +5,11 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -96,27 +97,27 @@ instance qqForall_defined : 𝚺ᴬ₀-Function₁ (qqAll : V → V) via qqAllDe
 instance qqExsists_defined : 𝚺ᴬ₀-Function₁ (qqExs : V → V) via qqExsDef :=
   .mk fun v ↦ by simp_all [qqExsDef, numeral_eq_natCast, qqExs]
 
-instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+instance (ℌ : HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₃ (qqRel : V → V → V → V) :=
   .of_zero qqRel_defined.to_definable
 
-instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+instance (ℌ : HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₃ (qqNRel : V → V → V → V) :=
   .of_zero qqNRel_defined.to_definable
 
-instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+instance (ℌ : HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₂ (qqAnd : V → V → V) :=
   .of_zero qqAnd_defined.to_definable
 
-instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+instance (ℌ : HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₂ (qqOr : V → V → V) :=
   .of_zero qqOr_defined.to_definable
 
-instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+instance (ℌ : HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₁ (qqAll : V → V) :=
   .of_zero qqForall_defined.to_definable
 
-instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+instance (ℌ : HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₁ (qqExs : V → V) :=
   .of_zero qqExsists_defined.to_definable
 

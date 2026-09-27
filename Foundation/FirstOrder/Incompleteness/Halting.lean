@@ -4,8 +4,7 @@ public import Foundation.FirstOrder.Incompleteness.First
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]

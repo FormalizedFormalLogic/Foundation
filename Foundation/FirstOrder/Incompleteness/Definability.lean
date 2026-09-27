@@ -12,8 +12,7 @@ presentations of `𝗣𝗔` and `𝗜𝚺⁺₁`.
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 

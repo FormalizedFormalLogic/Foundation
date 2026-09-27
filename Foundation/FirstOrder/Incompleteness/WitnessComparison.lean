@@ -4,13 +4,14 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 /-!
 # Witness comparisons of provability
 -/
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+
+open Bounding (HierarchySymbol)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -125,7 +126,7 @@ lemma find_minimal_proof_fintype {ι : Type*} [Finite ι] (φ : ι → V) {i : �
   have : ∃ z, (∃ j, Proof T z (φ j)) ∧ ∀ w < z, ∀ x, ¬Proof T w (φ x) := by
     simpa using
       InductionOnBroadHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, Proof T z (φ j))
-        (Bounding.HierarchySymbol.Definable.fintype_exs fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
+        (HierarchySymbol.Definable.fintype_exs fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
   rcases this with ⟨z, ⟨j, hj⟩, H⟩
   exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩
 

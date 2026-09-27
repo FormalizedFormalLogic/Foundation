@@ -6,8 +6,7 @@ public import Foundation.Vorspiel.Computability
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Theory
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -121,7 +120,8 @@ abbrev add (dT : T.Δ₁) (dU : U.Δ₁) : (T ∪ U).Δ₁ where
     grind
   isDelta1 :=
     Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
-    fun V _ _ ↦ Bounding.HierarchySymbol.Semiformula.ProperOn.or (by simp) (by simp)
+      (fun V _ _ ↦
+        Bounding.HierarchySymbol.Semiformula.ProperOn.or (by simp) (by simp))
 
 abbrev ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
   ch := dT.ch
@@ -133,14 +133,14 @@ instance empty : Theory.Δ₁ (∅ : Theory L) where
   mem_iff {ψ} := by simp
   isDelta1 :=
     Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
-    fun V _ _ ↦ by simp
+      (fun V _ _ ↦ by simp)
 
 abbrev singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
   ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)”) _
   mem_iff {ψ} := by simp [Semiformula.quote_eq_encode]
   isDelta1 :=
     Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
-    fun V _ _ ↦ by intro; rfl
+      (fun V _ _ ↦ by intro; rfl)
 
 @[simp] lemma singleton_toTDef_ch_val (φ : Sentence L) :
     letI := Δ₁.singleton φ

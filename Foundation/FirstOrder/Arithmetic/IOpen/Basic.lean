@@ -12,9 +12,7 @@ set_option autoImplicit true
 
 namespace FFL.FirstOrder.Arithmetic
 
-open scoped FFL.FirstOrder.Bounding
-
-open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 

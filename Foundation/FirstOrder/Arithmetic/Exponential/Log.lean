@@ -9,9 +9,7 @@ public import Foundation.FirstOrder.Arithmetic.Exponential.Exp
 
 namespace FFL.FirstOrder.Arithmetic
 
-open scoped FFL.FirstOrder.Bounding
-
-open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V]
 

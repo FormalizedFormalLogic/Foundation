@@ -4,8 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]

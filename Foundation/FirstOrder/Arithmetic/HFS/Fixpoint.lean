@@ -11,9 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 namespace FFL.FirstOrder.Arithmetic
 
-open scoped FFL.FirstOrder.Bounding
-
-open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -106,8 +104,9 @@ private lemma succ_graph {u v s ih} :
       exact h x (lt_of_lt_of_le (lt_succ_iff_le.mpr (c.mem_succ_iff.mp hx).1)
         (by simp)) |>.mpr (c.mem_succ_iff.mp hx)⟩
 
-lemma succ_defined : 𝚺ᴬ₁.DefinedFunction (fun v : Fin (k + 2) → V ↦ c.succ (v
-  ·.succ.succ) (v 1) (v 0)) φ.succDef := .mk fun v ↦ by
+lemma succ_defined : 𝚺ᴬ₁.DefinedFunction
+    (fun v : Fin (k + 2) → V ↦ c.succ (v ·.succ.succ) (v 1) (v 0)) φ.succDef :=
+  .mk fun v ↦ by
   simp [Blueprint.succDef, succ_graph, Bounding.HierarchySymbol.Semiformula.val_sigma,
     c.eval_formula,
     c.defined.proper.iff', -and_imp,  BinderNotation.finSuccItr]
@@ -224,8 +223,8 @@ lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
   rcases this with ⟨F, hF⟩
   have : ∀ x ∈ F, ∃ u, x ∈ c.limSeq v u := by
     intro x hx; exact hF x |>.mp hx |>.2
-  have : ∃ f, IsMapping f ∧ domain f = F ∧ ∀ (x y : V), ⟪x,
-    y⟫ ∈ f → x ∈ c.limSeq v y := sigmaOne_skolem
+  have : ∃ f, IsMapping f ∧ domain f = F ∧ ∀ (x y : V), ⟪x, y⟫ ∈ f →
+      x ∈ c.limSeq v y := sigmaOne_skolem
     (by apply Bounding.HierarchySymbol.Definable.comp₂
           ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)),
             by intro v; simp [c.eval_limSeqDef]⟩
@@ -278,8 +277,8 @@ end
 theorem induction [c.StrongFinite] {Γ : Polarity} {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
-  apply InductionOnBroadHierarchy.order_induction_sigma (Γ := Γ) (s := 1) (P := fun x
-    ↦ c.Fixpoint v x → P x)
+  apply InductionOnBroadHierarchy.order_induction_sigma (Γ := Γ) (s := 1)
+    (P := fun x ↦ c.Fixpoint v x → P x)
   · apply Bounding.HierarchySymbol.Definable.imp
       (Bounding.HierarchySymbol.DefinablePred.comp
         (by

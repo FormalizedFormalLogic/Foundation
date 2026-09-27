@@ -22,7 +22,7 @@ set_option autoImplicit true
 
 namespace FFL.FirstOrder.Arithmetic
 
-open Bounding.HierarchySymbol
+open Bounding (HierarchySymbol)
 open scoped FFL.FirstOrder.Arithmetic
 
 variable {Γ : Polarity} {i k m n : ℕ}
@@ -517,7 +517,7 @@ lemma order_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
   · exact Γ
   · exact s
   · suffices Γᴬ-[s].DefinablePred fun x ↦ ∀ y < x, P y by exact this
-    exact Bounding.HierarchySymbol.Definable.arithmetic_ball_blt
+    exact HierarchySymbol.Definable.arithmetic_ball_blt
       (by simp) (hP.retraction ![0])
   case zero => simp
   case succ x IH =>
@@ -539,10 +539,10 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred 
     · exact Γ
     · exact s
     · suffices Γᴬ-[s].DefinablePred fun x ↦ x ≤ a → P (a - x) by exact this
-      apply Bounding.HierarchySymbol.Definable.imp
-      · apply Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₂
+      apply HierarchySymbol.Definable.imp
+      · apply HierarchySymbol.Definable.arithmetic_bounded_comp₂
           (by definability) (by definability)
-      · apply Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₁ (by definability)
+      · apply HierarchySymbol.Definable.arithmetic_bounded_comp₁ (by definability)
     case zero =>
       intro _; simpa using ha
     case succ x IH =>
@@ -594,9 +594,9 @@ lemma least_number {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
     · exact Γ.alt
     · exact s
     · suffices Γ.altᴬ-[s].DefinablePred fun z ↦ ∀ w < z, ¬P w by exact this
-      apply Bounding.HierarchySymbol.Definable.arithmetic_ball_blt (by definability)
-      apply Bounding.HierarchySymbol.Definable.not
-      apply Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₁
+      apply HierarchySymbol.Definable.arithmetic_ball_blt (by definability)
+      apply HierarchySymbol.Definable.not
+      apply HierarchySymbol.Definable.arithmetic_bounded_comp₁
         (hP := by simpa using hP) (by definability)
     case zero => simp
     case succ x IH =>

@@ -4,8 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 /-! # Internalized languages of first-order logic -/
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -11,9 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 
 namespace FFL.FirstOrder.Arithmetic
 
-open scoped FFL.FirstOrder.Bounding
-
-open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 

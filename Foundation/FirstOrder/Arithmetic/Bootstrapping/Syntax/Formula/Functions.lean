@@ -5,8 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functio
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 set_option autoImplicit true
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 

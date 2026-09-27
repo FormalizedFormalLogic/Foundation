@@ -9,8 +9,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 # Gödel's first incompleteness theorem for arithmetic theories stronger than $\mathsf{R_0}$
 -/
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
 

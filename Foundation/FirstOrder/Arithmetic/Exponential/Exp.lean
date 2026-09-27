@@ -16,9 +16,7 @@ it's inductive property is provable in $\mathsf{I}\Sigma_0$.
 
 namespace FFL.FirstOrder.Arithmetic
 
-open scoped FFL.FirstOrder.Bounding
-
-open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V]
 

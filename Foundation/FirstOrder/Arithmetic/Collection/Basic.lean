@@ -18,9 +18,7 @@ collection to a model of the scheme, and the collection available in a model of 
 
 namespace FFL.FirstOrder.Arithmetic
 
-open scoped FFL.FirstOrder.Bounding
-
-open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
 
 open _root_.FFL.Entailment
 

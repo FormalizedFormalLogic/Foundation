@@ -5,8 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic
-open scoped FFL.FirstOrder.Bounding
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 /-!
 # Rosser's provability predicate
 -/
