@@ -188,8 +188,7 @@ instance IsHierarchy.definable (Γ : Polarity) (n : ℕ) :
 
 variable {Γ : Polarity} {n : ℕ} {p q : V}
 
-lemma IsHierarchy.zero_iff : IsHierarchy Γ 0 p ↔ IsBounded p := by
-  sorry
+lemma IsHierarchy.zero_iff : IsHierarchy Γ 0 p ↔ IsBounded p := by rfl
 
 lemma IsHierarchy.succ_iff :
     IsHierarchy Γ (n + 1) p ↔
@@ -200,8 +199,8 @@ lemma IsHierarchy.succ_iff :
       ∧ p = qqBall u q) ∨
     (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsHierarchy Γ (n + 1) q
       ∧ p = qqBex u q) ∨
-    (∃ q, IsHierarchy Γ (n + 1) q ∧ p = qqQuant Γ q) := by
-  sorry
+    (∃ q, IsHierarchy Γ (n + 1) q ∧ p = qqQuant Γ q) :=
+  (IsHierarchyF.construction Γ (IsHierarchyF.pred Γ.alt n).2).case
 
 alias ⟨IsHierarchy.succ_case, IsHierarchy.succ_mk⟩ := IsHierarchy.succ_iff
 
@@ -216,8 +215,16 @@ lemma IsHierarchy.succ_induction (Γ' : Polarity) {P : V → Prop} (hP : Γ'ᴬ-
     (hbex : ∀ t q, IsUTerm ℒₒᵣ t → IsHierarchy Γ (n + 1) q → P q →
       P (qqBex (termBShift ℒₒᵣ t) q))
     (hquant : ∀ q, IsHierarchy Γ (n + 1) q → P q → P (qqQuant Γ q)) :
-    ∀ p, IsHierarchy Γ (n + 1) p → P p := by
-  sorry
+    ∀ p, IsHierarchy Γ (n + 1) p → P p :=
+  (IsHierarchyF.construction Γ (IsHierarchyF.pred Γ.alt n).2).induction (v := ![]) hP (by
+    rintro C hC x (hx | ⟨p, q, hp, hq, rfl⟩ | ⟨p, q, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩
+      | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨q, hq, rfl⟩);
+    · exact hbase x hx;
+    · exact hand p q (hC p hp).1 (hC q hq).1 (hC p hp).2 (hC q hq).2;
+    · exact hor p q (hC p hp).1 (hC q hq).1 (hC p hp).2 (hC q hq).2;
+    · exact hball t q ht (hC q hq).1 (hC q hq).2;
+    · exact hbex t q ht (hC q hq).1 (hC q hq).2;
+    · exact hquant q (hC q hq).1 (hC q hq).2)
 
 /-! ### Closure properties -/
 
