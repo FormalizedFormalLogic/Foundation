@@ -13,7 +13,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.BoundedSatisfaction
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.BoundedSatisfactionTable
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.SigmaSatisfaction
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Satisfaction
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Tarski
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.TermVal
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax

@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.SigmaSatisfaction
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Satisfaction
 
 /-!
 # The Tarski conditions as an explicit finite theory
