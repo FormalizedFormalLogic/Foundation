@@ -1376,4 +1376,29 @@ lemma substs_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) 
 
 end Arithmetic
 
+/-! ### Bounded universal quantifier -/
+
+section qqBall
+
+/-- `qqBall u q = ^∀ ((^#0 ^≮ u) ^⋎ q)`, the code of `∀¹[“#0 < u”] q`. -/
+noncomputable def qqBall (u q : V) : V := qqAll (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q)
+
+@[simp] lemma lt_q_qqBall (u q : V) : q < qqBall u q :=
+  lt_trans (lt_or_right _ _) (lt_forall _)
+
+@[simp] lemma lt_u_qqBall (u q : V) : u < qqBall u q :=
+  lt_trans (Arithmetic.lt_qqNLT_right _ _) (lt_trans (lt_or_left _ _) (lt_forall _))
+
+def _root_.FFL.FirstOrder.Arithmetic.qqBallDef : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
+  “p u q. ∃ bv, !qqBvarDef bv 0 ∧ ∃ nlt, !qqNLTDef nlt bv u ∧ ∃ g, !qqOrDef g nlt q ∧ !qqAllDef p g”
+
+instance qqBall_defined :
+    𝚺ᴬ₁-Function₂ (qqBall : V → V → V) via Arithmetic.qqBallDef := .mk fun v ↦ by
+  simp [Arithmetic.qqBallDef, qqBall, (Arithmetic.qqNLT_defined (V := V)).df]
+
+instance qqBall_definable (Γ m) : Γᴬ-[m + 1]-Function₂ (qqBall : V → V → V) :=
+  .of_sigmaOne qqBall_defined.to_definable
+
+end qqBall
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping
