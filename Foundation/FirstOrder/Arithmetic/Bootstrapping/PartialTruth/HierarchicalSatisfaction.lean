@@ -162,16 +162,6 @@ end
 
 /-! ### Maximal existential blocks -/
 
-lemma qqQuants_cancel {Γ : Polarity} (k : V) :
-    ∀ p p' j : V, qqQuants Γ p k = qqQuants Γ p' (k + j) → p = qqQuants Γ p' j := by
-  induction k using ISigma1.pi1_succ_induction
-  · definability;
-  case zero => intro p p' j h; simpa using h;
-  case succ k ih =>
-    intro p p' j h;
-    rw [qqQuants_succ, add_right_comm k 1 j, qqQuants_succ, qqQuant_inj] at h;
-    exact ih p p' j h.2;
-
 section
 variable {n : ℕ} {z M K e : V}
 
@@ -505,19 +495,7 @@ lemma qVecIter_qVec (w k : V) :
   case zero => simp;
   case succ k ih => rw [qVecIter_succ, ih, qVecIter_succ];
 
-section
-variable {Γ : Polarity}
-
-@[simp] lemma substs_qqQuant {p : V} (hp : IsUFormula ℒₒᵣ p) (w : V) :
-    Bootstrapping.subst ℒₒᵣ w (qqQuant Γ p)
-      = qqQuant Γ (Bootstrapping.subst ℒₒᵣ (qVec ℒₒᵣ w) p) := by
-  cases Γ <;> simp [hp];
-
-@[simp] lemma isSemiformula_qqQuant {n p : V} :
-    IsSemiformula ℒₒᵣ n (qqQuant Γ p) ↔ IsSemiformula ℒₒᵣ (n + 1) p := by
-  cases Γ <;> simp;
-
-lemma substs_qqQuants {p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
+lemma substs_qqQuants {Γ : Polarity} {p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
     ∀ w : V, Bootstrapping.subst ℒₒᵣ w (qqQuants Γ p k)
       = qqQuants Γ (Bootstrapping.subst ℒₒᵣ (qVecIter w k) p) k := by
   induction k using ISigma1.pi1_succ_induction
@@ -527,17 +505,6 @@ lemma substs_qqQuants {p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
     intro w;
     rw [qqQuants_succ, substs_qqQuant (isUFormula_qqQuants.mpr hp), ih (qVec ℒₒᵣ w),
       qVecIter_qVec, qVecIter_succ, qqQuants_succ];
-
-lemma isSemiformula_qqQuants {p : V} (k : V) :
-    ∀ n : V, (IsSemiformula ℒₒᵣ n (qqQuants Γ p k) ↔ IsSemiformula ℒₒᵣ (n + k) p) := by
-  induction k using ISigma1.pi1_succ_induction
-  · definability;
-  case zero => intro n; simp;
-  case succ k ih =>
-    intro n;
-    rw [qqQuants_succ, isSemiformula_qqQuant, ih, add_assoc, add_comm 1 k];
-
-end
 
 section
 variable {n : ℕ} {m l w p e : V}
