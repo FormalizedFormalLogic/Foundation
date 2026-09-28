@@ -118,12 +118,36 @@ noncomputable def blueprint (Γ : Polarity) (θ : 𝚫ᴬ₁.Semisentence 1) :
 def construction (Γ : Polarity) {P : V → Prop} {θ : 𝚫ᴬ₁.Semisentence 1}
     (hP : 𝚫ᴬ₁-Predicate P via θ) : Fixpoint.Construction V (blueprint Γ θ) where
   Φ := fun _ ↦ Phi Γ P
-  defined := sorry
-  monotone := sorry
+  defined := .mk <| by
+    have := hP;
+    constructor;
+    · intro v;
+      simp [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
+        (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df,
+        (qqBex_defined (V := V)).df, (qqQuant_defined (V := V) Γ).df];
+    · intro v;
+      symm;
+      simpa [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
+        (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df,
+        (qqBex_defined (V := V)).df, (qqQuant_defined (V := V) Γ).df]
+        using phi_iff (V := V) Γ P _ _;
+  monotone := by
+    unfold Phi;
+    rintro C C' hC _ x (h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩
+      | ⟨u, q, ht, hq, rfl⟩ | ⟨q, hq, rfl⟩) <;> grind;
 
 instance (Γ : Polarity) {P : V → Prop} {θ : 𝚫ᴬ₁.Semisentence 1}
     (hP : 𝚫ᴬ₁-Predicate P via θ) : (construction Γ hP).StrongFinite V where
-  strong_finite := sorry
+  strong_finite := by
+    unfold construction Phi;
+    rintro C _ x (h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩
+      | ⟨u, q, ht, hq, rfl⟩ | ⟨q, hq, rfl⟩);
+    · disj 1; exact h;
+    · disj 2; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
+    · disj 3; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
+    · disj 4; exact ⟨u, q, ht, ⟨hq, by simp⟩, rfl⟩;
+    · disj 5; exact ⟨u, q, ht, ⟨hq, by simp⟩, rfl⟩;
+    · disj 6; exact ⟨q, ⟨hq, by simp⟩, rfl⟩;
 
 end IsHierarchyF
 
