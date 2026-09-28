@@ -123,31 +123,24 @@ def construction (Γ : Polarity) {P : V → Prop} {θ : 𝚫ᴬ₁.Semisentence 
     constructor;
     · intro v;
       simp [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
-        (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df,
-        (qqBex_defined (V := V)).df, (qqQuant_defined (V := V) Γ).df];
+        (termBShift.defined (L := ℒₒᵣ)).df, qqBall_defined.df, qqBex_defined.df,
+        (qqQuant_defined Γ).df];
     · intro v;
-      symm;
       simpa [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
-        (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df,
-        (qqBex_defined (V := V)).df, (qqQuant_defined (V := V) Γ).df]
-        using phi_iff (V := V) Γ P _ _;
+        (termBShift.defined (L := ℒₒᵣ)).df, qqBall_defined.df, qqBex_defined.df,
+        (qqQuant_defined Γ).df] using (phi_iff Γ P _ _).symm;
   monotone := by
     unfold Phi;
-    rintro C C' hC _ x (h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩
-      | ⟨u, q, ht, hq, rfl⟩ | ⟨q, hq, rfl⟩) <;> grind;
+    intro C C' hC _ x;
+    grind;
 
 instance (Γ : Polarity) {P : V → Prop} {θ : 𝚫ᴬ₁.Semisentence 1}
     (hP : 𝚫ᴬ₁-Predicate P via θ) : (construction Γ hP).StrongFinite V where
   strong_finite := by
     unfold construction Phi;
     rintro C _ x (h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩
-      | ⟨u, q, ht, hq, rfl⟩ | ⟨q, hq, rfl⟩);
-    · disj 1; exact h;
-    · disj 2; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
-    · disj 3; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
-    · disj 4; exact ⟨u, q, ht, ⟨hq, by simp⟩, rfl⟩;
-    · disj 5; exact ⟨u, q, ht, ⟨hq, by simp⟩, rfl⟩;
-    · disj 6; exact ⟨q, ⟨hq, by simp⟩, rfl⟩;
+      | ⟨u, q, ht, hq, rfl⟩ | ⟨q, hq, rfl⟩) <;>
+      grind [lt_K!_left, lt_K!_right, lt_or_left, lt_or_right, lt_q_qqBall, lt_q_qqBex, lt_qqQuant];
 
 end IsHierarchyF
 
@@ -332,12 +325,10 @@ lemma IsHierarchy.of_all (h : IsHierarchy Γ (n + 1) (^∀ p)) :
   · left; exact h;
   · simp [qqAll, qqAnd] at h;
   · simp [qqAll, qqOr] at h;
-  · right;
-    rw [qqBall, qqAll_inj] at h;
-    subst h;
-    constructor;
-    · exact IsHierarchy.or_iff.mpr ⟨by simp [Arithmetic.qqNLT], hq⟩;
-    · right; exact ⟨t, q, ht, rfl⟩;
+  · obtain rfl := (qqAll_inj _ _).mp h;
+    right;
+    exact ⟨IsHierarchy.or_iff.mpr ⟨by simp [Arithmetic.qqNLT], hq⟩,
+      by right; exact ⟨t, q, ht, rfl⟩⟩;
   · simp [qqAll, qqBex, qqExs] at h;
   · cases Γ;
     · simp [qqAll, qqExs] at h;
@@ -355,12 +346,10 @@ lemma IsHierarchy.of_ex (h : IsHierarchy Γ (n + 1) (^∃ p)) :
   · simp [qqExs, qqAnd] at h;
   · simp [qqExs, qqOr] at h;
   · simp [qqExs, qqBall, qqAll] at h;
-  · right;
-    rw [qqBex, qqExs_inj] at h;
-    subst h;
-    constructor;
-    · exact IsHierarchy.and_iff.mpr ⟨by simp [Arithmetic.qqLT], hq⟩;
-    · right; exact ⟨t, q, ht, rfl⟩;
+  · obtain rfl := (qqExs_inj _ _).mp h;
+    right;
+    exact ⟨IsHierarchy.and_iff.mpr ⟨by simp [Arithmetic.qqLT], hq⟩,
+      by right; exact ⟨t, q, ht, rfl⟩⟩;
   · cases Γ;
     · right;
       obtain rfl : p = q := (qqExs_inj _ _).mp h;
@@ -368,12 +357,6 @@ lemma IsHierarchy.of_ex (h : IsHierarchy Γ (n + 1) (^∃ p)) :
     · simp [qqAll, qqExs] at h;
 
 /-! ### Negation -/
-
-lemma neg_qqQuant (Γ : Polarity) (hp : IsUFormula ℒₒᵣ p) :
-    neg ℒₒᵣ (qqQuant Γ p) = qqQuant Γ.alt (neg ℒₒᵣ p) := by
-  cases Γ;
-  · exact neg_ex hp;
-  · exact neg_all hp;
 
 lemma IsHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsHierarchy Γ n p) :
     IsHierarchy Γ.alt n (neg ℒₒᵣ p) := by
@@ -396,8 +379,9 @@ lemma IsHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsHierarchy Γ n p) :
       simpa [neg_qqBex ht.termBShift hq] using IsHierarchy.ball ht (ih hq);
     · intro q _ ih h;
       have hq : IsUFormula ℒₒᵣ q := by cases Γ <;> simpa using h;
-      rw [neg_qqQuant Γ hq];
-      exact IsHierarchy.quant (ih hq);
+      cases Γ;
+      · simpa [neg_ex hq] using IsHierarchy.quant (ih hq);
+      · simpa [neg_all hq] using IsHierarchy.quant (ih hq);
 
 end isHierarchy
 
@@ -411,45 +395,9 @@ section quote
 
 open Bootstrapping
 
-lemma exists_ball_of_quote_eq {n : ℕ} {φ : ArithmeticSemiproposition (n + 1)} {t q : ℕ}
-    (ht : IsUTerm ℒₒᵣ t) (h : (⌜φ⌝ : ℕ) = (^#0 ^≮ termBShift ℒₒᵣ t) ^⋎ q) :
-    ∃ (s : SyntacticSemiterm ℒₒᵣ n) (ψ : ArithmeticSemiproposition (n + 1)),
-      φ = “#0 < !!(Rew.bShift s)” 🡒 ψ := by
-  have hsf : IsSemiformula ℒₒᵣ (n + 1) ((^#0 ^≮ termBShift ℒₒᵣ t) ^⋎ q) := by
-    simpa [h] using Semiformula.quote_isSemiformula (V := ℕ) φ;
-  obtain ⟨h₁, hq⟩ := IsSemiformula.or.mp hsf;
-  obtain ⟨ψ, rfl⟩ := IsSemiformula.sound hq;
-  have ht' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) := by
-    simpa using (IsSemiformula.nrel.mp h₁).2.nth (i := 1) (by simp);
-  obtain ⟨s, rfl⟩ := IsSemiterm.sound <| IsSemiterm.def.mpr
-    ⟨ht, (termBV_termBShift_le ht _).mp (IsSemiterm.def.mp ht').2⟩;
-  have e : (∀¹ φ) = ∀¹[“#0 < !!(Rew.bShift s)”] ψ := by
-    apply Semiformula.quote_inj_iff (V := ℕ) |>.mp;
-    rw [Semiformula.quote_all, h, quote_ball];
-    rfl;
-  exact ⟨s, ψ, (Semiformula.all_inj _ _).mp e⟩;
-
-lemma exists_bex_of_quote_eq {n : ℕ} {φ : ArithmeticSemiproposition (n + 1)} {t q : ℕ}
-    (ht : IsUTerm ℒₒᵣ t) (h : (⌜φ⌝ : ℕ) = (^#0 ^< termBShift ℒₒᵣ t) ^⋏ q) :
-    ∃ (s : SyntacticSemiterm ℒₒᵣ n) (ψ : ArithmeticSemiproposition (n + 1)),
-      φ = “#0 < !!(Rew.bShift s)” ⋏ ψ := by
-  have hsf : IsSemiformula ℒₒᵣ (n + 1) ((^#0 ^< termBShift ℒₒᵣ t) ^⋏ q) := by
-    simpa [h] using Semiformula.quote_isSemiformula (V := ℕ) φ;
-  obtain ⟨h₁, hq⟩ := IsSemiformula.and.mp hsf;
-  obtain ⟨ψ, rfl⟩ := IsSemiformula.sound hq;
-  have ht' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) := by
-    simpa using (IsSemiformula.rel.mp h₁).2.nth (i := 1) (by simp);
-  obtain ⟨s, rfl⟩ := IsSemiterm.sound <| IsSemiterm.def.mpr
-    ⟨ht, (termBV_termBShift_le ht _).mp (IsSemiterm.def.mp ht').2⟩;
-  have e : (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift s)”] ψ := by
-    apply Semiformula.quote_inj_iff (V := ℕ) |>.mp;
-    rw [Semiformula.quote_ex, h, quote_bex];
-    rfl;
-  exact ⟨s, ψ, (Semiformula.exs_inj _ _).mp e⟩;
-
 variable {Γ : Polarity} {s n : ℕ}
 
-lemma isHierarchy_of_hierarchy {ψ : ArithmeticSemiproposition n}
+private lemma isHierarchy_of_hierarchy {ψ : ArithmeticSemiproposition n}
     (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s ψ) : IsHierarchy Γ s (⌜ψ⌝ : ℕ) := by
   induction h with
   | bounded _ _ _ h => exact IsHierarchy.of_bounded ((isBounded_quote_iff_s _).mpr h);
@@ -476,7 +424,7 @@ lemma isHierarchy_of_hierarchy {ψ : ArithmeticSemiproposition n}
   | dummy_pi _ ih =>
     simpa [Semiformula.quote_ex] using IsHierarchy.of_alt (Γ := 𝚷) (IsSigma.ex ih);
 
-lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
+private lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
     IsHierarchy Γ s (⌜ψ⌝ : ℕ) → ℬ[<, ℒₒᵣ].Hierarchy Γ s ψ := by
   induction s generalizing Γ n ψ with
   | zero =>
@@ -490,12 +438,12 @@ lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
     | hnrel => simp;
     | hand φ ψ ihφ ihψ =>
       intro h;
-      rw [Semiformula.quote_and, IsHierarchy.and_iff] at h;
-      exact (ihφ h.1).and (ihψ h.2);
+      rw [Semiformula.quote_and] at h;
+      exact (ihφ (IsHierarchy.and_iff.mp h).1).and (ihψ (IsHierarchy.and_iff.mp h).2);
     | hor φ ψ ihφ ihψ =>
       intro h;
-      rw [Semiformula.quote_or, IsHierarchy.or_iff] at h;
-      exact (ihφ h.1).or (ihψ h.2);
+      rw [Semiformula.quote_or] at h;
+      exact (ihφ (IsHierarchy.or_iff.mp h).1).or (ihψ (IsHierarchy.or_iff.mp h).2);
     | hall φ ih =>
       intro h;
       rw [Semiformula.quote_all] at h;
@@ -580,17 +528,13 @@ instance qqExss_definable : 𝚺ᴬ₁-Function₂ (qqExss : V → V → V) :=
 instance qqExss_definable' {m : ℕ} (Γ) : Γᴬ-[m + 1]-Function₂ (qqExss : V → V → V) :=
   qqExss_definable.of_sigmaOne
 
-lemma le_qqExs (p : V) : p ≤ ^∃ p := (lt_exists p).le
-
-lemma succ_le_qqExs (p : V) : p + 1 ≤ ^∃ p := add_le_add_left (le_pair_right _ _) 1
-
 @[simp] lemma le_qqExss (p k : V) : p ≤ qqExss p k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability;
   case zero => simp;
   case succ k ih =>
     rw [qqExss_succ];
-    exact ih.trans (le_qqExs _);
+    exact ih.trans (lt_exists _).le;
 
 @[simp] lemma index_le_qqExss (p k : V) : k ≤ qqExss p k := by
   induction k using ISigma1.sigma1_succ_induction
@@ -598,7 +542,7 @@ lemma succ_le_qqExs (p : V) : p + 1 ≤ ^∃ p := add_le_add_left (le_pair_right
   case zero => simp;
   case succ k ih =>
     rw [qqExss_succ];
-    exact (add_le_add_left ih 1).trans (succ_le_qqExs _);
+    exact (add_le_add_left ih 1).trans (add_le_add_left (le_pair_right _ _) 1);
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] in
 @[simp] lemma isUFormula_qqExss {p k : V} : IsUFormula L (qqExss p k) ↔ IsUFormula L p := by

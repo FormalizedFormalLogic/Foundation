@@ -106,15 +106,7 @@ private lemma phi_iff (C p : V) :
     unfold Phi;
     rintro (rfl | rfl | ⟨k, _, r, _, v, _, rfl⟩ | ⟨k, _, r, _, v, _, rfl⟩
       | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, p₂, _, hp, hq, rfl⟩
-      | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩ | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩);
-    · disj 1; rfl;
-    · disj 2; rfl;
-    · disj 3; exact ⟨k, r, v, rfl⟩;
-    · disj 4; exact ⟨k, r, v, rfl⟩;
-    · disj 5; exact ⟨p₁, p₂, hp, hq, rfl⟩;
-    · disj 6; exact ⟨p₁, p₂, hp, hq, rfl⟩;
-    · disj 7; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
-    · disj 8; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
+      | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩ | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩) <;> grind;
 
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “p C.
@@ -153,30 +145,15 @@ def construction : Fixpoint.Construction V blueprint where
         using (phi_iff _ _).symm;
   monotone := by
     unfold Phi;
-    rintro C C' hC _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
-      | ⟨u, q, ht, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩);
-    · disj 1; exact h;
-    · disj 2; exact h;
-    · disj 3; exact h;
-    · disj 4; exact h;
-    · disj 5; exact ⟨p₁, p₂, hC hp, hC hq, rfl⟩;
-    · disj 6; exact ⟨p₁, p₂, hC hp, hC hq, rfl⟩;
-    · disj 7; exact ⟨u, q, ht, hC hq, rfl⟩;
-    · disj 8; exact ⟨u, q, ht, hC hq, rfl⟩;
+    intro C C' hC _ x;
+    grind;
 
 instance : construction.StrongFinite V where
   strong_finite := by
     unfold construction Phi;
     rintro C _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
-      | ⟨u, q, ht, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩);
-    · disj 1; exact h;
-    · disj 2; exact h;
-    · disj 3; exact h;
-    · disj 4; exact h;
-    · disj 5; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
-    · disj 6; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
-    · disj 7; exact ⟨u, q, ht, ⟨hq, lt_q_qqBall _ _⟩, rfl⟩;
-    · disj 8; exact ⟨u, q, ht, ⟨hq, lt_q_qqBex _ _⟩, rfl⟩;
+      | ⟨u, q, ht, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩) <;>
+      grind [lt_K!_left, lt_K!_right, lt_or_left, lt_or_right, lt_q_qqBall, lt_q_qqBex];
 
 end IsBoundedF
 
@@ -331,7 +308,43 @@ lemma quote_bex (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposit
     Matrix.vecHead, Matrix.vecTail, Matrix.cons_val_zero, Matrix.cons_val_one];
   rfl;
 
-lemma isBounded_of_bounded {ψ : ArithmeticSemiproposition n}
+lemma exists_ball_of_quote_eq {φ : ArithmeticSemiproposition (n + 1)} {t q : ℕ}
+    (ht : IsUTerm ℒₒᵣ t) (h : (⌜φ⌝ : ℕ) = (^#0 ^≮ termBShift ℒₒᵣ t) ^⋎ q) :
+    ∃ (s : SyntacticSemiterm ℒₒᵣ n) (ψ : ArithmeticSemiproposition (n + 1)),
+      φ = “#0 < !!(Rew.bShift s)” 🡒 ψ := by
+  have hsf : IsSemiformula ℒₒᵣ (n + 1) ((^#0 ^≮ termBShift ℒₒᵣ t) ^⋎ q) := by
+    simpa [h] using Semiformula.quote_isSemiformula (V := ℕ) φ;
+  obtain ⟨h₁, hq⟩ := IsSemiformula.or.mp hsf;
+  obtain ⟨ψ, rfl⟩ := IsSemiformula.sound hq;
+  have ht' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) := by
+    simpa using (IsSemiformula.nrel.mp h₁).2.nth (i := 1) (by simp);
+  obtain ⟨s, rfl⟩ := IsSemiterm.sound <| IsSemiterm.def.mpr
+    ⟨ht, (termBV_termBShift_le ht _).mp (IsSemiterm.def.mp ht').2⟩;
+  have e : (∀¹ φ) = ∀¹[“#0 < !!(Rew.bShift s)”] ψ := by
+    apply Semiformula.quote_inj_iff (V := ℕ) |>.mp;
+    rw [Semiformula.quote_all, h, quote_ball];
+    rfl;
+  exact ⟨s, ψ, (Semiformula.all_inj _ _).mp e⟩;
+
+lemma exists_bex_of_quote_eq {φ : ArithmeticSemiproposition (n + 1)} {t q : ℕ}
+    (ht : IsUTerm ℒₒᵣ t) (h : (⌜φ⌝ : ℕ) = (^#0 ^< termBShift ℒₒᵣ t) ^⋏ q) :
+    ∃ (s : SyntacticSemiterm ℒₒᵣ n) (ψ : ArithmeticSemiproposition (n + 1)),
+      φ = “#0 < !!(Rew.bShift s)” ⋏ ψ := by
+  have hsf : IsSemiformula ℒₒᵣ (n + 1) ((^#0 ^< termBShift ℒₒᵣ t) ^⋏ q) := by
+    simpa [h] using Semiformula.quote_isSemiformula (V := ℕ) φ;
+  obtain ⟨h₁, hq⟩ := IsSemiformula.and.mp hsf;
+  obtain ⟨ψ, rfl⟩ := IsSemiformula.sound hq;
+  have ht' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) := by
+    simpa using (IsSemiformula.rel.mp h₁).2.nth (i := 1) (by simp);
+  obtain ⟨s, rfl⟩ := IsSemiterm.sound <| IsSemiterm.def.mpr
+    ⟨ht, (termBV_termBShift_le ht _).mp (IsSemiterm.def.mp ht').2⟩;
+  have e : (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift s)”] ψ := by
+    apply Semiformula.quote_inj_iff (V := ℕ) |>.mp;
+    rw [Semiformula.quote_ex, h, quote_bex];
+    rfl;
+  exact ⟨s, ψ, (Semiformula.exs_inj _ _).mp e⟩;
+
+private lemma isBounded_of_bounded {ψ : ArithmeticSemiproposition n}
     (h : ℬ[<, ℒₒᵣ].Closure ψ) : IsBounded (⌜ψ⌝ : ℕ) := by
   revert h;
   apply Bounding.Closure.arithmetic_induction (P := fun _ φ ↦ IsBounded (⌜φ⌝ : ℕ)) (by simp)
@@ -345,7 +358,7 @@ lemma isBounded_of_bounded {ψ : ArithmeticSemiproposition n}
     rw [quote_bex];
     exact IsBounded.bex (by simp [Semiterm.quote_def]) ih;
 
-lemma bounded_of_isBounded (ψ : ArithmeticSemiproposition n) :
+private lemma bounded_of_isBounded (ψ : ArithmeticSemiproposition n) :
     IsBounded (⌜ψ⌝ : ℕ) → ℬ[<, ℒₒᵣ].Closure ψ := by
   induction ψ using Semiformula.rec' with
   | hverum => simp;
@@ -354,60 +367,33 @@ lemma bounded_of_isBounded (ψ : ArithmeticSemiproposition n) :
   | hnrel => simp;
   | hand φ ψ ihφ ihψ => simp +contextual [Semiformula.quote_and, ihφ, ihψ];
   | hor φ ψ ihφ ihψ => simp +contextual [Semiformula.quote_or, ihφ, ihψ];
-  | @hall m φ ih =>
+  | hall φ ih =>
     intro h;
     rw [Semiformula.quote_all] at h;
     obtain ⟨_, q, ⟨t, ht, rfl⟩, hq, hφ⟩ := IsBounded.of_all h;
-    have hsf : IsSemiformula ℒₒᵣ (m + 1) ((^#0 ^≮ termBShift ℒₒᵣ t) ^⋎ q) := by
-      simpa [hφ] using Semiformula.quote_isSemiformula (V := ℕ) φ;
-    obtain ⟨h₁, hq'⟩ := IsSemiformula.or.mp hsf;
-    obtain ⟨ψ, rfl⟩ := IsSemiformula.sound hq';
-    have ht' : IsSemiterm ℒₒᵣ (m + 1) (termBShift ℒₒᵣ t) := by
-      simpa using (IsSemiformula.nrel.mp h₁).2.nth (i := 1) (by simp);
-    obtain ⟨s, rfl⟩ := IsSemiterm.sound <| IsSemiterm.def.mpr
-      ⟨ht, (termBV_termBShift_le ht _).mp (IsSemiterm.def.mp ht').2⟩;
-    have e : (∀¹ φ) = ∀¹[“#0 < !!(Rew.bShift s)”] ψ := by
-      apply Semiformula.quote_inj_iff (V := ℕ) |>.mp;
-      rw [Semiformula.quote_all, hφ, quote_ball];
-      rfl;
-    obtain rfl : φ = “#0 < !!(Rew.bShift s)” 🡒 ψ := (Semiformula.all_inj _ _).mp e;
+    obtain ⟨s, ψ, rfl⟩ := exists_ball_of_quote_eq ht hφ;
     have : ℬ[<, ℒₒᵣ].Closure (“#0 < !!(Rew.bShift s)” 🡒 ψ) :=
       ih (by simp [hφ, hq, Arithmetic.qqNLT]);
     exact .ball rfl (Rew.positive_iff.mpr ⟨s, rfl⟩) (Bounding.Closure.or_iff.mp this).2;
-  | @hexs m φ ih =>
+  | hexs φ ih =>
     intro h;
     rw [Semiformula.quote_ex] at h;
     obtain ⟨_, q, ⟨t, ht, rfl⟩, hq, hφ⟩ := IsBounded.of_ex h;
-    have hsf : IsSemiformula ℒₒᵣ (m + 1) ((^#0 ^< termBShift ℒₒᵣ t) ^⋏ q) := by
-      simpa [hφ] using Semiformula.quote_isSemiformula (V := ℕ) φ;
-    obtain ⟨h₁, hq'⟩ := IsSemiformula.and.mp hsf;
-    obtain ⟨ψ, rfl⟩ := IsSemiformula.sound hq';
-    have ht' : IsSemiterm ℒₒᵣ (m + 1) (termBShift ℒₒᵣ t) := by
-      simpa using (IsSemiformula.rel.mp h₁).2.nth (i := 1) (by simp);
-    obtain ⟨s, rfl⟩ := IsSemiterm.sound <| IsSemiterm.def.mpr
-      ⟨ht, (termBV_termBShift_le ht _).mp (IsSemiterm.def.mp ht').2⟩;
-    have e : (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift s)”] ψ := by
-      apply Semiformula.quote_inj_iff (V := ℕ) |>.mp;
-      rw [Semiformula.quote_ex, hφ, quote_bex];
-      rfl;
-    obtain rfl : φ = “#0 < !!(Rew.bShift s)” ⋏ ψ := (Semiformula.exs_inj _ _).mp e;
+    obtain ⟨s, ψ, rfl⟩ := exists_bex_of_quote_eq ht hφ;
     have : ℬ[<, ℒₒᵣ].Closure (“#0 < !!(Rew.bShift s)” ⋏ ψ) :=
       ih (by simp [hφ, hq, Arithmetic.qqLT]);
     exact .bexs rfl (Rew.positive_iff.mpr ⟨s, rfl⟩) (Bounding.Closure.and_iff.mp this).2;
-
-lemma isBounded_iff_bounded (ψ : ArithmeticSemiproposition n) :
-    IsBounded (⌜ψ⌝ : ℕ) ↔ ℬ[<, ℒₒᵣ].Closure ψ :=
-  ⟨bounded_of_isBounded ψ, isBounded_of_bounded⟩
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 lemma isBounded_quote_iff_s (ψ : ArithmeticSemiproposition n) :
     IsBounded (⌜ψ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Closure ψ := by
-  have h : V ⊧/![(⌜ψ⌝ : V)] isBounded.val ↔ ℕ ⊧/![(⌜ψ⌝ : ℕ)] isBounded.val := by
-    simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
+  have h : IsBounded (⌜ψ⌝ : V) ↔ IsBounded (⌜ψ⌝ : ℕ) := by
+    simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton,
+      (IsBounded.defined (V := V)).df, (IsBounded.defined (V := ℕ)).df]
       using models_iff_of_Delta1 (V := V) IsBounded.defined.proper IsBounded.defined.proper
         (e := ![⌜ψ⌝]);
-  simpa [IsBounded.defined.df, isBounded_iff_bounded] using h;
+  exact h.trans ⟨bounded_of_isBounded ψ, isBounded_of_bounded⟩;
 
 theorem isBounded_quote_iff (σ : ArithmeticSemisentence n) :
     IsBounded (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Closure σ := by
