@@ -5,6 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
+public import Foundation.FirstOrder.Incompleteness.Definability
 
 @[expose] public section
 
@@ -124,6 +125,36 @@ lemma provable_standardProvability_imp_of_Δ₁Class_subset
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff, standardProvability_def] using
       fun hp ↦ (hp.toDerivable.of_ss (h V)).toProvable
+
+section
+
+variable {Γ : Polarity} {m n : ℕ}
+
+lemma InductionOnHierarchy.provable_standardProvability_imp_of_le (h : m ≤ n)
+    (σ : ArithmeticSentence) :
+    𝗜𝚺₁ ⊢ (𝗜𝗡𝗗 Γ m).standardProvability σ 🡒 (𝗜𝗡𝗗 Γ n).standardProvability σ :=
+  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦ mem_Δ₁Class_iff.mpr <|
+    (mem_Δ₁Class_iff.mp hp).imp_right <| InductionR.mono fun _ ↦ IsStrictHierarchy.mono h) σ
+
+lemma InductionOnHierarchy.provable_standardProvability_imp_Peano (m : ℕ)
+    (σ : ArithmeticSentence) :
+    𝗜𝚺₁ ⊢ (𝗜𝗡𝗗 Γ m).standardProvability σ 🡒 𝗣𝗔.standardProvability σ :=
+  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦ Peano.mem_Δ₁Class_iff.mpr <|
+    (mem_Δ₁Class_iff.mp hp).imp_right <| InductionR.mono fun _ _ ↦ trivial) σ
+
+lemma InductionOnBroadHierarchy.provable_standardProvability_imp_of_le (h : m ≤ n)
+    (σ : ArithmeticSentence) :
+    𝗜𝚺₁ ⊢ (𝗜𝗡𝗗⁺ Γ m).standardProvability σ 🡒 (𝗜𝗡𝗗⁺ Γ n).standardProvability σ :=
+  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦ mem_Δ₁Class_iff.mpr <|
+    (mem_Δ₁Class_iff.mp hp).imp_right <| InductionR.mono fun _ ↦ IsHierarchy.mono h) σ
+
+lemma InductionOnBroadHierarchy.provable_standardProvability_imp_Peano (m : ℕ)
+    (σ : ArithmeticSentence) :
+    𝗜𝚺₁ ⊢ (𝗜𝗡𝗗⁺ Γ m).standardProvability σ 🡒 𝗣𝗔.standardProvability σ :=
+  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦ Peano.mem_Δ₁Class_iff.mpr <|
+    (mem_Δ₁Class_iff.mp hp).imp_right <| InductionR.mono fun _ _ ↦ trivial) σ
+
+end
 
 end arithmetic
 

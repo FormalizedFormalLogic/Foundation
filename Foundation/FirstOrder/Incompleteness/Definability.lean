@@ -116,6 +116,11 @@ instance InductionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}
     simp [chInd, Bounding.HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le,
       eq_comm];
 
+lemma InductionR.mono {S S' : V → Prop} (hS : ∀ K, S K → S' K) {p : V} (h : InductionR S p) :
+    InductionR S' p := by
+  obtain ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hKS, hsub⟩ := h;
+  exact ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hS K hKS, hsub⟩;
+
 private lemma freeVariables_eq_empty_of_shift {m : ℕ} (β : ArithmeticSemiproposition m)
     (hsh : shift ℒₒᵣ (⌜β⌝ : ℕ) = ⌜β⌝) : β.freeVariables = ∅ := by
   have hsβ : Rewriting.shift β = β :=
@@ -229,6 +234,21 @@ noncomputable instance InductionScheme.delta1_strictHierarchy (Γ : Polarity) (s
     (InductionScheme ℒₒᵣ (StrictHierarchy Γ s)).Δ₁ :=
   InductionScheme.delta1_of (fun _ _ _ ↦ IsStrictHierarchy.defined Γ s)
     isStrictHierarchy_quote_iff_s
+
+variable {Γ : Polarity} {s : ℕ} {p : V}
+
+lemma Peano.mem_Δ₁Class_iff :
+    p ∈ 𝗣𝗔.Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (fun _ ↦ True) p :=
+  Δ₁Class.mem_union.trans <| .or .rfl <|
+    (InductionR.defined (hcond := ⟨by simp, fun _ ↦ by simp⟩)).df ![p]
+
+lemma InductionOnBroadHierarchy.mem_Δ₁Class_iff :
+    p ∈ (𝗜𝗡𝗗⁺ Γ s).Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (IsHierarchy Γ s) p :=
+  Δ₁Class.mem_union.trans <| .or .rfl <| InductionR.defined.df ![p]
+
+lemma InductionOnHierarchy.mem_Δ₁Class_iff :
+    p ∈ (𝗜𝗡𝗗 Γ s).Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (IsStrictHierarchy Γ s) p :=
+  Δ₁Class.mem_union.trans <| .or .rfl <| InductionR.defined.df ![p]
 
 lemma _root_.FFL.FirstOrder.Theory.RE.of_delta1 (T : ArithmeticTheory) [T.Δ₁] : T.RE := ⟨by
   have h : REPred (· ∈ T.Δ₁Class (V := ℕ)) :=
