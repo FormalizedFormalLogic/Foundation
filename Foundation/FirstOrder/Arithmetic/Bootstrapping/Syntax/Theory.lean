@@ -156,6 +156,11 @@ noncomputable abbrev ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁ :=
 
 instance [T.Δ₁] [U.Δ₁] : (T ∪ U).Δ₁ := add inferInstance inferInstance
 
+@[simp] lemma _root_.FFL.FirstOrder.Theory.Δ₁Class.mem_union {V : Type*} [ORingStructure V]
+    [T.Δ₁] [U.Δ₁] {p : V} : p ∈ (T ∪ U).Δ₁Class ↔ p ∈ T.Δ₁Class ∨ p ∈ U.Δ₁Class := by
+  change V ⊧/![p] (T.Δ₁ch ⋎ U.Δ₁ch).val ↔ _
+  simp [Theory.Δ₁Class]
+
 instance (φ : Sentence L) : Theory.Δ₁ {φ} := singleton φ
 
 instance insert {φ : Sentence L} [d : T.Δ₁] : (insert φ T).Δ₁ :=
@@ -164,15 +169,3 @@ instance insert {φ : Sentence L} [d : T.Δ₁] : (insert φ T).Δ₁ :=
 end Δ₁
 
 end FFL.FirstOrder.Theory
-
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
-
-variable {V : Type*} [ORingStructure V]
-  {L : Language} [L.Encodable] [L.LORDefinable] {T U : Theory L} [T.Δ₁] [U.Δ₁]
-
-@[simp] lemma Δ₁Class.mem_union {p : V} :
-    p ∈ (T ∪ U).Δ₁Class ↔ p ∈ T.Δ₁Class ∨ p ∈ U.Δ₁Class := by
-  change V ⊧/![p] (T.Δ₁ch ⋎ U.Δ₁ch).val ↔ _
-  simp [Theory.Δ₁Class]
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
