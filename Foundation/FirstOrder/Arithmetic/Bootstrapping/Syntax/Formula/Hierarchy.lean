@@ -447,13 +447,37 @@ lemma exists_ball_of_quote_eq {n : ℕ} {φ : ArithmeticSemiproposition (n + 1)}
     (ht : IsUTerm ℒₒᵣ t) (h : (⌜φ⌝ : ℕ) = (^#0 ^≮ termBShift ℒₒᵣ t) ^⋎ q) :
     ∃ (s : SyntacticSemiterm ℒₒᵣ n) (ψ : ArithmeticSemiproposition (n + 1)),
       φ = “#0 < !!(Rew.bShift s)” 🡒 ψ := by
-  sorry
+  have hsf : IsSemiformula ℒₒᵣ (n + 1) ((^#0 ^≮ termBShift ℒₒᵣ t) ^⋎ q) := by
+    simpa [h] using Semiformula.quote_isSemiformula (V := ℕ) φ;
+  obtain ⟨h₁, hq⟩ := IsSemiformula.or.mp hsf;
+  obtain ⟨ψ, rfl⟩ := IsSemiformula.sound hq;
+  have ht' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) := by
+    simpa using (IsSemiformula.nrel.mp h₁).2.nth (i := 1) (by simp);
+  obtain ⟨s, rfl⟩ := IsSemiterm.sound <| IsSemiterm.def.mpr
+    ⟨ht, (termBV_termBShift_le ht _).mp (IsSemiterm.def.mp ht').2⟩;
+  have e : (∀¹ φ) = ∀¹[“#0 < !!(Rew.bShift s)”] ψ := by
+    apply Semiformula.quote_inj_iff (V := ℕ) |>.mp;
+    rw [Semiformula.quote_all, h, quote_ball];
+    rfl;
+  exact ⟨s, ψ, (Semiformula.all_inj _ _).mp e⟩;
 
 lemma exists_bex_of_quote_eq {n : ℕ} {φ : ArithmeticSemiproposition (n + 1)} {t q : ℕ}
     (ht : IsUTerm ℒₒᵣ t) (h : (⌜φ⌝ : ℕ) = (^#0 ^< termBShift ℒₒᵣ t) ^⋏ q) :
     ∃ (s : SyntacticSemiterm ℒₒᵣ n) (ψ : ArithmeticSemiproposition (n + 1)),
       φ = “#0 < !!(Rew.bShift s)” ⋏ ψ := by
-  sorry
+  have hsf : IsSemiformula ℒₒᵣ (n + 1) ((^#0 ^< termBShift ℒₒᵣ t) ^⋏ q) := by
+    simpa [h] using Semiformula.quote_isSemiformula (V := ℕ) φ;
+  obtain ⟨h₁, hq⟩ := IsSemiformula.and.mp hsf;
+  obtain ⟨ψ, rfl⟩ := IsSemiformula.sound hq;
+  have ht' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) := by
+    simpa using (IsSemiformula.rel.mp h₁).2.nth (i := 1) (by simp);
+  obtain ⟨s, rfl⟩ := IsSemiterm.sound <| IsSemiterm.def.mpr
+    ⟨ht, (termBV_termBShift_le ht _).mp (IsSemiterm.def.mp ht').2⟩;
+  have e : (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift s)”] ψ := by
+    apply Semiformula.quote_inj_iff (V := ℕ) |>.mp;
+    rw [Semiformula.quote_ex, h, quote_bex];
+    rfl;
+  exact ⟨s, ψ, (Semiformula.exs_inj _ _).mp e⟩;
 
 variable {Γ : Polarity} {s n : ℕ}
 
