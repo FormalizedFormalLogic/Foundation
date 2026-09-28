@@ -468,8 +468,6 @@ noncomputable def qqAlls (p k : V) : V := qqAlls.construction.result ![p] k
 @[simp] lemma qqAlls_succ (p k : V) : qqAlls p (k + 1) = ^∀ (qqAlls p k) := by
   simp [qqAlls, qqAlls.construction]
 
-section
-
 def _root_.FFL.FirstOrder.Arithmetic.qqAllsDef : 𝚺ᴬ₁.Semisentence 3 :=
   qqAlls.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
@@ -481,8 +479,6 @@ instance qqAlls_definable : 𝚺ᴬ₁-Function₂ (qqAlls : V → V → V) :=
 
 instance qqAlls_definable' {Γ : Polarity} {m : ℕ} :
     Γᴬ-[m + 1]-Function₂ (qqAlls : V → V → V) := qqAlls_definable.of_sigmaOne
-
-end
 
 lemma le_qqAll (p : V) : p ≤ ^∀ p := by
   simp only [qqAll]; exact le_trans (le_pair_right _ _) le_self_add
@@ -502,9 +498,8 @@ lemma le_qqAlls (p k : V) : p ≤ qqAlls p k := by
   · definability
   case zero => simp
   case succ k ih =>
-    refine le_trans ih ?_
     rw [qqAlls_succ]
-    exact le_qqAll _
+    exact ih.trans (le_qqAll _)
 
 lemma succ_le_qqAll (p : V) : p + 1 ≤ ^∀ p := by
   simp only [qqAll]; exact add_le_add (le_pair_right _ _) (le_refl 1)

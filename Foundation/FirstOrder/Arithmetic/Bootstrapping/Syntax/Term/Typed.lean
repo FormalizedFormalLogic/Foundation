@@ -338,9 +338,9 @@ lemma fvarVec_val_eq (m : ℕ) :
   rw [len_fvarVec] at hi
   obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat hi
   have hj : j < m := by exact_mod_cast hi
-  rw [nth_fvarVec _ _ hi, show ((j : ℕ) : V) = ((⟨j, hj⟩ : Fin m) : ℕ) from rfl]
-  rw [SemitermVec.val_nth_eq
-    (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) ⟨j, hj⟩]
+  rw [nth_fvarVec _ _ hi, show ((j : ℕ) : V) = ((⟨j, hj⟩ : Fin m) : ℕ) from rfl,
+    SemitermVec.val_nth_eq
+      (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) ⟨j, hj⟩]
   simp
 
 end fvarVec

@@ -452,7 +452,7 @@ lemma le_termBShift {t : V} (ht : IsUTerm L t) : t ≤ termBShift L t := by
   · intro k f v hf hv ih
     rw [termBShift_func hf hv]
     have hvle : v ≤ termBShiftVec L k v := by
-      refine le_of_nth_le_nth ?_ ?_
+      apply le_of_nth_le_nth
       · rw [len_termBShiftVec hv]; exact hv.1.symm
       · intro i hi
         rw [← hv.1] at hi
@@ -467,7 +467,7 @@ lemma IsUTerm.termBShift {t : V} (ht : IsUTerm L t) : IsUTerm L (termBShift L t)
 
 lemma IsUTermVec.termBShiftVec {k v : V} (hv : IsUTermVec L k v) :
     IsUTermVec L k (termBShiftVec L k v) :=
-  ⟨(len_termBShiftVec hv).symm, fun i hi => by
+  ⟨(len_termBShiftVec hv).symm, fun i hi ↦ by
     rw [nth_termBShiftVec hv hi]; exact (hv.nth hi).termBShift⟩
 
 lemma termBV_termBShift_le {t : V} (ht : IsUTerm L t) (m : V) :

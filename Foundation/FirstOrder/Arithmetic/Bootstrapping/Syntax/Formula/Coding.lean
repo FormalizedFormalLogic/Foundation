@@ -494,23 +494,18 @@ lemma quote_allClosure {n : ℕ} (φ : Semiproposition L n) :
   case zero => simp
   case succ n ih =>
     rw [show (∀¹* φ : Semiproposition L 0) = ∀¹* (∀¹ φ) from rfl]
-    have := ih (∀¹ φ)
-    rw [Semiformula.quote_all] at this
-    rw [this, Nat.cast_succ, qqAlls_succ']
+    simpa [Semiformula.quote_all, qqAlls_all] using ih (∀¹ φ)
 
 lemma quote_univCl' (ψ : Semiproposition L 0) :
     (⌜Semiformula.univCl' ψ⌝ : V)
       = qqAlls (⌜(Rew.fixitr 0 ψ.fvSup ▹ ψ : Semiproposition L (0 + ψ.fvSup))⌝ : V)
-          ((0 + ψ.fvSup : ℕ) : V) := by
-  rw [Semiformula.univCl']; exact quote_allClosure _
+          ((0 + ψ.fvSup : ℕ) : V) :=
+  quote_allClosure _
 
 lemma quote_subst_fvar_fixitr (φ : Semiproposition L 0) :
     (⌜(Rew.fixitr 0 φ.fvSup ▹ φ : Semiproposition L (0 + φ.fvSup))
         ⇜ (fun x : Fin (0 + φ.fvSup) ↦ (&↑x : SyntacticTerm L))⌝ : V) = ⌜φ⌝ := by
-  rw [show (Rew.fixitr 0 φ.fvSup ▹ φ : Semiproposition L (0 + φ.fvSup))
-        ⇜ (fun x : Fin (0 + φ.fvSup) ↦ (&↑x : SyntacticTerm L)) = φ from by
-    have := Semiformula.subst_comp_fixitr (L := L) φ
-    convert this using 2]
+  rw [Semiformula.subst_comp_fixitr]
 
 /-! ### Pinning `bv` of the `fixitr`-image -/
 
@@ -535,8 +530,6 @@ lemma quote_shift_fixitr (χ : Semiproposition L 0) :
     Semiformula.rew_eq_self_of (by simp) (fun x hx ↦ absurd hx (not_fvar?_fixitr χ x))
   rw [← Semiformula.quote_shift (V := ℕ) (Rew.fixitr 0 χ.fvSup ▹ χ), hshift]
 
-/-- Pins the number of leading universals `m` recognized by the induction-scheme code to
-`fvSup χ`. -/
 lemma bv_quote_fixitr (χ : Semiproposition L 0) :
     bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
       = χ.fvSup := by
@@ -593,18 +586,10 @@ lemma bv_quote_fixitr (χ : Semiproposition L 0) :
 lemma subst_fvarVec_quote' {m : ℕ} (β : ArithmeticSemiproposition m) :
     Bootstrapping.subst ℒₒᵣ (fvarVec ((m : ℕ) : V)) (⌜β⌝ : V)
       = (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ : V) := by
-  set Kt : Bootstrapping.Semiformula V ℒₒᵣ m := ⌜β⌝ with hKt
-  set w : SemitermVec V ℒₒᵣ m 0 :=
-    (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) with hw
-  rw [fvarVec_val_eq,
-    show (⌜β⌝ : V) = Kt.val from rfl,
-    show Bootstrapping.subst ℒₒᵣ w.val Kt.val = (Kt.subst w).val from rfl]
-  rw [show (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ : V)
-      = (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ :
-          Bootstrapping.Semiformula V ℒₒᵣ 0).val from rfl]
-  congr 1
-  rw [hKt]
-  simp only [FirstOrder.Semiformula.typed_quote_substs, hw, Semiterm.typed_quote_fvar]
+  rw [fvarVec_val_eq]
+  change ((⌜β⌝ : Bootstrapping.Semiformula V ℒₒᵣ m).subst _).val
+    = (⌜β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ))⌝ : Bootstrapping.Semiformula V ℒₒᵣ 0).val
+  simp [FirstOrder.Semiformula.typed_quote_substs, Semiterm.typed_quote_fvar]
 
 end FirstOrder.Arithmetic.Bootstrapping
 

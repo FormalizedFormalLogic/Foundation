@@ -213,7 +213,6 @@ lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encod
     ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, empty_quote_eq_encode]
 
-
 lemma quote_castLE (t : SyntacticSemiterm L n) :
     ∀ {n' : ℕ} (h : n ≤ n'), (⌜(Rew.castLE h t : SyntacticSemiterm L n')⌝ : V) = ⌜t⌝ := by
   induction t with
