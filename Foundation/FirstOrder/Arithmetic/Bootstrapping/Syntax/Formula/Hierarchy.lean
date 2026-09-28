@@ -371,11 +371,33 @@ lemma IsHierarchy.of_ex (h : IsHierarchy Γ (n + 1) (^∃ p)) :
 
 lemma neg_qqQuant (Γ : Polarity) (hp : IsUFormula ℒₒᵣ p) :
     neg ℒₒᵣ (qqQuant Γ p) = qqQuant Γ.alt (neg ℒₒᵣ p) := by
-  sorry
+  cases Γ;
+  · exact neg_ex hp;
+  · exact neg_all hp;
 
 lemma IsHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsHierarchy Γ n p) :
     IsHierarchy Γ.alt n (neg ℒₒᵣ p) := by
-  sorry
+  induction n generalizing Γ p with
+  | zero => exact IsBounded.neg hp h;
+  | succ n ih =>
+    suffices ∀ p : V, IsHierarchy Γ (n + 1) p →
+        IsUFormula ℒₒᵣ p → IsHierarchy Γ.alt (n + 1) (neg ℒₒᵣ p) from this p h hp;
+    apply IsHierarchy.succ_induction 𝚺
+      (P := fun p ↦ IsUFormula ℒₒᵣ p → IsHierarchy Γ.alt (n + 1) (neg ℒₒᵣ p)) (by definability);
+    · intro p h hp;
+      exact IsHierarchy.of_alt (Γ := Γ.alt) (by simpa using ih hp h);
+    · simp +contextual;
+    · simp +contextual;
+    · intro t q ht _ ih h;
+      have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBall];
+      simpa [neg_qqBall ht.termBShift hq] using IsHierarchy.bex ht (ih hq);
+    · intro t q ht _ ih h;
+      have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex];
+      simpa [neg_qqBex ht.termBShift hq] using IsHierarchy.ball ht (ih hq);
+    · intro q _ ih h;
+      have hq : IsUFormula ℒₒᵣ q := by cases Γ <;> simpa using h;
+      rw [neg_qqQuant Γ hq];
+      exact IsHierarchy.quant (ih hq);
 
 /-! ### Comparison with `IsSigma1` -/
 
