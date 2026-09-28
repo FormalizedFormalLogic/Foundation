@@ -228,31 +228,51 @@ lemma IsHierarchy.succ_induction (Γ' : Polarity) {P : V → Prop} (hP : Γ'ᴬ-
 
 /-! ### Closure properties -/
 
-lemma IsHierarchy.of_alt (h : IsHierarchy Γ.alt n p) : IsHierarchy Γ (n + 1) p := by
-  sorry
+lemma IsHierarchy.of_alt (h : IsHierarchy Γ.alt n p) : IsHierarchy Γ (n + 1) p :=
+  IsHierarchy.succ_mk <| by left; exact h
 
 lemma IsHierarchy.of_bounded (h : IsBounded p) : IsHierarchy Γ n p := by
-  sorry
+  induction n generalizing Γ with
+  | zero => exact IsHierarchy.zero_iff.mpr h;
+  | succ n ih => exact IsHierarchy.of_alt ih;
 
-@[simp] lemma IsHierarchy.verum : IsHierarchy Γ n (^⊤ : V) := by
-  sorry
+@[simp] lemma IsHierarchy.verum : IsHierarchy Γ n (^⊤ : V) :=
+  IsHierarchy.of_bounded (by simp)
 
-@[simp] lemma IsHierarchy.falsum : IsHierarchy Γ n (^⊥ : V) := by
-  sorry
+@[simp] lemma IsHierarchy.falsum : IsHierarchy Γ n (^⊥ : V) :=
+  IsHierarchy.of_bounded (by simp)
 
-@[simp] lemma IsHierarchy.rel {k r v : V} : IsHierarchy Γ n (^rel k r v) := by
-  sorry
+@[simp] lemma IsHierarchy.rel {k r v : V} : IsHierarchy Γ n (^rel k r v) :=
+  IsHierarchy.of_bounded (by simp)
 
-@[simp] lemma IsHierarchy.nrel {k r v : V} : IsHierarchy Γ n (^nrel k r v) := by
-  sorry
+@[simp] lemma IsHierarchy.nrel {k r v : V} : IsHierarchy Γ n (^nrel k r v) :=
+  IsHierarchy.of_bounded (by simp)
 
 @[simp] lemma IsHierarchy.and_iff :
     IsHierarchy Γ n (p ^⋏ q) ↔ IsHierarchy Γ n p ∧ IsHierarchy Γ n q := by
-  sorry
+  induction n generalizing Γ with
+  | zero => exact IsBounded.and_iff;
+  | succ n ih =>
+    constructor;
+    · intro h;
+      rcases h.succ_case with (h | h | h | h | h | h);
+      · exact ⟨(ih.mp h).1.of_alt, (ih.mp h).2.of_alt⟩;
+      all_goals cases Γ <;> simp_all [qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex];
+    · rintro ⟨hp, hq⟩;
+      exact IsHierarchy.succ_mk <| by disj 2; exact ⟨p, q, hp, hq, rfl⟩;
 
 @[simp] lemma IsHierarchy.or_iff :
     IsHierarchy Γ n (p ^⋎ q) ↔ IsHierarchy Γ n p ∧ IsHierarchy Γ n q := by
-  sorry
+  induction n generalizing Γ with
+  | zero => exact IsBounded.or_iff;
+  | succ n ih =>
+    constructor;
+    · intro h;
+      rcases h.succ_case with (h | h | h | h | h | h);
+      · exact ⟨(ih.mp h).1.of_alt, (ih.mp h).2.of_alt⟩;
+      all_goals cases Γ <;> simp_all [qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex];
+    · rintro ⟨hp, hq⟩;
+      exact IsHierarchy.succ_mk <| by disj 3; exact ⟨p, q, hp, hq, rfl⟩;
 
 lemma IsHierarchy.ball {t : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ n q) :
     IsHierarchy Γ n (qqBall (termBShift ℒₒᵣ t) q) := by
