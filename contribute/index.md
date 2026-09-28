@@ -49,17 +49,17 @@ PRs (title and body) are written in English.
 
 ## PR body
 
-Every PR body follows [the template](../.github/pull_request_template.md), which has two sections:
+Every PR body follows [the template](../.github/pull_request_template.md):
 
 - `## Comment` — a human's brief account of the intent. It may be left empty when the PR is opened and filled in later on GitHub by anyone involved.
-- `## LLM/Summary` — 🤖 written by the coding agent: the source and subject of the change in two or three sentences. Leave out build results and checklists, which CI already verifies.
+- `## AI Summary` — optional, only when an AI agent was involved; delete it otherwise. 🤖 Written by the coding agent: the source and subject of the change in two or three sentences. Leave out build results and checklists, which CI already verifies.
 
 🤖 Agents use this template by default, even when opening the PR from the command line (e.g. `gh pr create --body`), leave `## Comment` empty unless told what to put there, and end the body with their own attribution line, for example:
 
 ```
 ## Comment
 
-## LLM/Summary
+## AI Summary
 
 ...
 
