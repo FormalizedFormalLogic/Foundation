@@ -2,7 +2,6 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Basic
-public import Foundation.Vorspiel.Tactic.Disj
 
 @[expose] public section
 
