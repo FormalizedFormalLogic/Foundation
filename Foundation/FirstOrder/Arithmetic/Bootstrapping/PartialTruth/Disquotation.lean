@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Tarski
 /-!
 # Partial truth definitions agree with truth
 
-The “it's snowing” agreement between partial satisfaction and semantics, both in every model of
+The “it's disquotation” agreement between partial satisfaction and semantics, both in every model of
 `𝗜𝚺₁` and, uniformly, over `𝗣𝗔⁻` together with the finite Tarski theory `tarski n`.
 
 ## References
@@ -224,22 +224,22 @@ theorem piSatisfaction_quote_iff (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k �
 
 end
 
-noncomputable def snowing (n : ℕ) {k : ℕ}
+noncomputable def disquotation (n : ℕ) {k : ℕ}
     (φ : ArithmeticSemisentence k) : ArithmeticSentence :=
   ∀¹* (φ 🡘 (sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
-theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
-    V↓[ℒₒᵣ] ⊧ snowing n φ ↔
+theorem models_disquotation_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
+    V↓[ℒₒᵣ] ⊧ disquotation n φ ↔
       ∀ v : Fin k → V, V ⊧/v φ ↔ SigmaSatisfaction (n + 1) ⌜φ⌝ (matrixToVec v) := by
-  simp [snowing, models_iff, (sigmaSatisfactionVec.defined n k).df, Function.comp_def];
+  simp [disquotation, models_iff, (sigmaSatisfactionVec.defined n k).df, Function.comp_def];
 
-theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ := by
+theorem ISigma1.provable_disquotation {n k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ disquotation n φ := by
   apply Arithmetic.complete.{0};
   intro M _ _;
-  exact (models_snowing_iff φ).mpr fun v ↦ (sigmaSatisfaction_quote_iff hφ v).symm;
+  exact (models_disquotation_iff φ).mpr fun v ↦ (sigmaSatisfaction_quote_iff hφ v).symm;
 
-/-! ## The snowing lemma over `𝗣𝗔⁻` -/
+/-! ## The disquotation lemma over `𝗣𝗔⁻` -/
 
 section peanoMinus
 
@@ -496,7 +496,7 @@ theorem sigmaSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k
     Reading.SigmaSatisfaction n ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ :=
   strictSatisfaction_quote_reading hM hφ le_rfl v ev hev
 
-/-! ### Assembling the snowing lemma over `𝗣𝗔⁻` -/
+/-! ### Assembling the disquotation lemma over `𝗣𝗔⁻` -/
 
 private lemma eval_sigmaSatisfactionVec {k : ℕ} (p : M) (w : Fin k → M) :
     M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔
@@ -511,7 +511,7 @@ private lemma eval_sigmaSatisfactionVec {k : ℕ} (p : M) (w : Fin k → M) :
     LogicalConnective.Prop.and_eq, exists_eq_right, Reading.Codes, Reading.Len, Reading.Nth,
     Reading.SigmaSatisfaction, and_assoc];
 
-private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fin k → M) :
+private lemma eval_disquotation_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fin k → M) :
     M ⊧/e ((sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
       ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (sigmaSatisfactionVec n k).val := by
   simp only [Semiformula.eval_substs, Matrix.comp_vecCons'', Arithmetic.gödelNumber'_def,
@@ -522,17 +522,17 @@ private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fi
 
 end peanoMinus
 
-theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ := by
+theorem provable_disquotation_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ disquotation n φ := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n) := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
       (Entailment.Axiomatized.le_of_subset Set.subset_union_left);
-  unfold snowing;
+  unfold disquotation;
   apply Arithmetic.provable_iff_of_models_iff.{0} (T := 𝗣𝗔⁻ ∪ tarski n);
   intro M _ hMT e;
   have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hMT Set.subset_union_left;
   have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦
     Semantics.ModelsSet.models _ (Set.mem_union_right 𝗣𝗔⁻ hσ);
-  rw [eval_snowing_rhs, eval_sigmaSatisfactionVec];
+  rw [eval_disquotation_rhs, eval_sigmaSatisfactionVec];
   constructor;
   · intro h;
     obtain ⟨ev, hev⟩ := exists_codes hM e;
