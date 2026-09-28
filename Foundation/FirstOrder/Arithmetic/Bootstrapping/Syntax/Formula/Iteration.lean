@@ -446,4 +446,96 @@ end
 
 end verums
 
+/-! ### Iterated universal quantifier -/
+
+section qqAlls
+
+def qqAlls.blueprint : PR.Blueprint 1 where
+  zero := .mkSigma “y x. y = x”
+  succ := .mkSigma “y ih n x. !qqAllDef y ih”
+
+noncomputable def qqAlls.construction : PR.Construction V qqAlls.blueprint where
+  zero := fun x ↦ x 0
+  succ := fun _ _ ih ↦ ^∀ ih
+  zero_defined := .mk fun v ↦ by simp [blueprint]
+  succ_defined := .mk fun v ↦ by simp [blueprint, qqAll]
+
+/-- `qqAlls p k = ^∀ ^∀ ... ^∀ p` (`k` universal quantifiers). -/
+noncomputable def qqAlls (p k : V) : V := qqAlls.construction.result ![p] k
+
+@[simp] lemma qqAlls_zero (p : V) : qqAlls p 0 = p := by simp [qqAlls, qqAlls.construction]
+
+@[simp] lemma qqAlls_succ (p k : V) : qqAlls p (k + 1) = ^∀ (qqAlls p k) := by
+  simp [qqAlls, qqAlls.construction]
+
+section
+
+def _root_.FFL.FirstOrder.Arithmetic.qqAllsDef : 𝚺ᴬ₁.Semisentence 3 :=
+  qqAlls.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
+
+instance qqAlls_defined : 𝚺ᴬ₁-Function₂ (qqAlls : V → V → V) via qqAllsDef := .mk
+  fun v ↦ by simp [qqAlls.construction.result_defined_iff, qqAllsDef]; rfl
+
+instance qqAlls_definable : 𝚺ᴬ₁-Function₂ (qqAlls : V → V → V) :=
+  qqAlls_defined.to_definable
+
+instance qqAlls_definable' {Γ : Polarity} {m : ℕ} :
+    Γᴬ-[m + 1]-Function₂ (qqAlls : V → V → V) := qqAlls_definable.of_sigmaOne
+
+end
+
+lemma le_qqAll (p : V) : p ≤ ^∀ p := by
+  simp only [qqAll]; exact le_trans (le_pair_right _ _) le_self_add
+
+lemma qqAlls_all (p k : V) : qqAlls (^∀ p) k = ^∀ (qqAlls p k) := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih => rw [qqAlls_succ, ih, qqAlls_succ]
+
+lemma qqAlls_succ' (p k : V) : qqAlls p (k + 1) = qqAlls (^∀ p) k := by
+  rw [qqAlls_succ, qqAlls_all]
+
+@[simp]
+lemma le_qqAlls (p k : V) : p ≤ qqAlls p k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih =>
+    refine le_trans ih ?_
+    rw [qqAlls_succ]
+    exact le_qqAll _
+
+lemma succ_le_qqAll (p : V) : p + 1 ≤ ^∀ p := by
+  simp only [qqAll]; exact add_le_add (le_pair_right _ _) (le_refl 1)
+
+@[simp] lemma index_le_qqAlls (p k : V) : k ≤ qqAlls p k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih =>
+    rw [qqAlls_succ]
+    exact le_trans (add_le_add ih (le_refl 1)) (succ_le_qqAll _)
+
+@[simp] lemma isUFormula_qqAlls {p k : V} : IsUFormula L (qqAlls p k) ↔ IsUFormula L p := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih => rw [qqAlls_succ, IsUFormula.all, ih]
+
+lemma bv_qqAlls {p k : V} (hp : IsUFormula L p) : bv L (qqAlls p k) = bv L p - k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih =>
+    rw [qqAlls_succ, bv_all (isUFormula_qqAlls.mpr hp), ih, Arithmetic.sub_sub]
+
+lemma IsSemiformula.qqAlls {n k p : V} (h : IsSemiformula L (n + k) p) :
+    IsSemiformula L n (qqAlls p k) := by
+  rw [isSemiformula_iff] at h ⊢
+  obtain ⟨hu, hbv⟩ := h
+  exact ⟨isUFormula_qqAlls.mpr hu, by rwa [bv_qqAlls hu, tsub_le_iff_right]⟩
+
+end qqAlls
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

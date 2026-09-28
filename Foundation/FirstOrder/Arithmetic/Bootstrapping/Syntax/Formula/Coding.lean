@@ -297,6 +297,60 @@ noncomputable instance : LCWQIsoGödelQuote (Semisentence L) (Bootstrapping.Semi
       Bootstrapping.Arithmetic.typedNumeral ⌜φ⌝ := by
   simp [←coe_quote, coe_quote_eq_quote]
 
+lemma quote_castLE (φ : Semiproposition L n) :
+    ∀ {n' : ℕ} (h : n ≤ n'), (⌜(Rew.castLE h ▹ φ : Semiproposition L n')⌝ : V) = ⌜φ⌝ := by
+  induction φ using rec' with
+  | hverum => intro n' h; simp
+  | hfalsum => intro n' h; simp
+  | hrel r v =>
+      intro n' h
+      simp only [rew_rel, quote_rel, SemitermVec.val]
+      congr 2; funext i; exact Semiterm.quote_castLE (v i) h
+  | hnrel r v =>
+      intro n' h
+      simp only [rew_nrel, quote_nrel, SemitermVec.val]
+      congr 2; funext i; exact Semiterm.quote_castLE (v i) h
+  | hand φ ψ ihp ihq =>
+      intro n' h; simp only [LogicalConnective.HomClass.map_and, quote_and, ihp h, ihq h]
+  | hor φ ψ ihp ihq =>
+      intro n' h; simp only [LogicalConnective.HomClass.map_or, quote_or, ihp h, ihq h]
+  | hall φ ih =>
+      intro n' h; rw [Rewriting.app_all, quote_all, Rew.q_castLE, ih, quote_all]
+  | hexs φ ih =>
+      intro n' h; rw [Rewriting.app_exs, quote_ex, Rew.q_castLE, ih, quote_ex]
+
+omit [L.Encodable] [L.LORDefinable] in
+lemma freeVariables_castLE (φ : Semiproposition L n) :
+    ∀ {n' : ℕ} (h : n ≤ n'),
+      (Rew.castLE h ▹ φ : Semiproposition L n').freeVariables = φ.freeVariables := by
+  induction φ using rec' with
+  | hverum => intro n' h; simp
+  | hfalsum => intro n' h; simp
+  | hrel r v =>
+      intro n' h
+      simp only [rew_rel, freeVariables_rel]
+      apply Finset.biUnion_congr rfl; intro i _; exact Semiterm.freeVariables_castLE _ h
+  | hnrel r v =>
+      intro n' h
+      simp only [rew_nrel, freeVariables_nrel]
+      apply Finset.biUnion_congr rfl; intro i _; exact Semiterm.freeVariables_castLE _ h
+  | hand φ ψ ihp ihq =>
+      intro n' h; simp only [LogicalConnective.HomClass.map_and, freeVariables_and, ihp h, ihq h]
+  | hor φ ψ ihp ihq =>
+      intro n' h; simp only [LogicalConnective.HomClass.map_or, freeVariables_or, ihp h, ihq h]
+  | hall φ ih =>
+      intro n' h; simp only [Rewriting.app_all, freeVariables_all, Rew.q_castLE, ih]
+  | hexs φ ih =>
+      intro n' h; simp only [Rewriting.app_exs, freeVariables_exs, Rew.q_castLE, ih]
+
+omit [L.Encodable] [L.LORDefinable] in
+lemma fvar?_fvSup_pred (φ : Semiproposition L n) (h : 0 < φ.fvSup) : φ.FVar? (φ.fvSup - 1) := by
+  by_cases he : φ.freeVariables = ∅
+  · simp [fvSup, he] at h
+  · obtain ⟨k, hk⟩ := Finset.max_of_nonempty (Finset.nonempty_iff_ne_empty.mpr he)
+    rw [show φ.fvSup = k + 1 from by simp [fvSup, hk]]
+    simpa using Finset.mem_of_max hk
+
 end Semiformula
 
 namespace Sentence
@@ -434,6 +488,144 @@ lemma IsSemiformula.sound {n φ : ℕ} (h : IsSemiformula L n φ) :
     · rcases ih φ (by simp) hp with ⟨φ, rfl⟩
       exact ⟨∃¹ φ, by simp⟩
 
+lemma quote_allClosure {n : ℕ} (φ : Semiproposition L n) :
+    (⌜(∀¹* φ : Semiproposition L 0)⌝ : V) = qqAlls (⌜φ⌝ : V) (n : V) := by
+  induction n
+  case zero => simp
+  case succ n ih =>
+    rw [show (∀¹* φ : Semiproposition L 0) = ∀¹* (∀¹ φ) from rfl]
+    have := ih (∀¹ φ)
+    rw [Semiformula.quote_all] at this
+    rw [this, Nat.cast_succ, qqAlls_succ']
+
+lemma quote_univCl' (ψ : Semiproposition L 0) :
+    (⌜Semiformula.univCl' ψ⌝ : V)
+      = qqAlls (⌜(Rew.fixitr 0 ψ.fvSup ▹ ψ : Semiproposition L (0 + ψ.fvSup))⌝ : V)
+          ((0 + ψ.fvSup : ℕ) : V) := by
+  rw [Semiformula.univCl']; exact quote_allClosure _
+
+lemma quote_subst_fvar_fixitr (φ : Semiproposition L 0) :
+    (⌜(Rew.fixitr 0 φ.fvSup ▹ φ : Semiproposition L (0 + φ.fvSup))
+        ⇜ (fun x : Fin (0 + φ.fvSup) ↦ (&↑x : SyntacticTerm L))⌝ : V) = ⌜φ⌝ := by
+  rw [show (Rew.fixitr 0 φ.fvSup ▹ φ : Semiproposition L (0 + φ.fvSup))
+        ⇜ (fun x : Fin (0 + φ.fvSup) ↦ (&↑x : SyntacticTerm L)) = φ from by
+    have := Semiformula.subst_comp_fixitr (L := L) φ
+    convert this using 2]
+
+/-! ### Pinning `bv` of the `fixitr`-image -/
+
+-- Only needs `GoedelQuote`/`Rewriting` structure on `L`, not `Encodable`/`LORDefinable`.
+omit [L.Encodable] [L.LORDefinable] in
+lemma not_fvar?_fixitr (χ : Semiproposition L 0) (x : ℕ) :
+    ¬(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)).FVar? x := by
+  rw [Rew.eq_bind (Rew.fixitr 0 χ.fvSup)]
+  simp only [Function.comp_def, Rew.fixitr_bvar, Rew.fixitr_fvar, Fin.natAdd_mk, zero_add]
+  intro hh
+  rcases Semiformula.fvar?_rew hh with (⟨z, hz⟩ | ⟨z, hz, hx⟩)
+  · simp at hz
+  · have : z < χ.fvSup := Semiformula.lt_fvSup_of_fvar? hz
+    simp [this] at hx
+
+lemma quote_shift_fixitr (χ : Semiproposition L 0) :
+    Bootstrapping.shift (V := ℕ) L
+        (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
+      = ⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ := by
+  have hshift : Rewriting.shift (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))
+      = (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)) :=
+    Semiformula.rew_eq_self_of (by simp) (fun x hx ↦ absurd hx (not_fvar?_fixitr χ x))
+  rw [← Semiformula.quote_shift (V := ℕ) (Rew.fixitr 0 χ.fvSup ▹ χ), hshift]
+
+/-- Pins the number of leading universals `m` recognized by the induction-scheme code to
+`fvSup χ`. -/
+lemma bv_quote_fixitr (χ : Semiproposition L 0) :
+    bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
+      = χ.fvSup := by
+  have hbsemi := Semiformula.quote_isSemiformula (V := ℕ)
+    (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))
+  have hbU : IsUFormula L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) :=
+    hbsemi.isUFormula
+  have hle := hbsemi.bv_le
+  simp only [Nat.zero_add, natCast_nat] at hle
+  rcases (hle : bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
+      = χ.fvSup ∨ bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
+      < χ.fvSup) with heq | hlt
+  · exact heq
+  exfalso
+  set j := bv (V := ℕ) L
+    (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) with hj
+  have hpos : 0 < χ.fvSup := by omega
+  have hsemi : IsSemiformula L j
+      (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) := by
+    have := IsUFormula.isSemiformula hbU; rwa [← hj] at this
+  obtain ⟨γ, hγ⟩ := IsSemiformula.sound hsemi
+  have hjle : j ≤ 0 + χ.fvSup := by omega
+  have hcast : (Rew.castLE hjle ▹ γ : Semiproposition L (0 + χ.fvSup))
+      = (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)) := by
+    apply (Semiformula.quote_inj_iff (V := ℕ)).mp
+    rw [Semiformula.quote_castLE, hγ]
+  have hγfree : γ.freeVariables = ∅ := by
+    have hb : (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)).freeVariables = ∅ :=
+      Finset.eq_empty_of_forall_notMem fun x hx ↦ not_fvar?_fixitr χ x hx
+    have := Semiformula.freeVariables_castLE γ hjle
+    rw [hcast, hb] at this; exact this.symm
+  have hχeq : χ = γ ⇜ (fun i : Fin j ↦ (&↑i : SyntacticTerm L)) := by
+    have e1 : (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))
+        ⇜ (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L)) = χ :=
+      Semiformula.subst_comp_fixitr χ
+    have hRewEq :
+        (Rew.subst (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L))).comp (Rew.castLE hjle)
+        = Rew.subst (fun i : Fin j ↦ (&↑i : SyntacticTerm L)) := by
+      ext x <;> simp [Rew.comp_app]
+    symm
+    rw [← e1, ← hcast]
+    unfold Rewriting.subst
+    rw [← TransitiveRewriting.comp_app, hRewEq]
+  have hfv : (γ ⇜ (fun i : Fin j ↦ (&↑i : SyntacticTerm L))).FVar? (χ.fvSup - 1) := by
+    rw [← hχeq]; exact Semiformula.fvar?_fvSup_pred χ hpos
+  unfold Rewriting.subst at hfv
+  rcases Semiformula.fvar?_rew hfv with (⟨i, hi⟩ | ⟨z, hz, _⟩)
+  · have hib : χ.fvSup - 1 = (i : ℕ) := by
+      simpa [Rew.subst_bvar, Semiterm.FVar?, Semiterm.freeVariables_fvar] using hi
+    have hij := i.isLt
+    omega
+  · simp [Semiformula.FVar?, hγfree] at hz
+
+lemma subst_fvarVec_quote' {m : ℕ} (β : ArithmeticSemiproposition m) :
+    Bootstrapping.subst ℒₒᵣ (fvarVec ((m : ℕ) : V)) (⌜β⌝ : V)
+      = (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ : V) := by
+  set Kt : Bootstrapping.Semiformula V ℒₒᵣ m := ⌜β⌝ with hKt
+  set w : SemitermVec V ℒₒᵣ m 0 :=
+    (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) with hw
+  rw [fvarVec_val_eq,
+    show (⌜β⌝ : V) = Kt.val from rfl,
+    show Bootstrapping.subst ℒₒᵣ w.val Kt.val = (Kt.subst w).val from rfl]
+  rw [show (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ : V)
+      = (⌜(β ⇜ (fun i : Fin m ↦ (&↑i : SyntacticTerm ℒₒᵣ)))⌝ :
+          Bootstrapping.Semiformula V ℒₒᵣ 0).val from rfl]
+  congr 1
+  rw [hKt]
+  simp only [FirstOrder.Semiformula.typed_quote_substs, hw, Semiterm.typed_quote_fvar]
+
 end FirstOrder.Arithmetic.Bootstrapping
+
+namespace FirstOrder.Arithmetic
+
+open Bootstrapping
+
+lemma quote_ball {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposition (n + 1)) :
+    (⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemiproposition n)⌝ : ℕ)
+      = qqBall (termBShift ℒₒᵣ (⌜t⌝ : ℕ)) (⌜φ⌝ : ℕ) := by
+  rw [Semiformula.ball_eq, Semiformula.imp_eq]
+  simp only [Semiformula.Operator.lt_def, Semiformula.neg_rel, Semiformula.quote_all,
+    Semiformula.quote_or, qqBall, qqAll_inj, qqOr_inj, and_true]
+  simp [Semiformula.quote_nrel, Arithmetic.qqNLT, Arithmetic.ltIndex, Semiterm.quote_def,
+    Matrix.vecHead, Matrix.vecTail, Matrix.cons_val_zero, Matrix.cons_val_one]
+  rfl
+
+lemma termBShift_quote {n : ℕ} (s : SyntacticSemiterm ℒₒᵣ n) :
+    (⌜Rew.bShift s⌝ : ℕ) = termBShift ℒₒᵣ (⌜s⌝ : ℕ) := by
+  simp [Semiterm.quote_def, Semiterm.typed_quote_bShift]
+
+end FirstOrder.Arithmetic
 
 end FFL

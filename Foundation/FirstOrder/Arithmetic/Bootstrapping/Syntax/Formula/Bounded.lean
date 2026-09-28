@@ -1,13 +1,13 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Sigma1
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
 # Internal $\Delta_0$ formulas
 
 The internal predicate `IsBounded` on codes of bounded arithmetical formulas: it is
-`𝚫ᴬ₁`-definable, closed under negation and shift, implies `IsSigma1`, and agrees with
-`ℬ[<, ℒₒᵣ].Closure` on quoted formulas.
+`𝚫ᴬ₁`-definable, closed under negation and shift, and agrees with `ℬ[<, ℒₒᵣ].Closure` on
+quoted formulas.
 
 ## References
 
@@ -307,16 +307,6 @@ lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     simpa [shift_qqBex ht.termBShift hq, ← termBShift_termShift ht.isSemiterm]
       using IsBounded.bex ht.termShift (ih hq);
 
-lemma IsBounded.isSigma1 {p : V} (h : IsBounded p) : IsSigma1 p := by
-  have : 𝚫ᴬ₁-Predicate (IsSigma1 : V → Prop) := IsSigma1.defined.to_definable;
-  suffices ∀ p : V, IsBounded p → IsSigma1 p from this p h;
-  apply IsBounded.induction 𝚺 (P := IsSigma1) (by definability) (by simp) (by simp) (by simp)
-    (by simp) (by simp +contextual) (by simp +contextual);
-  · intro t q ht _ ih;
-    exact IsSigma1.mk <| by disj 8; exact ⟨_, q, ⟨t, ht, rfl⟩, ih, rfl⟩;
-  · intro t q _ _ ih;
-    simp [qqBex, Arithmetic.qqLT, ih];
-
 end isBounded
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
@@ -329,7 +319,9 @@ section correctness
 
 open Bootstrapping
 
-lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposition (n + 1)) :
+variable {n : ℕ}
+
+lemma quote_bex (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposition (n + 1)) :
     (⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemiproposition n)⌝ : ℕ)
       = qqBex (termBShift ℒₒᵣ (⌜t⌝ : ℕ)) (⌜φ⌝ : ℕ) := by
   rw [Semiformula.bexs_eq];
@@ -339,7 +331,7 @@ lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSe
     Matrix.vecHead, Matrix.vecTail, Matrix.cons_val_zero, Matrix.cons_val_one];
   rfl;
 
-lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n}
+lemma isBounded_of_bounded {ψ : ArithmeticSemiproposition n}
     (h : ℬ[<, ℒₒᵣ].Closure ψ) : IsBounded (⌜ψ⌝ : ℕ) := by
   revert h;
   apply Bounding.Closure.arithmetic_induction (P := fun _ φ ↦ IsBounded (⌜φ⌝ : ℕ)) (by simp)
@@ -353,7 +345,7 @@ lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n}
     rw [quote_bex];
     exact IsBounded.bex (by simp [Semiterm.quote_def]) ih;
 
-lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
+lemma bounded_of_isBounded (ψ : ArithmeticSemiproposition n) :
     IsBounded (⌜ψ⌝ : ℕ) → ℬ[<, ℒₒᵣ].Closure ψ := by
   induction ψ using Semiformula.rec' with
   | hverum => simp;
@@ -403,13 +395,13 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
       ih (by simp [hφ, hq, Arithmetic.qqLT]);
     exact .bexs rfl (Rew.positive_iff.mpr ⟨s, rfl⟩) (Bounding.Closure.and_iff.mp this).2;
 
-lemma isBounded_iff_bounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
+lemma isBounded_iff_bounded (ψ : ArithmeticSemiproposition n) :
     IsBounded (⌜ψ⌝ : ℕ) ↔ ℬ[<, ℒₒᵣ].Closure ψ :=
   ⟨bounded_of_isBounded ψ, isBounded_of_bounded⟩
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
+lemma isBounded_quote_iff_s (ψ : ArithmeticSemiproposition n) :
     IsBounded (⌜ψ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Closure ψ := by
   have h : V ⊧/![(⌜ψ⌝ : V)] isBounded.val ↔ ℕ ⊧/![(⌜ψ⌝ : ℕ)] isBounded.val := by
     simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
@@ -417,7 +409,7 @@ lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         (e := ![⌜ψ⌝]);
   simpa [IsBounded.defined.df, isBounded_iff_bounded] using h;
 
-theorem isBounded_quote_iff {n : ℕ} (σ : ArithmeticSemisentence n) :
+theorem isBounded_quote_iff (σ : ArithmeticSemisentence n) :
     IsBounded (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Closure σ := by
   simp [Sentence.quote_def, isBounded_quote_iff_s];
 

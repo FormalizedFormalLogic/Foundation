@@ -19,7 +19,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Codi
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Sigma1
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language

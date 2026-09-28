@@ -213,6 +213,30 @@ lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encod
     ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, empty_quote_eq_encode]
 
+
+lemma quote_castLE (t : SyntacticSemiterm L n) :
+    ∀ {n' : ℕ} (h : n ≤ n'), (⌜(Rew.castLE h t : SyntacticSemiterm L n')⌝ : V) = ⌜t⌝ := by
+  induction t with
+  | bvar x => intro n' h; simp
+  | fvar x => intro n' h; simp
+  | func f v ih =>
+      intro n' h
+      simp only [Rew.func, quote_func, SemitermVec.val]
+      congr 2; funext i; exact ih i h
+
+omit [L.Encodable] [L.LORDefinable] in
+lemma freeVariables_castLE (t : SyntacticSemiterm L n) :
+    ∀ {n' : ℕ} (h : n ≤ n'),
+      (Rew.castLE h t : SyntacticSemiterm L n').freeVariables = t.freeVariables := by
+  induction t with
+  | bvar x => intro n' h; simp
+  | fvar x => intro n' h; simp
+  | func f v ih =>
+      intro n' h
+      simp only [Rew.func, freeVariables_func]
+      apply Finset.biUnion_congr rfl
+      intro i _; exact ih i h
+
 end FFL.FirstOrder.Semiterm
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping

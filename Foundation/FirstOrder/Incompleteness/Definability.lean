@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.StrictHierarchy
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 /-!
@@ -168,7 +169,7 @@ noncomputable def chInd (cond : 𝚫ᴬ₁.Semisentence 1) : 𝚫ᴬ₁.Semisent
 
 noncomputable def chUniv : 𝚫ᴬ₁.Semisentence 1 := chInd ⊤
 
-noncomputable def chSigma1 : 𝚫ᴬ₁.Semisentence 1 := chInd Bootstrapping.isSigma1
+noncomputable def chSigma1 : 𝚫ᴬ₁.Semisentence 1 := chInd (Bootstrapping.isSigma 1)
 
 section chDefined
 
@@ -190,7 +191,7 @@ noncomputable instance InductionR.univ_defined :
   InductionR.defined (hcond := ⟨by simp, by intro v; simp⟩)
 
 noncomputable instance InductionR.sigma1_defined :
-    𝚫ᴬ₁-Predicate[V] (InductionR IsSigma1 : V → Prop) via chSigma1 :=
+    𝚫ᴬ₁-Predicate[V] (InductionR (IsSigma 1) : V → Prop) via chSigma1 :=
   InductionR.defined
 
 end chDefined
@@ -349,10 +350,11 @@ noncomputable instance InductionScheme.delta1_sigma1 :
     (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)).Δ₁ where
   ch := chSigma1
   mem_iff φ := by
-    have h : (ℕ ⊧/![(⌜φ⌝ : ℕ)] chSigma1.val) ↔ InductionR Bootstrapping.IsSigma1 (⌜φ⌝ : ℕ) := by
+    have h : (ℕ ⊧/![(⌜φ⌝ : ℕ)] chSigma1.val) ↔ InductionR (Bootstrapping.IsSigma 1) (⌜φ⌝ : ℕ) := by
       simp
     rw [h]
-    exact (inductionR_quote_iff isSigma1_iff_hierarchy φ).trans (mem_inductionScheme_iff φ).symm
+    exact (inductionR_quote_iff (isHierarchy_quote_iff_s (V := ℕ)) φ).trans
+      (mem_inductionScheme_iff φ).symm
   isDelta1 :=
     Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
       (fun V _ _ ↦ by
@@ -394,12 +396,13 @@ lemma inductionScheme_re_univ : REPred (· ∈ InductionScheme ℒₒᵣ Set.uni
 
 lemma inductionScheme_re_sigma1 :
     REPred (· ∈ InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)) := by
-  have hR : REPred (InductionR Bootstrapping.IsSigma1) :=
+  have hR : REPred (InductionR (Bootstrapping.IsSigma 1)) :=
     rePred_iff_sigma1.mpr <| Bounding.HierarchySymbol.Definable.of_deltaOne
       InductionR.sigma1_defined.to_definable
   refine (hR.comp Computable.encode).of_eq fun σ ↦ ?_
   simpa [Semiformula.quote_eq_encode] using
-    (inductionR_quote_iff isSigma1_iff_hierarchy σ).trans (mem_inductionScheme_iff σ).symm
+    (inductionR_quote_iff (isHierarchy_quote_iff_s (V := ℕ)) σ).trans
+      (mem_inductionScheme_iff σ).symm
 
 instance : (InductionScheme ℒₒᵣ Set.univ).RE := ⟨inductionScheme_re_univ⟩
 
