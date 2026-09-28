@@ -64,7 +64,7 @@ namespace CollectionOnHierarchy
 
 variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
 
-instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (StrictHierarchy Γ s) :=
+instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].StrictHierarchy Γ s) :=
   models_of_subtheory ‹_›
 
 lemma collection (hR : StrictDefinableRel Γ s R) (a : V)

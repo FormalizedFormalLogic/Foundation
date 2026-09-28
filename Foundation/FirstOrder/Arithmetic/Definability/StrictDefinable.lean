@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 
 /-!
@@ -17,12 +16,12 @@ variable (Γ : Polarity) (s : ℕ)
 
 structure IsStrictDefinedBy (R : (Fin k → V) → Prop)
     (φ : ArithmeticSemisentence k) : Prop where
-  strictHierarchy : StrictHierarchy Γ s φ
+  strictHierarchy : ℬ[<, ℒₒᵣ].StrictHierarchy Γ s φ
   defined : FirstOrder.IsDefinedBy R φ
 
 structure IsStrictDefinedByWithParam (R : (Fin k → V) → Prop) (φ : ArithmeticSemiformula V k) :
     Prop where
-  strictHierarchy : StrictHierarchy Γ s φ
+  strictHierarchy : ℬ[<, ℒₒᵣ].StrictHierarchy Γ s φ
   defined : FirstOrder.IsDefinedByWithParam R φ
 
 abbrev StrictDefinable {k} (P : (Fin k → V) → Prop) :=
@@ -55,7 +54,7 @@ lemma definable {P : (Fin k → V) → Prop} (h : StrictDefinable Γ s P) :
 
 lemma exists_eval_iff {P : (Fin k → V) → Prop} (h : StrictDefinable Γ s P) :
     ∃ (e : ℕ → V) (φ : ArithmeticSemiformula ℕ k),
-      StrictHierarchy Γ s φ ∧ ∀ v, P v ↔ φ.Eval v e := by
+      ℬ[<, ℒₒᵣ].StrictHierarchy Γ s φ ∧ ∀ v, P v ↔ φ.Eval v e := by
   classical
   obtain ⟨φ, hs, hφ⟩ := h;
   have : Inhabited V := Classical.inhabited_of_nonempty';
@@ -66,7 +65,7 @@ lemma exists_eval_iff {P : (Fin k → V) → Prop} (h : StrictDefinable Γ s P) 
     simp [Semiformula.eval_rewriteMap, hφ];
 
 lemma of_strictHierarchy {ξ : Type*} {m : ℕ} {θ : ArithmeticSemiformula ξ (m + 2)}
-    (hθ : StrictHierarchy Γ s θ) (e : Fin m → V) (f : ξ → V) :
+    (hθ : ℬ[<, ℒₒᵣ].StrictHierarchy Γ s θ) (e : Fin m → V) (f : ξ → V) :
     StrictDefinableRel Γ s fun x y ↦ Semiformula.Eval (y :> x :> e) f θ := by
   use Rew.bind (#1 :> #0 :> fun i : Fin m ↦ (&(e i) : ArithmeticSemiterm V 2))
     (fun x : ξ ↦ (&(f x) : ArithmeticSemiterm V 2)) ▹ θ;

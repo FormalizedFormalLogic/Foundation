@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
@@ -104,8 +103,8 @@ lemma val_deltaZero {φ : Prenex Γ 0 ξ n} : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0
 -- The binders are spelled out rather than taken from `variable`, to fix the order `Γ s n ξ`.
 @[simp, grind .]
 lemma val_strictHierarchy {Γ : Polarity} {s n : ℕ} {ξ : Type*} {φ : Prenex Γ s ξ n} :
-    StrictHierarchy Γ s φ.val :=
-  StrictHierarchy.toPrenex_of_deltaZero
+    ℬ[<, ℒₒᵣ].StrictHierarchy Γ s φ.val :=
+  Bounding.StrictHierarchy.toPrenex_of_deltaZero
     (Bounding.Hierarchy.zero_iff_bounded.mp φ.matrix.sigma_prop)
 
 @[simp, grind .]
@@ -725,7 +724,7 @@ theorem exists_matrix_provable (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
   exact ⟨_, by simpa [Prenex.val] using hφ'⟩;
 
 theorem exists_strictHierarchy_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
-  ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
+  ∃ ψ : ArithmeticSemisentence n, ℬ[<, ℒₒᵣ].StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;
 

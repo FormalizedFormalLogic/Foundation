@@ -4,7 +4,6 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D2
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D3
@@ -130,6 +129,7 @@ public import Foundation.FirstOrder.Syntax
 public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 public import Foundation.FirstOrder.Syntax.Classical.Bounding
 public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
+public import Foundation.FirstOrder.Syntax.Classical.BoundingStrictHierarchy
 public import Foundation.FirstOrder.Syntax.Classical.Coding
 public import Foundation.FirstOrder.Syntax.Classical.Eq
 public import Foundation.FirstOrder.Syntax.Classical.Formula
