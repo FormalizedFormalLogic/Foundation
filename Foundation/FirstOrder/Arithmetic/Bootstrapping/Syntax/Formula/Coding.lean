@@ -533,53 +533,37 @@ lemma quote_shift_fixitr (χ : Semiproposition L 0) :
 lemma bv_quote_fixitr (χ : Semiproposition L 0) :
     bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
       = χ.fvSup := by
-  have hbsemi := Semiformula.quote_isSemiformula (V := ℕ)
+  have hβ := Semiformula.quote_isSemiformula (V := ℕ)
     (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))
-  have hbU : IsUFormula L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) :=
-    hbsemi.isUFormula
-  have hle := hbsemi.bv_le
+  have hle := hβ.bv_le
   simp only [Nat.zero_add, natCast_nat] at hle
-  rcases (hle : bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
-      = χ.fvSup ∨ bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
-      < χ.fvSup) with heq | hlt
-  · exact heq
+  set j := bv (V := ℕ) L (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ)
+  -- `≤` on a model of arithmetic unfolds to `= ∨ <`.
+  obtain h | hlt := (hle : j = χ.fvSup ∨ j < χ.fvSup)
+  · exact h
   exfalso
-  set j := bv (V := ℕ) L
-    (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) with hj
-  have hpos : 0 < χ.fvSup := by omega
-  have hsemi : IsSemiformula L j
-      (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))⌝ : ℕ) := by
-    have := IsUFormula.isSemiformula hbU; rwa [← hj] at this
-  obtain ⟨γ, hγ⟩ := IsSemiformula.sound hsemi
-  have hjle : j ≤ 0 + χ.fvSup := by omega
-  have hcast : (Rew.castLE hjle ▹ γ : Semiproposition L (0 + χ.fvSup))
-      = (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)) := by
-    apply (Semiformula.quote_inj_iff (V := ℕ)).mp
-    rw [Semiformula.quote_castLE, hγ]
+  have hj : j ≤ 0 + χ.fvSup := by omega
+  obtain ⟨γ, hγ⟩ := IsSemiformula.sound (hβ.isUFormula.isSemiformula : IsSemiformula L j _)
+  have hcast : (Rew.castLE hj ▹ γ : Semiproposition L (0 + χ.fvSup))
+      = (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)) :=
+    (Semiformula.quote_inj_iff (V := ℕ)).mp <| by rw [Semiformula.quote_castLE, hγ]
   have hγfree : γ.freeVariables = ∅ := by
-    have hb : (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup)).freeVariables = ∅ :=
-      Finset.eq_empty_of_forall_notMem fun x hx ↦ not_fvar?_fixitr χ x hx
-    have := Semiformula.freeVariables_castLE γ hjle
-    rw [hcast, hb] at this; exact this.symm
-  have hχeq : χ = γ ⇜ (fun i : Fin j ↦ (&↑i : SyntacticTerm L)) := by
-    have e1 : (Rew.fixitr 0 χ.fvSup ▹ χ : Semiproposition L (0 + χ.fvSup))
-        ⇜ (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L)) = χ :=
-      Semiformula.subst_comp_fixitr χ
-    have hRewEq :
-        (Rew.subst (fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L))).comp (Rew.castLE hjle)
-        = Rew.subst (fun i : Fin j ↦ (&↑i : SyntacticTerm L)) := by
+    rw [← Semiformula.freeVariables_castLE γ hj, hcast]
+    exact Finset.eq_empty_of_forall_notMem fun x hx ↦ not_fvar?_fixitr χ x hx
+  have hχ : γ ⇜ (fun i : Fin j ↦ (&↑i : SyntacticTerm L)) = χ := by
+    have : (Rew.subst fun x : Fin (0 + χ.fvSup) ↦ (&↑x : SyntacticTerm L)).comp (Rew.castLE hj)
+        = Rew.subst fun i : Fin j ↦ (&↑i : SyntacticTerm L) := by
       ext x <;> simp [Rew.comp_app]
-    symm
-    rw [← e1, ← hcast]
+    conv_rhs => rw [← Semiformula.subst_comp_fixitr χ, ← hcast]
     unfold Rewriting.subst
-    rw [← TransitiveRewriting.comp_app, hRewEq]
-  have hfv : (γ ⇜ (fun i : Fin j ↦ (&↑i : SyntacticTerm L))).FVar? (χ.fvSup - 1) := by
-    rw [← hχeq]; exact Semiformula.fvar?_fvSup_pred χ hpos
+    rw [← TransitiveRewriting.comp_app, this]
+  have hfv : (γ ⇜ fun i : Fin j ↦ (&↑i : SyntacticTerm L)).FVar? (χ.fvSup - 1) := by
+    rw [hχ]; exact Semiformula.fvar?_fvSup_pred χ (by omega)
   unfold Rewriting.subst at hfv
   rcases Semiformula.fvar?_rew hfv with (⟨i, hi⟩ | ⟨z, hz, _⟩)
-  · have hib : χ.fvSup - 1 = (i : ℕ) := by
+  · have : χ.fvSup - 1 = (i : ℕ) := by
       simpa [Rew.subst_bvar, Semiterm.FVar?, Semiterm.freeVariables_fvar] using hi
-    have hij := i.isLt
+    have := i.isLt
     omega
   · simp [Semiformula.FVar?, hγfree] at hz
 
