@@ -551,11 +551,16 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 lemma isHierarchy_quote_iff_s (ψ : ArithmeticSemiproposition n) :
     IsHierarchy Γ s (⌜ψ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Hierarchy Γ s ψ := by
-  sorry
+  have h : IsHierarchy Γ s (⌜ψ⌝ : V) ↔ IsHierarchy Γ s (⌜ψ⌝ : ℕ) := by
+    simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton,
+      (IsHierarchy.defined (V := V) Γ s).df, (IsHierarchy.defined (V := ℕ) Γ s).df]
+      using models_iff_of_Delta1 (V := V) (IsHierarchy.defined Γ s).proper
+        (IsHierarchy.defined Γ s).proper (e := ![⌜ψ⌝]);
+  exact h.trans ⟨hierarchy_of_isHierarchy ψ, isHierarchy_of_hierarchy⟩;
 
 theorem isHierarchy_quote_iff (σ : ArithmeticSemisentence n) :
     IsHierarchy Γ s (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Hierarchy Γ s σ := by
-  sorry
+  simp [Sentence.quote_def, isHierarchy_quote_iff_s];
 
 theorem isSigma_quote_iff (σ : ArithmeticSemisentence n) :
     IsSigma s (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s σ := isHierarchy_quote_iff σ
