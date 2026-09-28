@@ -164,3 +164,15 @@ instance insert {φ : Sentence L} [d : T.Δ₁] : (insert φ T).Δ₁ :=
 end Δ₁
 
 end FFL.FirstOrder.Theory
+
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+
+variable {V : Type*} [ORingStructure V]
+  {L : Language} [L.Encodable] [L.LORDefinable] {T U : Theory L} [T.Δ₁] [U.Δ₁]
+
+@[simp] lemma Δ₁Class.mem_union {p : V} :
+    p ∈ (T ∪ U).Δ₁Class ↔ p ∈ T.Δ₁Class ∨ p ∈ U.Δ₁Class := by
+  change V ⊧/![p] (T.Δ₁ch ⋎ U.Δ₁ch).val ↔ _
+  simp [Theory.Δ₁Class]
+
+end FFL.FirstOrder.Arithmetic.Bootstrapping
