@@ -26,13 +26,13 @@ def extendRoot : RootedModel (Option κ) α where
     | none, some _ => True
     | _, none => False
   Val' x a := match x with
-    | some x => M.Val x a
-    | none => M.Val M.root a
+    | some x => M x a
+    | none => M M.root a
   root := none
   root_rel x hx := by
     rcases x with _ | x;
-    . exact absurd rfl hx;
-    . trivial;
+    · exact absurd rfl hx;
+    · trivial;
 
 namespace extendRoot
 
@@ -55,8 +55,8 @@ instance [IsTrans _ M.Rel] : IsTrans _ M.extendRoot.Rel where
 instance [Std.Irrefl M.Rel] : Std.Irrefl M.extendRoot.Rel where
   irrefl x := by
     rcases x with _ | x;
-    . exact not_rel_none;
-    . exact Std.Irrefl.irrefl (r := M.Rel) x;
+    · exact not_rel_none;
+    · exact Std.Irrefl.irrefl (r := M.Rel) x;
 
 instance [IsConverseWellFounded _ M.Rel] : IsConverseWellFounded _ M.extendRoot.Rel where
   cwf := by
@@ -66,31 +66,31 @@ instance [IsConverseWellFounded _ M.Rel] : IsConverseWellFounded _ M.extendRoot.
       | h x ih =>
         constructor;
         rintro (_ | y) h;
-        . exact absurd h not_rel_none;
-        . exact ih y h;
+        · exact absurd h not_rel_none;
+        · exact ih y h;
     constructor;
     rintro (_ | x);
-    . constructor;
+    · constructor;
       rintro (_ | y) h;
-      . exact absurd h not_rel_none;
-      . exact hsome y;
-    . exact hsome x;
+      · exact absurd h not_rel_none;
+      · exact hsome y;
+    · exact hsome x;
 
 instance [M.IsGL] : M.extendRoot.IsGL where
 
 instance [Fintype M.World] : Fintype M.extendRoot.World := inferInstanceAs (Fintype (Option κ))
 
-lemma forces_some : some x ⊩[M.extendRoot.toModel] A ↔ x ⊩[M.toModel] A := by
+lemma forces_some : some x ⊩[M.extendRoot.toModel] A ↔ x ⊩ A := by
   induction A generalizing x with
   | atom | falsum => rfl;
   | imp A B ihA ihB => exact imp_congr ihA ihB;
   | box A ih =>
     constructor;
-    . intro h y Rxy;
+    · intro h y Rxy;
       exact ih.mp (h (some y) Rxy);
-    . rintro h (_ | y) Rxy;
-      . exact absurd Rxy not_rel_none;
-      . exact ih.mpr (h y Rxy);
+    · rintro h (_ | y) Rxy;
+      · exact absurd Rxy not_rel_none;
+      · exact ih.mpr (h y Rxy);
 
 lemma relItr_some_iff {n : ℕ} {y : M.extendRoot.World} :
     M.extendRoot.RelItr n (some x) y ↔ ∃ y', y = some y' ∧ M.RelItr n x y' := by
@@ -99,34 +99,33 @@ lemma relItr_some_iff {n : ℕ} {y : M.extendRoot.World} :
   | succ n ih =>
     simp only [Model.relItr_succ];
     constructor;
-    . rintro ⟨(_ | z), Rxz, Rzy⟩;
-      . exact absurd Rxz not_rel_none;
-      . obtain ⟨y', rfl, h⟩ := ih.mp Rzy;
+    · rintro ⟨(_ | z), Rxz, Rzy⟩;
+      · exact absurd Rxz not_rel_none;
+      · obtain ⟨y', rfl, h⟩ := ih.mp Rzy;
         exact ⟨y', rfl, z, Rxz, h⟩;
-    . rintro ⟨y', rfl, z, Rxz, Rzy⟩;
+    · rintro ⟨y', rfl, z, Rxz, Rzy⟩;
       exact ⟨some z, Rxz, ih.mpr ⟨y', rfl, Rzy⟩⟩;
 
 variable [Fintype M.World] [M.IsGL]
 
-lemma rank_some : Model.World.rank (M := M.extendRoot.toModel) (some x) = Model.World.rank (M := M.toModel) x := by
-  have h : ∀ n, Model.World.rank (M := M.extendRoot.toModel) (some x) < n ↔
-      Model.World.rank (M := M.toModel) x < n := by
-    intro n;
-    simp only [Model.rank_lt_iff, notRelItr_iff, relItr_some_iff];
-    grind;
-  exact le_antisymm (Nat.le_of_lt_succ ((h _).mpr (Nat.lt_succ_self _)))
-    (Nat.le_of_lt_succ ((h _).mp (Nat.lt_succ_self _)));
+lemma rank_some :
+    Model.World.rank (M := M.extendRoot.toModel) (some x) =
+      Model.World.rank (M := M.toModel) x := by
+  apply eq_of_forall_gt_iff;
+  intro n;
+  simp only [Model.rank_lt_iff, notRelItr_iff, relItr_some_iff];
+  grind;
 
 lemma height_extendRoot : M.extendRoot.height = M.height + 1 := by
   apply le_antisymm;
-  . apply cwfHeight_le;
+  · apply cwfHeight_le;
     rintro (_ | y) h;
-    . exact absurd h not_rel_none;
-    . have := rank_some (M := M) (x := y);
+    · exact absurd h not_rel_none;
+    · have := rank_some (M := M) (x := y);
       have := RootedModel.rank_le_height (M := M) (x := y);
       simp only [Model.World.rank] at *;
       omega;
-  . exact Nat.succ_le_of_lt <| lt_cwfHeight (b := some M.root) trivial <| by
+  · exact Nat.succ_le_of_lt <| lt_cwfHeight (b := some M.root) trivial <| by
       have := rank_some (M := M) (x := M.root);
       simp only [RootedModel.height, Model.World.rank] at *;
       omega;

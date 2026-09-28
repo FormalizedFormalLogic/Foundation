@@ -33,7 +33,7 @@ Ported code must not carry references to the source repository's development his
 
 `contribute/style.md` is the authority. The items that actually bite when moving AlphaCentauri code:
 
-- **Convert the tactic layout.** Add the trailing `;` where style.md calls for it, and rewrite the source's `·` focus dots as `.`. Revert any `;` that breaks the build or raises a warning, and say which.
+- **Convert the tactic layout.** Rewrite the source's `·` focus dots as `.`.
 - **Remove `refine … ?_` holes,** using `use` / `and_intros` / `intro` as style.md prescribes. A complete anonymous constructor with no holes (`exact ⟨…⟩`) is fine and stays.
 - **Factor repeated binders into `variable`,** in `section`s scoped to where the context actually holds — do not repeat the same implicit binders on declaration after declaration. Exception: lemmas defined by term-mode pattern matching over an inductive predicate must bind their own `Γ s n φ` in their signature, or the equation compiler cannot generalize them; scope your `variable` blocks so they do not cover those. Whatever you do, every declaration must keep exactly the same set of implicit arguments it had in the source — verify with `#check @<name>` before and after.
 - **Prefer an existing lemma over a new one.** When a proof repeats an ad-hoc step (e.g. `obtain ⟨t, rfl⟩ : ∃ t, s' = t + 1 := ⟨s' - 1, by omega⟩`), search Mathlib and Foundation first with `lean_local_search` / `lean_loogle` / `lean_leanfinder` — the fact usually already exists (that one is `Nat.exists_eq_succ_of_ne_zero`).

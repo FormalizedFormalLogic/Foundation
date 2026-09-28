@@ -15,11 +15,10 @@ reducible alias for the coercion so existing `.toSet` call-sites keep elaboratin
 
 namespace List
 
-variable {l : List α}
+variable {α β : Type*} {l : List α}
 
-variable {α : Type u} {β: Type v}
-
-lemma getI_map_range [Inhabited α] (f : ℕ → α) (h : i < n) : ((List.range n).map f).getI i = f i := by
+lemma getI_map_range [Inhabited α] (f : ℕ → α) {i n : ℕ} (h : i < n) :
+    ((List.range n).map f).getI i = f i := by
   simpa [h] using List.getI_eq_getElem ((List.range n).map f) (n := i) (by simpa using h)
 
 def subsetSet (l : List α) (s : Set α) [DecidablePred s] : Bool :=
@@ -34,11 +33,11 @@ def upper : List ℕ → ℕ
 @[simp] lemma upper_cons (n : ℕ) (ns : List ℕ) : upper (n :: ns) = max (n + 1) ns.upper := rfl
 
 lemma lt_upper (l : List ℕ) {n} (h : n ∈ l) : n < l.upper := by
-  induction' l with n ns ih
-  case nil => simp at h
-  case cons m =>
-    suffices m < n + 1 ∨ m < ns.upper by simpa
-    rcases show m = n ∨ m ∈ ns by simpa using h with (rfl | h)
+  induction l with
+  | nil => simp at h
+  | cons m ns ih =>
+    suffices n < m + 1 ∨ n < ns.upper by simpa
+    rcases show n = m ∨ n ∈ ns by simpa using h with (rfl | h)
     · exact Or.inl (Nat.lt_succ_self _)
     · exact Or.inr (ih h)
 
@@ -66,35 +65,39 @@ def sup : List α → α
 
 @[simp] lemma sup_cons (a : α) (as : List α) : (a :: as).sup = a ⊔ as.sup := rfl
 
-lemma le_sup {a} {l : List α} : a ∈ l → a ≤ l.sup := by
-  induction' l with a l ih
-  · simp
-  case cons _ b =>
+lemma le_sup {a : α} {l : List α} : a ∈ l → a ≤ l.sup := by
+  induction l with
+  | nil => simp
+  | cons c l ih =>
     intro h
-    rcases show b = a ∨ b ∈ l by simpa using h with (rfl | h)
+    rcases show a = c ∨ a ∈ l by simpa using h with (rfl | h)
     · simp
     · exact le_sup_of_le_right (ih h)
 
-lemma sup_ofFn (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := by
-  induction' n with n ih
-  · simp
-  · have h₁ : (Finset.univ : Finset (Fin (n + 1))) = insert 0 ((Finset.univ : Finset (Fin n)).image Fin.succ) := by
+lemma sup_ofFn {n : ℕ} (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    have h₁ : (Finset.univ : Finset (Fin (n + 1))) =
+        insert 0 ((Finset.univ : Finset (Fin n)).image Fin.succ) := by
       ext i; simp
     have h₂ : Finset.sup Finset.univ (fun i ↦ f (Fin.succ i)) = Finset.sup {0}ᶜ f := by
-      simpa [Function.comp] using! Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f
+      simpa [Function.comp] using!
+        Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f
     calc
       (ofFn f).sup = (f 0 ⊔ Finset.univ.sup fun i : Fin _ ↦ f i.succ) := by simp [ih]
       _            = f 0 ⊔ Finset.sup {0}ᶜ f                          := by rw [h₂]
-      _            = Finset.univ.sup f                                := by rw [h₁, Finset.sup_insert]; simp
+      _            = Finset.univ.sup f                                := by
+        rw [h₁, Finset.sup_insert]; simp
 
 end sup
 
-lemma ofFn_get_eq_map_cast {n} (g : α → β) (as : List α) {h} :
+lemma ofFn_get_eq_map_cast {n : ℕ} (g : α → β) (as : List α) {h : n = as.length} :
     ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
   ext i b; simp
   by_cases hi : i < n
   · simp [hi, List.getElem?_eq_getElem (h ▸ hi)]
-  · simp [hi, List.getElem?_eq_none (le_of_not_gt $ h ▸ hi)]
+  · simp [hi, List.getElem?_eq_none (le_of_not_gt <| h ▸ hi)]
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 
@@ -113,12 +116,14 @@ variable [DecidableEq α]
 lemma remove_nil (a : α) : [].remove a = [] := by simp [List.remove]
 
 @[simp]
-lemma eq_remove_cons {l : List α} : (ψ :: l).remove ψ = l.remove ψ := by induction l <;> simp_all [List.remove];
+lemma eq_remove_cons {ψ : α} {l : List α} : (ψ :: l).remove ψ = l.remove ψ := by
+  induction l <;> simp_all [List.remove]
 
 @[simp]
-lemma remove_singleton_of_ne {φ ψ : α} (h : φ ≠ ψ) : [φ].remove ψ = [φ] := by simp_all [List.remove];
+lemma remove_singleton_of_ne {φ ψ : α} (h : φ ≠ ψ) : [φ].remove ψ = [φ] := by
+  simp_all [List.remove]
 
-lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
+lemma mem_remove_iff {a b : α} {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
   simp [List.remove]
 
 lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ l := by
@@ -163,7 +168,7 @@ end remove
 
 @[elab_as_elim]
 lemma induction_with_singleton
-  {motive : List F → Prop}
+  {F : Type*} {motive : List F → Prop}
   (hnil : motive [])
   (hsingle : ∀ a, motive [a])
   (hcons : ∀ a as, as ≠ [] → motive as → motive (a :: as)) : ∀ as, motive as := by
@@ -197,11 +202,14 @@ instance Nodup.finite [Finite α] : Finite {l : List α // l.Nodup} := by
 
 section suffix
 
-lemma suffix_of_cons_suffix {l₁ l₂ : List α} {a} : a :: l₁ <:+ l₂ → l₁ <:+ l₂ := by rintro ⟨l₂, rfl⟩; exact ⟨l₂ ++ [a], by simp⟩
+lemma suffix_of_cons_suffix {l₁ l₂ : List α} {a} : a :: l₁ <:+ l₂ → l₁ <:+ l₂ := by
+  rintro ⟨l₂, rfl⟩; exact ⟨l₂ ++ [a], by simp⟩
 
-lemma suffix_cons_of {l₁ l₂ : List α} {a} : l₁ <:+ l₂ → l₁ <:+ a :: l₂ := fun h ↦ suffix_cons_iff.mpr <| Or.inr h
+lemma suffix_cons_of {l₁ l₂ : List α} {a} : l₁ <:+ l₂ → l₁ <:+ a :: l₂ :=
+  fun h ↦ suffix_cons_iff.mpr <| Or.inr h
 
-lemma exists_of_not_suffix (l₁ l₂ : List α) : ¬l₁ <:+ l₂ → ∃ l a, a :: l <:+ l₁ ∧ l <:+ l₂ ∧ ¬a :: l <:+ l₂ :=
+lemma exists_of_not_suffix (l₁ l₂ : List α) :
+    ¬l₁ <:+ l₂ → ∃ l a, a :: l <:+ l₁ ∧ l <:+ l₂ ∧ ¬a :: l <:+ l₂ :=
   match l₁ with
   |      [] => by simp
   | a :: l₁ => by
@@ -211,13 +219,14 @@ lemma exists_of_not_suffix (l₁ l₂ : List α) : ¬l₁ <:+ l₂ → ∃ l a, 
     · rcases exists_of_not_suffix l₁ l₂ h₁₂ with ⟨l, b, hb, hll₂, nh⟩
       exact ⟨l, b, suffix_cons_of hb, hll₂, nh⟩
 
-lemma IsSuffix.eq_or_cons_suffix : l₁ <:+ l₂ → l₁ = l₂ ∨ ∃ a, a :: l₁ <:+ l₂ := by
+lemma IsSuffix.eq_or_cons_suffix {l₁ l₂ : List α} : l₁ <:+ l₂ → l₁ = l₂ ∨ ∃ a, a :: l₁ <:+ l₂ := by
   rintro ⟨l, rfl⟩
   rcases eq_nil_or_concat' l with (rfl | ⟨l, a, rfl⟩)
   · simp
   · right; exact ⟨a, l, by simp⟩
 
-lemma suffix_trichotomy {l₁ l₂ : List α} (h₁₂ : ¬l₁ <:+ l₂) (h₂₁ : ¬l₂ <:+ l₁) : ∃ l a b, a ≠ b ∧ a :: l <:+ l₁ ∧ b :: l <:+ l₂ := by
+lemma suffix_trichotomy {l₁ l₂ : List α} (h₁₂ : ¬l₁ <:+ l₂) (h₂₁ : ¬l₂ <:+ l₁) :
+    ∃ l a b, a ≠ b ∧ a :: l <:+ l₁ ∧ b :: l <:+ l₂ := by
   rcases exists_of_not_suffix _ _ h₁₂ with ⟨l, a, ha, hkl, _⟩
   have : ∃ b, b :: l <:+ l₂ := by
     rcases hkl.eq_or_cons_suffix with (rfl | h)
@@ -233,17 +242,18 @@ namespace Vector
 
 variable {α : Type*}
 
-lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : List.Vector.get (⟨l, h⟩ : List.Vector α n) i = l.get (i.cast h.symm) := rfl
+lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) :
+    List.Vector.get (⟨l, h⟩ : List.Vector α n) i = l.get (i.cast h.symm) := rfl
 
 lemma get_one {α : Type*} {n} (v : Vector α (n + 2)) : v.get 1 = v.tail.head := by
   have : v.tail.get ⟨0, by omega⟩ = v.get 1 := Vector.get_tail_succ v 0;
   simp [←this];
 
-lemma ofFn_vecCons (a : α) (v : Fin n → α) :
+lemma ofFn_vecCons {n : ℕ} (a : α) (v : Fin n → α) :
     ofFn (a :> v) = a ::ᵥ ofFn v := by
   ext i; cases i using Fin.cases <;> simp
 
-lemma cons_get (a : α) (v : List.Vector α k) : (a ::ᵥ v).get = a :> v.get := by
+lemma cons_get {k : ℕ} (a : α) (v : List.Vector α k) : (a ::ᵥ v).get = a :> v.get := by
   ext i; cases i using Fin.cases <;> simp
 
 end Vector
@@ -257,10 +267,10 @@ lemma exists_of_not_nil (hl : l ≠ []) : ∃ a, a ∈ l := by
 
 lemma iff_nil_forall : (l = []) ↔ (∀ a ∈ l, a ∈ []) := by
   constructor;
-  . intro h;
+  · intro h;
     subst h;
     tauto;
-  . contrapose!;
+  · contrapose!;
     rintro h;
     obtain ⟨a, ha⟩ := exists_of_not_nil h;
     use a;
@@ -270,10 +280,10 @@ lemma iff_nil_forall : (l = []) ↔ (∀ a ∈ l, a ∈ []) := by
 lemma nodup_iff_get_ne_get : l.Nodup ↔ ∀ i j : Fin l.length, i < j → l[i] ≠ l[j] := by
   apply Iff.trans nodup_iff_getElem?_ne_getElem?;
   constructor;
-  . rintro h ⟨i, _⟩ ⟨j, hj⟩ hij;
+  · rintro h ⟨i, _⟩ ⟨j, hj⟩ hij;
     have := h i j (by omega) hj;
     simp_all;
-  . rintro h i j hij hj;
+  · rintro h i j hij hj;
     rw [getElem?_eq_getElem, getElem?_eq_getElem];
     simpa [Option.some.injEq] using h ⟨i, by omega⟩ ⟨j, by omega⟩ hij;
 
@@ -283,14 +293,15 @@ lemma Nodup.infinite_of_infinite : Infinite {l : List α // l.Nodup} → Infinit
   intro _;
   exact List.Nodup.finite;
 
-lemma exists_of_range (h : a ∈ List.map f (List.range n)) : ∃ i < n, a = f i := by
+lemma exists_of_range {a : α} {f : ℕ → α} {n : ℕ} (h : a ∈ List.map f (List.range n)) :
+    ∃ i < n, a = f i := by
   obtain ⟨i, ⟨hi, rfl⟩⟩ := List.exists_of_mem_map h;
   use i;
   constructor;
-  . simpa using hi;
-  . simp;
+  · simpa using hi;
+  · simp;
 
-lemma single_suffix_uniq {l : List α} (ha : [a] <:+ l) (hb : [b] <:+ l) : a = b := by
+lemma single_suffix_uniq {a b : α} {l : List α} (ha : [a] <:+ l) (hb : [b] <:+ l) : a = b := by
   rcases ha with ⟨la, rfl⟩
   rcases hb with ⟨lb, e⟩
   exact Eq.symm (List.concat_inj.mp <| by { simpa using e }).2

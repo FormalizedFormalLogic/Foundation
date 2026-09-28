@@ -20,7 +20,7 @@ variable {α : Type*} [DecidableEq α]
 
 /-- The three-layered cut-free sequent calculus of `D`: the layers `0` and `1` are those of `S`.
 
-- [KKIM25, §3]
+- [KKIM25, Section 3]
 -/
 inductive Gentzen : LayeredSequent 3 α → Prop
   | axm (ℓ) (A) : Gentzen ({A} ⟹[ℓ] {A})
@@ -36,9 +36,9 @@ inductive Gentzen : LayeredSequent 3 α → Prop
   | boxL {Γ Δ A} : Gentzen (insert A Γ ⟹[1] Δ) → Gentzen (insert (□A) Γ ⟹[1] Δ)
   | liftUp₁₂ {Γ Δ : FormulaFinset α} : Gentzen (Γ.box ⟹[1] Δ.box) → Gentzen (Γ.box ⟹[2] Δ.box)
 
-@[inherit_doc] notation:45 "⊢ᴳ[D] " S:50 => Gentzen S
+@[inherit_doc] notation:45 "⊢ᴳ[𝐃] " S:50 => Gentzen S
 
-notation:45 "⊬ᴳ[D] " S:50 => ¬Gentzen S
+notation:45 "⊬ᴳ[𝐃] " S:50 => ¬Gentzen S
 
 namespace Gentzen
 
@@ -47,7 +47,7 @@ variable {Γ Δ : FormulaFinset α}
 lemma isPropClosed : LayeredSequent.IsPropClosed (Gentzen (α := α)) :=
   ⟨axm, botL, fun h h' ↦ wkL h h', fun h h' ↦ wkR h h', impL, impR⟩
 
-lemma toGL {T : LayeredSequent 3 α} (h : ⊢ᴳ[D] T) : T.level = 0 → ⊢ᴳ[GL] T.toSequent := by
+lemma toGL {T : LayeredSequent 3 α} (h : ⊢ᴳ[𝐃] T) : T.level = 0 → ⊢ᴳ[𝐆𝐋] T.toSequent := by
   induction h with
   | axm => exact fun _ ↦ .axm _;
   | botL => exact fun _ ↦ .botL;
@@ -58,7 +58,7 @@ lemma toGL {T : LayeredSequent 3 α} (h : ⊢ᴳ[D] T) : T.level = 0 → ⊢ᴳ[
   | boxGL _ ih => exact fun hl ↦ .boxGL (ih hl);
   | liftUp₀₁ | boxL | liftUp₁₂ => nofun;
 
-lemma toS {T : LayeredSequent 3 α} (h : ⊢ᴳ[D] T) : T.level = 1 → ⊢ᴳ[S] T.ant ⟹[1] T.suc := by
+lemma toS {T : LayeredSequent 3 α} (h : ⊢ᴳ[𝐃] T) : T.level = 1 → ⊢ᴳ[𝐒] T.ant ⟹[1] T.suc := by
   induction h with
   | axm => exact fun _ ↦ .axm _ _;
   | botL => exact fun _ ↦ .botL _;
@@ -70,7 +70,7 @@ lemma toS {T : LayeredSequent 3 α} (h : ⊢ᴳ[D] T) : T.level = 1 → ⊢ᴳ[S
   | boxL _ ih => exact fun hl ↦ .boxL (ih hl);
   | boxGL | liftUp₁₂ => nofun;
 
-lemma of_S {T : LayeredSequent 2 α} (h : ⊢ᴳ[S] T) : ⊢ᴳ[D] T.ant ⟹[T.level.castSucc] T.suc := by
+lemma of_S {T : LayeredSequent 2 α} (h : ⊢ᴳ[𝐒] T) : ⊢ᴳ[𝐃] T.ant ⟹[T.level.castSucc] T.suc := by
   induction h with
   | axm ℓ A => exact axm _ A;
   | botL => exact botL _;
@@ -82,21 +82,15 @@ lemma of_S {T : LayeredSequent 2 α} (h : ⊢ᴳ[S] T) : ⊢ᴳ[D] T.ant ⟹[T.l
   | boxGL _ ih => exact boxGL ih;
   | boxL _ ih => exact boxL ih;
 
-/-- The layer `0` is the sequent calculus of `GL`.
-
-- [KKIM25, Theorem 4.1]
--/
-theorem iff_GL : ⊢ᴳ[D] Γ ⟹[0] Δ ↔ ⊢ᴳ[GL] Γ ⟹ Δ :=
+/-- - [KKIM25, Theorem 4.1] -/
+theorem iff_GL : ⊢ᴳ[𝐃] Γ ⟹[0] Δ ↔ ⊢ᴳ[𝐆𝐋] Γ ⟹ Δ :=
   ⟨fun h ↦ h.toGL rfl, fun h ↦ of_S (S.Gentzen.iff_GL.mpr h)⟩
 
-/-- The layer `1` is the upper layer of the sequent calculus of `S`.
-
-- [KKIM25, Theorem 4.2]
--/
-theorem iff_S : ⊢ᴳ[D] Γ ⟹[1] Δ ↔ ⊢ᴳ[S] Γ ⟹[1] Δ := ⟨fun h ↦ h.toS rfl, of_S⟩
+/-- - [KKIM25, Theorem 4.2] -/
+theorem iff_S : ⊢ᴳ[𝐃] Γ ⟹[1] Δ ↔ ⊢ᴳ[𝐒] Γ ⟹[1] Δ := ⟨fun h ↦ h.toS rfl, of_S⟩
 
 /-- - [KKIM25, Theorem 4.3] -/
-lemma liftUp₀₂ {S : Sequent α} (h : ⊢ᴳ[GL] S) : ⊢ᴳ[D] S.ant ⟹[2] S.suc := by
+lemma liftUp₀₂ {S : Sequent α} (h : ⊢ᴳ[𝐆𝐋] S) : ⊢ᴳ[𝐃] S.ant ⟹[2] S.suc := by
   induction h with
   | axm A => exact axm 2 A;
   | botL => exact botL 2;

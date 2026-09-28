@@ -1,0 +1,28 @@
+name: Setup Lean
+description: Install elan and just, then restore the Mathlib cache and Foundation's remote cache.
+
+runs:
+  using: composite
+  steps:
+    - name: Setup elan
+      shell: bash
+      run: |
+        curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+    - uses: extractions/setup-just@v4
+
+    - name: Get Mathlib cache
+      shell: bash
+      run: lake exe cache get
+
+    - name: Restore remote cache (Foundation)
+      shell: bash
+      env:
+        LAKE_CONFIG: lake-cache.toml
+      run: |
+        lake cache get \
+          --service ffl \
+          --max-revs=100 \
+          --repo FormalizedFormalLogic/Foundation \
+          --package Foundation \
+        || echo "::warning::cache incomplete; the build will compile the rest from source"

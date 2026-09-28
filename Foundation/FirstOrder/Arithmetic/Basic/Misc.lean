@@ -7,14 +7,15 @@ public import Foundation.FirstOrder.Arithmetic.LE
 
 - *NOTE*:
   To avoid the duplicate definitions of `Tarski.Structure ℒₒᵣ` for models,
-  we basically use `ORingStructure`, and generated `standardStructure` instead of `Tarski.Structure ℒₒᵣ` itself.
+  we basically use `ORingStructure`, and generated `standardStructure` instead of
+  `Tarski.Structure ℒₒᵣ` itself.
 -/
 
 namespace FFL
 
 class ORingStructure (α : Type*) extends Zero α, One α, Add α, Mul α, LT α
 
-instance [Zero α] [One α] [Add α] [Mul α] [LT α] : ORingStructure α where
+instance {α : Type*} [Zero α] [One α] [Add α] [Mul α] [LT α] : ORingStructure α where
 
 namespace ORingStructure
 
@@ -25,9 +26,9 @@ def numeral : ℕ → α
   |     1 => 1
   | n + 2 => numeral (n + 1) + 1
 
- @[simp] lemma zero_eq_zero : (numeral 0 : α) = 0 := rfl
+@[simp] lemma zero_eq_zero : (numeral 0 : α) = 0 := rfl
 
- @[simp] lemma one_eq_one : (numeral 1 : α) = 1 := rfl
+@[simp] lemma one_eq_one : (numeral 1 : α) = 1 := rfl
 
 end ORingStructure
 
@@ -60,15 +61,17 @@ section ToString
 
 variable {L : Language} [L.ORing]
 
-variable [ToString ξ]
+variable {ξ : Type*} {n : ℕ} [ToString ξ]
 
 def Semiterm.toStringORing : ArithmeticSemiterm ξ n → String
   |                        #x => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
   |                        &x => "a_{" ++ toString x ++ "}"
   | func Language.Zero.zero _ => "0"
   |   func Language.One.one _ => "1"
-  |   func Language.Add.add v => "(" ++ toStringORing (v 0) ++ " + " ++ toStringORing (v 1) ++ ")"
-  |   func Language.Mul.mul v => "(" ++ toStringORing (v 0) ++ " \\cdot " ++ toStringORing (v 1) ++ ")"
+  |   func Language.Add.add v =>
+    "(" ++ toStringORing (v 0) ++ " + " ++ toStringORing (v 1) ++ ")"
+  |   func Language.Mul.mul v =>
+    "(" ++ toStringORing (v 0) ++ " \\cdot " ++ toStringORing (v 1) ++ ")"
 
 instance : Repr (ArithmeticSemiterm ξ n) := ⟨fun t _ ↦ t.toStringORing⟩
 
@@ -81,12 +84,20 @@ def Semiformula.toStringORing : ∀ {n}, ArithmeticSemiformula ξ n → String
   | _,          rel Language.LT.lt v => (v 0).toStringORing ++ " < " ++ (v 1).toStringORing
   | _,         nrel Language.Eq.eq v => (v 0).toStringORing ++ " \\not = " ++ (v 1).toStringORing
   | _,         nrel Language.LT.lt v => (v 0).toStringORing ++ " \\not < " ++ (v 1).toStringORing
-  | _,                         φ ⋏ ψ => "[" ++ φ.toStringORing ++ "]" ++ " \\land " ++ "[" ++ ψ.toStringORing ++ "]"
-  | _,                         φ ⋎ ψ => "[" ++ φ.toStringORing ++ "]" ++ " \\lor "  ++ "[" ++ ψ.toStringORing ++ "]"
-  | n, ∀¹ (rel Language.LT.lt v 🡒 φ) => "(\\forall x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
-  | n, ∃¹ (rel Language.LT.lt v ⋏ φ) => "(\\exists x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
-  | n,                          ∀¹ φ => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
-  | n,                          ∃¹ φ => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
+  | _,                         φ ⋏ ψ =>
+    "[" ++ φ.toStringORing ++ "]" ++ " \\land " ++ "[" ++ ψ.toStringORing ++ "]"
+  | _,                         φ ⋎ ψ =>
+    "[" ++ φ.toStringORing ++ "]" ++ " \\lor "  ++ "[" ++ ψ.toStringORing ++ "]"
+  | n, ∀¹ (rel Language.LT.lt v 🡒 φ) =>
+    "(\\forall x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++
+      "[" ++ φ.toStringORing ++ "]"
+  | n, ∃¹ (rel Language.LT.lt v ⋏ φ) =>
+    "(\\exists x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++
+      "[" ++ φ.toStringORing ++ "]"
+  | n,                          ∀¹ φ =>
+    "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
+  | n,                          ∃¹ φ =>
+    "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
 
 instance : Repr (ArithmeticSemiformula ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
 
@@ -106,16 +117,18 @@ instance : Semiterm.Operator.GödelNumber ℒₒᵣ α :=
 lemma gödelNumber_def (a : α) :
   gödelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
-lemma gödelNumber'_def (a : α) :
+lemma gödelNumber'_def {ξ : Type*} {n : ℕ} (a : α) :
   (⌜a⌝ : ArithmeticSemiterm ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
-lemma gödelNumber'_eq_coe_encode (a : α) :
+lemma gödelNumber'_eq_coe_encode {ξ : Type*} {n : ℕ} (a : α) :
   (⌜a⌝ : ArithmeticSemiterm ξ n) = ↑(Encodable.encode a) := rfl
 
 @[simp] lemma encode_encode_eq (a : α) :
-    (gödelNumber (encode a) : Semiterm.Const ℒₒᵣ) = gödelNumber a := by simp [Semiterm.Operator.encode, gödelNumber_def]
+    (gödelNumber (encode a) : Semiterm.Const ℒₒᵣ) = gödelNumber a := by
+  simp [Semiterm.Operator.encode, gödelNumber_def]
 
-@[simp] lemma rew_gödelNumber' (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) (a : α) :
+@[simp] lemma rew_gödelNumber' {ξ₁ : Type*} {n₁ : ℕ} {ξ₂ : Type*} {n₂ : ℕ}
+    (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) (a : α) :
     ω ⌜a⌝ = ⌜a⌝ := by
   simp [gödelNumber'_def]
 
@@ -123,8 +136,10 @@ end Arithmetic
 
 /-! ### Semantics of arithmetic  -/
 
-class Tarski.Structure.ORing (L : Language) [L.ORing] (M : Type w) [ORingStructure M] [Tarski.Structure L M] extends
-  Tarski.Structure.Zero L M, Tarski.Structure.One L M, Tarski.Structure.Add L M, Tarski.Structure.Mul L M, Tarski.Structure.Eq L M, Tarski.Structure.LT L M
+class Tarski.Structure.ORing (L : Language) [L.ORing] (M : Type*) [ORingStructure M]
+    [Tarski.Structure L M] extends
+  Tarski.Structure.Zero L M, Tarski.Structure.One L M, Tarski.Structure.Add L M,
+  Tarski.Structure.Mul L M, Tarski.Structure.Eq L M, Tarski.Structure.LT L M
 
 attribute [instance] Tarski.Structure.ORing.mk
 
@@ -132,10 +147,12 @@ namespace Tarski.Structure
 
 open Semiterm Semiformula
 
-variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [ORingStructure M]
-  [Tarski.Structure L M] [Tarski.Structure.Zero L M] [Tarski.Structure.One L M] [Tarski.Structure.Add L M]
+variable {L : Language} [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type*}
+  [ORingStructure M] [Tarski.Structure L M] [Tarski.Structure.Zero L M]
+  [Tarski.Structure.One L M] [Tarski.Structure.Add L M]
 
-@[simp] lemma numeral_eq_numeral : (z : ℕ) → (Semiterm.Operator.numeral L z).val ![] = (ORingStructure.numeral z : M)
+@[simp] lemma numeral_eq_numeral :
+    (z : ℕ) → (Semiterm.Operator.numeral L z).val ![] = (ORingStructure.numeral z : M)
   | 0     => by simp [ORingStructure.numeral, Semiterm.Operator.numeral_zero]
   | 1     => by simp [ORingStructure.numeral, Semiterm.Operator.numeral_one]
   | z + 2 => by simp [ORingStructure.numeral, Semiterm.Operator.numeral_add_two,
@@ -145,20 +162,25 @@ end Tarski.Structure
 
 namespace Semiformula
 
-variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add]
+variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add] {ξ : Type*} {n : ℕ}
 
-def ballLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := φ.ballLT ‘!!t + 1’
+def ballLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
+  φ.ballLT ‘!!t + 1’
 
-def bexsLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := φ.bexsLT ‘!!t + 1’
+def bexsLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
+  φ.bexsLT ‘!!t + 1’
 
-variable {M : Type*} {s : Tarski.Structure L M} [LT M] [One M] [Add M] [Tarski.Structure.LT L M] [Tarski.Structure.One L M] [Tarski.Structure.Add L M]
+variable {M : Type*} {s : Tarski.Structure L M} [LT M] [One M] [Add M] [Tarski.Structure.LT L M]
+  [Tarski.Structure.One L M] [Tarski.Structure.Add L M]
 
 lemma eval_ballLTSucc {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} {fv bv} :
-    (φ.ballLTSucc t).Eval (M := M) fv bv ↔ ∀ x < t.val (M := M) fv bv + 1, φ.Eval (M := M) (x :> fv) bv := by
+    (φ.ballLTSucc t).Eval (M := M) fv bv ↔
+      ∀ x < t.val (M := M) fv bv + 1, φ.Eval (M := M) (x :> fv) bv := by
   simp [ballLTSucc, Semiterm.Operator.numeral]
 
 lemma eval_bexsLTSucc {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} {fv bv} :
-    (φ.bexsLTSucc t).Eval (M := M) fv bv ↔ ∃ x < t.val (M := M) fv bv + 1, φ.Eval (M := M) (x :> fv) bv := by
+    (φ.bexsLTSucc t).Eval (M := M) fv bv ↔
+      ∃ x < t.val (M := M) fv bv + 1, φ.Eval (M := M) (x :> fv) bv := by
   simp [bexsLTSucc, Semiterm.Operator.numeral]
 
 end Semiformula
@@ -175,11 +197,13 @@ macro_rules
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∀ $x <⁺ $t, $φ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(Semiformula.ballLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
+    `(Semiformula.ballLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ]
+      ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula(lit)[ $binders* | $fbinders* | ∃ $x <⁺ $t, $φ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(Semiformula.bexsLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
+    `(Semiformula.bexsLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ]
+      ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
 

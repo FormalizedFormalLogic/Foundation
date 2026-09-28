@@ -15,9 +15,10 @@ class Kripke.Model
     (Carrier : outParam Type*) where
   Domain : World → Set Carrier
   domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
-  domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
+  domain_antimonotone : ∀ {w v : World}, w ≥ v → Domain w ⊆ Domain v
   Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
-  rel_monotone : Rel w R t → ∀ v ≤ w, Rel v R t
+  rel_monotone : ∀ {w : World} {k : ℕ} {R : L.Rel k} {t : Fin k → Carrier},
+      Rel w R t → ∀ v ≤ w, Rel v R t
 
 class Kripke.Model.ConstantDomain
     {L : Language} [L.Relational]
@@ -27,7 +28,8 @@ class Kripke.Model.ConstantDomain
 
 attribute [simp] Kripke.Model.ConstantDomain.const_domain
 
-variable (L : Language) [L.Relational] (W : Type*) [Preorder W] (C : outParam Type*) [Kripke.Model L W C]
+variable (L : Language) [L.Relational] (W : Type*) [Preorder W] (C : outParam Type*)
+  [Kripke.Model L W C]
 
 instance : CoeSort W (Type _) := ⟨fun w ↦ Kripke.Model.Domain w⟩
 
@@ -43,7 +45,7 @@ instance (p : W) : Nonempty p := by
   rcases domain_nonempty p with ⟨x, _⟩
   exact ⟨x, by assumption⟩
 
-lemma domain_monotone {p : W} : p ⊩↓ x → ∀ q ≤ p, q ⊩↓ x := fun hx _ h ↦
+lemma domain_monotone {p : W} {x : C} : p ⊩↓ x → ∀ q ≤ p, q ⊩↓ x := fun hx _ h ↦
   domain_antimonotone h hx
 
 @[simp] lemma domain_forcesExists {p : W} (x : p) : p ⊩↓ x.val := x.prop
@@ -73,10 +75,11 @@ variable (F : Filter W)
 
 instance : CoeOut F.Domain C := ⟨fun x ↦ x.val⟩
 
-lemma finite_colimit [Fintype ι] (p : ι → W) (hp : ∀ i, p i ∈ F) : ∃ q ∈ F, ∀ i, q ≤ p i :=
+lemma finite_colimit {ι : Type*} [Finite ι] (p : ι → W) (hp : ∀ i, p i ∈ F) :
+    ∃ q ∈ F, ∀ i, q ≤ p i :=
   DirectedOn.fintype_colimit isTrans_ge (Order.PFilter.nonempty F) F.directed p hp
 
-lemma finite_colimit_domain [Fintype ι] (v : ι → F.Domain) :
+lemma finite_colimit_domain {ι : Type*} [Finite ι] (v : ι → F.Domain) :
     ∃ q ∈ F, ∀ i, q ⊩↓ ↑(v i) := by
   have : ∀ i, ∃ p ∈ F, p ⊩↓ ↑(v i) := fun i ↦ (v i).mem_filter
   choose p hp using this

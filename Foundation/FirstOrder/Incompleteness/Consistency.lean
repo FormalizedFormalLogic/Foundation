@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 # Consistency predicate
 -/
 
-open Classical
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -33,26 +33,37 @@ lemma _root_.FFL.FirstOrder.Theory.ConsistentWith.quote_iff {σ : Sentence L} :
 
 section
 
-noncomputable def _root_.FFL.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
+noncomputable def _root_.FFL.FirstOrder.Theory.consistent : 𝚷ᴬ₁.Sentence :=
   .mkPi (∼provabilityPred T ⊥)
 
-@[simp] lemma consistent.defined : (T.consistent : ArithmeticSentence).Evalb (M := V) ![] ↔ T.Consistent V := by
+@[simp] lemma consistent.defined :
+    (T.consistent : ArithmeticSentence).Evalb (M := V) ![] ↔ T.Consistent V := by
+  classical
   simp [Theory.consistent, Theory.Consistent]
 
-noncomputable def _root_.FFL.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi
+noncomputable def _root_.FFL.FirstOrder.Theory.consistentWith : 𝚷ᴬ₁.Semisentence 1 := .mkPi
   “φ. ∀ nφ, !(negGraph L) nφ φ → ¬!(provable T) nφ”
 
-instance consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith := .mk fun v ↦ by
+instance consistentWith.defined :
+    𝚷ᴬ₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith :=
+  .mk fun v ↦ by
+  classical
   simp [Theory.ConsistentWith, Theory.consistentWith]
 
-instance consistentWith.definable : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) := (consistentWith.defined T).to_definable
+instance consistentWith.definable : 𝚷ᴬ₁-Predicate (T.ConsistentWith : V → Prop) :=
+  (consistentWith.defined T).to_definable
 
-noncomputable abbrev _root_.FFL.FirstOrder.Theory.consistentWithPred (σ : Sentence L) : ArithmeticSentence := T.consistentWith.val/[⌜σ⌝]
+noncomputable abbrev _root_.FFL.FirstOrder.Theory.consistentWithPred (σ : Sentence L) :
+    ArithmeticSentence :=
+  T.consistentWith.val/[⌜σ⌝]
 
-noncomputable def _root_.FFL.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) : 𝚷₁.Sentence := .mkPi
+noncomputable def _root_.FFL.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) :
+    𝚷ᴬ₁.Sentence :=
+  .mkPi
   “!T.consistentWith !!(⌜σ⌝)”
 
-@[simp] lemma consistentWithPred'_val (σ : Sentence L) : (T.consistentWithPred' σ).val = T.consistentWithPred' σ := by rfl
+@[simp] lemma consistentWithPred'_val (σ : Sentence L) :
+    (T.consistentWithPred' σ).val = T.consistentWithPred' σ := by rfl
 
 variable {T}
 
@@ -84,6 +95,8 @@ namespace FFL.FirstOrder.Arithmetic
 open _root_.FFL.FirstOrder.Entailment
 
 variable (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁]
+
+instance : 𝗜𝚺₁ ⪯ T ∪ T.Con := Entailment.WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ T) inferInstance
 
 instance [ℕ↓[ℒₒᵣ] ⊧* T] : ℕ↓[ℒₒᵣ] ⊧* T ∪ T.Con := by
   have : 𝗥₀ ⪯ 𝗜𝚺₁ := inferInstance

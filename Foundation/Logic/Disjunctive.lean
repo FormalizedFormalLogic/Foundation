@@ -15,20 +15,22 @@ class Disjunctive (𝓢 : S) : Prop where
 alias disjunctive := Disjunctive.disjunctive
 
 omit [LogicalNeutral F] in
-lemma iff_disjunctive {𝓢 : S}  : (Disjunctive 𝓢) ↔ ∀ {φ ψ}, 𝓢 ⊢ φ ⋎ ψ → 𝓢 ⊢ φ ∨ 𝓢 ⊢ ψ := by
+lemma iff_disjunctive {𝓢 : S} : (Disjunctive 𝓢) ↔ ∀ {φ ψ}, 𝓢 ⊢ φ ⋎ ψ → 𝓢 ⊢ φ ∨ 𝓢 ⊢ ψ := by
   constructor;
-  . apply Disjunctive.disjunctive;
-  . exact λ d ↦ ⟨d⟩;
+  · apply Disjunctive.disjunctive;
+  · exact fun d ↦ ⟨d⟩;
 
-lemma iff_complete_disjunctive [DecidableEq F] {𝓢 : S} [Entailment.Cl 𝓢] : (Entailment.Complete 𝓢) ↔ (Disjunctive 𝓢) := by
+open scoped Classical in
+lemma iff_complete_disjunctive {𝓢 : S} [Entailment.Cl 𝓢] :
+    (Entailment.Complete 𝓢) ↔ (Disjunctive 𝓢) := by
   constructor;
-  . intro hComp;
+  · intro hComp;
     apply iff_disjunctive.mpr;
     intro φ ψ hpq;
     rcases (hComp.con φ) with (hp | hnp);
-    . left; assumption;
-    . right; exact of_C_of_C_of_A (C_of_N hnp) C_id hpq;
-  . intro hDisj;
+    · left; assumption;
+    · right; exact of_C_of_C_of_A (C_of_N hnp) C_id hpq;
+  · intro hDisj;
     refine ⟨fun φ ↦ ?_⟩
     replace hDisj : ∀ {φ ψ}, 𝓢 ⊢ φ ⋎ ψ → 𝓢 ⊢ φ ∨ 𝓢 ⊢ ψ := iff_disjunctive.mp hDisj;
     exact @hDisj φ (∼φ) lem;

@@ -10,7 +10,8 @@ abbrev withStar := Language.add ℒₒᵣ Language.unit
 
 local notation "ℒₒᵣ⋆" => withStar
 
-def starUnbounded (c : ℕ) : Theory ℒₒᵣ⋆ := Set.range fun n : Fin c ↦ “!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆”
+def starUnbounded (c : ℕ) : Theory ℒₒᵣ⋆ :=
+  Set.range fun n : Fin c ↦ “!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆”
 
 def trueArithWithStarUnbounded (n : ℕ) : Theory ℒₒᵣ⋆ :=
   𝗘𝗤 ℒₒᵣ⋆ ∪ (Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝗧𝗔) ∪ starUnbounded n
@@ -23,7 +24,8 @@ abbrev modelStar (c : ℕ) : Tarski.Structure Language.unit ℕ where
   func := fun _ ⟨⟨⟩⟩ _ ↦ c
   rel  := fun _ r _ ↦ PEmpty.elim r
 
-lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Satisfiable (trueArithWithStarUnbounded c) := by
+lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) :
+    Satisfiable (trueArithWithStarUnbounded c) := by
   let : Tarski.Structure Language.unit ℕ := modelStar c
   have : Tarski.Structure.Zero ℒₒᵣ⋆ ℕ := ⟨rfl⟩
   have : Tarski.Structure.One ℒₒᵣ⋆ ℕ := ⟨rfl⟩
@@ -58,15 +60,17 @@ def star : ℕ⋆ := Semiterm.Operator.Star.star.val (L := ℒₒᵣ⋆) ![]
 
 local notation "⋆" => star
 
-lemma models_union_trueArithWithStarUnbounded : ℕ⋆↓[ℒₒᵣ⋆] ⊧* ⋃ c, trueArithWithStarUnbounded c := ModelOfSatEq.models _
+lemma models_union_trueArithWithStarUnbounded :
+    ℕ⋆↓[ℒₒᵣ⋆] ⊧* ⋃ c, trueArithWithStarUnbounded c := ModelOfSatEq.models _
 
 instance : ℕ⋆↓[ℒₒᵣ] ⊧* 𝗧𝗔 := ⟨by
   have : ℕ⋆↓[ℒₒᵣ⋆] ⊧* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝗧𝗔 :=
     Semantics.ModelsSet.of_subset models_union_trueArithWithStarUnbounded
-      (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (by simp) _)
+      (Set.subset_iUnion_of_subset 0 <| Set.subset_union_of_subset_left (by simp) _)
   intro σ hσ
-  let s : Tarski.Structure ℒₒᵣ ℕ⋆ := (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
-    (Language.Hom.add₁ ℒₒᵣ Language.unit)
+  let s : Tarski.Structure ℒₒᵣ ℕ⋆ :=
+    (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
+      (Language.Hom.add₁ ℒₒᵣ Language.unit)
   have e : s = standardModel ℕ⋆ := by
     have : Tarski.Structure.Zero ℒₒᵣ ℕ⋆ := ⟨rfl⟩
     have : Tarski.Structure.One ℒₒᵣ ℕ⋆ := ⟨rfl⟩

@@ -23,101 +23,154 @@ namespace Theorems
 
 open Entailment TwoSided Tableaux FiniteContext
 
-variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S : Type*} [Entailment S F] {𝓢 : S} [Entailment.Int 𝓢]
+variable {F : Type*} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S : Type*}
+  [Entailment S F] {𝓢 : S} [Entailment.Int 𝓢]
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
 scoped notation:0 Γ:45 " ⟶ " Δ:46 => Tableaux.Sequent.mk Γ Δ
 
+-- Every lemma below is applied by `Context.app`/`iapp` (defined further down in this file) by
+-- filling in a *fixed* argument telescope `F, [LogicalConnective F], [LogicalNeutral F],
+-- [DecidableEq F], S, [Entailment S F], 𝓢, [Entailment.Int 𝓢]`. Most of these lemmas do not
+-- use `[DecidableEq F]` in their stated type, but it must stay a real argument (never
+-- `omit`ted) or `Context.app`'s fixed-position application misfires with a kernel type
+-- mismatch. The two linters that would otherwise flag this are suppressed instead.
 set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma to_twoSided {Γ Δ} (h : Valid 𝓢 [Γ ⟶ Δ]) : Γ ⟹ Δ := by
   rcases h
   · assumption
   · simp_all
 
--- `DecidableEq F` is not referenced in the proof term itself, but the ambient
--- instance is needed for elaboration to disambiguate `TwoSided.to_provable`'s
--- own `DecidableEq F`-dependent notation; omitting it (as the `unusedSectionVars`
--- linter suggests) breaks elaboration, so the false-positive warning is suppressed.
 set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma to_provable {φ} (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢ φ := by
   rcases h
   · exact TwoSided.to_provable <| by assumption
   · simp_all
 
-lemma add_hyp {𝒯 : S} (s : 𝒯 ⪯ 𝓢) {Γ Δ φ} (hφ : 𝒯 ⊢ φ)  : Valid 𝓢 [φ :: Γ ⟶ Δ] → Valid 𝓢 [Γ ⟶ Δ] :=
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+lemma add_hyp {𝒯 : S} (s : 𝒯 ⪯ 𝓢) {Γ Δ φ} (hφ : 𝒯 ⊢ φ) : Valid 𝓢 [φ :: Γ ⟶ Δ] → Valid 𝓢 [Γ ⟶ Δ] :=
   Valid.of_single_uppercedent <| TwoSided.add_hyp hφ
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma right_closed {T Γ Δ φ} (h : φ ∈ Γ) : Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := Valid.right_closed h
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma left_closed {T Γ Δ φ} (h : φ ∈ Δ) : Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) := Valid.left_closed h
 
 set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma remove {T Γ Δ} : Valid 𝓢 T → Valid 𝓢 ((Γ ⟶ Δ) :: T) := Valid.of_subset
 
 set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma rotate {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ Δ) :: T) := Valid.of_subset
 
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma remove_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
   Valid.remove_right (rotate h)
 
-lemma rotate_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+lemma rotate_right {T Γ Δ φ} :
+    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
   Valid.rotate_right (rotate h)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma verum_right {T Γ Δ} : Valid 𝓢 ((Γ ⟶ ⊤ :: Δ) :: T) := Valid.verum_right
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma falsum_right {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ ⊥ :: Δ) :: T) := fun h ↦
   Valid.falsum_right (rotate h)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma and_right {T Γ Δ φ ψ} :
-    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ]]) → Valid 𝓢 ((Γ ⟶ φ ⋏ ψ :: Δ) :: T) := fun h₁ h₂ ↦
+    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ]]) →
+    Valid 𝓢 ((Γ ⟶ φ ⋏ ψ :: Δ) :: T) := fun h₁ h₂ ↦
   Valid.and_right (rotate h₁) (rotate h₂)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma or_right {T Γ Δ φ ψ} :
     Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ, ψ]]) → Valid 𝓢 ((Γ ⟶ φ ⋎ ψ :: Δ) :: T) := fun h ↦
   Valid.or_right (rotate h)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma neg_right {T Γ Δ φ} :
     Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ []] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ ∼φ :: Δ) :: T) := fun h ↦
   Valid.neg_right' <| rotate <| rotate h
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma imply_right {T Γ Δ φ ψ} :
     Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ (φ 🡒 ψ) :: Δ) :: T) := fun h ↦
   Valid.imply_right' <| rotate <| rotate h
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma iff_right {T Γ Δ φ ψ} :
-    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ 🡒 ψ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ 🡒 φ]]) → Valid 𝓢 ((Γ ⟶ (φ 🡘 ψ) :: Δ) :: T) := fun h₁ h₂ ↦
+    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ 🡒 ψ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ 🡒 φ]]) →
+    Valid 𝓢 ((Γ ⟶ (φ 🡘 ψ) :: Δ) :: T) := fun h₁ h₂ ↦
   Valid.and_right (rotate h₁) (rotate h₂)
 
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma remove_left {T Γ Δ φ} : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
   Valid.remove_left
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma rotate_left {T Γ Δ φ} : Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
   Valid.rotate_left
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma verum_left {T Γ Δ} : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((⊤ :: Γ ⟶ Δ) :: T) := Valid.verum_left
 
 set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma falsum_left {T Γ Δ} : Valid 𝓢 ((⊥ :: Γ ⟶ Δ) :: T) := Valid.falsum_left
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma or_left {T Γ Δ φ ψ} :
-    Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋎ ψ :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) →
+    Valid 𝓢 ((φ ⋎ ψ :: Γ ⟶ Δ) :: T) :=
   Valid.or_left
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma and_left {T Γ Δ φ ψ} :
     Valid 𝓢 ((Γ ++ [φ, ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋏ ψ :: Γ ⟶ Δ) :: T) :=
   Valid.and_left
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma neg_left {T Γ Δ φ} :
     Valid 𝓢 ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((∼φ :: Γ ⟶ Δ) :: T) :=
   Valid.neg_left
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma imply_left {T Γ Δ φ ψ} :
-    Valid 𝓢 ((Γ ++ [φ 🡒 ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 (((φ 🡒 ψ) :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ 🡒 ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) →
+    Valid 𝓢 (((φ 🡒 ψ) :: Γ ⟶ Δ) :: T) :=
   Valid.imply_left
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 lemma iff_left {T Γ Δ φ ψ} :
     Valid 𝓢 ((Γ ++ [φ 🡒 ψ, ψ 🡒 φ] ⟶ Δ) :: T) → Valid 𝓢 (((φ 🡘 ψ) :: Γ ⟶ Δ) :: T) :=
   Valid.and_left
@@ -145,18 +198,21 @@ open Mathlib Qq Lean Elab Meta Tactic
 abbrev M := ReaderT Context AtomM
 
 /-- Apply the function
-  `n : ∀ {F} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Int 𝓢], _` to the
-implicit parameters in the context, and the given list of arguments. -/
+  `n : ∀ {F} [LogicalConnective F] [LogicalNeutral F] [DecidableEq F] {S} [Entailment S F] {𝓢}
+    [Entailment.Int 𝓢], _`
+to the implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
   mkAppN <| @Expr.const n [c.levelF, c.levelS]
-    |>.app c.F |>.app c.instLC |>.app c.instLN |>.app c.instDE |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.instInt
+    |>.app c.F |>.app c.instLC |>.app c.instLN |>.app c.instDE |>.app c.S |>.app c.E |>.app c.𝓢
+    |>.app c.instInt
 
 def iapp (n : Name) (xs : Array Expr) : M Expr := do
   let c ← read
   return c.app n xs
 
 def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List Q($c.F)) := do
-  let ~q(@Entailment.TwoSided $F $instLC $instLN $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.TwoSided $F $instLC $instLN $S $E $𝓢 $p $q) := e
+    | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some instDE ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some instInt ← trySynthInstanceQ q(Entailment.Int $𝓢)
@@ -166,7 +222,8 @@ def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List
   return ⟨⟨_, _, F, instLC, instLN, instDE, S, E, 𝓢, instInt⟩, Γ, Δ⟩
 
 def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
-  let ~q(@Entailment.Entails $S $F $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.Entails $S $F $E $𝓢 $p) := e
+    | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some instDE ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some instLC ← trySynthInstanceQ q(LogicalConnective $F)
@@ -203,7 +260,8 @@ def Sequent.toExpr (Γ : Sequent) : M Expr := do
   let c ← read
   return toQList <| Γ.map (Litform.toExpr c.instLC c.instLN)
 
-def mkTableauSequentQ (F : Q(Type*)) (Γ Δ : Q(List $F)) : Q(Entailment.Tableaux.Sequent $F) :=
+def mkTableauSequentQ {u : Level} (F : Q(Type u)) (Γ Δ : Q(List $F)) :
+    Q(Entailment.Tableaux.Sequent $F) :=
   q($Γ ⟶ $Δ)
 
 def Tableaux.toExpr (T : Tableaux) : M Expr := do
@@ -493,7 +551,8 @@ structure HypInfo where
 
 def synthProvable (e : Expr) : MetaM HypInfo := do
   let (ty : Q(Prop)) ← inferType e
-  let ~q(@Entailment.Entails $S $F $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
+  let ~q(@Entailment.Entails $S $F $E $𝓢 $φ) := ty
+    | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   return ⟨_, _, F, S, E, 𝓢, φ, e⟩
 
 structure CompatibleHypInfo where
@@ -504,7 +563,8 @@ structure CompatibleHypInfo where
 
 def HypInfo.toCompatible (h : HypInfo) : M CompatibleHypInfo := do
   let c ← read
-  if (← isDefEq (← whnf h.F) (← whnf c.F)) && (← isDefEq (← whnf h.S) (← whnf c.S)) && (← isDefEq (← whnf h.E) (← whnf c.E)) then
+  if (← isDefEq (← whnf h.F) (← whnf c.F)) && (← isDefEq (← whnf h.S) (← whnf c.S))
+      && (← isDefEq (← whnf h.E) (← whnf c.E)) then
     let e := @Expr.const ``FFL.Entailment.WeakerThan [c.levelF, c.levelS, c.levelS]
       |>.app c.F |>.app c.S |>.app c.S |>.app c.E |>.app c.E |>.app h.𝓢 |>.app c.𝓢
     let .some wt ← trySynthInstance e

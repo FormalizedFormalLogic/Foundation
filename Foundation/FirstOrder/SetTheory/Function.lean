@@ -28,11 +28,13 @@ lemma mem_domain_iff {R x : V} : x ∈ domain R ↔ ∃ y, ⟨x, y⟩ₖ ∈ R :
 
 def domain.dfn : SetTheorySemisentence 2 := f“d R. ∀ x, x ∈ d ↔ ∃ y, !kpair.dfn x y ∈ R”
 
-instance domain.defined : ℒₛₑₜ-function₁[V] domain via domain.dfn := ⟨fun v ↦ by simp [dfn, mem_ext_iff (y := domain _), mem_domain_iff]⟩
+instance domain.defined : ℒₛₑₜ-function₁[V] domain via domain.dfn :=
+  ⟨fun v ↦ by simp [dfn, mem_ext_iff (y := domain _), mem_domain_iff]⟩
 
 instance domain.definable : ℒₛₑₜ-function₁[V] domain := domain.defined.to_definable
 
-lemma mem_domain_of_kpair_mem {R x y : V} (h : ⟨x, y⟩ₖ ∈ R) : x ∈ domain R := mem_domain_iff.mpr ⟨y, h⟩
+lemma mem_domain_of_kpair_mem {R x y : V} (h : ⟨x, y⟩ₖ ∈ R) : x ∈ domain R :=
+  mem_domain_iff.mpr ⟨y, h⟩
 
 @[simp] lemma domain_empty : domain (∅ : V) = ∅ := by ext; simp [mem_domain_iff]
 
@@ -57,7 +59,8 @@ lemma domain_union {R₁ R₂ : V} : domain (R₁ ∪ R₂) = domain R₁ ∪ do
 lemma domain_inter_subset {R₁ R₂ : V} : domain (R₁ ∩ R₂) ⊆ domain R₁ ∩ domain R₂ := by
   intro p; simp only [mem_domain_iff, mem_inter_iff]; grind
 
-@[simp, grind .] lemma domain_insert {x y R : V} : domain (insert (⟨x, y⟩ₖ) R) = insert x (domain R) := by
+@[simp, grind .] lemma domain_insert {x y R : V} :
+    domain (insert (⟨x, y⟩ₖ) R) = insert x (domain R) := by
   ext z; simp only [mem_domain_iff, mem_insert, kpair_iff]; grind
 
 end domain
@@ -73,11 +76,13 @@ lemma mem_range_iff {R y : V} : y ∈ range R ↔ ∃ x, ⟨x, y⟩ₖ ∈ R := 
 
 def range.dfn : SetTheorySemisentence 2 := f“r R. ∀ y, y ∈ r ↔ ∃ x, !kpair.dfn x y ∈ R”
 
-instance range.defined : ℒₛₑₜ-function₁[V] range via range.dfn := ⟨fun v ↦ by simp [dfn, mem_ext_iff (y := range _), mem_range_iff]⟩
+instance range.defined : ℒₛₑₜ-function₁[V] range via range.dfn :=
+  ⟨fun v ↦ by simp [dfn, mem_ext_iff (y := range _), mem_range_iff]⟩
 
 instance range.definable : ℒₛₑₜ-function₁[V] range := range.defined.to_definable
 
-lemma mem_range_of_kpair_mem {R x y : V} (h : ⟨x, y⟩ₖ ∈ R) : y ∈ range R := mem_range_iff.mpr ⟨x, h⟩
+lemma mem_range_of_kpair_mem {R x y : V} (h : ⟨x, y⟩ₖ ∈ R) : y ∈ range R :=
+  mem_range_iff.mpr ⟨x, h⟩
 
 @[simp] lemma range_empty : range (∅ : V) = ∅ := by ext; simp [mem_range_iff]
 
@@ -102,7 +107,8 @@ lemma range_union {R₁ R₂ : V} : range (R₁ ∪ R₂) = range R₁ ∪ range
 lemma range_inter_subset {R₁ R₂ : V} : range (R₁ ∩ R₂) ⊆ range R₁ ∩ range R₂ := by
   intro p; simp only [mem_range_iff, mem_inter_iff]; grind
 
-@[simp, grind =] lemma range_insert {x y R : V} : range (insert (⟨x, y⟩ₖ) R) = insert y (range R) := by
+@[simp, grind =] lemma range_insert {x y R : V} :
+    range (insert (⟨x, y⟩ₖ) R) = insert y (range R) := by
   ext z; simp only [mem_range_iff, mem_insert, kpair_iff]; grind
 
 end range
@@ -115,26 +121,32 @@ noncomputable instance : Pow V V := ⟨fun Y X ↦ function Y X⟩
 
 lemma function_def {Y X : V} : Y ^ X = function Y X := rfl
 
-lemma mem_function_iff {f Y X : V} : f ∈ Y ^ X ↔ f ⊆ X ×ˢ Y ∧ ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f := by simp [function, function_def]
+lemma mem_function_iff {f Y X : V} :
+    f ∈ Y ^ X ↔ f ⊆ X ×ˢ Y ∧ ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f := by simp [function, function_def]
 
-def function.dfn : SetTheorySemisentence 3 := f“F Y X. ∀ f, f ∈ F ↔ f ⊆ !prod.dfn X Y ∧ ∀ x ∈ X, ∃! y, !kpair.dfn x y ∈ f”
+def function.dfn : SetTheorySemisentence 3 :=
+  f“F Y X. ∀ f, f ∈ F ↔ f ⊆ !prod.dfn X Y ∧ ∀ x ∈ X, ∃! y, !kpair.dfn x y ∈ f”
 
 instance function.defined : ℒₛₑₜ-function₂[V] (·^·) via function.dfn :=
   ⟨fun v ↦ by simp [function.dfn, mem_ext_iff (y := (v 1)^(v 2)), mem_function_iff]⟩
 
 instance function.definable : ℒₛₑₜ-function₂[V] (·^·) := function.defined.to_definable
 
-lemma mem_function.intro {f X Y : V} (prod : f ⊆ X ×ˢ Y) (total : ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f) : f ∈ Y ^ X :=
+lemma mem_function.intro {f X Y : V} (prod : f ⊆ X ×ˢ Y)
+    (total : ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f) : f ∈ Y ^ X :=
   mem_function_iff.mpr ⟨prod, total⟩
 
-lemma subset_prod_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : f ⊆ X ×ˢ Y := mem_function_iff.mp h |>.1
+lemma subset_prod_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : f ⊆ X ×ˢ Y :=
+  mem_function_iff.mp h |>.1
 
-lemma mem_of_mem_functions {f X Y : V} (h : f ∈ Y ^ X) (hx : ⟨x, y⟩ₖ ∈ f) : x ∈ X ∧ y ∈ Y := by
+lemma mem_of_mem_functions {f X Y x y : V} (h : f ∈ Y ^ X) (hx : ⟨x, y⟩ₖ ∈ f) : x ∈ X ∧ y ∈ Y := by
   simpa using subset_prod_of_mem_function h _ hx
 
-lemma function_subset_power_prod (X Y : V) : Y ^ X ⊆ ℘ (X ×ˢ Y) := fun f hf ↦ by simpa using subset_prod_of_mem_function hf
+lemma function_subset_power_prod (X Y : V) : Y ^ X ⊆ ℘ (X ×ˢ Y) :=
+  fun f hf ↦ by simpa using subset_prod_of_mem_function hf
 
-lemma exists_unique_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f := mem_function_iff.mp h |>.2
+lemma exists_unique_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) :
+    ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f := mem_function_iff.mp h |>.2
 
 lemma exists_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : ∀ x ∈ X, ∃ y ∈ Y, ⟨x, y⟩ₖ ∈ f := by
   intro x hx
@@ -175,7 +187,8 @@ lemma mem_function_range_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : f ∈ r
   have : y' = y := exists_unique_of_mem_function h x hx |>.unique hf' hf
   assumption
 
-lemma mem_function_of_mem_function_of_subset {f X Y₁ Y₂ : V} (h : f ∈ Y₁ ^ X) (hY : Y₁ ⊆ Y₂) : f ∈ Y₂ ^ X := by
+lemma mem_function_of_mem_function_of_subset {f X Y₁ Y₂ : V} (h : f ∈ Y₁ ^ X) (hY : Y₁ ⊆ Y₂) :
+    f ∈ Y₂ ^ X := by
   have : f ⊆ X ×ˢ Y₂ := calc
     f ⊆ X ×ˢ Y₁ := subset_prod_of_mem_function h
     _ ⊆ X ×ˢ Y₂ := prod_subset_prod_of_subset (by rfl) hY
@@ -196,11 +209,13 @@ lemma function_subset_function_of_subset {Y₁ Y₂ : V} (hY : Y₁ ⊆ Y₂) (X
 class IsFunction (f : V) : Prop where
   mem_func : ∃ X Y : V, f ∈ Y ^ X
 
-lemma isFunction_def {f : V} : IsFunction f ↔ ∃ X Y : V, f ∈ Y ^ X := ⟨fun h ↦ h.mem_func, fun h ↦ ⟨h⟩⟩
+lemma isFunction_def {f : V} : IsFunction f ↔ ∃ X Y : V, f ∈ Y ^ X :=
+  ⟨fun h ↦ h.mem_func, fun h ↦ ⟨h⟩⟩
 
 def IsFunction.dfn : SetTheorySemisentence 1 := f“f. ∃ X Y, f ∈ !function.dfn Y X”
 
-instance IsFunction.defined : ℒₛₑₜ-predicate[V] IsFunction via dfn := ⟨fun v ↦ by simp [isFunction_def, dfn]⟩
+instance IsFunction.defined : ℒₛₑₜ-predicate[V] IsFunction via dfn :=
+  ⟨fun v ↦ by simp [isFunction_def, dfn]⟩
 
 instance IsFunction.definable : ℒₛₑₜ-predicate[V] IsFunction := defined.to_definable
 
@@ -243,16 +258,20 @@ lemma mem_eq_kpair {f : V} [hf : IsFunction f] {p : V} (hpf : p ∈ f) : ∃ x y
     intro y' hxy'
     have hyf : ⟨x, y⟩ₖ ∈ f := hgf _ hxy
     have hy'f : ⟨x, y'⟩ₖ ∈ f := hgf _ hxy'
-    have hux : ∃! z, ⟨x, z⟩ₖ ∈ f := exists_unique_of_mem_function hf.mem_function x (mem_domain_of_kpair_mem hyf)
+    have hux : ∃! z, ⟨x, z⟩ₖ ∈ f :=
+      exists_unique_of_mem_function hf.mem_function x (mem_domain_of_kpair_mem hyf)
     exact hux.unique hy'f hyf
 
-lemma unique {f : V} [hf : IsFunction f] {x y₁ y₂} (h₁ : ⟨x, y₁⟩ₖ ∈ f) (h₂ : ⟨x, y₂⟩ₖ ∈ f) : y₁ = y₂ := by
-  have : ∃! y, ⟨x, y⟩ₖ ∈ f := exists_unique_of_mem_function (isFunction_iff.mp hf) x (mem_domain_of_kpair_mem h₁)
+lemma unique {f : V} [hf : IsFunction f] {x y₁ y₂} (h₁ : ⟨x, y₁⟩ₖ ∈ f) (h₂ : ⟨x, y₂⟩ₖ ∈ f) :
+    y₁ = y₂ := by
+  have : ∃! y, ⟨x, y⟩ₖ ∈ f :=
+    exists_unique_of_mem_function (isFunction_iff.mp hf) x (mem_domain_of_kpair_mem h₁)
   exact this.unique h₁ h₂
 
 @[simp] instance empty : IsFunction (∅ : V) := ⟨∅, ∅, by simp⟩
 
-protected theorem insert (f x y : V) (hx : x ∉ domain f) [hf : IsFunction f] : IsFunction (insert ⟨x, y⟩ₖ f) := by
+protected theorem insert (f x y : V) (hx : x ∉ domain f) [hf : IsFunction f] :
+    IsFunction (insert ⟨x, y⟩ₖ f) := by
   refine ⟨insert x (domain f), insert y (range f), ?_⟩
   apply mem_function.intro
   · have : f ⊆ domain f ×ˢ range f := subset_prod_of_mem_function hf.mem_function
@@ -274,11 +293,13 @@ protected theorem insert (f x y : V) (hx : x ∉ domain f) [hf : IsFunction f] :
         contradiction
       exact hf.unique Hw hzv
 
-@[simp] instance (x y : V) : IsFunction ({⟨x, y⟩ₖ} : V) := by simpa using IsFunction.insert ∅ x y (by simp)
+@[simp] instance (x y : V) : IsFunction ({⟨x, y⟩ₖ} : V) := by
+  simpa using IsFunction.insert ∅ x y (by simp)
 
 end IsFunction
 
-lemma function_eq_of_subset {X Y f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Y ^ X) (h : f ⊆ g) : f = g := by
+lemma function_eq_of_subset {X Y f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Y ^ X) (h : f ⊆ g) :
+    f = g := by
   have : IsFunction f := IsFunction.of_mem hf
   have : IsFunction g := IsFunction.of_mem hg
   apply subset_antisymm h
@@ -298,7 +319,8 @@ lemma function_ext {X Y f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Y ^ X)
     simpa [mem_prod_iff] using subset_prod_of_mem_function hf _ hp with ⟨x, hx, y, hy, rfl⟩
   exact h x hx y hy hp
 
-@[grind <=] lemma two_val_function_mem_iff_not {X f x : V} (hf : f ∈ (2 ^ X : V)) (hx : x ∈ X) : ⟨x, 0⟩ₖ ∈ f ↔ ⟨x, 1⟩ₖ ∉ f := by
+@[grind <=] lemma two_val_function_mem_iff_not {X f x : V} (hf : f ∈ (2 ^ X : V)) (hx : x ∈ X) :
+    ⟨x, 0⟩ₖ ∈ f ↔ ⟨x, 1⟩ₖ ∉ f := by
   have : IsFunction f := IsFunction.of_mem hf
   constructor
   · intro h0 h1
@@ -312,9 +334,11 @@ lemma function_ext {X Y f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Y ^ X)
 
 def Injective (R : V) : Prop := ∀ x₁ x₂ y, ⟨x₁, y⟩ₖ ∈ R → ⟨x₂, y⟩ₖ ∈ R → x₁ = x₂
 
-def Injective.dfn : SetTheorySemisentence 1 := f“f. ∀ x₁ x₂ y, !kpair.dfn x₁ y ∈ f → !kpair.dfn x₂ y ∈ f → x₁ = x₂”
+def Injective.dfn : SetTheorySemisentence 1 :=
+  f“f. ∀ x₁ x₂ y, !kpair.dfn x₁ y ∈ f → !kpair.dfn x₂ y ∈ f → x₁ = x₂”
 
-instance Injective.defined : ℒₛₑₜ-predicate[V] Injective via dfn := ⟨fun v ↦ by simp [Injective, dfn]⟩
+instance Injective.defined : ℒₛₑₜ-predicate[V] Injective via dfn :=
+  ⟨fun v ↦ by simp [Injective, dfn]⟩
 
 instance Injective.definable : ℒₛₑₜ-predicate[V] Injective := defined.to_definable
 
@@ -330,11 +354,12 @@ lemma mem_identity_iff {X p : V} : p ∈ identity X ↔ ∃ x ∈ X, p = ⟨x, x
 
 def identity.dfn : SetTheorySemisentence 2 := f“i X. ∀ p, p ∈ i ↔ ∃ x ∈ X, p = !kpair.dfn x x”
 
-instance identity.defined : ℒₛₑₜ-function₁[V] identity via dfn := ⟨fun v ↦ by simp [dfn, mem_ext_iff (y := identity (v 1)), mem_identity_iff]⟩
+instance identity.defined : ℒₛₑₜ-function₁[V] identity via dfn :=
+  ⟨fun v ↦ by simp [dfn, mem_ext_iff (y := identity (v 1)), mem_identity_iff]⟩
 
 instance identity.definable : ℒₛₑₜ-function₁[V] identity := defined.to_definable
 
-@[simp] lemma kpair_mem_identity_iff {X x : V} : ⟨x, y⟩ₖ ∈ identity X ↔ x ∈ X ∧ x = y := by
+@[simp] lemma kpair_mem_identity_iff {X x y : V} : ⟨x, y⟩ₖ ∈ identity X ↔ x ∈ X ∧ x = y := by
   simp only [mem_identity_iff, kpair_iff, exists_eq_right_right', and_congr_left_iff]
   grind
 
@@ -349,7 +374,8 @@ instance identity.definable : ℒₛₑₜ-function₁[V] identity := defined.to
     simp only [kpair_mem_identity_iff, and_imp]
     grind
 
-instance IsFunction.identity (X : V) : IsFunction (identity X) := IsFunction.of_mem (identity_mem_function X)
+instance IsFunction.identity (X : V) : IsFunction (identity X) :=
+  IsFunction.of_mem (identity_mem_function X)
 
 @[simp] lemma identity_injective (X : V) : Injective (identity X) := by
   intro x₁ x₂ y h₁ h₂
@@ -358,10 +384,13 @@ instance IsFunction.identity (X : V) : IsFunction (identity X) := IsFunction.of_
   rfl
 
 /-- Composition -/
-noncomputable def compose (R S : V) : V := {p ∈ domain R ×ˢ range S ; ∃ x y z, ⟨x, y⟩ₖ ∈ R ∧ ⟨y, z⟩ₖ ∈ S ∧ p = ⟨x, z⟩ₖ}
+noncomputable def compose (R S : V) : V :=
+  {p ∈ domain R ×ˢ range S ; ∃ x y z, ⟨x, y⟩ₖ ∈ R ∧ ⟨y, z⟩ₖ ∈ S ∧ p = ⟨x, z⟩ₖ}
 
-lemma mem_compose_iff {R S p : V} : p ∈ compose R S ↔ ∃ x y z, ⟨x, y⟩ₖ ∈ R ∧ ⟨y, z⟩ₖ ∈ S ∧ p = ⟨x, z⟩ₖ := by
-  simp only [compose, exists_and_left, mem_sep_iff, and_iff_right_iff_imp, forall_exists_index, and_imp]
+lemma mem_compose_iff {R S p : V} :
+    p ∈ compose R S ↔ ∃ x y z, ⟨x, y⟩ₖ ∈ R ∧ ⟨y, z⟩ₖ ∈ S ∧ p = ⟨x, z⟩ₖ := by
+  simp only [compose, exists_and_left, mem_sep_iff, and_iff_right_iff_imp, forall_exists_index,
+    and_imp]
   rintro x y hxy z hyz rfl
   simp [mem_domain_of_kpair_mem hxy, mem_range_of_kpair_mem hyz]
 
@@ -370,7 +399,8 @@ lemma mem_compose_iff {R S p : V} : p ∈ compose R S ↔ ∃ x y z, ⟨x, y⟩�
   simp only [mem_compose_iff, kpair_iff, exists_and_left, exists_eq_right_right']
   grind
 
-lemma compose_subset_prod {X Y Z R S : V} (hR : R ⊆ X ×ˢ Y) (hS : S ⊆ Y ×ˢ Z) : compose R S ⊆ X ×ˢ Z := by
+lemma compose_subset_prod {X Y Z R S : V} (hR : R ⊆ X ×ˢ Y) (hS : S ⊆ Y ×ˢ Z) :
+    compose R S ⊆ X ×ˢ Z := by
   intro p hp
   rcases mem_compose_iff.mp hp with ⟨x, y, z, hxy, hyz, rfl⟩
   have : x ∈ X ∧ y ∈ Y := by simpa using hR _ hxy
@@ -395,7 +425,8 @@ lemma compose_function {X Y Z f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Z ^ Y) : c
     rcases IsFunction.unique hyz hy'z'
     rfl
 
-lemma compose_injective {R S : V} (hR : Injective R) (hS : Injective S) : Injective (compose R S) := by
+lemma compose_injective {R S : V} (hR : Injective R) (hS : Injective S) :
+    Injective (compose R S) := by
   intro x₁ x₂ z h₁ h₂
   have : ∃ y₁, ⟨x₁, y₁⟩ₖ ∈ R ∧ ⟨y₁, z⟩ₖ ∈ S := by simpa using h₁
   rcases this with ⟨y₁, hx₁y₁, hy₁z⟩
@@ -405,13 +436,15 @@ lemma compose_injective {R S : V} (hR : Injective R) (hS : Injective S) : Inject
   rcases this
   exact hR x₁ x₂ y₁ hx₁y₁ hx₂y₂
 
-/- This definition of value is adapted from NM's contribution to Metamath: https://us.metamath.org/mpeuni/fv3.html -/
+/- This definition of value is adapted from NM's contribution to Metamath:
+https://us.metamath.org/mpeuni/fv3.html -/
 noncomputable def value (f x : V) := {z ∈ ⋃ˢ range f ; ∃ y, z ∈ y ∧ ⟨x, y⟩ₖ ∈ f}
 
 /-- If `x` is in `domain f`, then `f ‘ x` is the value of `f` at `x`, else it is `∅`. -/
 scoped notation f:arg " ‘ " x:arg => value f x
 
-def value.dfn : SetTheorySemisentence 3 := f“v f x. ∀ z, z ∈ v ↔ z ∈ !sUnion.dfn (!range.dfn f) ∧ ∃ y, z ∈ y ∧ !kpair.dfn x y ∈ f”
+def value.dfn : SetTheorySemisentence 3 :=
+  f“v f x. ∀ z, z ∈ v ↔ z ∈ !sUnion.dfn (!range.dfn f) ∧ ∃ y, z ∈ y ∧ !kpair.dfn x y ∈ f”
 
 instance value.defined : ℒₛₑₜ-function₂[V] value via value.dfn :=
   ⟨fun v ↦ by simp [dfn, value]; simp only [mem_ext_iff, mem_sep_iff]⟩
@@ -437,7 +470,8 @@ noncomputable def restrict (R A : V) : V := R ∩ (A ×ˢ range R)
 /-- Restricting the domain of a relation -/
 scoped notation R:arg " ↾ " A:arg => restrict R A
 
-def restrict.dfn : SetTheorySemisentence 3 := f“r R A. r = !inter.dfn R (!prod.dfn A (!range.dfn R))”
+def restrict.dfn : SetTheorySemisentence 3 :=
+  f“r R A. r = !inter.dfn R (!prod.dfn A (!range.dfn R))”
 
 instance restrict.defined : ℒₛₑₜ-function₂[V] restrict via restrict.dfn :=
   ⟨fun v ↦ by simp [dfn, restrict]⟩
@@ -475,7 +509,8 @@ lemma mem_restrict_iff {R A p : V} :
 instance IsFunction.restrict (f A : V) [hf : IsFunction f] : IsFunction (f ↾ A) := by
   exact IsFunction.ofSubset f (f ↾ A) (restrict_subset f A)
 
-lemma IsFunction.restrict_eq_self (f A : V) [hf : IsFunction f] (hA : domain f ⊆ A) : f ↾ A = f := by
+lemma IsFunction.restrict_eq_self (f A : V) [hf : IsFunction f] (hA : domain f ⊆ A) :
+    f ↾ A = f := by
   apply subset_antisymm
   · intro p hp
     exact (mem_restrict_iff.mp hp).1
@@ -562,7 +597,7 @@ instance CardLE.defined : ℒₛₑₜ-relation[V] CardLE via dfn := ⟨fun v �
 
 instance CardLE.definable : ℒₛₑₜ-relation[V] CardLE := defined.to_definable
 
-def CardLT.dfn : SetTheorySemisentence 2 := “X Y. !CardLE.dfn X Y ∧ ¬!CardLE.dfn Y X”
+def CardLT.dfn : SetTheorySemisentence 2 := f“X Y. !CardLE.dfn X Y ∧ ¬!CardLE.dfn Y X”
 
 instance CardLT.defined : ℒₛₑₜ-relation[V] CardLT via dfn := ⟨fun v ↦ by simp [CardLT, dfn]⟩
 
@@ -572,7 +607,7 @@ def CardEQ (X Y : V) : Prop := X ≤# Y ∧ Y ≤# X
 
 infix:60 " ≋ " => CardEQ
 
-def CardEQ.dfn : SetTheorySemisentence 2 := “X Y. !CardLE.dfn X Y ∧ !CardLE.dfn Y X”
+def CardEQ.dfn : SetTheorySemisentence 2 := f“X Y. !CardLE.dfn X Y ∧ !CardLE.dfn Y X”
 
 instance CardEQ.defined : ℒₛₑₜ-relation[V] CardEQ via dfn := ⟨fun v ↦ by simp [CardEQ, dfn]⟩
 
@@ -672,8 +707,8 @@ lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
           intro x hx
           by_cases hxS : x ∈ s
           · apply ExistsUnique.intro 1
-            · simp only [mem_sep_iff, kpair_mem_iff, hx, mem_two_iff, one_ne_zero, or_true, and_self,
-              kpair_iff, and_true, and_false, imp_false, not_not, true_and, f]; grind
+            · simp only [mem_sep_iff, kpair_mem_iff, hx, mem_two_iff, one_ne_zero, or_true,
+              and_self, kpair_iff, and_true, and_false, imp_false, not_not, true_and, f]; grind
             · intro i hi
               simp [f, hx] at hi
               grind only

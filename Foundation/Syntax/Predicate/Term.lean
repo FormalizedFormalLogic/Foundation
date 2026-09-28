@@ -10,8 +10,10 @@ public import Foundation.Vorspiel.String
 
 This file defines the terms of first-order logic.
 
-The bounded variables are denoted by `#x` for `x : Fin n`, and free variables are denoted by `&x` for `x : ξ`.
-`t : Semiterm L ξ n` is a (semi-)term of language `L` with bounded variables of `Fin n` and free variables of `ξ`.
+The bounded variables are denoted by `#x` for `x : Fin n`, and free variables are denoted by
+`&x` for `x : ξ`.
+`t : Semiterm L ξ n` is a (semi-)term of language `L` with bounded variables of `Fin n` and
+free variables of `ξ`.
 
 -/
 
@@ -20,7 +22,9 @@ namespace FFL
 namespace FirstOrder
 
 /--
-A semiterm of language `L`, with bound variables indexed by `Fin n` and free variables indexed by `ξ`. In `FFL.FirstOrder.Semiformula`, bound variables are de Bruijn indices with a separate type from free variables.
+A semiterm of language `L`, with bound variables indexed by `Fin n` and free variables indexed
+by `ξ`. In `FFL.FirstOrder.Semiformula`, bound variables are de Bruijn indices with a separate
+type from free variables.
 -/
 inductive Semiterm (L : Language) (ξ : Type*) (n : ℕ)
   | bvar : Fin n → Semiterm L ξ n
@@ -57,7 +61,8 @@ def toStr : Semiterm L ξ n → String
   |                        #x => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
   |                        &x => "z_{" ++ toString x ++ "}"
   |     func (arity := 0) c _ => toString c
-  | func (arity := _ + 1) f v => "{" ++ toString f ++ "} \\left(" ++ String.vecToStr (fun i => toStr (v i)) ++ "\\right)"
+  | func (arity := _ + 1) f v =>
+      "{" ++ toString f ++ "} \\left(" ++ String.vecToStr (fun i => toStr (v i)) ++ "\\right)"
 
 instance : Repr (Semiterm L ξ n) := ⟨fun t _ => toStr t⟩
 
@@ -102,11 +107,13 @@ def complexity : Semiterm L ξ n → ℕ
 
 @[simp] lemma complexity_fvar (x : ξ) : (&x : Semiterm L ξ n).complexity = 0 := rfl
 
-lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).complexity = Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1 := rfl
+lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
+    (func f v).complexity = Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1 := rfl
 
 @[simp] lemma complexity_func_lt {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) (i) :
     (v i).complexity < (func f v).complexity := by
-  simpa [complexity_func, Nat.lt_add_one_iff] using Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
+  simpa [complexity_func, Nat.lt_add_one_iff] using
+    Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
 
 abbrev func! (k) (f : L.Func k) (v : Fin k → Semiterm L ξ n) := func f v
 
@@ -118,11 +125,12 @@ def bv : Semiterm L ξ n → Finset (Fin n)
   |       &_ => ∅
   | func _ v => .biUnion .univ fun i ↦ bv (v i)
 
-@[simp] lemma bv_bvar : (#x : Semiterm L ξ n).bv = {x} := rfl
+@[simp] lemma bv_bvar (x : Fin n) : (#x : Semiterm L ξ n).bv = {x} := rfl
 
-@[simp] lemma bv_fvar : (&x : Semiterm L ξ n).bv = ∅ := rfl
+@[simp] lemma bv_fvar (x : ξ) : (&x : Semiterm L ξ n).bv = ∅ := rfl
 
-lemma bv_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).bv = .biUnion .univ fun i ↦ bv (v i) := rfl
+lemma bv_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
+    (func f v).bv = .biUnion .univ fun i ↦ bv (v i) := rfl
 
 @[simp] lemma bv_constant (f : L.Func 0) (v : Fin 0 → Semiterm L ξ n) : (func f v).bv = ∅ := rfl
 
@@ -130,9 +138,10 @@ def Positive (t : Semiterm L ξ (n + 1)) : Prop := ∀ x ∈ t.bv, 0 < x
 
 namespace Positive
 
-@[simp] protected lemma bvar : Positive (#x : Semiterm L ξ (n + 1)) ↔ 0 < x := by simp [Positive]
+@[simp] protected lemma bvar (x : Fin (n + 1)) : Positive (#x : Semiterm L ξ (n + 1)) ↔ 0 < x := by
+  simp [Positive]
 
-@[simp] protected lemma fvar : Positive (&x : Semiterm L ξ (n + 1)) := by simp [Positive]
+@[simp] protected lemma fvar (x : ξ) : Positive (&x : Semiterm L ξ (n + 1)) := by simp [Positive]
 
 @[simp] protected lemma func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ (n + 1)) :
     Positive (func f v) ↔ ∀ i, Positive (v i) := by
@@ -155,23 +164,25 @@ def freeVariables : Semiterm L ξ n → Finset ξ
   |       &x => {x}
   | func _ v => .biUnion .univ fun i ↦ freeVariables (v i)
 
-@[simp] lemma freeVariables_bvar : (#x : Semiterm L ξ n).freeVariables = ∅ := rfl
+@[simp] lemma freeVariables_bvar (x : Fin n) : (#x : Semiterm L ξ n).freeVariables = ∅ := rfl
 
-@[simp] lemma freeVariables_fvar : (&x : Semiterm L ξ n).freeVariables = {x} := rfl
+@[simp] lemma freeVariables_fvar (x : ξ) : (&x : Semiterm L ξ n).freeVariables = {x} := rfl
 
 lemma freeVariables_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
     (func f v).freeVariables = .biUnion .univ fun i ↦ (v i).freeVariables := rfl
 
-@[simp] lemma freeVariables_constant (f : L.Func 0) (v : Fin 0 → Semiterm L ξ n) : (func f v).freeVariables = ∅ := rfl
+@[simp] lemma freeVariables_constant (f : L.Func 0) (v : Fin 0 → Semiterm L ξ n) :
+    (func f v).freeVariables = ∅ := rfl
 
-@[simp] lemma freeVariables_empty {ο : Type*} [IsEmpty ο] {t : Semiterm L ο n} : t.freeVariables = ∅ := by
+@[simp] lemma freeVariables_empty {ο : Type*} [IsEmpty ο] {t : Semiterm L ο n} :
+    t.freeVariables = ∅ := by
   ext x; exact IsEmpty.elim inferInstance x
 
 abbrev FVar? (t : Semiterm L ξ n) (x : ξ) : Prop := x ∈ t.freeVariables
 
 @[simp] lemma fvar?_bvar (x z) : ¬(#x : Semiterm L ξ n).FVar? z := by simp [FVar?]
 
-@[simp] lemma fvar?_fvar (x z) : (&x : Semiterm L ξ n).FVar? z ↔ x = z := by simp [FVar?, Eq.comm]
+@[simp] lemma fvar?_fvar (x z) : (&x : Semiterm L ξ n).FVar? z ↔ x = z := by simp [FVar?, eq_comm]
 
 @[simp] lemma fvar?_func (x) {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
     (func f v).FVar? x ↔ ∃ i, (v i).FVar? x := by simp [FVar?, freeVariables_func]
@@ -235,12 +246,13 @@ def idxOfFVar [DecidableEq ξ] (t : Semiterm L ξ n) : ξ → ℕ := t.fvarList.
 def enumerateFVar [Inhabited ξ] (t : Semiterm L ξ n) : ℕ → ξ :=
   fun i ↦ if hi : i < t.fvarList.length then t.fvarList.get ⟨i, hi⟩ else default
 
-lemma enumerateFVar_idxOfFVar [DecidableEq ξ] [Inhabited ξ] {t : Semiterm L ξ n} {x : ξ} (hx : x ∈ t.fvarList) :
-    enumerateFVar t (idxOfFVar t x) = x := by
+lemma enumerateFVar_idxOfFVar [DecidableEq ξ] [Inhabited ξ] {t : Semiterm L ξ n} {x : ξ}
+    (hx : x ∈ t.fvarList) : enumerateFVar t (idxOfFVar t x) = x := by
   simpa [enumerateFVar, idxOfFVar]
-  using fun h ↦ False.elim <| not_le.mpr (List.idxOf_lt_length_iff.mpr $ hx) h
+  using fun h ↦ False.elim <| not_le.mpr (List.idxOf_lt_length_iff.mpr <| hx) h
 
-lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {t : Semiterm L ξ n} : x ∈ t.fvarList ↔ t.FVar? x:= by
+lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {t : Semiterm L ξ n} {x : ξ} :
+    x ∈ t.fvarList ↔ t.FVar? x := by
   induction t <;> { simp [fvarList, *]; try tauto }
 
 end idxOfFVar

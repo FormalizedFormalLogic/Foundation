@@ -23,18 +23,15 @@ namespace Logic.Grz
 
 universe u
 
-variable {α : Type u} [DecidableEq α] {A : Formula α} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+variable {α : Type u} {A : Formula α} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 theorem arithmetical_completeness_iff_of_height_eq_top (height : T.height = ⊤) :
-    𝐆𝐫𝐳 ⊢ A ↔ ∀ f : Realization α ℒₒᵣ, T ⊢ A.strongInterpret f T.standardProvability := by
-  rw [iff_boxdotTranslate_GL];
-  constructor;
-  . intro h f;
-    exact Formula.provable_interpret_boxdotTranslate_iff.mp
-      (WeakerThan.pbl (GL.arithmetical_soundness h));
-  . intro h;
-    exact GL.arithmetical_completeness_of_height_eq_top height fun f ↦
-      Formula.provable_interpret_boxdotTranslate_iff.mpr (h f);
+    𝐆𝐫𝐳 ⊢ A ↔ ∀ f : Realization α ℒₒᵣ, T ⊢ A.strongInterpret f T.standardProvability :=
+  iff_boxdotTranslate_GL.trans
+    ⟨fun h _ ↦ Formula.provable_interpret_boxdotTranslate_iff.mp
+        (WeakerThan.pbl (GL.arithmetical_soundness h)),
+      fun h ↦ GL.arithmetical_completeness_of_height_eq_top height fun f ↦
+        Formula.provable_interpret_boxdotTranslate_iff.mpr (h f)⟩
 
 theorem arithmetical_completeness_iff [T.SoundOnHierarchy 𝚺 1] :
     𝐆𝐫𝐳 ⊢ A ↔ ∀ f : Realization α ℒₒᵣ, T ⊢ A.strongInterpret f T.standardProvability :=

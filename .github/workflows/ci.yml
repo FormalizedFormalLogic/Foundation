@@ -19,60 +19,34 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  LAKE_ARTIFACT_CACHE: true
+  LAKE_RESTORE_ARTIFACTS: true
+  LAKE_NO_CACHE: true
+
 jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest
-    env:
-      LAKE_ARTIFACT_CACHE: true
-      LAKE_RESTORE_ARTIFACTS: true
-      LAKE_NO_CACHE: true
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 100
-
-      - name: Setup elan
-        run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - uses: extractions/setup-just@v4
-      - uses: typst-community/setup-typst@v5
-      - uses: ts-graphviz/setup-graphviz@v2
+      - uses: ./.github/actions/setup-lean
       - name: Print tool versions
         run: |
           lake --version
           lean --version
-          just --version
-          typst --version
-          dot -V
-
-      - name: Get Mathlib cache
-        run: lake exe cache get
-
-      - name: Restore remote cache (Foundation)
-        env:
-          LAKE_CONFIG: lake-cache.toml
-        run: |
-          lake cache get \
-            --service ffl \
-            --max-revs=100 \
-            --repo FormalizedFormalLogic/Foundation \
-            --package Foundation \
-          || echo "::warning::cache incomplete; the build will compile the rest from source"
 
       - run: lake build Foundation --wfail
-
       - run: just forgive
-      - run: just import-graph
-      - run: just zoo
-      # Without a cached `doc-data`, doc-gen re-analyses every imported module (~20 min), so
-      # docs are only built where they are deployed.
-      - run: just docs
-        if: github.ref == 'refs/heads/master'
 
+      # A merge-queue commit becomes `master` as is, so publishing it there lets the push run that
+      # follows, and the jobs below, restore it instead of compiling it again.
       - name: Save remote cache
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: >-
+          github.event_name == 'merge_group' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/master')
         env:
           LAKE_CONFIG: lake-cache.toml
           LAKE_CACHE_KEY: ${{ secrets.LAKE_CACHE_KEY }}
@@ -83,16 +57,83 @@ jobs:
             --service ffl-upload \
             --repo FormalizedFormalLogic/Foundation
 
-      - name: Upload lean artifacts
-        uses: actions/upload-artifact@v7
+  # The jobs below only produce what `deploy` publishes from `master`; `workflow_dispatch` lets a
+  # branch try them out.
+  import-graph:
+    name: Generate import graph
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v7
         with:
-          name: lean-artifacts
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+      - uses: ts-graphviz/setup-graphviz@v2
+
+      - run: lake build Foundation
+      - run: just import-graph
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: import-graph
           path: |
-            .lake/build/doc
             import_graph.png
             import_graph.pdf
             import_graph.html
-            pages/zoo
+          retention-days: 1
+
+  zoo:
+    name: Generate zoo
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+      - uses: typst-community/setup-typst@v5
+
+      - run: lake build Foundation
+      - run: just zoo
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: zoo
+          path: pages/zoo
+          retention-days: 1
+
+  docs:
+    name: Generate docs
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+
+      # doc-gen's database of core and dependency modules takes most of its ~20 minutes to fill,
+      # and only changes with the toolchain and the dependencies. `fromDb` renders just the import
+      # closure of `Foundation`, so rows left behind by removed modules never reach the output.
+      - name: Restore doc-gen database
+        uses: actions/cache@v6
+        with:
+          path: |
+            .lake/build/api-docs.db*
+            .lake/build/doc-data
+          key: doc-gen-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: doc-gen-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+      - run: lake build Foundation
+      - run: just docs
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: docs
+          path: .lake/build/doc
           retention-days: 1
           include-hidden-files: true
 
@@ -138,6 +179,9 @@ jobs:
     if: github.ref == 'refs/heads/master'
     needs:
       - build
+      - import-graph
+      - zoo
+      - docs
       - check-references
       - mk-all-check
     permissions:
@@ -150,18 +194,18 @@ jobs:
       - uses: actions/checkout@v7
       - uses: pandoc/actions/setup@v1
 
-      - name: Download lean artifacts
-        uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@v8
         with:
-          name: lean-artifacts
-      # `pages/zoo` is already unpacked in place by the download above.
-      - name: Copy from artifacts to pages
-        run: |
-          cp -r "$GITHUB_WORKSPACE/.lake/build/doc" pages/docs
-          cp "$GITHUB_WORKSPACE/import_graph.png" \
-             "$GITHUB_WORKSPACE/import_graph.pdf" \
-             "$GITHUB_WORKSPACE/import_graph.html" \
-             pages/
+          name: import-graph
+          path: pages
+      - uses: actions/download-artifact@v8
+        with:
+          name: zoo
+          path: pages/zoo
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs
+          path: pages/docs
 
       - name: Compile README.md to index.html
         run: |

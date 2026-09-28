@@ -5,8 +5,11 @@ public import Foundation.Logic.LindenbaumAlgebra
 public import Foundation.Vorspiel.Order.Heyting
 
 @[expose] public section
+set_option autoImplicit true
 
 namespace FFL.Propositional
+
+universe u w
 
 variable {α : Type u}
 
@@ -65,7 +68,8 @@ scoped [FFL.Propositional] infix:45 " ⊧ₕ " => FFL.Propositional.Heyting.Mode
 
 @[simp] lemma hVal_imply (φ ψ : Formula α) : (ℍ ⊧ₕ φ 🡒 ψ) = (ℍ ⊧ₕ φ) ⇨ (ℍ ⊧ₕ ψ) := rfl
 
-@[simp] lemma hVal_iff (φ ψ : Formula α) : (ℍ ⊧ₕ φ 🡘 ψ) = bihimp (ℍ ⊧ₕ φ) (ℍ ⊧ₕ ψ) := by simp [LogicalConnective.iff, bihimp, inf_comm]
+@[simp] lemma hVal_iff (φ ψ : Formula α) : (ℍ ⊧ₕ φ 🡘 ψ) = bihimp (ℍ ⊧ₕ φ) (ℍ ⊧ₕ ψ) := by
+  simp [LogicalConnective.iff, bihimp, inf_comm]
 
 @[simp] lemma hVal_verum : (ℍ ⊧ₕ ⊤) = ⊤ := by simp [Formula.top_def];
 
@@ -146,15 +150,17 @@ instance : Complete H (lindenbaum H) := ⟨lindenbaum_complete_iff.mp⟩
 
 end
 
-lemma complete [DecidableEq α] [Entailment.Int H] {φ : Formula α} (h : mod.{_,u} H ⊧ φ) : H ⊢ φ := by
+lemma complete [Entailment.Int H] {φ : Formula α} (h : mod.{_, u} H ⊧ φ) :
+    H ⊢ φ := by
+  classical
   wlog Con : Entailment.Consistent H
-  . exact Entailment.not_consistent_iff_inconsistent.mp Con φ
-  exact lindenbaum_complete_iff.mp <| mod_models_iff.mp h (lindenbaum H) $ by
+  · exact Entailment.not_consistent_iff_inconsistent.mp Con φ
+  exact lindenbaum_complete_iff.mp <| mod_models_iff.mp h (lindenbaum H) <| by
     constructor;
     intro ψ hψ;
-    exact lindenbaum_complete_iff.mpr $ Hilbert.of_schema hψ;
+    exact lindenbaum_complete_iff.mpr <| Hilbert.of_schema hψ;
 
-instance [DecidableEq α] [Entailment.Int H] : Complete H (mod.{_,u} H) := ⟨complete⟩
+instance [Entailment.Int H] : Complete H (mod.{_,u} H) := ⟨complete⟩
 
 end Heyting.Model
 

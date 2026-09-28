@@ -6,10 +6,10 @@ public import Foundation.Vorspiel.Fin.Matrix
 
 namespace Quotient
 open Matrix
-variable {α : Type u} [s : Setoid α] {β : Sort v}
+variable {α : Type*} [s : Setoid α] {β : Sort*}
 
 @[elab_as_elim]
-lemma inductionOnVec {φ : (Fin n → Quotient s) → Prop} (v : Fin n → Quotient s)
+lemma inductionOnVec {n : ℕ} {φ : (Fin n → Quotient s) → Prop} (v : Fin n → Quotient s)
   (h : ∀ v : Fin n → α, φ (fun i => Quotient.mk s (v i))) : φ v :=
   Quotient.induction_on_pi v h
 
@@ -19,19 +19,25 @@ def liftVec : ∀ {n} (f : (Fin n → α) → β),
 | n + 1, f, h, v =>
   let ih : α → (Fin n → Quotient s) → β :=
     fun a v => liftVec (n := n) (fun v => f (a :> v))
-      (fun v₁ v₂ hv => h (a :> v₁) (a :> v₂) (Fin.cases (by simp [cons_val_zero, Setoid.refl]) hv)) v
+      (fun v₁ v₂ hv => h (a :> v₁) (a :> v₂)
+        (Fin.cases (by simp [cons_val_zero, Setoid.refl]) hv)) v
   Quot.liftOn (vecHead v) (ih · (vecTail v))
     (fun a b hab => by
-      have : ∀ v, f (a :> v) = f (b :> v) := fun v ↦ h _ _ (Fin.cases hab (by simp [cons_val_succ, Setoid.refl]))
+      have : ∀ v, f (a :> v) = f (b :> v) :=
+        fun v ↦ h _ _ (Fin.cases hab (by simp [cons_val_succ, Setoid.refl]))
       simp [this, ih])
 
-@[simp] lemma liftVec_zero (f : (Fin 0 → α) → β) (h) (v : Fin 0 → Quotient s) : liftVec f h v = f ![] := rfl
+@[simp] lemma liftVec_zero (f : (Fin 0 → α) → β) (h) (v : Fin 0 → Quotient s) :
+    liftVec f h v = f ![] := rfl
 
 lemma liftVec_mk {n} (f : (Fin n → α) → β) (h) (v : Fin n → α) :
     liftVec f h (Quotient.mk s ∘ v) = f v := by
-  induction' n with n ih <;> simp [liftVec, empty_eq]
-  simpa using! ih (fun v' => f (vecHead v :> v'))
-    (fun v₁ v₂ hv => h (vecHead v :> v₁) (vecHead v :> v₂) (Fin.cases (refl _) hv)) (vecTail v)
+  induction n with
+  | zero => simp [liftVec, empty_eq]
+  | succ n ih =>
+    simp [liftVec]
+    simpa using! ih (fun v' => f (vecHead v :> v'))
+      (fun v₁ v₂ hv => h (vecHead v :> v₁) (vecHead v :> v₂) (Fin.cases (refl _) hv)) (vecTail v)
 
 @[simp] lemma liftVec_mk₁ (f : (Fin 1 → α) → β) (h) (a : α) :
     liftVec f h ![Quotient.mk s a] = f ![a] := liftVec_mk f h ![a]

@@ -35,7 +35,7 @@ PRs (title and body) are written in English.
 
 ## Before submitting
 
-- The affected modules build with `lake build`, with no errors or warnings (including remaining `sorry`).
+- The affected modules build with `lake build --wfail`, which turns every warning (including a remaining `sorry`) into an error.
 - 🤖 Run `just forgive` and confirm it passes before submitting a PR. This checks sorry-freeness and the axiom allowlist across the project, and CI re-runs it on every PR — a failing audit blocks the merge.
 - Run import-all to keep `Foundation.lean` up to date:
   ```shell
@@ -43,7 +43,7 @@ PRs (title and body) are written in English.
   ```
 - If you added entries to `references.bib`, format it:
   ```shell
-  bibtool -r .bibtoolrsc -i references.bib -o references.bib
+  just format-references
   ```
 - 🤖 No development-time artifacts survive in the code — plan references, issue numbers, step numbers, stale skeleton-era comments. See [style.md](./style.md#stale-comments-and-planning-artifacts).
 

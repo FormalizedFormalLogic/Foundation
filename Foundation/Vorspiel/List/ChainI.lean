@@ -19,7 +19,7 @@ namespace List
 ```
   ChainI R x y [a, b, c, d] ↔ x = a ∧ R a b ∧ R b c ∧ R c d ∧ d = y
 ```
- -/
+-/
 inductive ChainI {α : Type*} (R : α → α → Prop) : α → α → List α → Prop
   | singleton (a : α) : ChainI R a a [a]
   | cons {a b c : α} {l : List α} : R a b → ChainI R b c l → ChainI R a c (a :: l)
@@ -32,31 +32,33 @@ variable {α : Type*} {R : α → α → Prop}
 
 @[simp] lemma singletob_iff (a b x) : ChainI R a b [x] ↔ a = x ∧ x = b := by
   constructor;
-  . rintro ⟨⟩ <;> simp_all;
-  . rintro ⟨rfl, rfl⟩; simp [ChainI.singleton];
+  · rintro ⟨⟩ <;> simp_all;
+  · rintro ⟨rfl, rfl⟩; simp [ChainI.singleton];
 
 attribute [simp] ChainI.singleton
 
-lemma cons_iff : ChainI R a b (c :: l) ↔ a = c ∧ ChainI R c b (c :: l) := by
+lemma cons_iff {a b c : α} {l : List α} :
+    ChainI R a b (c :: l) ↔ a = c ∧ ChainI R c b (c :: l) := by
   constructor;
-  . rintro (_ | _);
-    . simp;
+  · rintro (_ | _);
+    · simp;
     case cons a' hR h =>
     simp [h.cons hR];
-  . rintro ⟨rfl, _⟩;
+  · rintro ⟨rfl, _⟩;
     assumption;
 
-lemma cons_cons_iff :
+lemma cons_cons_iff {a b c d : α} {l : List α} :
   ChainI R a b (c :: d :: l) ↔ a = c ∧ R c d ∧ ChainI R d b (d :: l) := by
   constructor;
-  . rintro ⟨⟩;
+  · rintro ⟨⟩;
     case cons d' hR hC =>
       rcases cons_iff.mp hC with ⟨rfl, hC⟩;
       simp_all;
-  . rintro ⟨rfl, hR, hC⟩;
+  · rintro ⟨rfl, hR, hC⟩;
     exact hC.cons hR;
 
-lemma not_mem_of_rel (IR : Std.Irrefl R) (TR : IsTrans α R) {a b x : α} {l : List α} : ChainI R a b l → R x a → x ∉ l := by
+lemma not_mem_of_rel (IR : Std.Irrefl R) (TR : IsTrans α R) {a b x : α} {l : List α} :
+    ChainI R a b l → R x a → x ∉ l := by
   match l with
   | [] => simp;
   | a' :: l =>
@@ -83,31 +85,34 @@ lemma nodup (IR : Std.Irrefl R) (TR : IsTrans α R) {a b l} : ChainI R a b l →
       have notin : a ∉ l := not_mem_of_rel IR TR h Raa';
       simp_all;
 
-lemma finite_of_irreflexive_of_transitive [Finite α] (IR : Std.Irrefl R) (TR : IsTrans α R) (a b : α) :
+lemma finite_of_irreflexive_of_transitive [Finite α] (IR : Std.Irrefl R) (TR : IsTrans α R)
+    (a b : α) :
   Finite {l : List α // l.ChainI R a b} := by
   have : Fintype α := Fintype.ofFinite α;
-  let f : {l : List α // l.ChainI R a b} → {l : List α // l.Nodup} := fun l ↦ ⟨l, l.prop.nodup IR TR⟩;
+  let f : {l : List α // l.ChainI R a b} → {l : List α // l.Nodup} :=
+    fun l ↦ ⟨l, l.prop.nodup IR TR⟩;
   have : Function.Injective f := by intro ⟨l₁, hl₁⟩ ⟨l₂, hl₂⟩; simp [f];
   exact Finite.of_injective f this;
 
-lemma cons_eq {l} : ChainI R a b (a' :: l) → a = a' := by
+lemma cons_eq {a b a' : α} {l} : ChainI R a b (a' :: l) → a = a' := by
   rintro ⟨⟩ <;> simp;
 
-lemma eq_of {l} (h₁ : ChainI R a₁ b₁ l) (h₂ : ChainI R a₂ b₂ l) : a₁ = a₂ ∧ b₁ = b₂ := by
+lemma eq_of {a₁ b₁ a₂ b₂ : α} {l} (h₁ : ChainI R a₁ b₁ l) (h₂ : ChainI R a₂ b₂ l) :
+    a₁ = a₂ ∧ b₁ = b₂ := by
   match l with
   | [] => simp_all;
   | [i] =>
     rcases h₁;
-    . rcases h₂;
-      . simp;
-      . simp_all;
-    . simp_all;
+    · rcases h₂;
+      · simp;
+      · simp_all;
+    · simp_all;
   | j :: i :: l =>
     rcases h₁; rcases h₂;
     case cons h₁ _ _ h₂ =>
     simp [(eq_of h₁ h₂).2];
 
-lemma prec_exists_of_ne {l} (h : ChainI R a b l) :
+lemma prec_exists_of_ne {a b : α} {l} (h : ChainI R a b l) :
   a ≠ b → ∃ l' c, R a c ∧ l = a :: c :: l' ∧ ChainI R c b (c :: l') := by
   intro _;
   match l with
@@ -119,7 +124,7 @@ lemma prec_exists_of_ne {l} (h : ChainI R a b l) :
       rcases show c' = c from cons_eq h;
       exact ⟨l', _, hR, rfl, h⟩;
 
-lemma tail_exists (h : ChainI R a b l) : ∃ l', l = a :: l' := by
+lemma tail_exists {a b : α} {l : List α} (h : ChainI R a b l) : ∃ l', l = a :: l' := by
   match l with
   | [] => rcases h;
   | [b'] => rcases h <;> simp_all;
@@ -129,17 +134,19 @@ lemma tail_exists (h : ChainI R a b l) : ∃ l', l = a :: l' := by
       rcases show c' = c from cons_eq h;
       exact ⟨_, rfl⟩;
 
-lemma append_singleton_append_iff {l₁ l₂ : List α} :
+lemma append_singleton_append_iff {a b c : α} {l₁ l₂ : List α} :
   ChainI R a b (l₁ ++ c :: l₂) ↔ ChainI R a c (l₁ ++ [c]) ∧ ChainI R c b (c :: l₂) := by
   match l₁ with
   | [] => simp [cons_iff (a := a)];
   | [x] => simp [cons_cons_iff, and_assoc];
   | x :: y :: l₁ =>
-    have ih : ChainI R y b (y :: (l₁ ++ c :: l₂)) ↔ ChainI R y c (y :: (l₁ ++ [c])) ∧ ChainI R c b (c :: l₂) :=
+    have ih : ChainI R y b (y :: (l₁ ++ c :: l₂)) ↔
+        ChainI R y c (y :: (l₁ ++ [c])) ∧ ChainI R c b (c :: l₂) :=
       append_singleton_append_iff (l₁ := y :: l₁) (l₂ := l₂) (c := c) (a := y) (b := b);
     simp [cons_cons_iff, ih, and_assoc];
 
-lemma rel_of_infix (hC : ChainI R a b l) (x y) (h : [x, y] <:+: l) : R x y := by
+lemma rel_of_infix {a b : α} {l : List α} (hC : ChainI R a b l) (x y) (h : [x, y] <:+: l) :
+    R x y := by
   rcases h with ⟨l₁, l₂, rfl⟩;
   have : ChainI R x b (x :: y :: l₂) := by
     simp only [append_assoc, cons_append, nil_append,
@@ -147,7 +154,7 @@ lemma rel_of_infix (hC : ChainI R a b l) (x y) (h : [x, y] <:+: l) : R x y := by
     exact hC.2;
   exact cons_cons_iff.mp this |>.2.1;
 
-lemma prefix_suffix : ChainI R a b l → [a] <+: l ∧ [b] <:+ l := by
+lemma prefix_suffix {a b : α} {l : List α} : ChainI R a b l → [a] <+: l ∧ [b] <:+ l := by
   match l with
   | [] => simp;
   | [x] =>

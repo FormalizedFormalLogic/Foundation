@@ -31,17 +31,15 @@ variable {α : Type*} {A B : Formula α}
 
 lemma of_GL (h : 𝐆𝐋 ⊢ A) : 𝐃 ⊢ A := sumQuasiNormal.of_left h
 
-lemma axiomP : (𝐃 : Logic α) ⊢ ∼□⊥ := sumQuasiNormal.mem₂ (Set.mem_insert _ _)
+lemma axiomP : 𝐃 ⊢ ∼□(⊥ : Formula α) := sumQuasiNormal.mem₂ (Set.mem_insert _ _)
 
 lemma axiomD : 𝐃 ⊢ □(□A ⋎ □B) 🡒 □A ⋎ □B := sumQuasiNormal.mem₂ (Set.mem_insert_of_mem _ ⟨A, B, rfl⟩)
 
-lemma subset_S : (𝐃 : Logic α) ⊆ 𝐒 := by
-  intro A h;
-  induction h with
-  | mem₁ h => exact S.of_GL h;
-  | mem₂ h => rcases h with rfl | ⟨A, B, rfl⟩ <;> exact S.axiomT;
-  | mdp _ _ ih₁ ih₂ => exact sumQuasiNormal.mdp ih₁ ih₂;
-  | subst _ ih => exact sumQuasiNormal.subst ih;
+instance : (𝐃 : Logic α) ⪯ 𝐒 :=
+  Logic.weakerThan_iff.mpr <| sumQuasiNormal.subset_iff.mpr <| by
+    rintro _ (rfl | ⟨A, B, rfl⟩) <;> exact S.axiomT
+
+instance : Consistent (𝐃 : Logic α) := .of_le (𝓢 := 𝐒) inferInstance inferInstance
 
 /-- - [KKIM25, Theorem 5.8] -/
 lemma sound_freeTail (h : 𝐃 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ α) [M.IsGL]
@@ -50,8 +48,8 @@ lemma sound_freeTail (h : 𝐃 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ �
   | mem₁ h => exact GL.sound _ h _;
   | mem₂ h =>
     rcases h with rfl | ⟨B, C, rfl⟩;
-    . exact fun h ↦ h (.inr 0) (toFreeTail.rel_inr_inr.mpr (by simp));
-    . intro h;
+    · exact fun h ↦ h (.inr 0) (toFreeTail.rel_inr_inr.mpr (by simp));
+    · intro h;
       by_contra hBC;
       obtain ⟨hB, hC⟩ := not_or.mp (forces_or.not.mp hBC);
       obtain ⟨x, Rx, hx⟩ := not_forces_box.mp hB;
@@ -60,33 +58,30 @@ lemma sound_freeTail (h : 𝐃 ⊢ A) {κ : Type*} [Nonempty κ] (M : Model κ �
       obtain ⟨k₂, hk₂⟩ := toFreeTail.eventually_rel Ry;
       rcases forces_or.mp (h (.inr (max k₁ k₂ : ℕ)) (toFreeTail.rel_inr_inr.mpr (by simp)))
         with h | h;
-      . exact hx (h x (hk₁ _ (le_max_left _ _)));
-      . exact hy (h y (hk₂ _ (le_max_right _ _)));
+      · exact hx (h x (hk₁ _ (le_max_left _ _)));
+      · exact hy (h y (hk₂ _ (le_max_right _ _)));
   | mdp _ _ ih₁ ih₂ => exact ih₁ M V (ih₂ M V);
   | @subst A s _ ih =>
     apply forces_subst.mp;
     apply (forces_congr (M := ((M.subst s).toFreeTail fun i a ↦
       Sum.inr i ⊩[(M.toFreeTail V).toModel] s a).toModel) _ _).mp (ih (M.subst s) _);
-    . funext x y;
+    · funext x y;
       rcases x <;> rcases y <;> rfl;
-    . rintro (x | i) a;
-      . exact toFreeTail.forces_inl.symm;
-      . rfl;
+    · rintro (x | i) a;
+      · exact toFreeTail.forces_inl.symm;
+      · rfl;
 
-lemma not_axiomT {a : α} : (𝐃 : Logic α) ⊬ □#a 🡒 #a := fun h ↦
-  sound_freeTail h (pointModel fun _ ↦ True) (fun i _ ↦ i ≠ ⊤)
-    (by rintro (_ | i) R; exacts [trivial, ne_top_of_lt R]) rfl
+instance : (𝐆𝐋 : Logic α) ⪱ 𝐃 :=
+  .of_unprovable_provable (φ := ∼□⊥)
+    (fun h ↦ GL.sound (pointModel fun _ ↦ True) h 0 fun _ h ↦ h.elim) axiomP
 
-lemma GL_ssubset : (𝐆𝐋 : Logic α) ⊂ 𝐃 :=
-  ⟨fun _ ↦ of_GL, fun h ↦
-    GL.sound (pointModel (α := α) fun _ ↦ True) (h axiomP) 0 fun _ h ↦ h.elim⟩
-
-lemma ssubset_S [Inhabited α] : (𝐃 : Logic α) ⊂ 𝐒 :=
-  ⟨subset_S, fun h ↦ not_axiomT (a := default) (h S.axiomT)⟩
+instance [Inhabited α] : (𝐃 : Logic α) ⪱ 𝐒 :=
+  have (a : α) : 𝐃 ⊬ □#a 🡒 #a := fun h ↦ sound_freeTail h (pointModel fun _ ↦ True)
+    (fun i _ ↦ i ≠ ⊤) (by rintro (_ | i) R; exacts [trivial, ne_top_of_lt R]) rfl;
+  .of_unprovable_provable (this default) S.axiomT
 
 variable [DecidableEq α]
 
-/-- The `n`-ary form of axiom `D`. -/
 lemma axiomD_disj {Γ : FormulaFinset α} : 𝐃 ⊢ □Γ.box.disj 🡒 Γ.box.disj := by
   induction Γ using Finset.induction_on with
   | empty =>
@@ -102,37 +97,41 @@ lemma axiomD_disj {Γ : FormulaFinset α} : 𝐃 ⊢ □Γ.box.disj 🡒 Γ.box.
     have h₂ : 𝐆𝐋 ⊢ Ψ 🡒 □A ⋎ Φ := by simp [Ψ, Φ, Finset.image_insert];
     have h₃ : 𝐆𝐋 ⊢ □A ⋎ Φ 🡒 Ψ := by simp [Ψ, Φ, Finset.image_insert];
     have h₄ : 𝐆𝐋 ⊢ □Ψ 🡒 □(□A ⋎ □Φ) := normalOf.box_mono (by cl_prover [h₁, h₂]);
-    have h₅ : 𝐆𝐋 ⊢ (□(□A ⋎ □Φ) 🡒 □A ⋎ □Φ) 🡒 (□Φ 🡒 Φ) 🡒 □Ψ 🡒 Ψ := by cl_prover [h₃, h₄];
-    exact of_GL h₅ ⨀ axiomD ⨀ ih;
+    exact of_GL (by cl_prover [h₃, h₄]) ⨀ axiomD ⨀ ih;
+
+omit [DecidableEq α] in
+lemma provable_alpha {n : ℕ} : 𝐃 ⊢ Formula.alpha n (α := α) := by
+  classical
+  cases n with
+  | zero => exact axiomP;
+  | succ n => simpa [Formula.alpha] using axiomD_disj (Γ := {□^[n]⊥});
 
 open Classical in
 /-- - [KKIM25, Proposition 3.6] -/
 lemma root_forces_of_forces_pseudoTail {κ : Type*} [Nonempty κ] {M : RootedModel κ α} [M.IsFiniteGL]
-    (h : ∀ x, M.root ≺ x → Sum.inr ⊤ ⊩[((M.toModel.cone x).toPseudoTail (M.Val M.root)).toModel] A)
+    (h : ∀ x, M.root ≺ x → Sum.inr ⊤ ⊩[((M.toModel.cone x).toPseudoTail (M M.root)).toModel] A)
     (hΓ : M.root ⊩[M.toModel] A.dSubfmls.conj) : M.root ⊩[M.toModel] A := by
-  let Δ := A.subfmls.prebox.filter fun B ↦ ¬M.root ⊩[M.toModel] □B;
-  obtain ⟨x, Rx, hx⟩ : ∃ x, M.root ≺ x ∧ ∀ B ∈ Δ, ¬x ⊩[M.toModel] □B := by
+  let Δ := A.subfmls.prebox.filter fun B ↦ ¬M.root ⊩ □B;
+  obtain ⟨x, Rx, hx⟩ : ∃ x, M.root ≺ x ∧ ∀ B ∈ Δ, ¬x ⊩ □B := by
     have h₁ := forces_conj.mp hΓ _ (Finset.mem_image.mpr
       ⟨Δ, Finset.mem_powerset.mpr (Finset.filter_subset _ _), rfl⟩);
-    have h₂ : ¬M.root ⊩[M.toModel] (FormulaFinset.box Δ).disj := by
+    have h₂ : ¬M.root ⊩ (FormulaFinset.box Δ).disj := by
       simp only [forces_disj, Finset.mem_image];
       rintro ⟨_, ⟨B, hB, rfl⟩, h⟩;
       exact (Finset.mem_filter.mp hB).2 h;
     obtain ⟨x, Rx, hx⟩ := not_forces_box.mp fun h ↦ h₂ (h₁ h);
     exact ⟨x, Rx, fun B hB h ↦ hx (forces_disj.mpr ⟨□B, Finset.mem_image_of_mem _ hB, h⟩)⟩;
-  have hbox : ∀ B, □B ∈ A.subfmls → (x ⊩[M.toModel] □B ↔ M.root ⊩[M.toModel] □B) := by
+  have hbox : ∀ B, □B ∈ A.subfmls → (x ⊩ □B ↔ M.root ⊩ □B) := by
     intro B hB;
     constructor;
-    . intro h;
+    · intro h;
       by_contra hr;
       exact hx B (Finset.mem_filter.mpr ⟨FormulaFinset.mem_prebox.mpr hB, hr⟩) h;
-    . exact fun h y Rxy ↦ h y (IsTrans.trans _ _ _ Rx Rxy);
-  have hrefl : ∀ B, □B ∈ A.subfmls →
-      (M.toModel.cone x).root ⊩[(M.toModel.cone x).toModel] □B 🡒 B := by
-    intro B hB h;
-    exact forces_cone.mpr ((hbox B hB).mp (forces_cone.mp h) x Rx);
+    · exact fun h y Rxy ↦ h y (IsTrans.trans _ _ _ Rx Rxy);
+  have hrefl : ∀ B, □B ∈ A.subfmls → (M.toModel.cone x).root ⊩ □B 🡒 B := fun B hB h ↦
+    forces_cone.mpr ((hbox B hB).mp (forces_cone.mp h) x Rx);
   have key : ∀ B ∈ A.subfmls,
-      Sum.inr ⊤ ⊩[((M.toModel.cone x).toPseudoTail (M.Val M.root)).toModel] B ↔
+      Sum.inr ⊤ ⊩[((M.toModel.cone x).toPseudoTail (M M.root)).toModel] B ↔
         M.root ⊩[M.toModel] B := by
     intro B hB;
     induction B with
@@ -142,14 +141,14 @@ lemma root_forces_of_forces_pseudoTail {κ : Type*} [Nonempty κ] {M : RootedMod
         (ihC (Formula.subfmls_trans hB (by grind)));
     | box B _ =>
       constructor;
-      . intro h;
+      · intro h;
         apply (hbox B hB).mp;
         exact forces_cone.mp <| toFreeTail.forces_inl.mp <|
           toFreeTail.forces_box_of_root h (.inl ⟨x, .inl rfl⟩);
-      . rintro h (⟨y, rfl | Rxy⟩ | j) R;
-        . exact toFreeTail.forces_inl.mpr <| forces_cone.mpr <| h y Rx;
-        . exact toFreeTail.forces_inl.mpr <| forces_cone.mpr <| h y (IsTrans.trans _ _ _ Rx Rxy);
-        . obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt (toFreeTail.rel_inr_inr.mp R));
+      · rintro h (⟨y, rfl | Rxy⟩ | j) R;
+        · exact toFreeTail.forces_inl.mpr <| forces_cone.mpr <| h y Rx;
+        · exact toFreeTail.forces_inl.mpr <| forces_cone.mpr <| h y (IsTrans.trans _ _ _ Rx Rxy);
+        · obtain ⟨m, rfl⟩ := ENat.ne_top_iff_exists.mp (ne_top_of_lt (toFreeTail.rel_inr_inr.mp R));
           apply (toFreeTail.forces_inr_iff (fun n ↦ by simp) (fun _ hC ↦ Formula.subfmls_trans hC)
             hrefl (Formula.subfmls_trans hB (by grind)) m).mpr;
           exact forces_cone.mpr (h x Rx);
@@ -162,7 +161,7 @@ variable {α : Type u} [DecidableEq α] {A : Formula α}
 /-- - [KKIM25, Proposition 3.6, Theorem 5.8] -/
 theorem provability_TFAE : [
     𝐃 ⊢ A,
-    ⊢ᴳ[D] ∅ ⟹[2] {A},
+    ⊢ᴳ[𝐃] ∅ ⟹[2] {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] (V : ℕ∞ → α → Prop),
       Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] A,
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (o : α → Prop),
@@ -173,16 +172,8 @@ theorem provability_TFAE : [
   ].TFAE := by
   tfae_have 1 → 3 := fun h _ _ M _ V ↦ sound_freeTail h M V;
   tfae_have 2 ↔ 3 := by
-    have h : ∀ {κ : Type u} [Nonempty κ] {M : Model κ α} {x : M.World},
-        x ⊩[M] (∅ ⟹ {A}) ↔ x ⊩[M] A := by simp [ForcesSequent];
-    have e : ⊢ᴳ[D] ∅ ⟹[2] {A} ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsGL] V,
-        Sum.inr ⊤ ⊩[(M.toFreeTail V).toModel] (∅ ⟹ {A}) := D.Gentzen.TFAE.out 1 2;
-    rw [e];
-    constructor;
-    . intro h' _ _ M _ V;
-      exact h.mp (h' M V);
-    . intro h' _ _ M _ V;
-      exact h.mpr (h' M V);
+    have := (D.Gentzen.TFAE (Γ := ∅) (Δ := {A})).out 1 2;
+    simpa [ForcesSequent] using this;
   tfae_have 3 → 4 := fun h _ _ M _ _ ↦ h M.toModel _;
   tfae_have 4 → 5 := fun h _ _ M _ ↦ root_forces_of_forces_pseudoTail fun x _ ↦ h _ _;
   tfae_have 5 ↔ 6 := GL.iff_root_forces.symm;
@@ -191,23 +182,22 @@ theorem provability_TFAE : [
     exact axiomD_disj;
   tfae_finish;
 
-lemma iff_provable_gentzen : 𝐃 ⊢ A ↔ ⊢ᴳ[D] ∅ ⟹[2] {A} := provability_TFAE.out 1 2
+lemma iff_provable_gentzen : 𝐃 ⊢ A ↔ ⊢ᴳ[𝐃] ∅ ⟹[2] {A} := provability_TFAE.out 1 2
 
+omit [DecidableEq α] in
 lemma iff_forces_pseudoTail : 𝐃 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (o : α → Prop),
-      Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] A :=
-  provability_TFAE.out 1 4
+      Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] A := by
+  classical
+  exact provability_TFAE.out 1 4
 
 lemma iff_provable_GL : 𝐃 ⊢ A ↔ 𝐆𝐋 ⊢ A.dSubfmls.conj 🡒 A := provability_TFAE.out 1 6
 
-lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A := by
-  constructor;
-  . intro h;
-    exact GL.iff_valid_finite.mpr fun M _ x ↦
-      toFreeTail.forces_inl.mp (sound_freeTail h M (fun _ _ ↦ True) (.inl x) trivial);
-  . exact fun h ↦ of_GL (normalOf.nec h);
-
-lemma consistent : (𝐃 : Logic α) ⊬ ⊥ := fun h ↦ S.consistent (subset_S h)
+omit [DecidableEq α] in
+lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A :=
+  ⟨fun h ↦ GL.iff_valid_finite.mpr fun M _ x ↦
+      toFreeTail.forces_inl.mp (sound_freeTail h M (fun _ _ ↦ True) (.inl x) trivial),
+    fun h ↦ of_GL (normalOf.nec h)⟩
 
 end Logic.D
 

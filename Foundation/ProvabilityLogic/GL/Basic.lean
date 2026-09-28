@@ -2,7 +2,7 @@ module
 
 public import Foundation.ProvabilityLogic.GL.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Kripke.Cone
-public import Foundation.ProvabilityLogic.Kripke.Soundness
+public import Foundation.ProvabilityLogic.Kripke.Unravelling
 
 /-!
 # The logic `GL`
@@ -34,11 +34,11 @@ section
 
 variable {κ : Type*} [Nonempty κ] {M : Model κ α}
 
-lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩[M] □(□A 🡒 A) 🡒 □A := by
+lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩ □(□A 🡒 A) 🡒 □A := by
   intro hx;
   by_contra hA;
   obtain ⟨y, Rxy, hy⟩ := not_forces_box.mp hA;
-  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮[M] A} ⟨y, Rxy, hy⟩;
+  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := M.terminalOf {y | x ≺ y ∧ y ⊮ A} ⟨y, Rxy, hy⟩;
   apply ht;
   apply hx t Rxt;
   intro z Rtz;
@@ -48,14 +48,17 @@ lemma forces_axiomL [M.IsGL] {x : M.World} : x ⊩[M] □(□A 🡒 A) 🡒 □A
 theorem sound (M : Model κ α) [M.IsGL] (h : 𝐆𝐋 ⊢ A) : M ⊧ A := by
   apply normalOf.sound _ h;
   rintro _ (⟨B, rfl⟩ | ⟨B, rfl⟩) x;
-  . exact fun h y Rxy z Ryz ↦ h z (IsTrans.trans _ _ _ Rxy Ryz);
-  . exact forces_axiomL;
+  · exact fun h y Rxy z Ryz ↦ h z (IsTrans.trans _ _ _ Rxy Ryz);
+  · exact forces_axiomL;
 
 end
 
+instance : Consistent (𝐆𝐋 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ sound (pointModel fun _ ↦ False) h 0
+
 /-! ### From the sequent calculus -/
 
-lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[GL] S) : 𝐆𝐋 ⊢ S.ant.conj 🡒 S.suc.disj := by
+lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[𝐆𝐋] S) : 𝐆𝐋 ⊢ S.ant.conj 🡒 S.suc.disj := by
   induction h with
   | axm A => simp;
   | botL => simp only [Finset.conj_singleton]; exact efq;
@@ -90,7 +93,6 @@ lemma of_gentzen [DecidableEq α] {S : Sequent α} (h : ⊢ᴳ[GL] S) : 𝐆𝐋
 
 /-! ### Quasi-normal extensions -/
 
-/-- A quasi-normal extension of `GL` proves `A` if it proves `Γ` and `𝐆𝐋 ⊢ Γ.conj 🡒 A`. -/
 lemma sumQuasiNormal_of_conj [DecidableEq α] {L : Logic α} {Γ : FormulaFinset α}
     (hΓ : ∀ B ∈ Γ, 𝐆𝐋 +ᴸ L ⊢ B) (h : 𝐆𝐋 ⊢ Γ.conj 🡒 A) : 𝐆𝐋 +ᴸ L ⊢ A :=
   sumQuasiNormal.of_left h ⨀ FConj_iff_forall_provable.mpr hΓ
@@ -101,46 +103,43 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
 
-theorem iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[GL] ∅ ⟹ {A} := by
-  constructor;
-  . intro h;
-    apply Gentzen.complete;
-    intro _ _ M _ x _;
-    exact ⟨A, by simp, sound M h x⟩;
-  . intro h;
-    have : 𝐆𝐋 ⊢ (∅ : FormulaFinset α).conj := by simp [Finset.conj];
-    simpa using of_gentzen h ⨀ this;
-
-theorem iff_valid_finite : 𝐆𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
-  constructor;
-  . intro h _ _ M _;
-    exact sound M h;
-  . intro h;
-    apply iff_provable_gentzen.mpr;
-    apply Gentzen.complete;
-    intro _ _ M _ x _;
-    exact ⟨A, by simp, h M x⟩;
-
-theorem iff_root_forces : 𝐆𝐋 ⊢ A ↔
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A := by
-  constructor;
-  . intro h _ _ M _;
-    exact sound M.toModel h M.root;
-  . intro h;
-    apply iff_valid_finite.mpr;
-    intro _ _ M _ x;
-    exact Model.forces_cone.mp <| h (M.cone x);
-
 theorem provability_TFAE : [
     𝐆𝐋 ⊢ A,
-    ⊢ᴳ[GL] ∅ ⟹ {A},
+    ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩[M.toModel] A
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩ A,
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
+      M.root ⊩ A
   ].TFAE := by
-  tfae_have 1 ↔ 2 := iff_provable_gentzen;
-  tfae_have 1 ↔ 3 := iff_valid_finite;
-  tfae_have 1 ↔ 4 := iff_root_forces;
+  tfae_have 1 → 3 := fun h _ _ M _ ↦ sound M h;
+  tfae_have 3 → 2 := fun h ↦ Gentzen.complete fun M _ x _ ↦ ⟨A, by simp, h M x⟩;
+  tfae_have 2 → 1 := fun h ↦ by simpa using of_gentzen h ⨀ (by simp [Finset.conj]);
+  tfae_have 3 → 5 := fun h _ _ M _ _ ↦ h M.toModel M.root;
+  tfae_have 5 → 4 := fun h _ _ M _ ↦ RootedModel.unravelling.forces_root_iff.mp <| h M.unravelling;
+  tfae_have 4 → 3 := fun h _ _ M _ x ↦ Model.forces_cone.mp <| h (M.cone x);
   tfae_finish;
+
+lemma iff_provable_gentzen : 𝐆𝐋 ⊢ A ↔ ⊢ᴳ[𝐆𝐋] ∅ ⟹ {A} := provability_TFAE.out 1 2
+
+omit [DecidableEq α] in
+lemma iff_valid_finite :
+    𝐆𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGL] → M ⊧ A := by
+  classical
+  exact provability_TFAE.out 1 3
+
+omit [DecidableEq α] in
+lemma iff_root_forces : 𝐆𝐋 ⊢ A ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → M.root ⊩ A := by
+  classical
+  exact provability_TFAE.out 1 4
+
+omit [DecidableEq α] in
+/-- - [CZ97] -/
+theorem iff_tree_root_forces : 𝐆𝐋 ⊢ A ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGL] → [M.IsTree] →
+      M.root ⊩ A := by
+  classical
+  exact provability_TFAE.out 1 5
 
 end Logic.GL
 
