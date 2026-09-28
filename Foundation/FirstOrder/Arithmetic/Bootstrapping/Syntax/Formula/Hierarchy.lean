@@ -402,7 +402,34 @@ lemma IsHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsHierarchy Γ n p) :
 /-! ### Comparison with `IsSigma1` -/
 
 theorem isSigma_one_iff_isSigma1 : IsSigma 1 p ↔ IsSigma1 p := by
-  sorry
+  have : 𝚫ᴬ₁-Predicate (IsSigma1 : V → Prop) := IsSigma1.defined.to_definable;
+  constructor;
+  · revert p;
+    apply IsHierarchy.succ_induction 𝚺 (P := IsSigma1) (by definability);
+    · intro p h;
+      exact IsBounded.isSigma1 h;
+    · intro p q _ _ hp hq;
+      exact IsSigma1.and_iff.mpr ⟨hp, hq⟩;
+    · intro p q _ _ hp hq;
+      exact IsSigma1.or_iff.mpr ⟨hp, hq⟩;
+    · intro t q ht _ hq;
+      exact IsSigma1.mk <| by disj 8; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
+    · intro t q _ _ hq;
+      simp [qqBex, Arithmetic.qqLT, hq];
+    · intro q _ hq;
+      exact IsSigma1.ex_iff.mpr hq;
+  · revert p;
+    apply IsSigma1F.construction.induction (v := ![]) (Γ := 𝚺) (P := IsSigma 1) (by definability);
+    rintro C hC x (rfl | rfl | ⟨k, r, v, rfl⟩ | ⟨k, r, v, rfl⟩ | ⟨p, q, hp, hq, rfl⟩
+      | ⟨p, q, hp, hq, rfl⟩ | ⟨p, hp, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩);
+    · exact IsHierarchy.verum;
+    · exact IsHierarchy.falsum;
+    · exact IsHierarchy.rel;
+    · exact IsHierarchy.nrel;
+    · exact IsHierarchy.and_iff.mpr ⟨(hC p hp).2, (hC q hq).2⟩;
+    · exact IsHierarchy.or_iff.mpr ⟨(hC p hp).2, (hC q hq).2⟩;
+    · exact IsSigma.ex (hC p hp).2;
+    · exact IsHierarchy.ball ht (hC q hq).2;
 
 end isHierarchy
 
