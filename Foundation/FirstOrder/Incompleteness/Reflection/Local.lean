@@ -183,11 +183,9 @@ lemma provable_neg_iterate_standardProvability_bot (hU : U ⊢* 𝗥𝗳𝗻[ℬ
     ∀ n, U ⊢ ∼T.standardProvability^[n] ⊥
   | 0 => by simp
   | n + 1 => by
-    have h₁ : U ⊢ T.standardProvability.refl (T.standardProvability^[n] ⊥) :=
-      hU ⟨_, hierarchy_iterate_standardProvability_bot n, rfl⟩;
-    have h₂ := provable_neg_iterate_standardProvability_bot hU n;
     rw [Function.iterate_succ_apply'];
-    cl_prover [h₁, h₂];
+    cl_prover [hU ⟨_, hierarchy_iterate_standardProvability_bot n, rfl⟩,
+      provable_neg_iterate_standardProvability_bot hU n];
 
 variable [U.Δ₁]
 
@@ -195,11 +193,9 @@ lemma provable_iterate_standardProvability_bot_imp
     (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
     (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) (n : ℕ) :
     𝗜𝚺₁ ⊢ T.standardProvability^[n + 1] ⊥ 🡒 U.standardProvability ⊥ := by
-  have h₀ := provable_neg_iterate_standardProvability_bot hU n;
   rw [Function.iterate_succ_apply'];
-  generalize T.standardProvability^[n] ⊥ = σ at h₀ ⊢;
-  have h₁ : U ⊢ σ 🡒 ⊥ := by cl_prover [h₀];
-  exact C_trans (hTU σ) (U.standardProvability.D2 ⨀ U.standardProvability.D1 h₁);
+  exact C_trans (hTU _) <| U.standardProvability.D2 ⨀
+    U.standardProvability.D1 (by cl_prover [provable_neg_iterate_standardProvability_bot hU n]);
 
 end Iterate
 
