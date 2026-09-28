@@ -1767,6 +1767,40 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
       simp [ih hfq];
   exact H p hp hp' e;
 
+section
+variable {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+include hw
+
+lemma subst_rel (hp : IsSemiformula ℒₒᵣ n (^rel k r v)) :
+    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w (^rel k r v)) e ↔
+      BoundedSatisfaction (^rel k r v) (termValVec e n w) := by
+  rcases rel_cases hp.isUFormula with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩ <;>
+    rw [heq] at hp ⊢;
+  · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+      simpa [Arithmetic.qqEQ] using hp;
+    rw [substs_qqEQ ht hu, eq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
+      eq_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus];
+  · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+      simpa [Arithmetic.qqLT] using hp;
+    rw [substs_qqLT ht hu, lt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
+      lt_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus];
+
+lemma subst_nrel (hp : IsSemiformula ℒₒᵣ n (^nrel k r v)) :
+    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w (^nrel k r v)) e ↔
+      BoundedSatisfaction (^nrel k r v) (termValVec e n w) := by
+  rcases nrel_cases hp.isUFormula with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩ <;>
+    rw [heq] at hp ⊢;
+  · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+      simpa [Arithmetic.qqNEQ] using hp;
+    rw [substs_qqNEQ ht hu, neq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
+      neq_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus];
+  · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+      simpa [Arithmetic.qqNLT] using hp;
+    rw [substs_qqNLT ht hu, nlt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
+      nlt_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus];
+
+end
+
 lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
     BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
@@ -1782,33 +1816,9 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     · intro n m w e _ _; simp;
     · intro n m w e _ _; simp;
     · intro k r v n m w e hw hp;
-      rcases rel_cases hp.isUFormula with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩;
-      · rw [heq] at hp ⊢;
-        obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
-          simpa [Arithmetic.qqEQ] using hp;
-        rw [substs_qqEQ ht hu, eq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
-          eq_iff ht hu,
-          termVal_termSubst hw hts, termVal_termSubst hw hus];
-      · rw [heq] at hp ⊢;
-        obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
-          simpa [Arithmetic.qqLT] using hp;
-        rw [substs_qqLT ht hu, lt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
-          lt_iff ht hu,
-          termVal_termSubst hw hts, termVal_termSubst hw hus];
+      exact subst_rel hw hp;
     · intro k r v n m w e hw hp;
-      rcases nrel_cases hp.isUFormula with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩;
-      · rw [heq] at hp ⊢;
-        obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
-          simpa [Arithmetic.qqNEQ] using hp;
-        rw [substs_qqNEQ ht hu, neq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
-          neq_iff ht hu,
-          termVal_termSubst hw hts, termVal_termSubst hw hus];
-      · rw [heq] at hp ⊢;
-        obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
-          simpa [Arithmetic.qqNLT] using hp;
-        rw [substs_qqNLT ht hu, nlt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
-          nlt_iff ht hu,
-          termVal_termSubst hw hts, termVal_termSubst hw hus];
+      exact subst_nrel hw hp;
     · intro p q _ _ ihp ihq n m w e hw hpq;
       obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq;
       rw [substs_and hp.isUFormula hq.isUFormula, and_iff, and_iff, ihp n m w e hw hp,

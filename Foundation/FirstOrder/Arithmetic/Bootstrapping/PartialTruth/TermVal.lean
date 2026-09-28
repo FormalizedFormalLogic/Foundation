@@ -26,9 +26,9 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Exponential bounds
 
-`bound` proves `a ≤ Exp.exp (⋯ (Exp.exp c))` by splitting sums and products one level of `Exp.exp`
-at a time (`add_le_exp`, `mul_le_exp_exp`) and lifting a leaf `a ≤ c` through the remaining levels
-(`le_exp_of_le`, an unsafe rule so that the levels at which to split are searched for). -/
+`bound` proves `a ≤ Exp.exp (⋯ (Exp.exp c))` by splitting a sum one level of `Exp.exp` at a time
+(`add_le_exp`) and lifting a leaf `a ≤ c` through the remaining levels (`le_exp_of_le`, an unsafe
+rule so that the levels at which to split are searched for). -/
 
 section expBound
 
@@ -50,10 +50,6 @@ lemma two_mul_le_exp (a : V) : 2 * a ≤ Exp.exp a := by
 @[bound] lemma add_le_exp (ha : a ≤ c) (hb : b ≤ c) : a + b ≤ Exp.exp c :=
   calc a + b ≤ 2 * c := by rw [two_mul]; gcongr
     _ ≤ Exp.exp c := two_mul_le_exp c
-
-@[bound] lemma mul_le_exp_exp (ha : a ≤ c) (hb : b ≤ c) : a * b ≤ Exp.exp (Exp.exp c) :=
-  calc a * b ≤ Exp.exp c * Exp.exp c := by gcongr <;> bound
-    _ ≤ Exp.exp (Exp.exp c) := by rw [← exp_add]; bound
 
 lemma exp_add_exp_le_of_lt (ha : a < c) (hb : b < c) : Exp.exp a + Exp.exp b ≤ Exp.exp c := by
   obtain ⟨d, rfl⟩ : ∃ d, c = d + 1 := (zero_or_succ c).resolve_left (by rintro rfl; simp at ha);
