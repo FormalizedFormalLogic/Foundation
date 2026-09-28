@@ -184,13 +184,13 @@ theorem provabilityLogic_TA_classification : [
     fun _ ↦ Arithmetic.height_eq_top_of_sigma1_sound T;
   oaoo_split;
   · by_cases hs : ℕ↓[ℒₒᵣ] ⊧* T;
-    · exact .inl ⟨hs, Logic.S.eq_provabilityLogicRelativeTo_TA.symm⟩;
+    · disj 1; exact ⟨hs, Logic.S.eq_provabilityLogicRelativeTo_TA.symm⟩;
     by_cases hs₁ : T.SoundOnHierarchy 𝚺 1;
-    · exact .inr <| .inl ⟨hs₁, hs, provabilityLogic_TA_eq_D_iff.mpr ⟨hs₁, hs⟩⟩;
+    · disj 2; exact ⟨hs₁, hs, provabilityLogic_TA_eq_D_iff.mpr ⟨hs₁, hs⟩⟩;
     by_cases h : T.height = ⊤;
-    · exact .inr <| .inr <| .inl ⟨hs₁, h, provabilityLogic_TA_eq_A_iff.mpr ⟨hs₁, h⟩⟩;
+    · disj 3; exact ⟨hs₁, h, provabilityLogic_TA_eq_A_iff.mpr ⟨hs₁, h⟩⟩;
     · obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp h;
-      exact .inr <| .inr <| .inr ⟨n, hn.symm, provabilityLogic_TA_eq_GLBeta_iff.mpr hn.symm⟩;
+      disj 4; exact ⟨n, hn.symm, provabilityLogic_TA_eq_GLBeta_iff.mpr hn.symm⟩;
   all_goals simp +contextual [h₁, h₂];
 
 lemma provabilityLogic_TA_classification_equiv : [

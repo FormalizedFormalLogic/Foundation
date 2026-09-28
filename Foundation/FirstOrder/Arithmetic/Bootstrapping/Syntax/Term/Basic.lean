@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
+public import Foundation.Vorspiel.Tactic.Disj
 
 @[expose] public section
 
@@ -98,18 +99,16 @@ private lemma phi_iff (C : V) (t : V) :
     (∃ k < t, ∃ f < t, ∃ v < t,
       L.IsFunc k f ∧ k = len v ∧ (∀ i < k, v.[i] ∈ C) ∧ t = ^func k f v) where
   mp := by
-    rintro (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, hk, hv, rfl⟩)
-    · left; exact ⟨z, lt_succ_iff_le.mpr <| by simp, rfl⟩
-    · right; left
-      exact ⟨x, lt_succ_iff_le.mpr <| by simp, rfl⟩
-    · right; right
-      exact ⟨k, by simp, f, by simp, v, by simp, hkf, hk, hv, rfl⟩
+    rintro (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, hk, hv, rfl⟩);
+    · disj 1; exact ⟨z, lt_succ_iff_le.mpr <| by simp, rfl⟩;
+    · disj 2; exact ⟨x, lt_succ_iff_le.mpr <| by simp, rfl⟩;
+    · disj 3; exact ⟨k, by simp, f, by simp, v, by simp, hkf, hk, hv, rfl⟩;
   mpr := by
-    unfold Phi
-    rintro (⟨z, _, rfl⟩ | ⟨x, _, rfl⟩ | ⟨k, _, f, _, v, _, hkf, hk, hv, rfl⟩)
-    · left; exact ⟨z, rfl⟩
-    · right; left; exact ⟨x, rfl⟩
-    · right; right; exact ⟨k, f, v, hkf, hk, hv, rfl⟩
+    unfold Phi;
+    rintro (⟨z, _, rfl⟩ | ⟨x, _, rfl⟩ | ⟨k, _, f, _, v, _, hkf, hk, hv, rfl⟩);
+    · disj 1; exact ⟨z, rfl⟩;
+    · disj 2; exact ⟨x, rfl⟩;
+    · disj 3; exact ⟨k, f, v, hkf, hk, hv, rfl⟩;
 
 def blueprint : Fixpoint.Blueprint 0 where
   core := .mkDelta
@@ -130,18 +129,18 @@ def construction : Fixpoint.Construction V (blueprint L) where
   Φ := fun _ ↦ Phi L
   defined := ⟨by intro v; simp [blueprint], by intro v; simp [blueprint, phi_iff]⟩
   monotone := by
-    rintro C C' hC _ x (h | h | ⟨k, f, v, hkf, hk, h, rfl⟩)
-    · exact Or.inl h
-    · exact Or.inr <| Or.inl h
-    · exact Or.inr <| Or.inr ⟨k, f, v, hkf, hk, fun i hi ↦ hC (h i hi), rfl⟩
+    rintro C C' hC _ x (h | h | ⟨k, f, v, hkf, hk, h, rfl⟩);
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact ⟨k, f, v, hkf, hk, fun i hi ↦ hC (h i hi), rfl⟩;
 
 instance : (construction L).StrongFinite V where
   strong_finite := by
-    rintro C v x (h | h | ⟨k, f, v, hkf, hk, h, rfl⟩)
-    · exact Or.inl h
-    · exact Or.inr <| Or.inl h
-    · exact Or.inr <| Or.inr ⟨k, f, v, hkf, hk, fun i hi ↦
-        ⟨h i hi, lt_of_le_of_lt (nth_le _ _) (by simp)⟩, rfl⟩
+    rintro C v x (h | h | ⟨k, f, v, hkf, hk, h, rfl⟩);
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3;
+      exact ⟨k, f, v, hkf, hk, fun i hi ↦ ⟨h i hi, lt_of_le_of_lt (nth_le _ _) (by simp)⟩, rfl⟩;
 
 end FormalizedTerm
 
@@ -255,10 +254,10 @@ lemma case_iff {t : V} :
 alias ⟨case, mk⟩ := case_iff
 
 @[simp] lemma bvar {z : V} : IsUTerm L ^#z :=
-  mk (Or.inl ⟨z, rfl⟩)
+  mk (by disj 1; exact ⟨z, rfl⟩)
 
 @[simp] lemma fvar (x : V) : IsUTerm L ^&x :=
-  mk (Or.inr <| Or.inl ⟨x, rfl⟩)
+  mk (by disj 2; exact ⟨x, rfl⟩)
 
 @[simp] lemma func_iff {k f v : V} :
     IsUTerm L (^func k f v) ↔ L.IsFunc k f ∧ IsUTermVec L k v :=
@@ -268,7 +267,7 @@ alias ⟨case, mk⟩ := case_iff
       · simp [qqFunc, qqFvar] at h
       · rcases (show k = k' ∧ f = f' ∧ v = w by simpa [qqFunc] using h) with ⟨rfl, rfl, rfl⟩
         exact ⟨hkf, hk, hv⟩,
-   by rintro ⟨hkf, hk, hv⟩; exact mk <| Or.inr <| Or.inr ⟨k, f, v, hkf, ⟨hk, hv⟩, rfl⟩⟩
+   by rintro ⟨hkf, hk, hv⟩; apply mk; disj 3; exact ⟨k, f, v, hkf, ⟨hk, hv⟩, rfl⟩⟩
 
 lemma func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     IsUTerm L (^func k f v) := func_iff.mpr ⟨hkf, hv⟩
@@ -375,19 +374,18 @@ private lemma phi_iff (param : Fin arity → V) (C pr : V) :
   · rintro ⟨ht, H⟩
     refine ⟨π₁ pr, by simp, π₂ pr, by simp, by simp, ht, ?_⟩
     rcases H with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, w, ⟨hk, hw⟩, hk, rfl⟩)
-    · left; exact ⟨z, by simp⟩
-    · right; left; exact ⟨x, by simp⟩
-    · right; right
+    · disj 1; exact ⟨z, by simp⟩;
+    · disj 2; exact ⟨x, by simp⟩;
+    · disj 3;
       refine ⟨k, by simp, f, by simp, v, by simp, w, ?_, ⟨hk, hw⟩, by simp⟩
       · rcases hk; apply len_repeatVec_of_nth_le (fun i hi ↦ le_of_lt <| lt_of_mem_rng <| hw i hi)
   · rintro ⟨t, _, y, _, rfl, ht, H⟩
     refine ⟨by simpa using ht, ?_⟩
     rcases H with
       (⟨z, _, rfl, rfl⟩ | ⟨x, _, rfl, rfl⟩ | ⟨k, _, f, _, v, _, w, _, ⟨hk, hw⟩, rfl, rfl⟩)
-    · left; exact ⟨z, rfl⟩
-    · right; left; exact ⟨x, rfl⟩
-    · right; right
-      exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hw i hi⟩, rfl⟩
+    · disj 1; exact ⟨z, rfl⟩;
+    · disj 2; exact ⟨x, rfl⟩;
+    · disj 3; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hw i hi⟩, rfl⟩;
 
 /-- TODO: move -/
 @[simp] lemma cons_app_9 {n : ℕ} (a : α)
@@ -421,18 +419,17 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
     rintro C C' hC v pr ⟨ht, H⟩
     refine ⟨ht, ?_⟩
     rcases H with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, w, ⟨hk, hw⟩, rfl⟩)
-    · left; exact ⟨z, rfl⟩
-    · right; left; exact ⟨x, rfl⟩
-    · right; right; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hC (hw i hi)⟩, rfl⟩
+    · disj 1; exact ⟨z, rfl⟩;
+    · disj 2; exact ⟨x, rfl⟩;
+    · disj 3; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hC (hw i hi)⟩, rfl⟩;
 
 instance : (c.construction L).Finite where
   finite {C param pr h} := by
     rcases h with ⟨hp, (h | h | ⟨k, f, v, w, ⟨hk, hw⟩, rfl⟩)⟩
-    · exact ⟨0, hp, Or.inl h⟩
-    · exact ⟨0, hp, Or.inr <| Or.inl h⟩
-    · exact ⟨⟪v, w⟫ + 1, hp, Or.inr <| Or.inr
-        ⟨k, f, v, w,
-          ⟨hk, fun i hi ↦ ⟨hw i hi, lt_succ_iff_le.mpr <| pair_le_pair (by simp) (by simp)⟩⟩, rfl⟩⟩
+    · exact ⟨0, hp, by disj 1; exact h⟩;
+    · exact ⟨0, hp, by disj 2; exact h⟩;
+    · exact ⟨⟪v, w⟫ + 1, hp, by disj 3; exact ⟨k, f, v, w,
+        ⟨hk, fun i hi ↦ ⟨hw i hi, lt_succ_iff_le.mpr <| pair_le_pair (by simp) (by simp)⟩⟩, rfl⟩⟩;
 
 def Graph (param : Fin arity → V) (x y : V) : Prop := (c.construction L).Fixpoint param ⟪x, y⟫
 
@@ -476,7 +473,7 @@ lemma graph_bvar_iff {z} :
     · rcases (by simpa using h); rfl
     · simp [qqBvar, qqFvar] at h
     · simp [qqBvar, qqFunc] at h
-  · rintro rfl; exact Graph.case_iff.mpr ⟨by simp, Or.inl ⟨z, by simp⟩⟩
+  · rintro rfl; exact Graph.case_iff.mpr ⟨by simp, by disj 1; exact ⟨z, by simp⟩⟩
 
 lemma graph_fvar_iff (x) :
     c.Graph L param ^&x y ↔ y = c.fvar param x := by
@@ -486,12 +483,13 @@ lemma graph_fvar_iff (x) :
     · simp [qqFvar, qqBvar] at h
     · rcases (by simpa using h); rfl
     · simp [qqFvar, qqFunc] at h
-  · rintro rfl; exact Graph.case_iff.mpr ⟨by simp, Or.inr <| Or.inl ⟨x, by simp⟩⟩
+  · rintro rfl; exact Graph.case_iff.mpr ⟨by simp, by disj 2; exact ⟨x, by simp⟩⟩
 
 lemma graph_func {k f v w} (hkr : L.IsFunc k f) (hv : IsUTermVec L k v)
     (hkw : k = len w) (hw : ∀ i < k, c.Graph L param v.[i] w.[i]) :
     c.Graph L param (^func k f v) (c.func param k f v w) := by
-  exact Graph.case_iff.mpr ⟨by simp [hkr, hv], Or.inr <| Or.inr ⟨k, f, v, w, ⟨hkw, hw⟩, by simp⟩⟩
+  exact Graph.case_iff.mpr
+    ⟨by simp [hkr, hv], by disj 3; exact ⟨k, f, v, w, ⟨hkw, hw⟩, by simp⟩⟩
 
 lemma graph_func_inv {k f v y} :
     c.Graph L param (^func k f v) y → ∃ w,
@@ -901,9 +899,9 @@ lemma IsSemiterm.case_iff {n t : V} :
   constructor
   · intro h
     rcases h.isUTerm.case with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, _, rfl⟩)
-    · left; exact ⟨z, by simpa [succ_le_iff_lt] using h.bv, rfl⟩
-    · right; left; exact ⟨x, rfl⟩
-    · right; right; exact ⟨k, f, v, hf, by simp_all, rfl⟩
+    · disj 1; exact ⟨z, by simpa [succ_le_iff_lt] using h.bv, rfl⟩;
+    · disj 2; exact ⟨x, rfl⟩;
+    · disj 3; exact ⟨k, f, v, hf, by simp_all, rfl⟩;
   · rintro (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, hv, rfl⟩)
     · simp [hz]
     · simp
