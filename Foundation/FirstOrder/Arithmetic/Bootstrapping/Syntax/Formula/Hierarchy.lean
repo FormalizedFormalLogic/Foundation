@@ -483,7 +483,30 @@ variable {Γ : Polarity} {s n : ℕ}
 
 lemma isHierarchy_of_hierarchy {ψ : ArithmeticSemiproposition n}
     (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s ψ) : IsHierarchy Γ s (⌜ψ⌝ : ℕ) := by
-  sorry
+  induction h with
+  | bounded _ _ _ h => exact IsHierarchy.of_bounded ((isBounded_quote_iff_s _).mpr h);
+  | and _ _ ihφ ihψ => simpa [Semiformula.quote_and] using ⟨ihφ, ihψ⟩;
+  | or _ _ ihφ ihψ => simpa [Semiformula.quote_or] using ⟨ihφ, ihψ⟩;
+  | ball hR ht _ ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR;
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht;
+    change IsHierarchy _ _ (⌜(∀¹[“#0 < !!(Rew.bShift t)”] _ : ArithmeticSemiproposition _)⌝ : ℕ);
+    rw [quote_ball];
+    exact IsHierarchy.ball (by simp [Semiterm.quote_def]) ih;
+  | bexs hR ht _ ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR;
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht;
+    change IsHierarchy _ _ (⌜(∃¹[“#0 < !!(Rew.bShift t)”] _ : ArithmeticSemiproposition _)⌝ : ℕ);
+    rw [quote_bex];
+    exact IsHierarchy.bex (by simp [Semiterm.quote_def]) ih;
+  | exs _ ih => simpa [Semiformula.quote_ex] using IsSigma.ex ih;
+  | all _ ih => simpa [Semiformula.quote_all] using IsPi.all ih;
+  | sigma _ ih => simpa [Semiformula.quote_ex] using IsSigma.sigma ih;
+  | pi _ ih => simpa [Semiformula.quote_all] using IsPi.pi ih;
+  | dummy_sigma _ ih =>
+    simpa [Semiformula.quote_all] using IsHierarchy.of_alt (Γ := 𝚺) (IsPi.all ih);
+  | dummy_pi _ ih =>
+    simpa [Semiformula.quote_ex] using IsHierarchy.of_alt (Γ := 𝚷) (IsSigma.ex ih);
 
 lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
     IsHierarchy Γ s (⌜ψ⌝ : ℕ) → ℬ[<, ℒₒᵣ].Hierarchy Γ s ψ := by
