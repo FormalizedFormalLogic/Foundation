@@ -41,10 +41,12 @@ def _root_.FFL.FirstOrder.Arithmetic.qqQuantDef : Polarity → 𝚺ᴬ₀.Semise
 
 instance qqQuant_defined (Γ : Polarity) :
     𝚺ᴬ₀-Function₁ (qqQuant Γ : V → V) via qqQuantDef Γ := by
-  sorry
+  cases Γ;
+  · exact qqExsists_defined;
+  · exact qqForall_defined;
 
 @[simp] lemma lt_qqQuant (Γ : Polarity) (p : V) : p < qqQuant Γ p := by
-  sorry
+  cases Γ <;> simp [lt_exists, lt_forall];
 
 end qqQuant
 
@@ -72,7 +74,23 @@ private lemma phi_iff (Γ : Polarity) (P : V → Prop) (C p : V) :
     (∃ u < p, ∃ q < p, (∃ t < p, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ q ∈ C
         ∧ p = qqBex u q) ∨
     (∃ q < p, q ∈ C ∧ p = qqQuant Γ q) := by
-  sorry
+  constructor;
+  · rintro (hp | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩
+      | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨q, hq, rfl⟩);
+    · disj 1; exact hp;
+    · disj 2; exact ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩;
+    · disj 3; exact ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩;
+    · disj 4;
+      exact ⟨termBShift ℒₒᵣ t, by simp, q, by simp,
+        ⟨t, lt_of_le_of_lt (le_termBShift ht) (by simp), ht, rfl⟩, hq, rfl⟩;
+    · disj 5;
+      exact ⟨termBShift ℒₒᵣ t, by simp, q, by simp,
+        ⟨t, lt_of_le_of_lt (le_termBShift ht) (by simp), ht, rfl⟩, hq, rfl⟩;
+    · disj 6; exact ⟨q, by simp, hq, rfl⟩;
+  · unfold Phi;
+    rintro (hp | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, p₂, _, hp, hq, rfl⟩
+      | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩ | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩
+      | ⟨q, _, hq, rfl⟩) <;> grind;
 
 noncomputable def blueprint (Γ : Polarity) (θ : 𝚫ᴬ₁.Semisentence 1) :
     Fixpoint.Blueprint 0 := ⟨.mkDelta
