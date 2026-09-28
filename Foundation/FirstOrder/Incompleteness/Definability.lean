@@ -7,9 +7,9 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 /-!
 # $\Delta_1$ and r.e. presentations of arithmetic theories
 
-The induction schemata over all formulas, over `ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1` and over the strict
-prenex classes are `Δ₁`, hence so are `𝗣𝗔`, `𝗜𝚺⁺₁` and `𝗜𝗡𝗗 Γ s`; `𝗣𝗔` and `𝗜𝚺⁺₁` are also
-recursively enumerable.
+The induction schemata over all formulas, over `ℬ[<, ℒₒᵣ].Hierarchy Γ s` and over the strict
+prenex classes are `Δ₁`, hence so are `𝗣𝗔`, `𝗜𝗡𝗗⁺ Γ s` (in particular `𝗜𝚺⁺ n`) and `𝗜𝗡𝗗 Γ s`;
+`𝗣𝗔` and `𝗜𝗡𝗗⁺ Γ s` are also recursively enumerable.
 -/
 
 @[expose] public section
@@ -169,8 +169,6 @@ noncomputable def chInd (cond : 𝚫ᴬ₁.Semisentence 1) : 𝚫ᴬ₁.Semisent
 
 noncomputable def chUniv : 𝚫ᴬ₁.Semisentence 1 := chInd ⊤
 
-noncomputable def chSigma1 : 𝚫ᴬ₁.Semisentence 1 := chInd (Bootstrapping.isSigma 1)
-
 section chDefined
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -190,8 +188,8 @@ noncomputable instance InductionR.univ_defined :
     𝚫ᴬ₁-Predicate[V] (InductionR (fun _ ↦ True) : V → Prop) via chUniv :=
   InductionR.defined (hcond := ⟨by simp, by intro v; simp⟩)
 
-noncomputable instance InductionR.sigma1_defined :
-    𝚫ᴬ₁-Predicate[V] (InductionR (IsSigma 1) : V → Prop) via chSigma1 :=
+noncomputable instance InductionR.hierarchy_defined (Γ : Polarity) (s : ℕ) :
+    𝚫ᴬ₁-Predicate[V] (InductionR (IsHierarchy Γ s) : V → Prop) via chInd (isHierarchy Γ s) :=
   InductionR.defined
 
 end chDefined
@@ -345,20 +343,20 @@ noncomputable instance InductionScheme.delta1_univ :
       (fun V _ _ ↦ by
         have := InductionR.univ_defined (V := V); simp)
 
-/-- The induction schema `InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)` is `Δ₁`, via `chSigma1`. -/
-noncomputable instance InductionScheme.delta1_sigma1 :
-    (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)).Δ₁ where
-  ch := chSigma1
+/-- The induction schema over `ℬ[<, ℒₒᵣ].Hierarchy Γ s` is `Δ₁`. -/
+noncomputable instance InductionScheme.delta1_hierarchy (Γ : Polarity) (s : ℕ) :
+    (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ s)).Δ₁ where
+  ch := chInd (Bootstrapping.isHierarchy Γ s)
   mem_iff φ := by
-    have h : (ℕ ⊧/![(⌜φ⌝ : ℕ)] chSigma1.val) ↔ InductionR (Bootstrapping.IsSigma 1) (⌜φ⌝ : ℕ) := by
-      simp
-    rw [h]
-    exact (inductionR_quote_iff (isHierarchy_quote_iff_s (V := ℕ)) φ).trans
-      (mem_inductionScheme_iff φ).symm
+    simpa using (inductionR_quote_iff (isHierarchy_quote_iff_s (V := ℕ)) φ).trans
+      (mem_inductionScheme_iff φ).symm;
   isDelta1 :=
     Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
-      (fun V _ _ ↦ by
-        have := InductionR.sigma1_defined (V := V); simp)
+      fun V _ _ ↦ by have := InductionR.hierarchy_defined (V := V) Γ s; simp
+
+noncomputable instance InductionOnBroadHierarchy.delta1 (Γ : Polarity) (s : ℕ) :
+    (𝗜𝗡𝗗⁺ Γ s).Δ₁ :=
+  Δ₁.add PeanoMinus.delta1 inferInstance
 
 /-! ## The strict induction theories are `Δ₁` -/
 
@@ -385,7 +383,7 @@ noncomputable instance InductionScheme.delta1_strictHierarchy :
 noncomputable instance InductionOnHierarchy.delta1 (Γ : Polarity) (s : ℕ) : (𝗜𝗡𝗗 Γ s).Δ₁ :=
   Δ₁.add PeanoMinus.delta1 inferInstance
 
-/-! ## `𝗣𝗔` and `𝗜𝚺⁺₁` are recursively enumerable -/
+/-! ## `𝗣𝗔` and `𝗜𝗡𝗗⁺ Γ s` are recursively enumerable -/
 
 lemma inductionScheme_re_univ : REPred (· ∈ InductionScheme ℒₒᵣ Set.univ) := by
   have hR : REPred (InductionR fun _ : ℕ ↦ True) := rePred_iff_sigma1.mpr (by definability)
@@ -394,31 +392,30 @@ lemma inductionScheme_re_univ : REPred (· ∈ InductionScheme ℒₒᵣ Set.uni
     (inductionR_quote_iff (S := fun _ : ℕ ↦ True) (C := Set.univ)
       (fun _ ↦ Iff.rfl) σ).trans (mem_inductionScheme_iff σ).symm
 
-lemma inductionScheme_re_sigma1 :
-    REPred (· ∈ InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)) := by
-  have hR : REPred (InductionR (Bootstrapping.IsSigma 1)) :=
+lemma inductionScheme_re_hierarchy (Γ : Polarity) (s : ℕ) :
+    REPred (· ∈ InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ s)) := by
+  have hR : REPred (InductionR (Bootstrapping.IsHierarchy Γ s)) :=
     rePred_iff_sigma1.mpr <| Bounding.HierarchySymbol.Definable.of_deltaOne
-      InductionR.sigma1_defined.to_definable
-  refine (hR.comp Computable.encode).of_eq fun σ ↦ ?_
+      (InductionR.hierarchy_defined Γ s).to_definable
+  refine (hR.comp Computable.encode).of_eq fun σ ↦ ?_;
   simpa [Semiformula.quote_eq_encode] using
     (inductionR_quote_iff (isHierarchy_quote_iff_s (V := ℕ)) σ).trans
       (mem_inductionScheme_iff σ).symm
 
 instance : (InductionScheme ℒₒᵣ Set.univ).RE := ⟨inductionScheme_re_univ⟩
 
-instance : (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1)).RE :=
-  ⟨inductionScheme_re_sigma1⟩
+instance (Γ : Polarity) (s : ℕ) : (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ s)).RE :=
+  ⟨inductionScheme_re_hierarchy Γ s⟩
 
 instance : 𝗣𝗔.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
 
-instance : 𝗜𝚺⁺₁.RE := Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
+instance (Γ : Polarity) (s : ℕ) : (𝗜𝗡𝗗⁺ Γ s).RE :=
+  Theory.RE.add (Theory.RE.ofFinite PeanoMinus.finite) inferInstance
 
-/-! ## `𝗣𝗔` and `𝗜𝚺⁺₁` are `Δ₁`
+/-! ## `𝗣𝗔` is `Δ₁`
 
 TODO: remove. Not mathematically essential — `RE` above already suffices. -/
 
 noncomputable instance : 𝗣𝗔.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_univ
-
-noncomputable instance : 𝗜𝚺⁺₁.Δ₁ := Theory.Δ₁.add PeanoMinus.delta1 InductionScheme.delta1_sigma1
 
 end FFL.FirstOrder.Arithmetic
