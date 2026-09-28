@@ -5,8 +5,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Tarski
 /-!
 # Partial truth definitions agree with truth
 
-The “it's disquotation” agreement between partial satisfaction and semantics, both in every model of
-`𝗜𝚺₁` and, uniformly, over `𝗣𝗔⁻` together with the finite Tarski theory `tarski n`.
+The disquotation lemma: partial satisfaction of a quoted formula agrees with its truth, both in
+every model of `𝗜𝚺₁` and, uniformly, over `𝗣𝗔⁻` together with the finite Tarski theory `tarski n`.
 
 ## References
 
@@ -43,57 +43,22 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
   · intro n t φ hφ ihφ v;
     rw [quote_ball_sentence, BoundedSatisfaction.ball_iff (by simp) ((isBounded_quote_iff φ).mpr hφ)
       (by simp), termVal_quote];
-    simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel];
-    apply forall_congr';
-    intro x;
-    rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)];
-    simp [Function.comp_def];
+    simp [← ihφ, Function.comp_def];
   · intro n t φ hφ ihφ v;
     rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (by simp), termVal_quote];
-    simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel];
-    apply exists_congr;
-    intro x;
-    rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)];
-    simp [Function.comp_def];
+    simp [← ihφ, Function.comp_def];
 
 lemma hierarchicalSatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) :
     ∀ v : Fin k → V, HierarchicalSatisfaction Γ s (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
   induction h with
-  | @zero Γ₀ n₀ φ₀ hφ₀ =>
-    intro v;
-    rcases Γ₀ with _ | _;
-    · change SigmaSatisfaction 0 _ _ ↔ _;
-      rw [SigmaSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v;
-    · change PiSatisfaction 0 _ _ ↔ _;
-      rw [PiSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v;
-  | @ofAlt Γ₀ s₀ n₀ φ₀ hφ₀ ih =>
-    intro v;
-    rcases Γ₀ with _ | _;
-    · change SigmaSatisfaction (s₀ + 1) _ _ ↔ _;
-      rw [SigmaSatisfaction.of_pi ((isStrictPi_quote_iff φ₀).mpr hφ₀) (by simp)];
-      exact ih v;
-    · change PiSatisfaction (s₀ + 1) _ _ ↔ _;
-      rw [PiSatisfaction.of_sigma ((isStrictSigma_quote_iff φ₀).mpr hφ₀) (by simp)];
-      exact ih v;
-  | @exs s₀ n₀ φ₀ hφ₀ ih =>
-    intro v;
-    change SigmaSatisfaction (s₀ + 1) _ _ ↔ _;
-    rw [Sentence.quote_ex, SigmaSatisfaction.exs_iff];
-    simp only [Semiformula.eval_ex];
-    apply exists_congr;
-    intro x;
-    rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp];
-    exact ih (x :> v);
-  | @all s₀ n₀ φ₀ hφ₀ ih =>
-    intro v;
-    change PiSatisfaction (s₀ + 1) _ _ ↔ _;
-    rw [Sentence.quote_all, PiSatisfaction.all_iff];
-    simp only [Semiformula.eval_all];
-    apply forall_congr';
-    intro x;
-    rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp];
-    exact ih (x :> v);
+  | @zero Γ _ _ hφ =>
+    cases Γ <;> simpa [HierarchicalSatisfaction] using boundedSatisfaction_quote_iff (V := V) hφ;
+  | ofAlt hφ ih =>
+    exact fun v ↦ (HierarchicalSatisfaction.of_alt ((isStrictHierarchy_quote_iff _).mpr hφ)
+      (by simp)).trans (ih v);
+  | exs _ ih => simp [HierarchicalSatisfaction, Sentence.quote_ex, SigmaSatisfaction.exs_iff, ← ih];
+  | all _ ih => simp [HierarchicalSatisfaction, Sentence.quote_all, PiSatisfaction.all_iff, ← ih];
 
 section
 variable {n k : ℕ} {φ : ArithmeticSemisentence k}
@@ -116,10 +81,9 @@ theorem models_disquotation_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
   simp [disquotation, models_iff, (sigmaSatisfactionVec.defined n k).df, Function.comp_def];
 
 theorem ISigma1.provable_disquotation {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ disquotation n φ := by
-  apply Arithmetic.complete.{0};
-  intro M _ _;
-  exact (models_disquotation_iff φ).mpr fun v ↦ (sigmaSatisfaction_quote_iff hφ v).symm;
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ disquotation n φ :=
+  Arithmetic.complete.{0} _ _ fun _ _ _ ↦
+    (models_disquotation_iff φ).mpr fun v ↦ (sigmaSatisfaction_quote_iff hφ v).symm
 
 /-! ## The disquotation lemma over `𝗣𝗔⁻` -/
 
@@ -179,48 +143,36 @@ private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k}
 /-! ### Evaluation of coded closed terms -/
 
 include hM in
-private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Codes v ev) :
-    ∀ t : ClosedSemiterm ℒₒᵣ k, TermVal (t.valb v) ev ((⌜t⌝ : ℕ) : M) := by
-  intro t;
+private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Codes v ev)
+    (t : ClosedSemiterm ℒₒᵣ k) : TermVal (t.valb v) ev ((⌜t⌝ : ℕ) : M) := by
   induction t with
   | bvar i =>
     have hb : M ⊧/![((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M), ((i.val : ℕ) : M)] qqBvarDef.val :=
       sigmaZero_upward_absolute₂ qqBvarDef (by simp);
-    simpa using (read_termValBvar hM ev ((i.val : ℕ) : M) ((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
-      (v i) hb).mpr (hev.2 i);
+    simpa using (read_termValBvar hM ev _ _ (v i) hb).mpr (hev.2 i);
   | fvar x => exact x.elim;
   | @func k' f w ih =>
     match k', f, w, ih with
     | 0, .zero, w, _ =>
-      have hq : (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟎 := by
-        simp;
-      rw [hq];
+      rw [show (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟎 by
+        simp];
       exact (read_termValZero hM ev 0).mpr rfl;
     | 0, .one, w, _ =>
-      have hq : (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟏 := by
-        simp;
-      rw [hq];
+      rw [show (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟏 by
+        simp];
       exact (read_termValOne hM ev 1).mpr rfl;
     | 2, .add, w, ih =>
-      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.add w :
-          ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
-          ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
-        sigmaOne_upward_absolute₃ Arithmetic.qqAddGraph
-          (by simp);
-      exact (read_termValAdd hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
-        ((⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
-        ((w 0).valb v) ((w 1).valb v) ((w 0).valb v + (w 1).valb v)
-        (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq (ih 0) (ih 1)).mpr rfl;
+      have hq : M ⊧/![((⌜Semiterm.func Language.ORing.Func.add w⌝ : ℕ) : M), ((⌜w 0⌝ : ℕ) : M),
+          ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
+        sigmaOne_upward_absolute₃ Arithmetic.qqAddGraph (by simp);
+      exact (read_termValAdd hM ev _ _ _ _ _ _ (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq
+        (ih 0) (ih 1)).mpr rfl;
     | 2, .mul, w, ih =>
-      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.mul w :
-          ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
-          ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
-        sigmaOne_upward_absolute₃ Arithmetic.qqMulGraph
-          (by simp);
-      exact (read_termValMul hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
-        ((⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
-        ((w 0).valb v) ((w 1).valb v) ((w 0).valb v * (w 1).valb v)
-        (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq (ih 0) (ih 1)).mpr rfl;
+      have hq : M ⊧/![((⌜Semiterm.func Language.ORing.Func.mul w⌝ : ℕ) : M), ((⌜w 0⌝ : ℕ) : M),
+          ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
+        sigmaOne_upward_absolute₃ Arithmetic.qqMulGraph (by simp);
+      exact (read_termValMul hM ev _ _ _ _ _ _ (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq
+        (ih 0) (ih 1)).mpr rfl;
 
 /-! ### The $\Delta_0$ base case -/
 
@@ -234,66 +186,41 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
     (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
       (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ));
   · intro m v ev _;
-    have hq : M ⊧/![((⌜(⊤ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqVerumDef.val :=
-      sigmaZero_upward_absolute₁ qqVerumDef (by simp [Sentence.quote_verum]);
-    simpa using read_boundedSatisfactionVerum hM _ ev hq;
+    exact iff_of_true (read_boundedSatisfactionVerum hM _ ev
+      (sigmaZero_upward_absolute₁ qqVerumDef (by simp [Sentence.quote_verum]))) (by simp);
   · intro m v ev _;
-    have hq : M ⊧/![((⌜(⊥ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqFalsumDef.val :=
-      sigmaZero_upward_absolute₁ qqFalsumDef (by simp [Sentence.quote_falsum]);
-    simpa using read_boundedSatisfactionFalsum hM _ ev hq;
+    exact iff_of_false (read_boundedSatisfactionFalsum hM _ ev
+      (sigmaZero_upward_absolute₁ qqFalsumDef (by simp [Sentence.quote_falsum]))) (by simp);
   · intro m t u v ev hev;
-    have hq : M ⊧/![((⌜(.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
-        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqEQDef.val :=
-      sigmaOne_upward_absolute₃ qqEQDef (by simp);
-    rw [read_boundedSatisfactionEq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
-      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
-      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)];
-    simp [Semiformula.eval_rel];
+    exact (read_boundedSatisfactionEq hM _ _ _ ev _ _ (uTerm_quote_cast t) (uTerm_quote_cast u)
+      (sigmaOne_upward_absolute₃ qqEQDef (by simp)) (termVal_quote_cast hM hev t)
+      (termVal_quote_cast hM hev u)).trans (by simp [Semiformula.eval_rel]);
   · intro m t u v ev hev;
-    have hq : M ⊧/![((⌜(.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
-        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNEQDef.val :=
-      sigmaOne_upward_absolute₃ qqNEQDef (by simp);
-    rw [read_boundedSatisfactionNeq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
-      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
-      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)];
-    simp [Semiformula.eval_nrel];
+    exact (read_boundedSatisfactionNeq hM _ _ _ ev _ _ (uTerm_quote_cast t) (uTerm_quote_cast u)
+      (sigmaOne_upward_absolute₃ qqNEQDef (by simp)) (termVal_quote_cast hM hev t)
+      (termVal_quote_cast hM hev u)).trans (by simp [Semiformula.eval_nrel]);
   · intro m t u v ev hev;
-    have hq : M ⊧/![((⌜(.rel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
-        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqLTDef.val :=
-      sigmaOne_upward_absolute₃ qqLTDef (by simp);
-    rw [read_boundedSatisfactionLt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
-      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
-      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)];
-    simp [Semiformula.eval_rel];
+    exact (read_boundedSatisfactionLt hM _ _ _ ev _ _ (uTerm_quote_cast t) (uTerm_quote_cast u)
+      (sigmaOne_upward_absolute₃ qqLTDef (by simp)) (termVal_quote_cast hM hev t)
+      (termVal_quote_cast hM hev u)).trans (by simp [Semiformula.eval_rel]);
   · intro m t u v ev hev;
-    have hq : M ⊧/![((⌜(.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
-        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNLTDef.val :=
-      sigmaOne_upward_absolute₃ qqNLTDef (by simp);
-    rw [read_boundedSatisfactionNlt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
-      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
-      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)];
-    simp [Semiformula.eval_nrel];
+    exact (read_boundedSatisfactionNlt hM _ _ _ ev _ _ (uTerm_quote_cast t) (uTerm_quote_cast u)
+      (sigmaOne_upward_absolute₃ qqNLTDef (by simp)) (termVal_quote_cast hM hev t)
+      (termVal_quote_cast hM hev u)).trans (by simp [Semiformula.eval_nrel]);
   · intro m φ ψ _ _ ihφ ihψ v ev hev;
-    have hq : M ⊧/![((⌜φ ⋏ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqAndDef.val :=
-      sigmaZero_upward_absolute₃ qqAndDef (by simp);
-    rw [read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev,
-      ihψ v ev hev];
-    simp;
+    exact (read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev
+      (sigmaZero_upward_absolute₃ qqAndDef (by simp))).trans (by simp [ihφ v ev hev, ihψ v ev hev]);
   · intro m φ ψ hφ hψ ihφ ihψ v ev hev;
-    have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
-      sigmaZero_upward_absolute₃ qqOrDef (by simp);
-    rw [read_boundedSatisfactionOr hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev
-      (bounded_quote_cast hφ) (uFormula_quote_cast φ) (bounded_quote_cast hψ)
-      (uFormula_quote_cast ψ) hq, ihφ v ev hev, ihψ v ev hev];
-    simp;
+    exact (read_boundedSatisfactionOr hM _ _ _ ev (bounded_quote_cast hφ) (uFormula_quote_cast φ)
+      (bounded_quote_cast hψ) (uFormula_quote_cast ψ)
+      (sigmaZero_upward_absolute₃ qqOrDef (by simp))).trans (by simp [ihφ v ev hev, ihψ v ev hev]);
   · intro m t φ hφ ihφ v ev hev;
     have hu : M ⊧/![((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜t⌝ : ℕ) : M)]
         (termBShiftGraph ℒₒᵣ).val := sigmaOne_upward_absolute₂ (termBShiftGraph ℒₒᵣ) (by simp);
     have hq : M ⊧/![((⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBallDef.val :=
       sigmaOne_upward_absolute₃ qqBallDef (by simpa using quote_ball_sentence (V := ℕ) t φ);
-    rw [read_boundedSatisfactionBall hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
-      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) (bounded_quote_cast hφ)
+    rw [read_boundedSatisfactionBall hM _ _ _ _ ev _ (uTerm_quote_cast t) (bounded_quote_cast hφ)
       (uFormula_quote_cast φ) hu hq (termVal_quote_cast hM hev t)];
     simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel];
     constructor;
@@ -310,8 +237,7 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
     have hq : M ⊧/![((⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBexDef.val :=
       sigmaOne_upward_absolute₃ qqBexDef (by simpa using quote_bex_sentence (V := ℕ) t φ);
-    rw [read_boundedSatisfactionBex hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
-      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) hu hq
+    rw [read_boundedSatisfactionBex hM _ _ _ _ ev _ (uTerm_quote_cast t) hu hq
       (termVal_quote_cast hM hev t)];
     simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel];
     constructor;
@@ -333,12 +259,10 @@ private lemma hierarchicalSatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
       (Reading.HierarchicalSatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   revert hs;
   induction h with
-  | @zero Γ₀ m₀ φ₀ hφ₀ =>
-    intro _ v ev hev;
-    exact boundedSatisfaction_quote_reading hM hφ₀ v ev hev;
+  | zero hφ₀ => exact fun _ ↦ boundedSatisfaction_quote_reading hM hφ₀;
   | @ofAlt Γ₀ s₀ m₀ φ₀ hφ₀ ih =>
     intro hs v ev hev;
-    rw [read_ofAlt hM (show s₀ ≤ n by omega) Γ₀ ((⌜φ₀⌝ : ℕ) : M) ev
+    rw [read_ofAlt hM (show s₀ ≤ n by omega) Γ₀ _ ev
       (deltaOne_upward_absolute₁ (isStrictHierarchy Γ₀.alt s₀)
         (by simpa using (isStrictHierarchy_quote_iff (V := ℕ) φ₀).mpr hφ₀))
       (uFormula_quote_cast φ₀)];
@@ -349,7 +273,7 @@ private lemma hierarchicalSatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
         qqExsDef.val :=
       sigmaZero_upward_absolute₂ qqExsDef (by simp);
     change Reading.SigmaSatisfaction s₀ _ _ ↔ _;
-    rw [read_sigmaSatisfactionExs hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq];
+    rw [read_sigmaSatisfactionExs hM (show s₀ ≤ n by omega) _ _ ev hq];
     simp only [Semiformula.eval_ex];
     constructor;
     · rintro ⟨x, e', hadj, hsat⟩;
@@ -363,7 +287,7 @@ private lemma hierarchicalSatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
         qqAllDef.val :=
       sigmaZero_upward_absolute₂ qqAllDef (by simp);
     change Reading.PiSatisfaction s₀ _ _ ↔ _;
-    rw [read_piSatisfactionAll hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq];
+    rw [read_piSatisfactionAll hM (show s₀ ≤ n by omega) _ _ ev hq];
     simp only [Semiformula.eval_all];
     constructor;
     · intro hsat x;
@@ -411,15 +335,12 @@ theorem provable_disquotation_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence
   unfold disquotation;
   apply Arithmetic.provable_iff_of_models_iff.{0} (T := 𝗣𝗔⁻ ∪ tarski n);
   intro M _ hMT e;
-  have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hMT Set.subset_union_left;
-  have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hMT Set.subset_union_left;
+  have hM (σ : ArithmeticSentence) (hσ : tarski n σ) : M↓[ℒₒᵣ] ⊧ σ :=
     Semantics.ModelsSet.models _ (Set.mem_union_right 𝗣𝗔⁻ hσ);
   rw [eval_disquotation_rhs, eval_sigmaSatisfactionVec];
-  constructor;
-  · intro h;
-    obtain ⟨ev, hev⟩ := exists_codes hM e;
-    exact ⟨ev, hev, (hierarchicalSatisfaction_quote_reading hM hφ le_rfl e ev hev).mpr h⟩;
-  · rintro ⟨ev, hev, hsat⟩;
-    exact (hierarchicalSatisfaction_quote_reading hM hφ le_rfl e ev hev).mp hsat;
+  obtain ⟨ev₀, hev₀⟩ := exists_codes hM e;
+  exact ⟨fun h ↦ ⟨ev₀, hev₀, (sigmaSatisfaction_quote_reading hM hφ hev₀).mpr h⟩,
+    fun ⟨ev, hev, hsat⟩ ↦ (sigmaSatisfaction_quote_reading hM hφ hev).mp hsat⟩;
 
 end FFL.FirstOrder.Arithmetic
