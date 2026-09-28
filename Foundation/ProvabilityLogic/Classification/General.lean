@@ -209,6 +209,10 @@ theorem provabilityLogic_add_con_eq_A (hC : Consistent (T ∪ U.Con)) :
       (by simp : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 _) h₁).not_con hC;
   · exact A_weakerThan_provabilityLogic_add_con hTU hU;
 
+lemma provabilityLogic_add_con_equiv_A (hC : Consistent (T ∪ U.Con)) :
+    T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) ≊ 𝐀 :=
+  Logic.equiv_iff.mpr (provabilityLogic_add_con_eq_A hTU hU hC)
+
 end
 
 end ProvabilityLogic
