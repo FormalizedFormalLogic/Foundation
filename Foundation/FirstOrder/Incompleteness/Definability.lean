@@ -225,11 +225,10 @@ noncomputable instance InductionScheme.delta1_hierarchy (Γ : Polarity) (s : ℕ
     (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ s)).Δ₁ :=
   InductionScheme.delta1_of (fun _ _ _ ↦ IsHierarchy.defined Γ s) isHierarchy_quote_iff_s
 
-noncomputable instance InductionScheme.delta1_strictHierarchy :
-    (Γ : Polarity) → (s : ℕ) → (InductionScheme ℒₒᵣ (StrictHierarchy Γ s)).Δ₁
-  | 𝚺, s =>
-    InductionScheme.delta1_of (fun _ _ _ ↦ IsStrictSigma.defined s) isStrictSigma_quote_iff_s
-  | 𝚷, s => InductionScheme.delta1_of (fun _ _ _ ↦ IsStrictPi.defined s) isStrictPi_quote_iff_s
+noncomputable instance InductionScheme.delta1_strictHierarchy (Γ : Polarity) (s : ℕ) :
+    (InductionScheme ℒₒᵣ (StrictHierarchy Γ s)).Δ₁ :=
+  InductionScheme.delta1_of (fun _ _ _ ↦ IsStrictHierarchy.defined Γ s)
+    isStrictHierarchy_quote_iff_s
 
 lemma _root_.FFL.FirstOrder.Theory.RE.of_delta1 (T : ArithmeticTheory) [T.Δ₁] : T.RE := ⟨by
   have h : REPred (· ∈ T.Δ₁Class (V := ℕ)) :=
