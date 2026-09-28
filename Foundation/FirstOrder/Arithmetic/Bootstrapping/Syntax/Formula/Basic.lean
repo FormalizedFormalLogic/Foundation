@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Basic
+public import Foundation.Vorspiel.Tactic.Disj
 
 @[expose] public section
 
@@ -197,38 +198,28 @@ private lemma phi_iff (C p : V) :
     (∃ p₁ < p, p₁ ∈ C ∧ p = ^∀ p₁) ∨
     (∃ p₁ < p, p₁ ∈ C ∧ p = ^∃ p₁) where
   mp := by
-    rintro (⟨k, r, v, hkr, hv, rfl⟩ | ⟨k, r, v, hkr, hv, rfl⟩ | H)
-    · left; refine ⟨k, ?_, r, ?_, v, ?_, hkr, hv, rfl⟩ <;> simp
-    · right; left; refine ⟨k, ?_, r, ?_, v, ?_, hkr, hv, rfl⟩ <;> simp
-    right; right
-    rcases H with (rfl | rfl | H)
-    · left; rfl
-    · right; left; rfl
-    right; right
-    rcases H with (⟨q, r, hp, hq, rfl⟩ | ⟨q, r, hp, hq, rfl⟩ | H)
-    · left; refine ⟨q, ?_, r, ?_, hp, hq, rfl⟩ <;> simp
-    · right; left; refine ⟨q, ?_, r, ?_, hp, hq, rfl⟩ <;> simp
-    right; right
-    rcases H with (⟨q, h, rfl⟩ | ⟨q, h, rfl⟩)
-    · left; refine ⟨q, ?_, h, rfl⟩; simp
-    · right; refine ⟨q, ?_, h, rfl⟩; simp
+    rintro (⟨k, r, v, hkr, hv, rfl⟩ | ⟨k, r, v, hkr, hv, rfl⟩ | rfl | rfl |
+      ⟨q, r, hp, hq, rfl⟩ | ⟨q, r, hp, hq, rfl⟩ | ⟨q, h, rfl⟩ | ⟨q, h, rfl⟩)
+    · disj 1; refine ⟨k, ?_, r, ?_, v, ?_, hkr, hv, rfl⟩ <;> simp;
+    · disj 2; refine ⟨k, ?_, r, ?_, v, ?_, hkr, hv, rfl⟩ <;> simp;
+    · disj 3; rfl;
+    · disj 4; rfl;
+    · disj 5; refine ⟨q, ?_, r, ?_, hp, hq, rfl⟩ <;> simp;
+    · disj 6; refine ⟨q, ?_, r, ?_, hp, hq, rfl⟩ <;> simp;
+    · disj 7; refine ⟨q, ?_, h, rfl⟩; simp;
+    · disj 8; refine ⟨q, ?_, h, rfl⟩; simp;
   mpr := by
-    unfold Phi
-    rintro (⟨k, _, r, _, v, _, hkr, hv, rfl⟩ | ⟨k, _, r, _, v, _, hkr, hv, rfl⟩ | H)
-    · left; exact ⟨k, r, v, hkr, hv, rfl⟩
-    · right; left; exact ⟨k, r, v, hkr, hv, rfl⟩
-    right; right
-    rcases H with (rfl | rfl | H)
-    · left; rfl
-    · right; left; rfl
-    right; right
-    rcases H with (⟨q, _, r, _, hq, hr, rfl⟩ | ⟨q, _, r, _, hq, hr, rfl⟩ | H)
-    · left; exact ⟨q, r, hq, hr, rfl⟩
-    · right; left; exact ⟨q, r, hq, hr, rfl⟩
-    right; right
-    rcases H with (⟨q, _, hq, rfl⟩ | ⟨q, _, hq, rfl⟩)
-    · left; exact ⟨q, hq, rfl⟩
-    · right; exact ⟨q, hq, rfl⟩
+    unfold Phi;
+    rintro (⟨k, _, r, _, v, _, hkr, hv, rfl⟩ | ⟨k, _, r, _, v, _, hkr, hv, rfl⟩ | rfl | rfl |
+      ⟨q, _, r, _, hq, hr, rfl⟩ | ⟨q, _, r, _, hq, hr, rfl⟩ | ⟨q, _, hq, rfl⟩ | ⟨q, _, hq, rfl⟩)
+    · disj 1; exact ⟨k, r, v, hkr, hv, rfl⟩;
+    · disj 2; exact ⟨k, r, v, hkr, hv, rfl⟩;
+    · disj 3; rfl;
+    · disj 4; rfl;
+    · disj 5; exact ⟨q, r, hq, hr, rfl⟩;
+    · disj 6; exact ⟨q, r, hq, hr, rfl⟩;
+    · disj 7; exact ⟨q, hq, rfl⟩;
+    · disj 8; exact ⟨q, hq, rfl⟩;
 
 def formulaAux : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “p C.
@@ -261,37 +252,31 @@ def construction : Fixpoint.Construction V (blueprint L) where
       symm
       simpa [blueprint, formulaAux] using phi_iff L _ _
   monotone := by
-    unfold Phi
-    rintro C C' hC _ x (h | h | h | h | H)
-    · left; exact h
-    · right; left; exact h
-    · right; right; left; exact h
-    · right; right; right; left; exact h
-    right; right; right; right
-    rcases H with (⟨q, r, hqC, hrC, rfl⟩ | ⟨q, r, hqC, hrC, rfl⟩ | H)
-    · left; exact ⟨q, r, hC hqC, hC hrC, rfl⟩
-    · right; left; exact ⟨q, r, hC hqC, hC hrC, rfl⟩
-    right; right
-    rcases H with (⟨q, hqC, rfl⟩ | ⟨q, hqC, rfl⟩)
-    · left; exact ⟨q, hC hqC, rfl⟩
-    · right; exact ⟨q, hC hqC, rfl⟩
+    unfold Phi;
+    rintro C C' hC _ x (h | h | h | h | ⟨q, r, hqC, hrC, rfl⟩ | ⟨q, r, hqC, hrC, rfl⟩ |
+      ⟨q, hqC, rfl⟩ | ⟨q, hqC, rfl⟩)
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact h;
+    · disj 4; exact h;
+    · disj 5; exact ⟨q, r, hC hqC, hC hrC, rfl⟩;
+    · disj 6; exact ⟨q, r, hC hqC, hC hrC, rfl⟩;
+    · disj 7; exact ⟨q, hC hqC, rfl⟩;
+    · disj 8; exact ⟨q, hC hqC, rfl⟩;
 
 instance : (construction L).StrongFinite V where
   strong_finite := by
-    unfold construction Phi
-    rintro C _ x (h | h | h | h | H)
-    · left; exact h
-    · right; left; exact h
-    · right; right; left; exact h
-    · right; right; right; left; exact h
-    right; right; right; right
-    rcases H with (⟨q, r, hqC, hrC, rfl⟩ | ⟨q, r, hqC, hrC, rfl⟩ | H)
-    · left; exact ⟨q, r, by simp [hqC], by simp [hrC], rfl⟩
-    · right; left; exact ⟨q, r, by simp [hqC], by simp [hrC], rfl⟩
-    right; right
-    rcases H with (⟨q, hqC, rfl⟩ | ⟨q, hqC, rfl⟩)
-    · left; exact ⟨q, by simp [hqC], rfl⟩
-    · right; exact ⟨q, by simp [hqC], rfl⟩
+    unfold construction Phi;
+    rintro C _ x (h | h | h | h | ⟨q, r, hqC, hrC, rfl⟩ | ⟨q, r, hqC, hrC, rfl⟩ |
+      ⟨q, hqC, rfl⟩ | ⟨q, hqC, rfl⟩)
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact h;
+    · disj 4; exact h;
+    · disj 5; exact ⟨q, r, by simp [hqC], by simp [hrC], rfl⟩;
+    · disj 6; exact ⟨q, r, by simp [hqC], by simp [hrC], rfl⟩;
+    · disj 7; exact ⟨q, by simp [hqC], rfl⟩;
+    · disj 8; exact ⟨q, by simp [hqC], rfl⟩;
 
 end FormalizedFormula
 
@@ -342,7 +327,7 @@ set_option linter.flexible false in
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hkr, hv⟩,
    by rintro ⟨hkr, hv⟩
-      exact mk (Or.inl ⟨k, r, v, hkr, hv, rfl⟩)⟩
+      exact mk <| by disj 1; exact ⟨k, r, v, hkr, hv, rfl⟩⟩
 
 set_option linter.flexible false in
 @[simp] lemma nrel {k r v : V} :
@@ -353,13 +338,13 @@ set_option linter.flexible false in
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hkr, hv⟩,
    by rintro ⟨hkr, hv⟩
-      exact mk (Or.inr <| Or.inl ⟨k, r, v, hkr, hv, rfl⟩)⟩
+      exact mk <| by disj 2; exact ⟨k, r, v, hkr, hv, rfl⟩⟩
 
 @[simp] lemma verum : IsUFormula L (^⊤ : V) :=
-  mk (Or.inr <| Or.inr <| Or.inl rfl)
+  mk <| by disj 3; rfl
 
 @[simp] lemma falsum : IsUFormula L (^⊥ : V) :=
-  mk (Or.inr <| Or.inr <| Or.inr <| Or.inl rfl)
+  mk <| by disj 4; rfl
 
 set_option linter.flexible false in
 @[simp] lemma and {p q : V} :
@@ -370,7 +355,7 @@ set_option linter.flexible false in
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hp, hq⟩,
    by rintro ⟨hp, hq⟩
-      exact mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p, q, hp, hq, rfl⟩)⟩
+      exact mk <| by disj 5; exact ⟨p, q, hp, hq, rfl⟩⟩
 
 set_option linter.flexible false in
 @[simp] lemma or {p q : V} :
@@ -381,7 +366,7 @@ set_option linter.flexible false in
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hp, hq⟩,
    by rintro ⟨hp, hq⟩
-      exact mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p, q, hp, hq, rfl⟩)⟩
+      exact mk <| by disj 6; exact ⟨p, q, hp, hq, rfl⟩⟩
 
 set_option linter.flexible false in
 @[simp] lemma all {p : V} :
@@ -392,7 +377,7 @@ set_option linter.flexible false in
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact hp,
    by rintro hp
-      exact mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p, hp, rfl⟩)⟩
+      exact mk <| by disj 7; exact ⟨p, hp, rfl⟩⟩
 
 set_option linter.flexible false in
 @[simp] lemma ex {p : V} :
@@ -403,7 +388,7 @@ set_option linter.flexible false in
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact hp,
    by rintro hp
-      exact mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨p, hp, rfl⟩)⟩
+      exact mk <| by disj 8; exact ⟨p, hp, rfl⟩⟩
 
 lemma pos {p : V} (h : IsUFormula L p) : 0 < p := by
   rcases h.case with (⟨_, _, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩ |
@@ -674,45 +659,38 @@ private lemma phi_iff (C pr : V) :
     refine ⟨param, by simp,
       p, le_trans (le_pair_left p y) (le_pair_right _ _),
       y, le_trans (le_pair_right p y) (le_pair_right _ _), rfl, hp, ?_⟩
-    rcases H with (⟨k, r, v, rfl, rfl⟩ | ⟨k, r, v, rfl, rfl⟩ | H)
-    · left; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩
-    · right; left; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩
-    right; right
-    rcases H with (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | H)
-    · left; exact ⟨rfl, rfl⟩
-    · right; left; exact ⟨rfl, rfl⟩
-    right; right
-    rcases H with (⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | H)
-    · left; exact ⟨p₁, by simp, p₂, by simp,
+    rcases H with (⟨k, r, v, rfl, rfl⟩ | ⟨k, r, v, rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
+      ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, y₁, h₁, rfl, rfl⟩ | ⟨p₁, y₁, h₁, rfl, rfl⟩)
+    · disj 1; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩;
+    · disj 2; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩;
+    · disj 3; exact ⟨rfl, rfl⟩;
+    · disj 4; exact ⟨rfl, rfl⟩;
+    · disj 5; exact ⟨p₁, by simp, p₂, by simp,
         y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), y₂, lt_of_le_of_lt (by simp)
           (lt_of_mem_rng h₂),
-        h₁, h₂, rfl, rfl⟩
-    · right; left; exact ⟨p₁, by simp, p₂, by simp,
+        h₁, h₂, rfl, rfl⟩;
+    · disj 6; exact ⟨p₁, by simp, p₂, by simp,
         y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), y₂, lt_of_le_of_lt (by simp)
           (lt_of_mem_rng h₂),
-        h₁, h₂, rfl, rfl⟩
-    right; right
-    rcases H with (⟨p₁, y₁, h₁, rfl, rfl⟩ | ⟨p₁, y₁, h₁, rfl, rfl⟩)
-    · left; exact ⟨p₁, by simp, y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), h₁, rfl, rfl⟩
-    · right; exact ⟨p₁, by simp, y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), h₁, rfl, rfl⟩
+        h₁, h₂, rfl, rfl⟩;
+    · disj 7; exact ⟨p₁, by simp, y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), h₁, rfl, rfl⟩;
+    · disj 8; exact ⟨p₁, by simp, y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), h₁, rfl, rfl⟩;
   · rintro ⟨param, _, p, _, y, _, rfl, hp, H⟩
     refine ⟨param, p, y, rfl, hp, ?_⟩
-    rcases H with (⟨k, _, r, _, v, _, rfl, rfl⟩ | ⟨k, _, r, _, v, _, rfl, rfl⟩ | H)
-    · left; exact ⟨k, r, v, rfl, rfl⟩
-    · right; left; exact ⟨k, r, v, rfl, rfl⟩
-    right; right
-    rcases H with (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | H)
-    · left; exact ⟨rfl, rfl⟩
-    · right; left; exact ⟨rfl, rfl⟩
-    right; right
-    rcases H with (⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ |
-      ⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ | H)
-    · left; exact ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩
-    · right; left; exact ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩
-    right; right
-    rcases H with (⟨p₁, _, y₁, _, h₁, rfl, rfl⟩ | ⟨p₁, _, y₁, _, h₁, rfl, rfl⟩)
-    · left; exact ⟨p₁, y₁, h₁, rfl, rfl⟩
-    · right; exact ⟨p₁, y₁, h₁, rfl, rfl⟩
+    rcases H with (⟨k, _, r, _, v, _, rfl, rfl⟩ | ⟨k, _, r, _, v, _, rfl, rfl⟩ |
+      ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
+      ⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, _, y₁, _, h₁, rfl, rfl⟩ | ⟨p₁, _, y₁, _, h₁, rfl, rfl⟩)
+    · disj 1; exact ⟨k, r, v, rfl, rfl⟩;
+    · disj 2; exact ⟨k, r, v, rfl, rfl⟩;
+    · disj 3; exact ⟨rfl, rfl⟩;
+    · disj 4; exact ⟨rfl, rfl⟩;
+    · disj 5; exact ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩;
+    · disj 6; exact ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩;
+    · disj 7; exact ⟨p₁, y₁, h₁, rfl, rfl⟩;
+    · disj 8; exact ⟨p₁, y₁, h₁, rfl, rfl⟩;
 
 def construction : Fixpoint.Construction V (β.blueprint L) where
   Φ := fun _ ↦ c.Phi L
@@ -747,42 +725,39 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
     unfold Phi
     rintro C C' hC _ _ ⟨param, p, y, rfl, hp, H⟩
     refine ⟨param, p, y, rfl, hp, ?_⟩
-    rcases H with (h | h | h | h | H)
-    · left; exact h
-    · right; left; exact h
-    · right; right; left; exact h
-    · right; right; right; left; exact h
-    right; right; right; right
-    rcases H with (⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ | H)
-    · left; exact ⟨p₁, p₂, r₁, r₂, hC h₁, hC h₂, rfl, rfl⟩
-    · right; left; exact ⟨p₁, p₂, r₁, r₂, hC h₁, hC h₂, rfl, rfl⟩
-    right; right
-    rcases H with (⟨p₁, r₁, h₁, rfl, rfl⟩ | ⟨p₁, r₁, h₁, rfl, rfl⟩)
-    · left; exact ⟨p₁, r₁, hC h₁, rfl, rfl⟩
-    · right; exact ⟨p₁, r₁, hC h₁, rfl, rfl⟩
+    rcases H with (h | h | h | h | ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, r₁, h₁, rfl, rfl⟩ | ⟨p₁, r₁, h₁, rfl, rfl⟩)
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact h;
+    · disj 4; exact h;
+    · disj 5; exact ⟨p₁, p₂, r₁, r₂, hC h₁, hC h₂, rfl, rfl⟩;
+    · disj 6; exact ⟨p₁, p₂, r₁, r₂, hC h₁, hC h₂, rfl, rfl⟩;
+    · disj 7; exact ⟨p₁, r₁, hC h₁, rfl, rfl⟩;
+    · disj 8; exact ⟨p₁, r₁, hC h₁, rfl, rfl⟩;
 
 instance : (c.construction L).Finite where
   finite {C _ pr h} := by
     rcases h with ⟨param, p, y, rfl, hp, (h | h | h | h |
       ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, y₁, h₁, rfl,
         rfl⟩ | ⟨p₁, y₁, h₁, rfl, rfl⟩)⟩
-    · exact ⟨0, param, _, _, rfl, hp, Or.inl h⟩
-    · exact ⟨0, param, _, _, rfl, hp, Or.inr <| Or.inl h⟩
-    · exact ⟨0, param, _, _, rfl, hp, Or.inr <| Or.inr <| Or.inl h⟩
-    · exact ⟨0, param, _, _, rfl, hp, Or.inr <| Or.inr <| Or.inr <| Or.inl h⟩
+    · exact ⟨0, param, _, _, rfl, hp, by disj 1; exact h⟩
+    · exact ⟨0, param, _, _, rfl, hp, by disj 2; exact h⟩
+    · exact ⟨0, param, _, _, rfl, hp, by disj 3; exact h⟩
+    · exact ⟨0, param, _, _, rfl, hp, by disj 4; exact h⟩
     · exact ⟨Max.max ⟪param, p₁, y₁⟫ ⟪param, p₂, y₂⟫ + 1, param, _, _, rfl, hp, by
-        right; right; right; right; left
+        disj 5;
         exact ⟨p₁, p₂, y₁, y₂, by simp [h₁, lt_succ_iff_le], by simp [h₂, lt_succ_iff_le], rfl,
           rfl⟩⟩
     · exact ⟨Max.max ⟪param, p₁, y₁⟫ ⟪param, p₂, y₂⟫ + 1, param, _, _, rfl, hp, by
-        right; right; right; right; right; left
+        disj 6;
         exact ⟨p₁, p₂, y₁, y₂, by simp [h₁, lt_succ_iff_le], by simp [h₂, lt_succ_iff_le], rfl,
           rfl⟩⟩
     · exact ⟨⟪c.allChanges param, p₁, y₁⟫ + 1, param, _, _, rfl, hp, by
-        right; right; right; right; right; right; left
+        disj 7;
         exact ⟨p₁, y₁, by simp [h₁], rfl, rfl⟩⟩
     · exact ⟨⟪c.exsChanges param, p₁, y₁⟫ + 1, param, _, _, rfl, hp, by
-        right; right; right; right; right; right; right
+        disj 8;
         exact ⟨p₁, y₁, by simp [h₁], rfl, rfl⟩⟩
 
 def Graph (param : V) (x y : V) : Prop := (c.construction L).Fixpoint ![] ⟪param, x, y⟫
@@ -840,7 +815,7 @@ lemma graph_rel_iff {k r v y} (hkr : L.IsRel k r) (hv : IsUTermVec L k v) :
     · simp [qqRel, qqOr] at H
     · simp [qqRel, qqAll] at H
     · simp [qqRel, qqExs] at H
-  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inl ⟨k, r, v, rfl, rfl⟩⟩
+  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], by disj 1; exact ⟨k, r, v, rfl, rfl⟩⟩
 
 lemma graph_nrel_iff {k r v y} (hkr : L.IsRel k r) (hv : IsUTermVec L k v) :
     c.Graph L param (^nrel k r v) y ↔ y = c.nrel param k r v := by
@@ -856,7 +831,7 @@ lemma graph_nrel_iff {k r v y} (hkr : L.IsRel k r) (hv : IsUTermVec L k v) :
     · simp [qqNRel, qqOr] at H
     · simp [qqNRel, qqAll] at H
     · simp [qqNRel, qqExs] at H
-  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inr <| Or.inl ⟨k, r, v, rfl, rfl⟩⟩
+  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], by disj 2; exact ⟨k, r, v, rfl, rfl⟩⟩
 
 lemma graph_verum_iff {y} :
     c.Graph L param ^⊤ y ↔ y = c.verum param := by
@@ -872,7 +847,7 @@ lemma graph_verum_iff {y} :
     · simp [qqVerum, qqOr] at H
     · simp [qqVerum, qqAll] at H
     · simp [qqVerum, qqExs] at H
-  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, Or.inr <| Or.inr <| Or.inl ⟨rfl, rfl⟩⟩
+  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, by disj 3; exact ⟨rfl, rfl⟩⟩
 
 lemma graph_falsum_iff {y} :
     c.Graph L param ^⊥ y ↔ y = c.falsum param := by
@@ -888,30 +863,28 @@ lemma graph_falsum_iff {y} :
     · simp [qqFalsum, qqOr] at H
     · simp [qqFalsum, qqAll] at H
     · simp [qqFalsum, qqExs] at H
-  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨rfl,
-    rfl⟩⟩
+  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, by disj 4; exact ⟨rfl, rfl⟩⟩
 
 lemma graph_rel {k r v} (hkr : L.IsRel k r) (hv : IsUTermVec L k v) :
     c.Graph L param (^rel k r v) (c.rel param k r v) :=
-  (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inl ⟨k, r, v, rfl, rfl⟩⟩
+  (Graph.case_iff).mpr ⟨by simp [hkr, hv], by disj 1; exact ⟨k, r, v, rfl, rfl⟩⟩
 
 lemma graph_nrel {k r v} (hkr : L.IsRel k r) (hv : IsUTermVec L k v) :
     c.Graph L param (^nrel k r v) (c.nrel param k r v) :=
-  (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inr <| Or.inl ⟨k, r, v, rfl, rfl⟩⟩
+  (Graph.case_iff).mpr ⟨by simp [hkr, hv], by disj 2; exact ⟨k, r, v, rfl, rfl⟩⟩
 
 lemma graph_verum :
-    c.Graph L param ^⊤ (c.verum param) := (Graph.case_iff).mpr ⟨by simp, Or.inr <| Or.inr <| Or.inl
-      ⟨rfl, rfl⟩⟩
+    c.Graph L param ^⊤ (c.verum param) :=
+  (Graph.case_iff).mpr ⟨by simp, by disj 3; exact ⟨rfl, rfl⟩⟩
 
 lemma graph_falsum :
-    c.Graph L param ^⊥ (c.falsum param) := (Graph.case_iff).mpr ⟨by simp, Or.inr <| Or.inr <|
-      Or.inr <| Or.inl ⟨rfl, rfl⟩⟩
+    c.Graph L param ^⊥ (c.falsum param) :=
+  (Graph.case_iff).mpr ⟨by simp, by disj 4; exact ⟨rfl, rfl⟩⟩
 
 lemma graph_and {p₁ p₂ r₁ r₂ : V} (hp₁ : IsUFormula L p₁) (hp₂ : IsUFormula L p₂)
     (h₁ : c.Graph L param p₁ r₁) (h₂ : c.Graph L param p₂ r₂) :
     c.Graph L param (p₁ ^⋏ p₂) (c.and param p₁ p₂ r₁ r₂) :=
-  (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p₁, p₂,
-    r₁, r₂, h₁, h₂, rfl, rfl⟩⟩
+  (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], by disj 5; exact ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩⟩
 
 lemma graph_and_inv {p₁ p₂ r : V} :
     c.Graph L param (p₁ ^⋏ p₂) r → ∃ r₁ r₂, c.Graph L param p₁ r₁ ∧ c.Graph L param p₂ r₂ ∧ r =
@@ -932,8 +905,7 @@ lemma graph_and_inv {p₁ p₂ r : V} :
 lemma graph_or {p₁ p₂ r₁ r₂ : V} (hp₁ : IsUFormula L p₁) (hp₂ : IsUFormula L p₂)
     (h₁ : c.Graph L param p₁ r₁) (h₂ : c.Graph L param p₂ r₂) :
     c.Graph L param (p₁ ^⋎ p₂) (c.or param p₁ p₂ r₁ r₂) :=
-  (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-    Or.inl ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩⟩
+  (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], by disj 6; exact ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩⟩
 
 lemma graph_or_inv {p₁ p₂ r : V} :
     c.Graph L param (p₁ ^⋎ p₂) r → ∃ r₁ r₂, c.Graph L param p₁ r₁ ∧ c.Graph L param p₂ r₂ ∧ r =
@@ -953,8 +925,7 @@ lemma graph_or_inv {p₁ p₂ r : V} :
 
 lemma graph_all {p₁ r₁ : V} (hp₁ : IsUFormula L p₁) (h₁ : c.Graph L (c.allChanges param) p₁ r₁) :
     c.Graph L param (^∀ p₁) (c.all param p₁ r₁) :=
-  (Graph.case_iff).mpr ⟨by simp [hp₁], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-    Or.inl ⟨p₁, r₁, h₁, rfl, rfl⟩⟩
+  (Graph.case_iff).mpr ⟨by simp [hp₁], by disj 7; exact ⟨p₁, r₁, h₁, rfl, rfl⟩⟩
 
 lemma graph_all_inv {p₁ r : V} :
     c.Graph L param (^∀ p₁) r → ∃ r₁, c.Graph L (c.allChanges param) p₁ r₁ ∧ r = c.all param p₁ r₁
@@ -974,8 +945,7 @@ lemma graph_all_inv {p₁ r : V} :
 
 lemma graph_ex {p₁ r₁ : V} (hp₁ : IsUFormula L p₁) (h₁ : c.Graph L (c.exsChanges param) p₁ r₁) :
     c.Graph L param (^∃ p₁) (c.exs param p₁ r₁) :=
-  (Graph.case_iff).mpr ⟨by simp [hp₁], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-    Or.inr ⟨p₁, r₁, h₁, rfl, rfl⟩⟩
+  (Graph.case_iff).mpr ⟨by simp [hp₁], by disj 8; exact ⟨p₁, r₁, h₁, rfl, rfl⟩⟩
 
 lemma graph_ex_inv {p₁ r : V} :
     c.Graph L param (^∃ p₁) r → ∃ r₁, c.Graph L (c.exsChanges param) p₁ r₁ ∧ r = c.exs param p₁ r₁
@@ -1413,19 +1383,19 @@ lemma IsSemiformula.case_iff {n p : V} :
       (⟨k, r, v, _, _, rfl⟩ | ⟨k, r, v, _, _, rfl⟩ | rfl | rfl | ⟨p₁, p₂, _, _, rfl⟩ | ⟨p₁, p₂, _,
         _, rfl⟩ | ⟨p₁, _, rfl⟩ | ⟨p₁, _, rfl⟩)
     · have : L.IsRel k r ∧ IsSemitermVec L k n v := by simpa using h
-      exact Or.inl ⟨k, r, v, by simp [this]⟩
+      disj 1; exact ⟨k, r, v, by simp [this]⟩;
     · have : L.IsRel k r ∧ IsSemitermVec L k n v := by simpa using h
-      exact Or.inr <| Or.inl ⟨k, r, v, by simp [this]⟩
-    · exact Or.inr <| Or.inr <| Or.inl rfl
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inl rfl
+      disj 2; exact ⟨k, r, v, by simp [this]⟩;
+    · disj 3; rfl;
+    · disj 4; rfl;
     · have : IsSemiformula L n p₁ ∧ IsSemiformula L n p₂ := by simpa using h
-      exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p₁, p₂, by simp [this]⟩
+      disj 5; exact ⟨p₁, p₂, by simp [this]⟩;
     · have : IsSemiformula L n p₁ ∧ IsSemiformula L n p₂ := by simpa using h
-      exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p₁, p₂, by simp [this]⟩
+      disj 6; exact ⟨p₁, p₂, by simp [this]⟩;
     · have : IsSemiformula L (n + 1) p₁ := by simpa using h
-      exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p₁, by simp [this]⟩
+      disj 7; exact ⟨p₁, by simp [this]⟩;
     · have : IsSemiformula L (n + 1) p₁ := by simpa using h
-      exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨p₁, by simp [this]⟩
+      disj 8; exact ⟨p₁, by simp [this]⟩;
   · rintro (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ |
     ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩) <;> simp [*]
 
