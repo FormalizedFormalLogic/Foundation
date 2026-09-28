@@ -98,8 +98,8 @@ noncomputable def reCh (T : Theory L) [T.RE] : 𝚺ᴬ₁.Semisentence 1 :=
 
 variable (T : Theory L) [T.RE]
 
-noncomputable def reWitness : 𝚺ᴬ₀.Semisentence 2 :=
-  (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose.toSigmaZero
+noncomputable def reWitness : ArithmeticBoundedSemisentence 2 :=
+  (ISigma1.exists_matrix_provable T.reCh.sigma_prop).choose
 
 lemma reWitness_spec (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 1 → V) :
     V ⊧/e T.reCh.val ↔ ∃ w, V ⊧/(w :> e) T.reWitness.val :=
@@ -310,7 +310,7 @@ lemma primrecPred_craig_core : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦
       (Primrec₂.natPair.comp (Primrec.const 4) (Primrec₂.natPair.comp hm hweight))
       (Primrec.const 1));
   have heval : PrimrecPred fun p : ℕ × (ℕ × ℕ) ↦ ℕ ⊧/![p.2.2, p.1] T.reWitness.val :=
-    ((Arithmetic.delta0_primrec Empty.elim T.reWitness.sigma_prop).comp
+    ((Arithmetic.delta0_primrec Empty.elim T.reWitness.hierarchy).comp
       (Primrec.vector_cons.comp hs
         (Primrec.vector_cons.comp hm (Primrec.const List.Vector.nil)))).of_eq fun p ↦ by
       simp [List.Vector.cons_get];

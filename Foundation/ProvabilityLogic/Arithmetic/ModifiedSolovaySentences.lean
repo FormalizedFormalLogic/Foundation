@@ -250,7 +250,7 @@ end comparison
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Formula α}
   (T : ArithmeticTheory) [T.Δ₁] (M : StrongReflexiveCountermodel κ A) [Fintype M.World]
-  (σ : ArithmeticSentence) (θ : 𝚺ᴬ₀.Semisentence 1)
+  (σ : ArithmeticSentence) (θ : ArithmeticBoundedSemisentence 1)
 
 section stx
 
@@ -634,7 +634,7 @@ def standardModifiedSolovaySentences
       V ⊧/![] σ ↔ ∃ w, V ⊧/![w] hex.choose.val := fun V _ _ ↦ by
     simpa [models_iff] using
       consequence_iff.mp (Theory.Proof.sound hex.choose_spec) V inferInstance;
-  { Λ := T.modifiedSolovay M σ hex.choose.toSigmaZero
+  { Λ := T.modifiedSolovay M σ hex.choose
     SC1 _ _ ne := complete _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using! ModifiedSolovay.exclusive (hθσ V) ne
     SC2 _ _ hxy hy := complete _ _ fun (V : Type) _ _ ↦ by
