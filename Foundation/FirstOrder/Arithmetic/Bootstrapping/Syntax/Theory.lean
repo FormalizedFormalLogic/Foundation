@@ -123,6 +123,13 @@ abbrev add (dT : T.Δ₁) (dU : U.Δ₁) : (T ∪ U).Δ₁ where
       (fun V _ _ ↦
         Bounding.HierarchySymbol.Semiformula.ProperOn.or (by simp) (by simp))
 
+instance [T.Δ₁] [U.Δ₁] : (T ∪ U).Δ₁ := add inferInstance inferInstance
+
+@[simp] lemma _root_.FFL.FirstOrder.Theory.Δ₁Class.mem_union {V : Type*} [ORingStructure V]
+    [T.Δ₁] [U.Δ₁] {p : V} : p ∈ (T ∪ U).Δ₁Class ↔ p ∈ T.Δ₁Class ∨ p ∈ U.Δ₁Class := by
+  change V ⊧/![p] (T.Δ₁ch ⋎ U.Δ₁ch).val ↔ _
+  simp [Theory.Δ₁Class]
+
 abbrev ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
   ch := dT.ch
   mem_iff := by rcases h; exact dT.mem_iff
@@ -153,13 +160,6 @@ abbrev ofList (l : List (Sentence L)) : Δ₁ {φ | φ ∈ l} :=
 
 noncomputable abbrev ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁ :=
   (ofList h.toFinset.toList).ofEq (by ext; simp)
-
-instance [T.Δ₁] [U.Δ₁] : (T ∪ U).Δ₁ := add inferInstance inferInstance
-
-@[simp] lemma _root_.FFL.FirstOrder.Theory.Δ₁Class.mem_union {V : Type*} [ORingStructure V]
-    [T.Δ₁] [U.Δ₁] {p : V} : p ∈ (T ∪ U).Δ₁Class ↔ p ∈ T.Δ₁Class ∨ p ∈ U.Δ₁Class := by
-  change V ⊧/![p] (T.Δ₁ch ⋎ U.Δ₁ch).val ↔ _
-  simp [Theory.Δ₁Class]
 
 instance (φ : Sentence L) : Theory.Δ₁ {φ} := singleton φ
 
