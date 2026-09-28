@@ -648,7 +648,7 @@ def SigmaSatisfaction (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (sigmaSatisfac
 
 def PiSatisfaction (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (piSatisfaction m).val
 
-def HierarchySatisfaction : Polarity → ℕ → V → V → Prop
+def StrictSatisfaction : Polarity → ℕ → V → V → Prop
   | _,       0     => BoundedSatisfaction
   | .sigma, m + 1 => Reading.SigmaSatisfaction m
   | .pi,    m + 1 => Reading.PiSatisfaction m
@@ -659,13 +659,7 @@ def UFormula (z : V) : Prop := V ⊧/![z] (isUFormula ℒₒᵣ).val
 
 def UTerm (t : V) : Prop := V ⊧/![t] (isUTerm ℒₒᵣ).val
 
-def StrictSig (m : ℕ) (z : V) : Prop := V ⊧/![z] (isStrictHierarchy 𝚺 m).val
-
-def StrictPii (m : ℕ) (z : V) : Prop := V ⊧/![z] (isStrictHierarchy 𝚷 m).val
-
-def Strict : Polarity → ℕ → V → Prop
-  | .sigma => StrictSig
-  | .pi => StrictPii
+def Strict (Γ : Polarity) (m : ℕ) (z : V) : Prop := V ⊧/![z] (isStrictHierarchy Γ m).val
 
 def Adjoin (e' x e : V) : Prop := V ⊧/![e', x, e] adjoinDef.val
 
@@ -830,35 +824,33 @@ variable {m : ℕ} (hm : m ≤ n)
 include hm
 
 lemma read_sigmaSatisfactionOfPi : ∀ z e : V, Strict 𝚷 m z → Reading.UFormula z →
-    (Reading.SigmaSatisfaction m z e ↔ HierarchySatisfaction 𝚷 m z e) := by
+    (Reading.SigmaSatisfaction m z e ↔ StrictSatisfaction 𝚷 m z e) := by
   have h := hV _ (tarski_mono hm (tarski.new m (Tarski.sigmaSatisfactionOfPi m)
     (by simp [Tarski.sigmaSatisfactionAxioms])));
   cases m with
   | zero =>
-    simpa [models_iff, Tarski.sigmaSatisfactionOfPi, Reading.HierarchySatisfaction, Reading.Strict,
-      Reading.SigmaSatisfaction,
-      Reading.StrictPii, Reading.BoundedSatisfaction, Reading.UFormula, isStrictHierarchy] using h;
+    simpa [models_iff, Tarski.sigmaSatisfactionOfPi, Reading.StrictSatisfaction, Reading.Strict,
+      Reading.SigmaSatisfaction, Reading.BoundedSatisfaction, Reading.UFormula,
+      isStrictHierarchy] using h;
   | succ m =>
-    simpa [models_iff, Tarski.sigmaSatisfactionOfPi, Reading.HierarchySatisfaction, Reading.Strict,
-      Reading.SigmaSatisfaction,
-      Reading.StrictPii, Reading.PiSatisfaction, Reading.UFormula] using h;
+    simpa [models_iff, Tarski.sigmaSatisfactionOfPi, Reading.StrictSatisfaction, Reading.Strict,
+      Reading.SigmaSatisfaction, Reading.PiSatisfaction, Reading.UFormula] using h;
 
 lemma read_piSatisfactionOfSigma : ∀ z e : V, Strict 𝚺 m z → Reading.UFormula z →
-    (Reading.PiSatisfaction m z e ↔ HierarchySatisfaction 𝚺 m z e) := by
+    (Reading.PiSatisfaction m z e ↔ StrictSatisfaction 𝚺 m z e) := by
   have h := hV _ (tarski_mono hm (tarski.new m (Tarski.piSatisfactionOfSigma m)
     (by simp [Tarski.sigmaSatisfactionAxioms])));
   cases m with
   | zero =>
-    simpa [models_iff, Tarski.piSatisfactionOfSigma, Reading.HierarchySatisfaction, Reading.Strict,
-      Reading.PiSatisfaction,
-      Reading.StrictSig, Reading.BoundedSatisfaction, Reading.UFormula, isStrictHierarchy] using h;
+    simpa [models_iff, Tarski.piSatisfactionOfSigma, Reading.StrictSatisfaction, Reading.Strict,
+      Reading.PiSatisfaction, Reading.BoundedSatisfaction, Reading.UFormula,
+      isStrictHierarchy] using h;
   | succ m =>
-    simpa [models_iff, Tarski.piSatisfactionOfSigma, Reading.HierarchySatisfaction, Reading.Strict,
-      Reading.PiSatisfaction,
-      Reading.StrictSig, Reading.SigmaSatisfaction, Reading.UFormula] using h;
+    simpa [models_iff, Tarski.piSatisfactionOfSigma, Reading.StrictSatisfaction, Reading.Strict,
+      Reading.PiSatisfaction, Reading.SigmaSatisfaction, Reading.UFormula] using h;
 
 lemma read_ofAlt (Γ : Polarity) : ∀ z e : V, Strict Γ.alt m z → Reading.UFormula z →
-    (HierarchySatisfaction Γ (m + 1) z e ↔ HierarchySatisfaction Γ.alt m z e) := by
+    (StrictSatisfaction Γ (m + 1) z e ↔ StrictSatisfaction Γ.alt m z e) := by
   rcases Γ with _ | _;
   · exact read_sigmaSatisfactionOfPi hV hm;
   · exact read_piSatisfactionOfSigma hV hm;
