@@ -237,16 +237,16 @@ noncomputable instance InductionScheme.delta1_strictHierarchy (Γ : Polarity) (s
 
 variable {Γ : Polarity} {s : ℕ} {p : V}
 
-lemma mem_Δ₁Class_Peano_iff :
+lemma Peano.mem_Δ₁Class_iff :
     p ∈ 𝗣𝗔.Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (fun _ ↦ True) p :=
   Δ₁Class.mem_union.trans <| .or .rfl <|
     (InductionR.defined (hcond := ⟨by simp, fun _ ↦ by simp⟩)).df ![p]
 
-lemma mem_Δ₁Class_InductionOnBroadHierarchy_iff :
+lemma InductionOnBroadHierarchy.mem_Δ₁Class_iff :
     p ∈ (𝗜𝗡𝗗⁺ Γ s).Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (IsHierarchy Γ s) p :=
   Δ₁Class.mem_union.trans <| .or .rfl <| InductionR.defined.df ![p]
 
-lemma mem_Δ₁Class_InductionOnHierarchy_iff :
+lemma InductionOnHierarchy.mem_Δ₁Class_iff :
     p ∈ (𝗜𝗡𝗗 Γ s).Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (IsStrictHierarchy Γ s) p :=
   Δ₁Class.mem_union.trans <| .or .rfl <| InductionR.defined.df ![p]
 

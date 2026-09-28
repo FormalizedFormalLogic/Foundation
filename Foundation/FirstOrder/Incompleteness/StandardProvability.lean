@@ -133,32 +133,26 @@ variable {Γ : Polarity} {m n : ℕ}
 theorem InductionOnHierarchy.provable_standardProvability_imp_of_le (h : m ≤ n)
     (σ : ArithmeticSentence) :
     𝗜𝚺₁ ⊢ (𝗜𝗡𝗗 Γ m).standardProvability σ 🡒 (𝗜𝗡𝗗 Γ n).standardProvability σ :=
-  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦
-    mem_Δ₁Class_InductionOnHierarchy_iff.mpr <|
-      (mem_Δ₁Class_InductionOnHierarchy_iff.mp hp).imp id <|
-        InductionR.mono fun _ ↦ IsStrictHierarchy.mono h) σ
+  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦ mem_Δ₁Class_iff.mpr <|
+    (mem_Δ₁Class_iff.mp hp).imp_right <| InductionR.mono fun _ ↦ IsStrictHierarchy.mono h) σ
 
 theorem InductionOnHierarchy.provable_standardProvability_imp_Peano (m : ℕ)
     (σ : ArithmeticSentence) :
     𝗜𝚺₁ ⊢ (𝗜𝗡𝗗 Γ m).standardProvability σ 🡒 𝗣𝗔.standardProvability σ :=
-  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦
-    mem_Δ₁Class_Peano_iff.mpr <| (mem_Δ₁Class_InductionOnHierarchy_iff.mp hp).imp id <|
-      InductionR.mono fun _ _ ↦ trivial) σ
+  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦ Peano.mem_Δ₁Class_iff.mpr <|
+    (mem_Δ₁Class_iff.mp hp).imp_right <| InductionR.mono fun _ _ ↦ trivial) σ
 
 theorem InductionOnBroadHierarchy.provable_standardProvability_imp_of_le (h : m ≤ n)
     (σ : ArithmeticSentence) :
     𝗜𝚺₁ ⊢ (𝗜𝗡𝗗⁺ Γ m).standardProvability σ 🡒 (𝗜𝗡𝗗⁺ Γ n).standardProvability σ :=
-  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦
-    mem_Δ₁Class_InductionOnBroadHierarchy_iff.mpr <|
-      (mem_Δ₁Class_InductionOnBroadHierarchy_iff.mp hp).imp id <|
-        InductionR.mono fun _ ↦ IsHierarchy.mono h) σ
+  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦ mem_Δ₁Class_iff.mpr <|
+    (mem_Δ₁Class_iff.mp hp).imp_right <| InductionR.mono fun _ ↦ IsHierarchy.mono h) σ
 
 theorem InductionOnBroadHierarchy.provable_standardProvability_imp_Peano (m : ℕ)
     (σ : ArithmeticSentence) :
     𝗜𝚺₁ ⊢ (𝗜𝗡𝗗⁺ Γ m).standardProvability σ 🡒 𝗣𝗔.standardProvability σ :=
-  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦
-    mem_Δ₁Class_Peano_iff.mpr <| (mem_Δ₁Class_InductionOnBroadHierarchy_iff.mp hp).imp id <|
-      InductionR.mono fun _ _ ↦ trivial) σ
+  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦ Peano.mem_Δ₁Class_iff.mpr <|
+    (mem_Δ₁Class_iff.mp hp).imp_right <| InductionR.mono fun _ _ ↦ trivial) σ
 
 end
 
