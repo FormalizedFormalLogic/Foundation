@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
+import Mathlib.Tactic.Bound.Attribute
 
 @[expose] public section
 set_option autoImplicit true
@@ -63,6 +64,24 @@ lemma nil_or_adjoin (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
 
 lemma adjoin_le_adjoin {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
     x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [adjoin_def] using pair_le_pair hx hv
+
+section bound
+
+variable {a b v c : V}
+
+@[bound] lemma adjoin_le_exp_exp (ha : a ≤ c) (hv : v ≤ c) : a ∷ v ≤ Exp.exp (Exp.exp c) :=
+  calc a ∷ v ≤ c ∷ c := adjoin_le_adjoin ha hv
+    _ = (c + 1) * (c + 1) := by simp [adjoin_def, pair, add_mul, mul_add, add_assoc]
+    _ ≤ Exp.exp c * Exp.exp c := by gcongr <;> exact succ_le_iff_lt.mpr (lt_exp c)
+    _ ≤ Exp.exp (Exp.exp c) := by rw [← exp_add]; exact exp_le_exp (add_le_exp le_rfl le_rfl)
+
+@[bound] lemma pair_lt_exp_exp (ha : a ≤ c) (hb : b ≤ c) : ⟪a, b⟫ < Exp.exp (Exp.exp c) :=
+  (lt_add_one _).trans_le (adjoin_le_exp_exp ha hb)
+
+@[bound] lemma pair_le_exp_exp (ha : a ≤ c) (hb : b ≤ c) : ⟪a, b⟫ ≤ Exp.exp (Exp.exp c) :=
+  (pair_lt_exp_exp ha hb).le
+
+end bound
 
 section
 
@@ -742,6 +761,20 @@ lemma listMaxss_le_iff {v z : V} : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ 
   · intro h i hi; exact le_trans (nth_le_listMax hi) h
   · exact listMaxss_le
 
+lemma nth_le_listMax_total (v i : V) : v.[i] ≤ listMax v := by
+  rcases lt_or_ge i (len v) with h | h
+  · exact nth_le_listMax h
+  · simp [nth_lt_len h]
+
+lemma listMax_le_self (v : V) : listMax v ≤ v := by
+  induction v using adjoin_ISigma1.pi1_succ_induction
+  · definability
+  case nil => simp
+  case adjoin x v ih => simpa using ⟨(lt_adjoin x v).le, ih.trans (lt_adjoin' x v).le⟩
+
+lemma listMax_le_of_le {v c : V} (h : v ≤ c) : listMax v ≤ c :=
+  (listMax_le_self v).trans h
+
 /-
 lemma nth_le_listMaxs (v : V) (hv : v ≠ 0) : ∃ i < len v, v.[i] = listMax v := by
   induction v using adjoin_ISigma1.sigma1_succ_induction
@@ -919,6 +952,82 @@ lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := b
   rcases hi; simp
 
 end concat
+
+/-!
+
+### Append
+
+-/
+
+namespace VecAppend
+
+def blueprint : VecRec.Blueprint 1 where
+  nil := .mkSigma “y w. y = w”
+  adjoin := .mkSigma “y x xs ih w. !adjoinDef y x ih”
+
+noncomputable def construction : VecRec.Construction V blueprint where
+  nil param := param 0
+  adjoin (_ x _ ih) := x ∷ ih
+  nil_defined := .mk fun v ↦ by simp [blueprint]
+  adjoin_defined := .mk fun v ↦ by simp [blueprint]
+
+end VecAppend
+
+section vecAppend
+
+noncomputable def vecAppend (v w : V) : V := VecAppend.construction.result ![w] v
+
+@[simp] lemma vecAppend_nil (w : V) : vecAppend 0 w = w := by
+  simp [vecAppend, VecAppend.construction]
+
+@[simp] lemma vecAppend_adjoin (x v w : V) : vecAppend (x ∷ v) w = x ∷ vecAppend v w := by
+  simp [vecAppend, VecAppend.construction]
+
+section
+
+def _root_.FFL.FirstOrder.Arithmetic.vecAppendDef : 𝚺ᴬ₁.Semisentence 3 :=
+  VecAppend.blueprint.resultDef
+
+instance vecAppend_defined : 𝚺ᴬ₁-Function₂ (vecAppend : V → V → V) via vecAppendDef :=
+  VecAppend.construction.result_defined
+
+instance vecAppend_definable : 𝚺ᴬ₁-Function₂ (vecAppend : V → V → V) :=
+  vecAppend_defined.to_definable
+
+instance vecAppend_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (vecAppend : V → V → V) :=
+  vecAppend_definable.of_sigmaOne
+
+end
+
+@[simp] lemma len_vecAppend (v w : V) : len (vecAppend v w) = len v + len w := by
+  induction v using adjoin_ISigma1.sigma1_succ_induction
+  · definability
+  case nil => simp
+  case adjoin x v ih => simp [ih, add_right_comm]
+
+lemma vecAppend_assoc (u v w : V) :
+    vecAppend (vecAppend u v) w = vecAppend u (vecAppend v w) := by
+  induction u using adjoin_ISigma1.sigma1_succ_induction
+  · definability
+  case nil => simp
+  case adjoin x u ih => simp [ih]
+
+lemma exists_vecAppend_singleton {k w : V} (h : len w = k + 1) :
+    ∃ u x, len u = k ∧ w = vecAppend u ?[x] := by
+  have H (w : V) : w ≠ 0 → ∃ u ≤ w, ∃ x ≤ w, len u + 1 = len w ∧ w = vecAppend u ?[x] := by
+    induction w using adjoin_ISigma1.sigma1_succ_induction
+    · definability
+    case nil => simp
+    case adjoin y w ih =>
+      intro _
+      rcases eq_or_ne w 0 with rfl | hw
+      · exact ⟨0, by simp, y, (lt_adjoin y 0).le, by simp⟩
+      · obtain ⟨u, hu, x, hx, -, rfl⟩ := ih hw
+        exact ⟨y ∷ u, adjoin_le_adjoin le_rfl hu, x, hx.trans (lt_adjoin' y _).le, by simp, by simp⟩
+  obtain ⟨u, -, x, -, hlen, heq⟩ := H w (by rintro rfl; simp at h)
+  exact ⟨u, x, add_right_cancel (hlen.trans h), heq⟩
+
+end vecAppend
 
 /-!
 

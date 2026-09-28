@@ -33,95 +33,6 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-! ## Bounds on pairs, towers of exponentials and finite mappings -/
-
-section generic
-
-variable {a b c v x y m n q Q : V}
-
-@[bound] lemma adjoin_le_exp_exp (ha : a ≤ c) (hv : v ≤ c) : a ∷ v ≤ Exp.exp (Exp.exp c) :=
-  calc a ∷ v ≤ c ∷ c := adjoin_le_adjoin ha hv
-    _ = (c + 1) * (c + 1) := by simp [adjoin_def, pair]; ring
-    _ ≤ Exp.exp c * Exp.exp c := by gcongr <;> exact succ_le_iff_lt.mpr (lt_exp c)
-    _ ≤ Exp.exp (Exp.exp c) := by rw [← exp_add]; bound
-
-@[bound] lemma pair_lt_exp_exp (ha : a ≤ c) (hb : b ≤ c) : ⟪a, b⟫ < Exp.exp (Exp.exp c) :=
-  (lt_add_one _).trans_le (adjoin_le_exp_exp ha hb)
-
-@[bound] lemma pair_le_exp_exp (ha : a ≤ c) (hb : b ≤ c) : ⟪a, b⟫ ≤ Exp.exp (Exp.exp c) :=
-  (pair_lt_exp_exp ha hb).le
-
-lemma listMax_le_self (v : V) : listMax v ≤ v := by
-  apply adjoin_induction 𝚷 (P := fun v ↦ listMax v ≤ v) (by definability) (by simp);
-  intro x v ih;
-  simpa using ⟨(lt_adjoin x v).le, ih.trans (lt_adjoin' x v).le⟩;
-
-@[bound] lemma listMax_le_of_le (h : v ≤ c) : listMax v ≤ c := (listMax_le_self v).trans h
-
-lemma le_iterExp (x n : V) : x ≤ iterExp x n := by
-  apply ISigma1.sigma1_succ_induction (P := fun n ↦ x ≤ iterExp x n) (by definability) (by simp);
-  intro n ih;
-  simpa using le_exp_of_le ih;
-
-lemma iterExp_add (x m n : V) : iterExp x (m + n) = iterExp (iterExp x m) n := by
-  apply ISigma1.sigma1_succ_induction (P := fun n ↦ iterExp x (m + n) = iterExp (iterExp x m) n)
-    (by definability) (by simp);
-  intro n ih;
-  rw [← add_assoc, iterExp_succ, ih, iterExp_succ];
-
-@[gcongr] lemma iterExp_le_iterExp (hxy : x ≤ y) (hmn : m ≤ n) : iterExp x m ≤ iterExp y n := by
-  have : iterExp x m ≤ iterExp y m := by
-    apply ISigma1.sigma1_succ_induction (P := fun m ↦ iterExp x m ≤ iterExp y m)
-      (by definability) (by simpa using hxy);
-    intro m ih;
-    simpa using ih;
-  obtain ⟨k, rfl⟩ := le_iff_exists_add.mp hmn;
-  exact this.trans (by simpa [iterExp_add] using le_iterExp (iterExp y m) k);
-
-lemma iterExp_natCast (x : V) (k : ℕ) : iterExp x k = Exp.exp^[k] x := by
-  induction k with
-  | zero => simp;
-  | succ k ih => simp [Function.iterate_succ_apply', ih];
-
-@[simp] lemma iterExp_ofNat (x : V) (k : ℕ) [k.AtLeastTwo] :
-    iterExp x (no_index (OfNat.ofNat k : V)) = Exp.exp^[k] x :=
-  iterExp_natCast x k
-
-lemma lt_of_mem_domain (h : n ∈ domain q) : n < q := by
-  obtain ⟨y, hy⟩ := mem_domain_iff.mp h;
-  exact lt_of_mem_dom hy;
-
-lemma fst_lt_of_mem_domain {p e : V} (h : ⟪p, e⟫ ∈ domain q) : p < q :=
-  (le_pair_left p e).trans_lt (lt_of_mem_domain h)
-
-lemma snd_lt_of_mem_domain {p e : V} (h : ⟪p, e⟫ ∈ domain q) : e < q :=
-  (le_pair_right p e).trans_lt (lt_of_mem_domain h)
-
-lemma val_iff_of_subset (hQ : IsMapping Q) (hsub : q ⊆ Q) (hn : n ∈ domain q) :
-    ⟪n, v⟫ ∈ Q ↔ ⟪n, v⟫ ∈ q := by
-  obtain ⟨w, hw⟩ := mem_domain_iff.mp hn;
-  exact ⟨fun h ↦ hQ.uniq (hsub hw) h ▸ hw, fun h ↦ hsub h⟩;
-
-lemma mem_insert_iff_of_not_mem_domain (hn : n ∉ domain q) :
-    ⟪n, y⟫ ∈ insert ⟪n, v⟫ q ↔ y = v := by
-  simpa using fun h ↦ absurd (mem_domain_of_pair_mem h) hn;
-
-/-- Descending induction on the first components of the elements of a domain. -/
-lemma forall_mem_domain_of_desc {P : V → Prop} (hP : 𝚷ᴬ₁.DefinablePred P)
-    (H : ∀ n ∈ domain q, (∀ m ∈ domain q, π₁ n < π₁ m → P m) → P n) : ∀ n ∈ domain q, P n := by
-  suffices ∀ k n, n ∈ domain q → q ≤ π₁ n + k → P n from fun n hn ↦ this q n hn le_add_self;
-  apply ISigma1.pi1_succ_induction (P := fun k ↦ ∀ n, n ∈ domain q → q ≤ π₁ n + k → P n)
-    (by definability);
-  · intro n hn hle;
-    exact absurd ((pi₁_le_self n).trans_lt (lt_of_mem_domain hn)) (by simpa using hle);
-  · intro k IH n hn hle;
-    exact H n hn fun m hm hlt ↦ IH m hm <|
-      calc q ≤ π₁ n + (k + 1) := hle
-        _ = π₁ n + 1 + k := by ring
-        _ ≤ π₁ m + k := by gcongr; exact succ_le_iff_lt.mpr hlt
-
-end generic
-
 /-! ## Coded atomic and bounded formulas -/
 
 section codedSyntax
@@ -1139,7 +1050,7 @@ lemma Spec.mono {Q : V} (hQ : IsMapping Q) (hsub : q ⊆ Q) (hd : ⟪z, e⟫ ∈
     (h : Spec q z e) : Spec Q z e := by
   have dom : ∀ m ∈ domain q, m ∈ domain Q := fun m hm ↦ domain_subset_domain_of_subset hsub hm;
   have val : ∀ {m w : V}, m ∈ domain q → (⟪m, w⟫ ∈ Q ↔ ⟪m, w⟫ ∈ q) :=
-    fun hm ↦ val_iff_of_subset hQ hsub hm;
+    fun hm ↦ hQ.mem_iff_of_subset hsub hm;
   rcases h with ⟨he, hv⟩ | ⟨he, hv⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
     ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, he, hc, hc', hA, hB⟩ |
     ⟨a, b, he, hc, hc', hA, hB⟩ | ⟨a, b, ht, he, hc, hA, hB⟩ | ⟨a, b, ht, he, hc, hA, hB⟩;
@@ -1236,10 +1147,10 @@ lemma of_and (hr : ∀ v ≤ 1, ⟪⟪p₁ ^⋏ p₂, e⟫, v⟫ < N) :
       · rfl;
       · exact domain_subset_domain_of_subset hs₁ h₁.mem_dom_root;
       · exact domain_subset_domain_of_subset hs₂ h₂.mem_dom_root;
-      · rw [mem_insert_iff_of_not_mem_domain hz, hv1, val_iff_of_subset hQ hs₁ h₁.mem_dom_root,
-          val_iff_of_subset hQ hs₂ h₂.mem_dom_root];
-      · rw [mem_insert_iff_of_not_mem_domain hz, hv0, val_iff_of_subset hQ hs₁ h₁.mem_dom_root,
-          val_iff_of_subset hQ hs₂ h₂.mem_dom_root, h₁.val_zero_iff h₁.mem_dom_root,
+      · rw [mem_insert_iff_of_not_mem_domain hz, hv1, hQ.mem_iff_of_subset hs₁ h₁.mem_dom_root,
+          hQ.mem_iff_of_subset hs₂ h₂.mem_dom_root];
+      · rw [mem_insert_iff_of_not_mem_domain hz, hv0, hQ.mem_iff_of_subset hs₁ h₁.mem_dom_root,
+          hQ.mem_iff_of_subset hs₂ h₂.mem_dom_root, h₁.val_zero_iff h₁.mem_dom_root,
           h₂.val_zero_iff h₂.mem_dom_root, not_and_or];
   · intro w hw;
     rcases (by simpa using hw : w = ⟪⟪p₁ ^⋏ p₂, e⟫, v⟫ ∨ w ∈ q₁ ∨ w ∈ q₂) with rfl | h | h;
@@ -1270,10 +1181,10 @@ lemma of_or (hr : ∀ v ≤ 1, ⟪⟪p₁ ^⋎ p₂, e⟫, v⟫ < N) :
       · rfl;
       · exact domain_subset_domain_of_subset hs₁ h₁.mem_dom_root;
       · exact domain_subset_domain_of_subset hs₂ h₂.mem_dom_root;
-      · rw [mem_insert_iff_of_not_mem_domain hz, hv1, val_iff_of_subset hQ hs₁ h₁.mem_dom_root,
-          val_iff_of_subset hQ hs₂ h₂.mem_dom_root];
-      · rw [mem_insert_iff_of_not_mem_domain hz, hv0, val_iff_of_subset hQ hs₁ h₁.mem_dom_root,
-          val_iff_of_subset hQ hs₂ h₂.mem_dom_root, h₁.val_zero_iff h₁.mem_dom_root,
+      · rw [mem_insert_iff_of_not_mem_domain hz, hv1, hQ.mem_iff_of_subset hs₁ h₁.mem_dom_root,
+          hQ.mem_iff_of_subset hs₂ h₂.mem_dom_root];
+      · rw [mem_insert_iff_of_not_mem_domain hz, hv0, hQ.mem_iff_of_subset hs₁ h₁.mem_dom_root,
+          hQ.mem_iff_of_subset hs₂ h₂.mem_dom_root, h₁.val_zero_iff h₁.mem_dom_root,
           h₂.val_zero_iff h₂.mem_dom_root, not_or];
   · intro w hw;
     rcases (by simpa using hw : w = ⟪⟪p₁ ^⋎ p₂, e⟫, v⟫ ∨ w ∈ q₁ ∨ w ∈ q₂) with rfl | h | h;
@@ -1346,7 +1257,7 @@ lemma of_ball (hp : p < qqBall u p) (hr : ∀ v ≤ 1, ⟪⟪qqBall u p, e⟫, v
     obtain ⟨r, hr, hrW⟩ := hWfam x hx;
     have hd := hr.mem_dom_root;
     exact ⟨domain_subset_domain_of_subset hrW hd, by
-      rw [val_iff_of_subset hW hrW hd, val_iff_of_subset hW hrW hd, hr.val_zero_iff hd]⟩;
+      rw [hW.mem_iff_of_subset hrW hd, hW.mem_iff_of_subset hrW hd, hr.val_zero_iff hd]⟩;
   use insert ⟪⟪qqBall u p, e⟫, v⟫ W;
   and_intros;
   · apply of_insert hW hz;
@@ -1360,11 +1271,11 @@ lemma of_ball (hp : p < qqBall u p) (hr : ∀ v ≤ 1, ⟪⟪qqBall u p, e⟫, v
       · rfl;
       · exact fun x hx ↦ domain_subset_domain_of_subset hWQ (child x hx).1;
       · rw [mem_insert_iff_of_not_mem_domain hz, hv1];
-        exact forall₂_congr fun x hx ↦ (val_iff_of_subset hQ hWQ (child x hx).1).symm;
+        exact forall₂_congr fun x hx ↦ (hQ.mem_iff_of_subset hWQ (child x hx).1).symm;
       · rw [mem_insert_iff_of_not_mem_domain hz, hv0];
         push Not;
         exact exists_congr fun x ↦ and_congr_right fun hx ↦ by
-          rw [val_iff_of_subset hQ hWQ (child x hx).1, (child x hx).2];
+          rw [hQ.mem_iff_of_subset hWQ (child x hx).1, (child x hx).2];
   · intro w hw;
     rcases (by simpa using hw : w = ⟪⟪qqBall u p, e⟫, v⟫ ∨ w ∈ W) with rfl | h;
     · exact hr v hv;
@@ -1385,7 +1296,7 @@ lemma of_bex (hp : p < qqBex u p) (hr : ∀ v ≤ 1, ⟪⟪qqBex u p, e⟫, v⟫
     obtain ⟨r, hr, hrW⟩ := hWfam x hx;
     have hd := hr.mem_dom_root;
     exact ⟨domain_subset_domain_of_subset hrW hd, by
-      rw [val_iff_of_subset hW hrW hd, val_iff_of_subset hW hrW hd, hr.val_zero_iff hd]⟩;
+      rw [hW.mem_iff_of_subset hrW hd, hW.mem_iff_of_subset hrW hd, hr.val_zero_iff hd]⟩;
   use insert ⟪⟪qqBex u p, e⟫, v⟫ W;
   and_intros;
   · apply of_insert hW hz;
@@ -1400,11 +1311,11 @@ lemma of_bex (hp : p < qqBex u p) (hr : ∀ v ≤ 1, ⟪⟪qqBex u p, e⟫, v⟫
       · exact fun x hx ↦ domain_subset_domain_of_subset hWQ (child x hx).1;
       · rw [mem_insert_iff_of_not_mem_domain hz, hv1];
         exact exists_congr fun x ↦ and_congr_right fun hx ↦
-          (val_iff_of_subset hQ hWQ (child x hx).1).symm;
+          (hQ.mem_iff_of_subset hWQ (child x hx).1).symm;
       · rw [mem_insert_iff_of_not_mem_domain hz, hv0];
         push Not;
         exact forall₂_congr fun x hx ↦ by
-          rw [val_iff_of_subset hQ hWQ (child x hx).1, (child x hx).2];
+          rw [hQ.mem_iff_of_subset hWQ (child x hx).1, (child x hx).2];
   · intro w hw;
     rcases (by simpa using hw : w = ⟪⟪qqBex u p, e⟫, v⟫ ∨ w ∈ W) with rfl | h;
     · exact hr v hv;
@@ -1424,6 +1335,10 @@ noncomputable def tableBound (z e : V) : V := Exp.exp (iterExp (tableExp z e) (8
 section tableBound
 
 variable {x v : V}
+
+-- Reducing `listMax v ≤ c` to `v ≤ c` can lose provability (see `termVal_le`), so this is a
+-- `bound` rule only here, where the lists at hand are themselves bounded.
+attribute [local bound] listMax_le_of_le
 
 lemma le_tableExp_left (z e : V) : z ≤ tableExp z e := by simp [tableExp, add_assoc]
 
