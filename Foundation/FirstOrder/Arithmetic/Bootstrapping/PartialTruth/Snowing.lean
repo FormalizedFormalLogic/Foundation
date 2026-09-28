@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Tarski
-public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 
 /-!
 # Partial truth definitions agree with truth
