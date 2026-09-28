@@ -276,26 +276,28 @@ lemma IsHierarchy.of_bounded (h : IsBounded p) : IsHierarchy Γ n p := by
 
 lemma IsHierarchy.ball {t : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ n q) :
     IsHierarchy Γ n (qqBall (termBShift ℒₒᵣ t) q) := by
-  sorry
+  cases n with
+  | zero => exact IsBounded.ball ht hq;
+  | succ n => exact IsHierarchy.succ_mk <| by disj 4; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
 
 lemma IsHierarchy.bex {t : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ n q) :
     IsHierarchy Γ n (qqBex (termBShift ℒₒᵣ t) q) := by
-  sorry
+  cases n with
+  | zero => exact IsBounded.bex ht hq;
+  | succ n => exact IsHierarchy.succ_mk <| by disj 5; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
 
-lemma IsHierarchy.quant (h : IsHierarchy Γ (n + 1) p) : IsHierarchy Γ (n + 1) (qqQuant Γ p) := by
-  sorry
+lemma IsHierarchy.quant (h : IsHierarchy Γ (n + 1) p) : IsHierarchy Γ (n + 1) (qqQuant Γ p) :=
+  IsHierarchy.succ_mk <| by disj 6; exact ⟨p, h, rfl⟩
 
-lemma IsSigma.ex (h : IsSigma (n + 1) p) : IsSigma (n + 1) (^∃ p) := by
-  sorry
+lemma IsSigma.ex (h : IsSigma (n + 1) p) : IsSigma (n + 1) (^∃ p) := IsHierarchy.quant h
 
-lemma IsPi.all (h : IsPi (n + 1) p) : IsPi (n + 1) (^∀ p) := by
-  sorry
+lemma IsPi.all (h : IsPi (n + 1) p) : IsPi (n + 1) (^∀ p) := IsHierarchy.quant h
 
-lemma IsSigma.sigma (h : IsPi n p) : IsSigma (n + 1) (^∃ p) := by
-  sorry
+lemma IsSigma.sigma (h : IsPi n p) : IsSigma (n + 1) (^∃ p) :=
+  IsSigma.ex (IsHierarchy.of_alt (Γ := 𝚺) h)
 
-lemma IsPi.pi (h : IsSigma n p) : IsPi (n + 1) (^∀ p) := by
-  sorry
+lemma IsPi.pi (h : IsSigma n p) : IsPi (n + 1) (^∀ p) :=
+  IsPi.all (IsHierarchy.of_alt (Γ := 𝚷) h)
 
 lemma IsHierarchy.succ (h : IsHierarchy Γ n p) : IsHierarchy Γ (n + 1) p := by
   sorry
