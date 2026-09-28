@@ -510,7 +510,42 @@ lemma isHierarchy_of_hierarchy {ψ : ArithmeticSemiproposition n}
 
 lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
     IsHierarchy Γ s (⌜ψ⌝ : ℕ) → ℬ[<, ℒₒᵣ].Hierarchy Γ s ψ := by
-  sorry
+  induction s generalizing Γ n ψ with
+  | zero =>
+    intro h;
+    exact .bounded _ _ _ ((isBounded_quote_iff_s ψ).mp h);
+  | succ s ihs =>
+    induction ψ using Semiformula.rec' with
+    | hverum => simp;
+    | hfalsum => simp;
+    | hrel => simp;
+    | hnrel => simp;
+    | hand φ ψ ihφ ihψ =>
+      intro h;
+      rw [Semiformula.quote_and, IsHierarchy.and_iff] at h;
+      exact (ihφ h.1).and (ihψ h.2);
+    | hor φ ψ ihφ ihψ =>
+      intro h;
+      rw [Semiformula.quote_or, IsHierarchy.or_iff] at h;
+      exact (ihφ h.1).or (ihψ h.2);
+    | hall φ ih =>
+      intro h;
+      rw [Semiformula.quote_all] at h;
+      rcases IsHierarchy.of_all h with (h | ⟨hφ, rfl | ⟨t, q, ht, e⟩⟩);
+      · exact (ihs (∀¹ φ) (by rwa [Semiformula.quote_all])).accum Γ;
+      · exact (ih hφ).all;
+      · obtain ⟨u, χ, rfl⟩ := exists_ball_of_quote_eq ht e;
+        exact Bounding.Hierarchy.arithmetic_ball (Rew.positive_iff.mpr ⟨u, rfl⟩)
+          (Bounding.Hierarchy.imp_iff.mp (ih hφ)).2;
+    | hexs φ ih =>
+      intro h;
+      rw [Semiformula.quote_ex] at h;
+      rcases IsHierarchy.of_ex h with (h | ⟨hφ, rfl | ⟨t, q, ht, e⟩⟩);
+      · exact (ihs (∃¹ φ) (by rwa [Semiformula.quote_ex])).accum Γ;
+      · exact (ih hφ).exs;
+      · obtain ⟨u, χ, rfl⟩ := exists_bex_of_quote_eq ht e;
+        exact Bounding.Hierarchy.arithmetic_bexs (Rew.positive_iff.mpr ⟨u, rfl⟩)
+          (Bounding.Hierarchy.and_iff.mp (ih hφ)).2;
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
