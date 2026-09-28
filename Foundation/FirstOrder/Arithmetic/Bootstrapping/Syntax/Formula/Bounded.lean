@@ -89,14 +89,32 @@ private lemma phi_iff (C p : V) :
         ∧ p = qqBex u q) where
   mp := by
     rintro (rfl | rfl | ⟨k, r, v, rfl⟩ | ⟨k, r, v, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
-      | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩) <;>
-      simp_all <;>
-      grind [le_termBShift, lt_u_qqBall, lt_q_qqBall, lt_u_qqBex, lt_q_qqBex];
+      | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩);
+    · disj 1; rfl;
+    · disj 2; rfl;
+    · disj 3; exact ⟨k, by simp, r, by simp, v, by simp, rfl⟩;
+    · disj 4; exact ⟨k, by simp, r, by simp, v, by simp, rfl⟩;
+    · disj 5; exact ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩;
+    · disj 6; exact ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩;
+    · disj 7;
+      exact ⟨termBShift ℒₒᵣ t, lt_u_qqBall _ _, q, lt_q_qqBall _ _,
+        ⟨t, (le_termBShift ht).trans_lt (lt_u_qqBall _ _), ht, rfl⟩, hq, rfl⟩;
+    · disj 8;
+      exact ⟨termBShift ℒₒᵣ t, lt_u_qqBex _ _, q, lt_q_qqBex _ _,
+        ⟨t, (le_termBShift ht).trans_lt (lt_u_qqBex _ _), ht, rfl⟩, hq, rfl⟩;
   mpr := by
     unfold Phi;
     rintro (rfl | rfl | ⟨k, _, r, _, v, _, rfl⟩ | ⟨k, _, r, _, v, _, rfl⟩
       | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, p₂, _, hp, hq, rfl⟩
-      | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩ | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩) <;> grind;
+      | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩ | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩);
+    · disj 1; rfl;
+    · disj 2; rfl;
+    · disj 3; exact ⟨k, r, v, rfl⟩;
+    · disj 4; exact ⟨k, r, v, rfl⟩;
+    · disj 5; exact ⟨p₁, p₂, hp, hq, rfl⟩;
+    · disj 6; exact ⟨p₁, p₂, hp, hq, rfl⟩;
+    · disj 7; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
+    · disj 8; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
 
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “p C.
@@ -136,14 +154,29 @@ def construction : Fixpoint.Construction V blueprint where
   monotone := by
     unfold Phi;
     rintro C C' hC _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
-      | ⟨u, q, ht, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩) <;> grind;
+      | ⟨u, q, ht, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩);
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact h;
+    · disj 4; exact h;
+    · disj 5; exact ⟨p₁, p₂, hC hp, hC hq, rfl⟩;
+    · disj 6; exact ⟨p₁, p₂, hC hp, hC hq, rfl⟩;
+    · disj 7; exact ⟨u, q, ht, hC hq, rfl⟩;
+    · disj 8; exact ⟨u, q, ht, hC hq, rfl⟩;
 
 instance : construction.StrongFinite V where
   strong_finite := by
     unfold construction Phi;
     rintro C _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
-      | ⟨u, q, ht, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩) <;>
-      grind [lt_K!_left, lt_K!_right, lt_or_left, lt_or_right, lt_q_qqBall, lt_q_qqBex];
+      | ⟨u, q, ht, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩);
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact h;
+    · disj 4; exact h;
+    · disj 5; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
+    · disj 6; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
+    · disj 7; exact ⟨u, q, ht, ⟨hq, lt_q_qqBall _ _⟩, rfl⟩;
+    · disj 8; exact ⟨u, q, ht, ⟨hq, lt_q_qqBex _ _⟩, rfl⟩;
 
 end IsBoundedF
 
@@ -171,10 +204,14 @@ lemma IsBounded.case_iff {p : V} :
 
 alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
 
-@[simp] lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk <| by grind
-@[simp] lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk <| by grind
-@[simp] lemma IsBounded.rel {k r v : V} : IsBounded (^rel k r v) := IsBounded.mk <| by grind
-@[simp] lemma IsBounded.nrel {k r v : V} : IsBounded (^nrel k r v) := IsBounded.mk <| by grind
+@[simp] lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk <| by disj 1; rfl
+@[simp] lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk <| by disj 2; rfl
+
+@[simp] lemma IsBounded.rel {k r v : V} : IsBounded (^rel k r v) :=
+  IsBounded.mk <| by disj 3; exact ⟨k, r, v, rfl⟩
+
+@[simp] lemma IsBounded.nrel {k r v : V} : IsBounded (^nrel k r v) :=
+  IsBounded.mk <| by disj 4; exact ⟨k, r, v, rfl⟩
 
 @[simp] lemma IsBounded.and_iff {p q : V} : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor;
@@ -183,7 +220,7 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
       | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩) <;>
       simp_all [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex];
   · rintro ⟨hp, hq⟩;
-    exact IsBounded.mk <| by grind;
+    exact IsBounded.mk <| by disj 5; exact ⟨p, q, hp, hq, rfl⟩;
 
 @[simp] lemma IsBounded.or_iff {p q : V} : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor;
@@ -192,15 +229,15 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
       | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩) <;>
       simp_all [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex];
   · rintro ⟨hp, hq⟩;
-    exact IsBounded.mk <| by grind;
+    exact IsBounded.mk <| by disj 6; exact ⟨p, q, hp, hq, rfl⟩;
 
 lemma IsBounded.ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBall (termBShift ℒₒᵣ t) q) :=
-  IsBounded.mk <| by grind
+  IsBounded.mk <| by disj 7; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩
 
 lemma IsBounded.bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBex (termBShift ℒₒᵣ t) q) :=
-  IsBounded.mk <| by grind
+  IsBounded.mk <| by disj 8; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩
 
 lemma IsBounded.of_all {p : V} (h : IsBounded (^∀ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q
@@ -275,8 +312,8 @@ lemma IsBounded.isSigma1 {p : V} (h : IsBounded p) : IsSigma1 p := by
   suffices ∀ p : V, IsBounded p → IsSigma1 p from this p h;
   apply IsBounded.induction 𝚺 (P := IsSigma1) (by definability) (by simp) (by simp) (by simp)
     (by simp) (by simp +contextual) (by simp +contextual);
-  · intro t q _ _ ih;
-    exact IsSigma1.mk <| by grind;
+  · intro t q ht _ ih;
+    exact IsSigma1.mk <| by disj 8; exact ⟨_, q, ⟨t, ht, rfl⟩, ih, rfl⟩;
   · intro t q _ _ ih;
     simp [qqBex, Arithmetic.qqLT, ih];
 

@@ -511,7 +511,7 @@ private lemma phi_iff (C p : V) :
         ∧ p = qqBall u q) where
   mp := by
     rintro (rfl | rfl | ⟨k, r, v, rfl⟩ | ⟨k, r, v, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
-      | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, hp, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩)
+      | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, hp, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩);
     · disj 1; rfl;
     · disj 2; rfl;
     · disj 3; exact ⟨k, by simp, r, by simp, v, by simp, rfl⟩;
@@ -521,12 +521,20 @@ private lemma phi_iff (C p : V) :
     · disj 7; exact ⟨p₁, by simp, hp, rfl⟩;
     · disj 8;
       exact ⟨termBShift ℒₒᵣ t, lt_u_qqBall _ _, q, lt_q_qqBall _ _,
-        ⟨t, lt_of_le_of_lt (le_termBShift ht) (lt_u_qqBall _ _), ht, rfl⟩, hq, rfl⟩;
+        ⟨t, (le_termBShift ht).trans_lt (lt_u_qqBall _ _), ht, rfl⟩, hq, rfl⟩;
   mpr := by
-    unfold Phi
+    unfold Phi;
     rintro (rfl | rfl | ⟨k, _, r, _, v, _, rfl⟩ | ⟨k, _, r, _, v, _, rfl⟩
       | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, hp, rfl⟩
-      | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩) <;> grind
+      | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩);
+    · disj 1; rfl;
+    · disj 2; rfl;
+    · disj 3; exact ⟨k, r, v, rfl⟩;
+    · disj 4; exact ⟨k, r, v, rfl⟩;
+    · disj 5; exact ⟨p₁, p₂, hp, hq, rfl⟩;
+    · disj 6; exact ⟨p₁, p₂, hp, hq, rfl⟩;
+    · disj 7; exact ⟨p₁, hp, rfl⟩;
+    · disj 8; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
 
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “p C.
@@ -553,25 +561,33 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
 def construction : Fixpoint.Construction V blueprint where
   Φ := fun _ ↦ Phi
   defined := .mk <| by
-    constructor
-    · intro v
+    constructor;
+    · intro v;
       simp [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
-        (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df]
-    · intro v
-      symm
+        (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df];
+    · intro v;
+      symm;
       simpa [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
         (termBShift.defined (L := ℒₒᵣ) (V := V)).df, (qqBall_defined (V := V)).df]
-        using phi_iff (V := V) _ _
+        using phi_iff (V := V) _ _;
   monotone := by
-    unfold Phi
+    unfold Phi;
     rintro C C' hC _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
-      | ⟨p₁, hp, rfl⟩ | ⟨u, q, ht, hq, rfl⟩) <;> grind
+      | ⟨p₁, hp, rfl⟩ | ⟨u, q, ht, hq, rfl⟩);
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact h;
+    · disj 4; exact h;
+    · disj 5; exact ⟨p₁, p₂, hC hp, hC hq, rfl⟩;
+    · disj 6; exact ⟨p₁, p₂, hC hp, hC hq, rfl⟩;
+    · disj 7; exact ⟨p₁, hC hp, rfl⟩;
+    · disj 8; exact ⟨u, q, ht, hC hq, rfl⟩;
 
 instance : construction.StrongFinite V where
   strong_finite := by
-    unfold construction Phi
+    unfold construction Phi;
     rintro C _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
-      | ⟨p₁, hp, rfl⟩ | ⟨u, q, ht, hq, rfl⟩)
+      | ⟨p₁, hp, rfl⟩ | ⟨u, q, ht, hq, rfl⟩);
     · disj 1; exact h;
     · disj 2; exact h;
     · disj 3; exact h;
@@ -608,48 +624,52 @@ lemma IsSigma1.case_iff {p : V} :
 
 alias ⟨IsSigma1.case, IsSigma1.mk⟩ := IsSigma1.case_iff
 
-@[simp] lemma IsSigma1.verum : IsSigma1 (V := V) (^⊤) := IsSigma1.mk <| by grind;
-@[simp] lemma IsSigma1.falsum : IsSigma1 (V := V) (^⊥) := IsSigma1.mk <| by grind;
-@[simp] lemma IsSigma1.rel {k r v : V} : IsSigma1 (^rel k r v) := IsSigma1.mk <| by grind;
-@[simp] lemma IsSigma1.nrel {k r v : V} : IsSigma1 (^nrel k r v) := IsSigma1.mk <| by grind;
+@[simp] lemma IsSigma1.verum : IsSigma1 (V := V) (^⊤) := IsSigma1.mk <| by disj 1; rfl
+@[simp] lemma IsSigma1.falsum : IsSigma1 (V := V) (^⊥) := IsSigma1.mk <| by disj 2; rfl
+
+@[simp] lemma IsSigma1.rel {k r v : V} : IsSigma1 (^rel k r v) :=
+  IsSigma1.mk <| by disj 3; exact ⟨k, r, v, rfl⟩
+
+@[simp] lemma IsSigma1.nrel {k r v : V} : IsSigma1 (^nrel k r v) :=
+  IsSigma1.mk <| by disj 4; exact ⟨k, r, v, rfl⟩
 
 @[simp]
 lemma IsSigma1.and_iff {p q : V} : IsSigma1 (p ^⋏ q) ↔ IsSigma1 p ∧ IsSigma1 q := by
   constructor;
-  · intro h
+  · intro h;
     rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,h⟩ |
         ⟨u,q',_,_,h⟩) <;>
       simp only [qqAnd, qqVerum, qqFalsum, qqRel, qqNRel, qqOr, qqExs, qqBall, qqAll, add_left_inj,
         pair_ext_iff, OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero,
-        OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
-    · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
-  · rintro ⟨hp, hq⟩
-    exact IsSigma1.mk <| by grind;
+        OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h;
+    · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩;
+  · rintro ⟨hp, hq⟩;
+    exact IsSigma1.mk <| by disj 5; exact ⟨p, q, hp, hq, rfl⟩;
 
 @[simp]
 lemma IsSigma1.or_iff {p q : V} : IsSigma1 (p ^⋎ q) ↔ IsSigma1 p ∧ IsSigma1 q := by
-  constructor
-  · intro h
+  constructor;
+  · intro h;
     rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,p₂,hp,hq,h⟩ | ⟨_,_,h⟩ |
         ⟨u,q',_,_,h⟩) <;>
       simp only [qqOr, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqExs, qqBall, qqAll, add_left_inj,
         pair_ext_iff, OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero,
-        OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
-    · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
-  · rintro ⟨hp, hq⟩
-    exact IsSigma1.mk <| by grind;
+        OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h;
+    · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩;
+  · rintro ⟨hp, hq⟩;
+    exact IsSigma1.mk <| by disj 6; exact ⟨p, q, hp, hq, rfl⟩;
 
 @[simp] lemma IsSigma1.ex_iff {p : V} : IsSigma1 (^∃ p) ↔ IsSigma1 p := by
-  constructor
-  · intro h
+  constructor;
+  · intro h;
     rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨p₁,hp,h⟩ |
         ⟨u,q',_,_,h⟩) <;>
       simp only [qqExs, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqBall, qqAll, add_left_inj,
         pair_ext_iff, OfNat.ofNat_eq_ofNat, Nat.reduceEqDiff, OfNat.ofNat_ne_zero,
-        OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
-    · obtain rfl := h; exact hp
-  · rintro hp
-    exact IsSigma1.mk <| by grind;
+        OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h;
+    · obtain rfl := h; exact hp;
+  · rintro hp;
+    exact IsSigma1.mk <| by disj 7; exact ⟨p, hp, rfl⟩;
 
 lemma IsSigma1.of_all {p : V} (h : IsSigma1 (^∀ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsSigma1 q
