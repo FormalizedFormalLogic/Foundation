@@ -300,13 +300,26 @@ lemma IsPi.pi (h : IsSigma n p) : IsPi (n + 1) (^∀ p) :=
   IsPi.all (IsHierarchy.of_alt (Γ := 𝚷) h)
 
 lemma IsHierarchy.succ (h : IsHierarchy Γ n p) : IsHierarchy Γ (n + 1) p := by
-  sorry
+  induction n generalizing Γ p with
+  | zero => exact IsHierarchy.of_bounded h;
+  | succ n ih =>
+    apply IsHierarchy.succ_induction 𝚺 (P := IsHierarchy Γ (n + 1 + 1)) (by definability)
+      (fun p hp ↦ (ih hp).of_alt) (fun p q _ _ hp hq ↦ IsHierarchy.and_iff.mpr ⟨hp, hq⟩)
+      (fun p q _ _ hp hq ↦ IsHierarchy.or_iff.mpr ⟨hp, hq⟩)
+      (fun t q ht _ hq ↦ IsHierarchy.ball ht hq) (fun t q ht _ hq ↦ IsHierarchy.bex ht hq)
+      (fun q _ hq ↦ IsHierarchy.quant hq) p h;
 
 lemma IsHierarchy.accum (Γ' : Polarity) (h : IsHierarchy Γ n p) : IsHierarchy Γ' (n + 1) p := by
-  sorry
+  cases Γ <;> cases Γ';
+  · exact h.succ;
+  · exact IsHierarchy.of_alt (Γ := 𝚷) h;
+  · exact IsHierarchy.of_alt (Γ := 𝚺) h;
+  · exact h.succ;
 
 lemma IsHierarchy.mono {m : ℕ} (hmn : m ≤ n) (h : IsHierarchy Γ m p) : IsHierarchy Γ n p := by
-  sorry
+  induction hmn with
+  | refl => exact h;
+  | step _ ih => exact ih.succ;
 
 /-! ### Inversion of unbounded quantifiers -/
 
