@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.BoundedSatisfactionTable
 public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 import Mathlib.Tactic.Ring.RingNF
+import Mathlib.Tactic.Bound
 
 /-!
 # Satisfaction for $\Delta_0$ formulas
@@ -32,196 +33,114 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section existence
 
-/-! ### Elementary exponential bounds -/
+/-! ### Bounds on pairs and towers of exponentials -/
 
-lemma mul_le_exp_add (a b : V) : a * b ≤ Exp.exp (a + b) :=
-  calc a * b ≤ Exp.exp a * Exp.exp b :=
-        mul_le_mul (le_of_lt (lt_exp a)) (le_of_lt (lt_exp b)) (by simp) (by simp)
-    _ = Exp.exp (a + b) := (exp_add a b).symm
+section towerBound
 
-lemma exp_add_le (a c : V) : Exp.exp a + c ≤ Exp.exp (a + c + 1) := by
-  have h1 : c + 2 ≤ Exp.exp (c + 1) := by
-    have : c + 1 + 1 ≤ Exp.exp (c + 1) := succ_le_iff_lt.mpr (lt_exp (c + 1));
-    simpa [add_assoc, one_add_one_eq_two] using this;
-  have h2 : (1 : V) ≤ Exp.exp a := by
-    have := succ_le_iff_lt.mpr (exp_pos a);
-    simp;
-  have hc : c ≤ Exp.exp a * c := le_mul_of_one_le_left (by simp) h2;
-  have he : Exp.exp a ≤ Exp.exp a * 2 := le_mul_of_one_le_right (by simp) (by simp);
-  calc Exp.exp a + c
-      ≤ Exp.exp a * 2 + Exp.exp a * c := add_le_add he hc
-    _ = Exp.exp a * (c + 2) := by rw [mul_add]; simp [add_comm]
-    _ ≤ Exp.exp a * Exp.exp (c + 1) := mul_le_mul le_rfl h1 (by simp) (by simp)
-    _ = Exp.exp (a + c + 1) := by rw [← exp_add]; simp [add_assoc];
+variable {a b c v x y m n : V}
 
-lemma pair_le_exp (a b : V) : ⟪a, b⟫ ≤ Exp.exp (2 * a + 2 * b + 2) :=
-  calc ⟪a, b⟫ ≤ (a + b + 1) ^ 2 := pair_polybound a b
-    _ = (a + b + 1) * (a + b + 1) := by ring
-    _ ≤ Exp.exp ((a + b + 1) + (a + b + 1)) := mul_le_exp_add _ _
-    _ = Exp.exp (2 * a + 2 * b + 2) := by ring_nf
+@[bound] lemma adjoin_le_exp_exp (ha : a ≤ c) (hv : v ≤ c) : a ∷ v ≤ Exp.exp (Exp.exp c) :=
+  calc a ∷ v ≤ c ∷ c := adjoin_le_adjoin ha hv
+    _ = (c + 1) * (c + 1) := by simp [adjoin_def, pair]; ring
+    _ ≤ Exp.exp c * Exp.exp c := by gcongr <;> exact succ_le_iff_lt.mpr (lt_exp c)
+    _ ≤ Exp.exp (Exp.exp c) := by rw [← exp_add]; bound
 
-lemma adjoin_le_exp (a v : V) : a ∷ v ≤ Exp.exp (2 * a + 2 * v + 3) := by
-  have h1 : (1 : V) ≤ Exp.exp (2 * a + 2 * v + 2) := by simp;
-  calc a ∷ v = ⟪a, v⟫ + 1 := adjoin_def a v
-    _ ≤ Exp.exp (2 * a + 2 * v + 2) + 1 := add_le_add (pair_le_exp a v) le_rfl
-    _ ≤ 2 * Exp.exp (2 * a + 2 * v + 2) := by simp [two_mul]
-    _ = Exp.exp (2 * a + 2 * v + 3) := by
-        rw [show 2 * a + 2 * v + 3 = (2 * a + 2 * v + 2) + 1 from by ring, exp_succ];
+@[bound] lemma pair_lt_exp_exp (ha : a ≤ c) (hb : b ≤ c) : ⟪a, b⟫ < Exp.exp (Exp.exp c) :=
+  (lt_add_one _).trans_le (adjoin_le_exp_exp ha hb)
+
+@[bound] lemma pair_le_exp_exp (ha : a ≤ c) (hb : b ≤ c) : ⟪a, b⟫ ≤ Exp.exp (Exp.exp c) :=
+  (pair_lt_exp_exp ha hb).le
 
 lemma listMax_le_self (v : V) : listMax v ≤ v := by
   apply adjoin_induction 𝚷 (P := fun v ↦ listMax v ≤ v) (by definability) (by simp);
   intro x v ih;
-  rw [listMax_adjoin];
-  exact max_le (le_of_lt (lt_adjoin x v)) (le_trans ih (le_of_lt (lt_adjoin' x v)));
+  simpa using ⟨(lt_adjoin x v).le, ih.trans (lt_adjoin' x v).le⟩;
 
-/-! ### The iterated exponential -/
+@[bound] lemma listMax_le_of_le (h : v ≤ c) : listMax v ≤ c := (listMax_le_self v).trans h
 
 lemma le_iterExp (x n : V) : x ≤ iterExp x n := by
-  apply ISigma1.sigma1_succ_induction (P := fun n ↦ x ≤ iterExp x n) (by definability)
-    (by simp);
+  apply ISigma1.sigma1_succ_induction (P := fun n ↦ x ≤ iterExp x n) (by definability) (by simp);
   intro n ih;
-  calc x ≤ iterExp x n := ih
-    _ ≤ Exp.exp (iterExp x n) := le_of_lt (lt_exp _)
-    _ = iterExp x (n + 1) := (iterExp_succ x n).symm;
-
-lemma iterExp_le_iterExp_left {x y : V} (h : x ≤ y) (n : V) : iterExp x n ≤ iterExp y n := by
-  apply ISigma1.sigma1_succ_induction (P := fun n ↦ iterExp x n ≤ iterExp y n) (by definability)
-    (by simpa using h);
-  intro n ih;
-  simpa using exp_monotone_le.mpr ih;
+  simpa using le_exp_of_le ih;
 
 lemma iterExp_add (x m n : V) : iterExp x (m + n) = iterExp (iterExp x m) n := by
   apply ISigma1.sigma1_succ_induction (P := fun n ↦ iterExp x (m + n) = iterExp (iterExp x m) n)
     (by definability) (by simp);
   intro n ih;
-  rw [show m + (n + 1) = (m + n) + 1 from by ring, iterExp_succ, ih, iterExp_succ];
+  rw [← add_assoc, iterExp_succ, ih, iterExp_succ];
 
-lemma iterExp_le_iterExp_right (x : V) {m n : V} (h : m ≤ n) : iterExp x m ≤ iterExp x n := by
-  obtain ⟨k, rfl⟩ := le_iff_exists_add.mp h;
-  rw [iterExp_add];
-  exact le_iterExp _ k;
+@[gcongr] lemma iterExp_le_iterExp (hxy : x ≤ y) (hmn : m ≤ n) : iterExp x m ≤ iterExp y n := by
+  have : iterExp x m ≤ iterExp y m := by
+    apply ISigma1.sigma1_succ_induction (P := fun m ↦ iterExp x m ≤ iterExp y m)
+      (by definability) (by simpa using hxy);
+    intro m ih;
+    simpa using ih;
+  obtain ⟨k, rfl⟩ := le_iff_exists_add.mp hmn;
+  exact this.trans (by simpa [iterExp_add] using le_iterExp (iterExp y m) k);
 
-lemma iterExp_lt_iterExp_succ (x n : V) : iterExp x n < iterExp x (n + 1) := by
-  simp;
+lemma iterExp_natCast (x : V) (k : ℕ) : iterExp x k = Exp.exp^[k] x := by
+  induction k with
+  | zero => simp;
+  | succ k ih => simp [Function.iterate_succ_apply', ih];
 
-lemma iterExp_lt_of_lt (x : V) {m n : V} (h : m < n) : iterExp x m < iterExp x n :=
-  lt_of_lt_of_le (iterExp_lt_iterExp_succ x m) (iterExp_le_iterExp_right x (lt_iff_succ_le.mp h))
+@[simp] lemma iterExp_ofNat (x : V) (k : ℕ) [k.AtLeastTwo] :
+    iterExp x (no_index (OfNat.ofNat k : V)) = Exp.exp^[k] x :=
+  iterExp_natCast x k
 
-lemma two_mul_le_exp {a : V} (h : 2 ≤ a) : 2 * a ≤ Exp.exp a := by
-  obtain ⟨c, rfl⟩ := le_iff_exists_add.mp h;
-  have h4 : Exp.exp (2 + c : V) = 4 * Exp.exp c := by
-    rw [show (2 : V) + c = c + 1 + 1 from by ring, exp_succ, exp_succ]; ring;
-  have hc : c + 1 ≤ Exp.exp c := succ_le_iff_lt.mpr (lt_exp c);
-  calc 2 * (2 + c) = 4 + 2 * c := by ring
-    _ ≤ (4 + 2 * c) + 2 * c := le_self_add
-    _ = 4 * (c + 1) := by ring
-    _ ≤ 4 * Exp.exp c := mul_le_mul le_rfl hc (by simp) (by simp)
-    _ = Exp.exp (2 + c) := h4.symm;
+end towerBound
 
-@[simp] lemma iterExp_one (x : V) : iterExp x 1 = Exp.exp x := by
-  rw [show (1 : V) = 0 + 1 from by ring, iterExp_succ, iterExp_zero];
+/-! ### The bound on a partial satisfaction table
 
-lemma iterExp_two (x : V) : iterExp x 2 = Exp.exp (Exp.exp x) := by
-  rw [show (2 : V) = 1 + 1 from by ring, iterExp_succ, iterExp_one];
+`tableBound z e` is a tower of exponentials over `tableExp z e` whose height grows linearly in `z`;
+the tables of the children of `z` and the nodes `⟪⟪z, e⟫, v⟫` lie below its logarithm. -/
 
-lemma iterExp_three (x : V) : iterExp x 3 = Exp.exp (Exp.exp (Exp.exp x)) := by
-  rw [show (3 : V) = 2 + 1 from by ring, iterExp_succ, iterExp_two];
+def tableExp (z e : V) : V := z + e + 2
 
-lemma iterExp_four (x : V) : iterExp x 4 = Exp.exp (Exp.exp (Exp.exp (Exp.exp x))) := by
-  rw [show (4 : V) = 3 + 1 from by ring, iterExp_succ, iterExp_three];
+noncomputable def tableBound (z e : V) : V := Exp.exp (iterExp (tableExp z e) (8 * z + 4))
 
-/-! ### The bound on a partial satisfaction table -/
+section tableBound
 
-def tableExp (z e : V) : V := 4 * z + 3 * e + 31
+variable {p z e e' u x v : V}
 
-noncomputable def tableBound (z e : V) : V := iterExp (tableExp z e) (8 * z + 24)
+lemma le_tableExp_left (z e : V) : z ≤ tableExp z e := by simp [tableExp, add_assoc]
 
-lemma tableExp_mono {p z e : V} (h : p ≤ z) : tableExp p e ≤ tableExp z e :=
-  add_le_add (add_le_add (mul_le_mul le_rfl h (by simp) (by simp)) le_rfl) le_rfl
+lemma le_tableExp_right (z e : V) : e ≤ tableExp z e := by simp [tableExp, add_right_comm z e]
 
-lemma node_le_iterExp {z e v : V} (hv : v ≤ 1) : ⟪⟪z, e⟫, v⟫ ≤ iterExp (tableExp z e) 2 := by
-  have h1 : (2 : V) * ⟪z, e⟫ + 2 * v + 2 ≤ Exp.exp (2 * z + 2 * e + 3) + 4 := by
-    calc (2 : V) * ⟪z, e⟫ + 2 * v + 2
-        ≤ 2 * Exp.exp (2 * z + 2 * e + 2) + 2 * 1 + 2 :=
-          add_le_add (add_le_add (mul_le_mul le_rfl (pair_le_exp z e) (by simp) (by simp))
-            (mul_le_mul le_rfl hv (by simp) (by simp))) le_rfl
-      _ = Exp.exp (2 * z + 2 * e + 2 + 1) + 4 := by rw [← exp_succ]; ring
-      _ = Exp.exp (2 * z + 2 * e + 3) + 4 := by
-          rw [show 2 * z + 2 * e + 2 + 1 = 2 * z + 2 * e + 3 from by ring];
-  have h2 : Exp.exp (2 * z + 2 * e + 3) + 4 ≤ Exp.exp (2 * z + 2 * e + 8) := by
-    calc Exp.exp (2 * z + 2 * e + 3) + 4 ≤ Exp.exp (2 * z + 2 * e + 3 + 4 + 1) := exp_add_le _ _
-      _ = Exp.exp (2 * z + 2 * e + 8) := by
-          rw [show 2 * z + 2 * e + 3 + 4 + 1 = 2 * z + 2 * e + 8 from by ring];
-  have h3 : 2 * z + 2 * e + 8 ≤ tableExp z e := by
-    calc 2 * z + 2 * e + 8 ≤ (2 * z + 2 * e + 8) + (2 * z + e + 23) := le_self_add
-      _ = tableExp z e := by simp only [tableExp]; ring;
-  calc ⟪⟪z, e⟫, v⟫ ≤ Exp.exp (2 * ⟪z, e⟫ + 2 * v + 2) := pair_le_exp _ _
-    _ ≤ Exp.exp (Exp.exp (2 * z + 2 * e + 8)) := exp_monotone_le.mpr (le_trans h1 h2)
-    _ ≤ Exp.exp (Exp.exp (tableExp z e)) := exp_monotone_le.mpr (exp_monotone_le.mpr h3)
-    _ = iterExp (tableExp z e) 2 := (iterExp_two _).symm;
+lemma two_le_tableExp (z e : V) : 2 ≤ tableExp z e := by simp [tableExp]
 
-lemma tableExp_step {z p u x e : V} (hp : p < z) (hu : u < z) (hx : x < termVal (0 ∷ e) u) :
-    tableExp p (x ∷ e) ≤ iterExp (tableExp z e) 4 := by
-  have hxE : x ≤ Exp.exp ((e + 2) * (z + 1)) := by
-    have h2 : listMax (0 ∷ e) ≤ e := by simpa using listMax_le_self e;
-    have h3 : (listMax (0 ∷ e) + 2) * (u + 1) ≤ (e + 2) * (z + 1) :=
-      mul_le_mul (add_le_add h2 le_rfl) (add_le_add (le_of_lt hu) le_rfl) (by simp) (by simp);
-    exact le_of_lt (lt_of_lt_of_le hx
-      (le_trans (termVal_le_poly _ _) (exp_monotone_le.mpr h3)));
-  have hb : 3 * (x ∷ e) ≤ Exp.exp (2 * x + 2 * e + 5) := by
-    calc 3 * (x ∷ e) ≤ 3 * Exp.exp (2 * x + 2 * e + 3) :=
-          mul_le_mul le_rfl (adjoin_le_exp x e) (by simp) (by simp)
-      _ ≤ 3 * Exp.exp (2 * x + 2 * e + 3) + Exp.exp (2 * x + 2 * e + 3) := le_self_add
-      _ = 4 * Exp.exp (2 * x + 2 * e + 3) := by ring
-      _ = Exp.exp (2 * x + 2 * e + 5) := by
-          rw [show 2 * x + 2 * e + 5 = (2 * x + 2 * e + 3) + 1 + 1 from by ring, exp_succ,
-            exp_succ];
-          ring;
-  have step1 : tableExp p (x ∷ e) ≤ Exp.exp (2 * x + 2 * e + 4 * z + 37) := by
-    have hpz : 4 * p ≤ 4 * z := mul_le_mul le_rfl (le_of_lt hp) (by simp) (by simp);
-    calc tableExp p (x ∷ e) = 4 * p + 3 * (x ∷ e) + 31 := rfl
-      _ ≤ 4 * z + Exp.exp (2 * x + 2 * e + 5) + 31 := add_le_add (add_le_add hpz hb) le_rfl
-      _ = Exp.exp (2 * x + 2 * e + 5) + (4 * z + 31) := by ring
-      _ ≤ Exp.exp (2 * x + 2 * e + 5 + (4 * z + 31) + 1) := exp_add_le _ _
-      _ = Exp.exp (2 * x + 2 * e + 4 * z + 37) := by
-          rw [show 2 * x + 2 * e + 5 + (4 * z + 31) + 1 = 2 * x + 2 * e + 4 * z + 37 from by ring];
-  have step2 : 2 * x + 2 * e + 4 * z + 37 ≤ Exp.exp ((e + 2) * (z + 1) + 2 * e + 4 * z + 39) := by
-    have h2x : 2 * x ≤ Exp.exp ((e + 2) * (z + 1) + 1) := by
-      calc 2 * x ≤ 2 * Exp.exp ((e + 2) * (z + 1)) := mul_le_mul le_rfl hxE (by simp) (by simp)
-        _ = Exp.exp ((e + 2) * (z + 1) + 1) := (exp_succ _).symm;
-    calc 2 * x + 2 * e + 4 * z + 37
-        ≤ Exp.exp ((e + 2) * (z + 1) + 1) + 2 * e + 4 * z + 37 :=
-          add_le_add (add_le_add (add_le_add h2x le_rfl) le_rfl) le_rfl
-      _ = Exp.exp ((e + 2) * (z + 1) + 1) + (2 * e + 4 * z + 37) := by ring
-      _ ≤ Exp.exp ((e + 2) * (z + 1) + 1 + (2 * e + 4 * z + 37) + 1) := exp_add_le _ _
-      _ = Exp.exp ((e + 2) * (z + 1) + 2 * e + 4 * z + 39) := by
-          rw [show (e + 2) * (z + 1) + 1 + (2 * e + 4 * z + 37) + 1
-            = (e + 2) * (z + 1) + 2 * e + 4 * z + 39 from by ring];
-  have step3 : (e + 2) * (z + 1) + 2 * e + 4 * z + 39 ≤ Exp.exp (5 * z + 3 * e + 43) := by
-    have hEE : (e + 2) * (z + 1) ≤ Exp.exp (z + e + 3) := by
-      calc (e + 2) * (z + 1) ≤ Exp.exp ((e + 2) + (z + 1)) := mul_le_exp_add _ _
-        _ = Exp.exp (z + e + 3) := by rw [show (e + 2) + (z + 1) = z + e + 3 from by ring];
-    calc (e + 2) * (z + 1) + 2 * e + 4 * z + 39
-        ≤ Exp.exp (z + e + 3) + 2 * e + 4 * z + 39 :=
-          add_le_add (add_le_add (add_le_add hEE le_rfl) le_rfl) le_rfl
-      _ = Exp.exp (z + e + 3) + (2 * e + 4 * z + 39) := by ring
-      _ ≤ Exp.exp (z + e + 3 + (2 * e + 4 * z + 39) + 1) := exp_add_le _ _
-      _ = Exp.exp (5 * z + 3 * e + 43) := by
-          rw [show z + e + 3 + (2 * e + 4 * z + 39) + 1 = 5 * z + 3 * e + 43 from by ring];
-  have step4 : 5 * z + 3 * e + 43 ≤ Exp.exp (tableExp z e) := by
-    have h2 : (2 : V) ≤ tableExp z e := by
-      calc (2 : V) ≤ 2 + (4 * z + 3 * e + 29) := le_self_add
-        _ = tableExp z e := by simp only [tableExp]; ring;
-    calc 5 * z + 3 * e + 43 ≤ (5 * z + 3 * e + 43) + (3 * z + 3 * e + 19) := le_self_add
-      _ = 2 * tableExp z e := by simp only [tableExp]; ring
-      _ ≤ Exp.exp (tableExp z e) := two_mul_le_exp h2;
-  calc tableExp p (x ∷ e) ≤ Exp.exp (2 * x + 2 * e + 4 * z + 37) := step1
-    _ ≤ Exp.exp (Exp.exp ((e + 2) * (z + 1) + 2 * e + 4 * z + 39)) := exp_monotone_le.mpr step2
-    _ ≤ Exp.exp (Exp.exp (Exp.exp (5 * z + 3 * e + 43))) :=
-      exp_monotone_le.mpr (exp_monotone_le.mpr step3)
-    _ ≤ Exp.exp (Exp.exp (Exp.exp (Exp.exp (tableExp z e)))) :=
-        exp_monotone_le.mpr (exp_monotone_le.mpr (exp_monotone_le.mpr step4))
-    _ = iterExp (tableExp z e) 4 := (iterExp_four _).symm;
+lemma node_lt_iterExp (hv : v ≤ 1) : ⟪⟪z, e⟫, v⟫ < iterExp (tableExp z e) (8 * z + 4) := by
+  calc ⟪⟪z, e⟫, v⟫ < iterExp (tableExp z e) 4 := by
+        simp only [iterExp_ofNat, Function.iterate_succ_apply', Function.iterate_zero_apply];
+        bound [le_tableExp_left z e, le_tableExp_right z e,
+          hv.trans (one_le_two.trans (two_le_tableExp z e))]
+    _ ≤ iterExp (tableExp z e) (8 * z + 4) := by gcongr; exact le_add_self
+
+lemma lt_iterExp_of_mem {q w : V} (hp : p < z) (he' : e' ≤ iterExp (tableExp z e) 5)
+    (hq : q ≤ tableBound p e') (hw : w ∈ q) : w < iterExp (tableExp z e) (8 * z + 4) :=
+  calc w < tableBound p e' := (lt_of_mem hw).trans_le hq
+    _ ≤ Exp.exp (iterExp (iterExp (tableExp z e) 7) (8 * p + 4)) := by
+        rw [tableBound];
+        gcongr;
+        change p + e' + 2 ≤ _;
+        simp only [iterExp_ofNat, Function.iterate_succ_apply',
+          Function.iterate_zero_apply] at he' ⊢;
+        bound [hp.le.trans (le_tableExp_left z e), two_le_tableExp z e]
+    _ = iterExp (tableExp z e) (7 + (8 * p + 4) + 1) := by
+        rw [iterExp_succ, iterExp_add (tableExp z e) 7]
+    _ ≤ iterExp (tableExp z e) (8 * z + 4) := iterExp_le_iterExp le_rfl <|
+        calc 7 + (8 * p + 4) + 1 = 8 * (p + 1) + 4 := by ring
+          _ ≤ 8 * z + 4 := by gcongr; exact succ_le_iff_lt.mpr hp
+
+lemma adjoin_le_iterExp (hu : u < z) (hx : x < termVal (0 ∷ e) u) :
+    x ∷ e ≤ iterExp (tableExp z e) 5 := by
+  have : x ≤ Exp.exp (Exp.exp (Exp.exp (tableExp z e))) :=
+    hx.le.trans <| (termVal_le _ _).trans <| by
+      rw [listMax_adjoin];
+      bound [le_tableExp_right z e, hu.le.trans (le_tableExp_left z e)];
+  simp only [iterExp_ofNat, Function.iterate_succ_apply', Function.iterate_zero_apply];
+  bound [le_tableExp_right z e];
+
+end tableBound
 
 /-! ### Atomic codes over `ℒₒᵣ` -/
 
@@ -839,65 +758,6 @@ lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ�
       · exact hr1;
     · exact hWN _ h;
 
-/-! ### Bound bookkeeping -/
-
-lemma singleton_le_tableBound {z e v : V} (hv : v ≤ 1) :
-    ({⟪⟪z, e⟫, v⟫} : V) ≤ tableBound z e := by
-  rw [singleton_def];
-  calc Exp.exp ⟪⟪z, e⟫, v⟫ ≤ Exp.exp (iterExp (tableExp z e) 2) :=
-         exp_monotone_le.mpr (node_le_iterExp hv)
-    _ = iterExp (tableExp z e) 3 := by rw [show (3 : V) = 2 + 1 from by ring, iterExp_succ]
-    _ ≤ tableBound z e := by
-        rw [tableBound, show 8 * z + 24 = 3 + (8 * z + 21) from by ring, iterExp_add];
-        exact le_iterExp _ _;
-
-lemma node_lt_step {z e v : V} (hv : v ≤ 1) :
-    ⟪⟪z, e⟫, v⟫ < iterExp (tableExp z e) (8 * z + 21) := by
-  calc ⟪⟪z, e⟫, v⟫ ≤ iterExp (tableExp z e) 2 := node_le_iterExp hv
-    _ < iterExp (tableExp z e) 3 := iterExp_lt_of_lt _ (by
-        rw [show (3 : V) = 2 + 1 from by ring]; simp)
-    _ ≤ iterExp (tableExp z e) (8 * z + 21) := by
-        rw [show 8 * z + 21 = 3 + (8 * z + 18) from by ring, iterExp_add];
-        exact le_iterExp _ _;
-
-lemma exp_step_le_tableBound (z e : V) :
-    Exp.exp (iterExp (tableExp z e) (8 * z + 21)) ≤ tableBound z e :=
-  calc Exp.exp (iterExp (tableExp z e) (8 * z + 21))
-      = iterExp (tableExp z e) (8 * z + 21 + 1) := (iterExp_succ _ _).symm
-    _ ≤ iterExp (tableExp z e) (8 * z + 24) := iterExp_le_iterExp_right _ (by
-        calc 8 * z + 21 + 1 = 8 * z + 22 := by ring
-          _ ≤ 8 * z + 22 + 2 := le_self_add
-          _ = 8 * z + 24 := by ring)
-    _ = tableBound z e := rfl
-
-lemma tableBound_le_step {p z e : V} (h : p < z) :
-    tableBound p e ≤ iterExp (tableExp z e) (8 * z + 21) := by
-  have h1 : p + 1 ≤ z := lt_iff_succ_le.mp h;
-  calc tableBound p e = iterExp (tableExp p e) (8 * p + 24) := rfl
-    _ ≤ iterExp (tableExp z e) (8 * p + 24) :=
-      iterExp_le_iterExp_left (tableExp_mono (le_of_lt h)) _
-    _ ≤ iterExp (tableExp z e) (8 * z + 21) := by
-        apply iterExp_le_iterExp_right _;
-        calc 8 * p + 24 = 8 * (p + 1) + 16 := by ring
-          _ ≤ 8 * z + 16 := add_le_add (mul_le_mul le_rfl h1 (by simp) (by simp)) le_rfl
-          _ ≤ 8 * z + 16 + 5 := le_self_add
-          _ = 8 * z + 21 := by ring;
-
-lemma tableBound_le_step_quant {p z u x e : V} (hp : p < z) (hu : u < z)
-    (hx : x < termVal (0 ∷ e) u) :
-    tableBound p (x ∷ e) ≤ iterExp (tableExp z e) (8 * z + 21) := by
-  have h1 : p + 1 ≤ z := lt_iff_succ_le.mp hp;
-  calc tableBound p (x ∷ e) = iterExp (tableExp p (x ∷ e)) (8 * p + 24) := rfl
-    _ ≤ iterExp (iterExp (tableExp z e) 4) (8 * p + 24) :=
-      iterExp_le_iterExp_left (tableExp_step hp hu hx) _
-    _ = iterExp (tableExp z e) (4 + (8 * p + 24)) := (iterExp_add _ _ _).symm
-    _ ≤ iterExp (tableExp z e) (8 * z + 21) := by
-        apply iterExp_le_iterExp_right _;
-        calc 4 + (8 * p + 24) = 8 * (p + 1) + 20 := by ring
-          _ ≤ 8 * z + 20 := add_le_add (mul_le_mul le_rfl h1 (by simp) (by simp)) le_rfl
-          _ ≤ 8 * z + 20 + 1 := le_self_add
-          _ = 8 * z + 21 := by ring;
-
 /-! ### The atomic cases -/
 
 lemma exists_atom_table {z e : V} (hz' : IsUFormula ℒₒᵣ z)
@@ -947,85 +807,52 @@ theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUF
     (P := fun z ↦ ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z →
       ∃ q ≤ b, BoundedSatisfactionTable q z e)
     (by simp only [tableBound, tableExp]; definability);
-  · intro e b hb hu;
-    subst hb;
-    obtain ⟨v, hv, hq⟩ := exists_atom_table (e := e) hu (by disj 1; exact rfl);
-    exact ⟨_, singleton_le_tableBound hv, hq⟩;
-  · intro e b hb hu;
-    subst hb;
-    obtain ⟨v, hv, hq⟩ := exists_atom_table (e := e) hu (by disj 2; exact rfl);
-    exact ⟨_, singleton_le_tableBound hv, hq⟩;
-  · intro k r w e b hb hu;
-    subst hb;
+  · rintro e _ rfl hu;
+    obtain ⟨v, hv, hq⟩ := exists_atom_table (e := e) hu (by disj 1; rfl);
+    exact ⟨_, exp_le_exp (node_lt_iterExp hv).le, hq⟩;
+  · rintro e _ rfl hu;
+    obtain ⟨v, hv, hq⟩ := exists_atom_table (e := e) hu (by disj 2; rfl);
+    exact ⟨_, exp_le_exp (node_lt_iterExp hv).le, hq⟩;
+  · rintro k r w e _ rfl hu;
     obtain ⟨v, hv, hq⟩ := exists_atom_table (e := e) hu (by disj 3; exact ⟨k, r, w, rfl⟩);
-    exact ⟨_, singleton_le_tableBound hv, hq⟩;
-  · intro k r w e b hb hu;
-    subst hb;
+    exact ⟨_, exp_le_exp (node_lt_iterExp hv).le, hq⟩;
+  · rintro k r w e _ rfl hu;
     obtain ⟨v, hv, hq⟩ := exists_atom_table (e := e) hu (by disj 4; exact ⟨k, r, w, rfl⟩);
-    exact ⟨_, singleton_le_tableBound hv, hq⟩;
-  · intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ e b hb hu;
-    subst hb;
+    exact ⟨_, exp_le_exp (node_lt_iterExp hv).le, hq⟩;
+  · rintro p₁ p₂ - - ih₁ ih₂ e _ rfl hu;
     obtain ⟨hu₁, hu₂⟩ : IsUFormula ℒₒᵣ p₁ ∧ IsUFormula ℒₒᵣ p₂ := by simpa using hu;
     obtain ⟨q₁, hb₁, hq₁⟩ := ih₁ e _ rfl hu₁;
     obtain ⟨q₂, hb₂, hq₂⟩ := ih₂ e _ rfl hu₂;
-    obtain ⟨Q, hQ, hQN⟩ := hq₁.of_and hq₂
-      (fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-        (le_trans hb₁ (tableBound_le_step (by simp))))
-      (fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-        (le_trans hb₂ (tableBound_le_step (by simp))))
-      (node_lt_step le_rfl) (node_lt_step (by simp));
-    use Q;
-    and_intros;
-    · calc Q ≤ Exp.exp (iterExp (tableExp (p₁ ^⋏ p₂) e) (8 * (p₁ ^⋏ p₂) + 21)) :=
-             le_of_lt (lt_exp_iff.mpr hQN)
-        _ ≤ tableBound (p₁ ^⋏ p₂) e := exp_step_le_tableBound _ _;
-    · exact hQ;
-  · intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ e b hb hu;
-    subst hb;
+    have he : e ≤ iterExp (tableExp (p₁ ^⋏ p₂) e) 5 :=
+      (le_tableExp_right _ e).trans (le_iterExp _ _);
+    obtain ⟨Q, hQ, hQN⟩ := hq₁.of_and hq₂ (fun _ ↦ lt_iterExp_of_mem (by simp) he hb₁)
+      (fun _ ↦ lt_iterExp_of_mem (by simp) he hb₂) (node_lt_iterExp le_rfl)
+      (node_lt_iterExp (by simp));
+    exact ⟨Q, (lt_exp_iff.mpr hQN).le, hQ⟩;
+  · rintro p₁ p₂ - - ih₁ ih₂ e _ rfl hu;
     obtain ⟨hu₁, hu₂⟩ : IsUFormula ℒₒᵣ p₁ ∧ IsUFormula ℒₒᵣ p₂ := by simpa using hu;
     obtain ⟨q₁, hb₁, hq₁⟩ := ih₁ e _ rfl hu₁;
     obtain ⟨q₂, hb₂, hq₂⟩ := ih₂ e _ rfl hu₂;
-    obtain ⟨Q, hQ, hQN⟩ := hq₁.of_or hq₂
-      (fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-        (le_trans hb₁ (tableBound_le_step (by simp))))
-      (fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-        (le_trans hb₂ (tableBound_le_step (by simp))))
-      (node_lt_step le_rfl) (node_lt_step (by simp));
-    use Q;
-    and_intros;
-    · calc Q ≤ Exp.exp (iterExp (tableExp (p₁ ^⋎ p₂) e) (8 * (p₁ ^⋎ p₂) + 21)) :=
-             le_of_lt (lt_exp_iff.mpr hQN)
-        _ ≤ tableBound (p₁ ^⋎ p₂) e := exp_step_le_tableBound _ _;
-    · exact hQ;
-  · intro t p ht hp ih e b hb hu;
-    subst hb;
+    have he : e ≤ iterExp (tableExp (p₁ ^⋎ p₂) e) 5 :=
+      (le_tableExp_right _ e).trans (le_iterExp _ _);
+    obtain ⟨Q, hQ, hQN⟩ := hq₁.of_or hq₂ (fun _ ↦ lt_iterExp_of_mem (by simp) he hb₁)
+      (fun _ ↦ lt_iterExp_of_mem (by simp) he hb₂) (node_lt_iterExp le_rfl)
+      (node_lt_iterExp (by simp));
+    exact ⟨Q, (lt_exp_iff.mpr hQN).le, hQ⟩;
+  · rintro t p ht - ih e _ rfl hu;
     have hup : IsUFormula ℒₒᵣ p := (IsUFormula.or.mp (IsUFormula.all.mp hu)).2;
     obtain ⟨Q, hQ, hQN⟩ := of_ball (e := e) ⟨t, ht, rfl⟩ (by simp)
-      (node_lt_step le_rfl) (node_lt_step (by simp)) (fun x hx ↦ by
+      (node_lt_iterExp le_rfl) (node_lt_iterExp (by simp)) fun x hx ↦ by
         obtain ⟨q, hqb, hq⟩ := ih (x ∷ e) _ rfl hup;
-        exact ⟨q, hq, fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-          (le_trans hqb (tableBound_le_step_quant (by simp) (by simp) hx))⟩);
-    use Q;
-    and_intros;
-    · calc Q ≤ Exp.exp (iterExp (tableExp (qqBall (termBShift ℒₒᵣ t) p) e)
-                (8 * qqBall (termBShift ℒₒᵣ t) p + 21)) := le_of_lt (lt_exp_iff.mpr hQN)
-        _ ≤ tableBound (qqBall (termBShift ℒₒᵣ t) p) e := exp_step_le_tableBound _ _;
-    · exact hQ;
-  · intro t p ht hp ih e b hb hu;
-    subst hb;
+        exact ⟨q, hq, fun _ ↦ lt_iterExp_of_mem (by simp) (adjoin_le_iterExp (by simp) hx) hqb⟩;
+    exact ⟨Q, (lt_exp_iff.mpr hQN).le, hQ⟩;
+  · rintro t p ht - ih e _ rfl hu;
     have hup : IsUFormula ℒₒᵣ p := (IsUFormula.and.mp (IsUFormula.ex.mp hu)).2;
     obtain ⟨Q, hQ, hQN⟩ := of_bex (e := e) ⟨t, ht, rfl⟩ (by simp)
-      (node_lt_step le_rfl) (node_lt_step (by simp)) <| by
-        intro x hx;
+      (node_lt_iterExp le_rfl) (node_lt_iterExp (by simp)) fun x hx ↦ by
         obtain ⟨q, hqb, hq⟩ := ih (x ∷ e) _ rfl hup;
-        exact ⟨q, hq, fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-          (le_trans hqb (tableBound_le_step_quant (by simp) (by simp) hx))⟩;
-    use Q;
-    and_intros;
-    · calc Q ≤ Exp.exp (iterExp (tableExp (qqBex (termBShift ℒₒᵣ t) p) e)
-                (8 * qqBex (termBShift ℒₒᵣ t) p + 21)) := le_of_lt (lt_exp_iff.mpr hQN)
-        _ ≤ tableBound (qqBex (termBShift ℒₒᵣ t) p) e := exp_step_le_tableBound _ _;
-    · exact hQ;
+        exact ⟨q, hq, fun _ ↦ lt_iterExp_of_mem (by simp) (adjoin_le_iterExp (by simp) hx) hqb⟩;
+    exact ⟨Q, (lt_exp_iff.mpr hQN).le, hQ⟩;
 
 @[simp] lemma isRel_two_zero : (ℒₒᵣ).IsRel (2 : V) 0 := by
   simpa using Arithmetic.LOR_rel_eqIndex (V := V);
