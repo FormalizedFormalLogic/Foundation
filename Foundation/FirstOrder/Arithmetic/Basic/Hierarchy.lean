@@ -147,35 +147,27 @@ lemma arithmetic_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Pro
       P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
     (hBex : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ →
       P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
-    (n φ) : ℬ[<, ℒₒᵣ].Closure φ → P n φ
-  |                verum _ => hVerum _
-  |               falsum _ => hFalsum _
-  |  rel Language.Eq.eq v => by
-      simpa [← Matrix.fun_eq_vec_two] using hEQ _ (v 0) (v 1)
-  | nrel Language.Eq.eq v => by
-      simpa [← Matrix.fun_eq_vec_two] using hNEQ _ (v 0) (v 1)
-  |  rel Language.LT.lt v => by
-      simpa [← Matrix.fun_eq_vec_two] using hLT _ (v 0) (v 1)
-  | nrel Language.LT.lt v => by
-      simpa [← Matrix.fun_eq_vec_two] using hNLT _ (v 0) (v 1)
-  |                and hp hq =>
-    hAnd _ _ _ hp hq
-      (arithmetic_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
-      (arithmetic_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hq)
-  |                 or hp hq =>
-    hOr _ _ _ hp hq
-      (arithmetic_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
-      (arithmetic_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hq)
-  |          ball hR pt hp => by
+    (n φ) : ℬ[<, ℒₒᵣ].Closure φ → P n φ := by
+  intro h;
+  induction h with
+  | verum n => exact hVerum n;
+  | falsum n => exact hFalsum n;
+  | rel r v =>
+    cases r <;> rw [Matrix.fun_eq_vec_two v];
+    exacts [hEQ _ _ _, hLT _ _ _];
+  | nrel r v =>
+    cases r <;> rw [Matrix.fun_eq_vec_two v];
+    exacts [hNEQ _ _ _, hNLT _ _ _];
+  | and hp hq ihp ihq => exact hAnd _ _ _ hp hq ihp ihq;
+  | or hp hq ihp ihq => exact hOr _ _ _ hp hq ihp ihq;
+  | ball hR ht hp ih =>
     obtain rfl := Set.mem_singleton_iff.mp hR;
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩;
-    exact hBall _ t _ hp
-      (arithmetic_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
-  |          bexs hR pt hp => by
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht;
+    exact hBall _ t _ hp ih;
+  | bexs hR ht hp ih =>
     obtain rfl := Set.mem_singleton_iff.mp hR;
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩;
-    exact hBex _ t _ hp
-      (arithmetic_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht;
+    exact hBex _ t _ hp ih;
 
 lemma arithmetic_induction_open {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
     (hOpen : ∀ n φ, Semiformula.Open φ → P n φ)
