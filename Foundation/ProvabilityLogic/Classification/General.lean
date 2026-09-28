@@ -73,9 +73,9 @@ theorem provabilityLogic_eq_A_or_eq_D_or_eq_S
       T.provabilityLogicRelativeTo U (α := α) = 𝐒 := by
   rcases Logic.eq_or_strictlyWeakerThan (A_weakerThan_provabilityLogic hT) with h | h₁;
   · grind;
-  rcases Logic.eq_or_strictlyWeakerThan (D_weakerThan_provabilityLogic hT h₁) with h | h₂;
-  · grind;
-  · simp [Logic.weakerThan_antisymm hS <| S_weakerThan_provabilityLogic hT h₂];
+  · rcases Logic.eq_or_strictlyWeakerThan (D_weakerThan_provabilityLogic hT h₁) with h | h₂;
+    · grind;
+    · simp [Logic.weakerThan_antisymm hS <| S_weakerThan_provabilityLogic hT h₂];
 
 lemma provabilityLogic_equiv_A_or_equiv_D_or_equiv_S
     (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
@@ -121,10 +121,11 @@ theorem provabilityLogic_classification :
         T.provabilityLogicRelativeTo U (α := α) = 𝐆𝐋β _ hL ∨
         T.provabilityLogicRelativeTo U (α := α) = 𝐃 ∩ 𝐆𝐋β _ hL ∨
         T.provabilityLogicRelativeTo U (α := α) = 𝐒 ∩ 𝐆𝐋β _ hL := by
-  rcases (T.provabilityLogicRelativeTo U (α := α)).traceᶜ.finite_or_infinite with hL | hL;
-  · by_cases h : T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒;
-    · let V := T.addAlpha U (T.provabilityLogicRelativeTo U (α := α)).traceᶜ;
-      have h₁ : T.provabilityLogicRelativeTo V (α := α) ⪯ 𝐒 := by
+  set L := T.provabilityLogicRelativeTo U (α := α);
+  rcases L.traceᶜ.finite_or_infinite with hL | hL;
+  · by_cases h : L ⪯ 𝐒;
+    · set L' := T.provabilityLogicRelativeTo (T.addAlpha U (L).traceᶜ) (α := α);
+      have h₁ : L' ⪯ 𝐒 := by
         by_contra h₁;
         have h₂ : 𝐒 ⊢ (⩕ n ∈ hL.toFinset, alpha n : LetterlessFormula).lift (α := α) :=
           WeakerThan.pbl (𝓢 := 𝐆𝐋α Set.univ) <| Logic.GLAlpha.mem_iff.mpr
@@ -132,9 +133,8 @@ theorem provabilityLogic_classification :
               Set.subset_univ _⟩;
         exact unprovable_bot <| h.wk (imp_mem_provabilityLogic_of_mem_addAlpha hL <|
           (provabilityLogic_eq_GLBeta h₁).symm.subset <| Logic.GLBeta.mem_iff.mpr <| by
-            simp [V, trace_provabilityLogic_addAlpha]) ⨀ h₂;
-      have h₂ : T.provabilityLogicRelativeTo U (α := α) =
-          T.provabilityLogicRelativeTo V ∩ 𝐆𝐋β _ hL := by
+            simp [L, trace_provabilityLogic_addAlpha]) ⨀ h₂;
+      have h₂ : L = L' ∩ 𝐆𝐋β _ hL := by
         apply subset_antisymm;
         · exact Set.subset_inter provabilityLogic_weakerThan_addAlpha.subset
             (Logic.weakerThan_GLBeta_trace hL).subset;
@@ -177,7 +177,8 @@ lemma D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1
   · exact (A_weakerThan_provabilityLogic
       (trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1 h)).wk
       (Logic.A.neg_boxItr_bot (n := 1));
-  · exact fun f ↦ h <| T.standardProvability.mem_localReflectionOn_iff.mpr
+  · intro f;
+    exact h <| T.standardProvability.mem_localReflectionOn_iff.mpr
       ⟨_, by simp [interpret, standardProvability_def], rfl⟩;
 
 lemma S_weakerThan_provabilityLogic_of_provable_localReflection
