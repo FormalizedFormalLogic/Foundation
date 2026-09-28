@@ -389,6 +389,11 @@ private lemma bounded_of_isBounded (ψ : ArithmeticSemiproposition n) :
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
+lemma quote_bex_sentence (t : ClosedSemiterm ℒₒᵣ n) (φ : ArithmeticSemisentence (n + 1)) :
+    (⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence n)⌝ : V)
+      = qqBex (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
+  simp [Semiformula.bexs_eq, Semiformula.Operator.lt_def, qqBex];
+
 lemma isBounded_quote_iff_s (ψ : ArithmeticSemiproposition n) :
     IsBounded (⌜ψ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Closure ψ := by
   simpa [Semiformula.coe_quote_eq_quote] using

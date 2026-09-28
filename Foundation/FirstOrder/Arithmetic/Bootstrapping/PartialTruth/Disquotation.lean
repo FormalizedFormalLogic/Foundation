@@ -24,114 +24,6 @@ open Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-! ## Codes of quoted semisentences
-
-Foundation's `quote_*` lemmas compute the code of a `Semiproposition`. A `Semisentence` is
-quoted through its embedding (`Sentence.quote_def`), so each of them has a counterpart here. -/
-
-private lemma isUTerm_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) : IsUTerm ℒₒᵣ (⌜t⌝ : V) := by
-  simp [Semiterm.empty_quote_eq];
-
-private lemma isUFormula_quote {k : ℕ} (φ : ArithmeticSemisentence k) :
-    IsUFormula ℒₒᵣ (⌜φ⌝ : V) := (Sentence.quote_isSemiformula φ).isUFormula
-
-section
-variable {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k)
-
-private lemma quote_eq_sentence :
-    (⌜(.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence k)⌝ : V)
-      = Arithmetic.qqEQ (⌜t⌝ : V) (⌜u⌝ : V) := by
-  simpa [Sentence.quote_def, Semiformula.quote_rel, Arithmetic.qqEQ, Semiterm.empty_quote_eq,
-    Semiterm.empty_typed_quote_def, Matrix.vecHead, Matrix.vecTail] using coe_quote_eq (V := V);
-
-private lemma quote_neq_sentence :
-    (⌜(.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence k)⌝ : V)
-      = Arithmetic.qqNEQ (⌜t⌝ : V) (⌜u⌝ : V) := by
-  simpa [Sentence.quote_def, Semiformula.quote_nrel, Arithmetic.qqNEQ, Semiterm.empty_quote_eq,
-    Semiterm.empty_typed_quote_def, Matrix.vecHead, Matrix.vecTail] using coe_quote_eq (V := V);
-
-private lemma quote_lt_sentence :
-    (⌜(.rel Language.LT.lt ![t, u] : ArithmeticSemisentence k)⌝ : V)
-      = Arithmetic.qqLT (⌜t⌝ : V) (⌜u⌝ : V) := by
-  simpa [Sentence.quote_def, Semiformula.quote_rel, Arithmetic.qqLT, Semiterm.empty_quote_eq,
-    Semiterm.empty_typed_quote_def, Matrix.vecHead, Matrix.vecTail] using coe_quote_lt (V := V);
-
-private lemma quote_nlt_sentence :
-    (⌜(.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence k)⌝ : V)
-      = Arithmetic.qqNLT (⌜t⌝ : V) (⌜u⌝ : V) := by
-  simpa [Sentence.quote_def, Semiformula.quote_nrel, Arithmetic.qqNLT, Semiterm.empty_quote_eq,
-    Semiterm.empty_typed_quote_def, Matrix.vecHead, Matrix.vecTail] using coe_quote_lt (V := V);
-
-end
-
-section
-variable {k : ℕ}
-
-private lemma quote_and_sentence (φ ψ : ArithmeticSemisentence k) :
-    (⌜φ ⋏ ψ⌝ : V) = (⌜φ⌝ : V) ^⋏ (⌜ψ⌝ : V) := by simp [Sentence.quote_def];
-
-private lemma quote_or_sentence (φ ψ : ArithmeticSemisentence k) :
-    (⌜φ ⋎ ψ⌝ : V) = (⌜φ⌝ : V) ^⋎ (⌜ψ⌝ : V) := by simp [Sentence.quote_def];
-
-private lemma quote_all_sentence (φ : ArithmeticSemisentence (k + 1)) :
-    (⌜(∀¹ φ : ArithmeticSemisentence k)⌝ : V) = ^∀ (⌜φ⌝ : V) := by simp [Sentence.quote_def];
-
-private lemma quote_ex_sentence (φ : ArithmeticSemisentence (k + 1)) :
-    (⌜(∃¹ φ : ArithmeticSemisentence k)⌝ : V) = ^∃ (⌜φ⌝ : V) := by simp [Sentence.quote_def];
-
-end
-
-section
-variable {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (φ : ArithmeticSemisentence (k + 1))
-
-private lemma quote_ball_sentence :
-    (⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence k)⌝ : V)
-      = qqBall (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
-  rw [Semiformula.ball_eq, Semiformula.imp_eq];
-  simpa [Sentence.quote_def, Semiformula.Operator.lt_def, Semiformula.neg_rel, qqBall,
-    Semiformula.quote_nrel, Arithmetic.qqNLT, Semiterm.empty_quote_eq, Matrix.vecHead,
-    Matrix.vecTail, ← Rew.emb_bShift_term,
-    ← Semiterm.empty_typed_quote_def] using coe_quote_lt (V := V);
-
-private lemma quote_bex_sentence :
-    (⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence k)⌝ : V)
-      = qqBex (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
-  rw [Semiformula.bexs_eq];
-  simpa [Sentence.quote_def, Semiformula.Operator.lt_def, qqBex, Semiformula.quote_rel,
-    Arithmetic.qqLT, Semiterm.empty_quote_eq, Matrix.vecHead, Matrix.vecTail,
-    ← Rew.emb_bShift_term, ← Semiterm.empty_typed_quote_def] using coe_quote_lt (V := V);
-
-end
-
-section
-variable {k : ℕ}
-
-private lemma quote_zeroTerm_sentence (w : Fin 0 → ClosedSemiterm ℒₒᵣ k) :
-    (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : V) = (𝟎 : V) := by
-  rw [Arithmetic.coe_zero_eq,
-    show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq];
-  simp [Semiterm.empty_quote_eq, quote_zeroIndex_eq];
-
-private lemma quote_oneTerm_sentence (w : Fin 0 → ClosedSemiterm ℒₒᵣ k) :
-    (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : V) = (𝟏 : V) := by
-  rw [Arithmetic.coe_one_eq,
-    show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq];
-  simp [Semiterm.empty_quote_eq, quote_oneIndex_eq];
-
-private lemma quote_addTerm_sentence (w : Fin 2 → ClosedSemiterm ℒₒᵣ k) :
-    (⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : V)
-      = (⌜w 0⌝ : V) ^+ ⌜w 1⌝ := by
-  simp [Semiterm.empty_quote_eq, Arithmetic.qqAdd, quote_addIndex_eq,
-    Arithmetic.coe_addIndex_eq, Matrix.vecHead, Matrix.vecTail];
-
-private lemma quote_mulTerm_sentence (w : Fin 2 → ClosedSemiterm ℒₒᵣ k) :
-    (⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : V)
-      = (⌜w 0⌝ : V) ^* ⌜w 1⌝ := by
-  simp [Semiterm.empty_quote_eq, Arithmetic.qqMul, quote_mulIndex_eq,
-    Arithmetic.coe_mulIndex_eq, Matrix.vecHead, Matrix.vecTail];
-
-end
-
 /-! ## Agreement of satisfaction with truth -/
 
 theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
@@ -140,30 +32,24 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
   revert hφ v;
   apply Bounding.Closure.arithmetic_induction (ξ := Empty)
     (P := fun k φ ↦ ∀ v : Fin k → V, BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ);
-  · intro n v; simp [Sentence.quote_def];
-  · intro n v; simp [Sentence.quote_def];
-  · intro n t u v;
-    simp [quote_eq_sentence, isUTerm_quote, termVal_quote, Semiformula.eval_rel];
-  · intro n t u v;
-    simp [quote_neq_sentence, isUTerm_quote, termVal_quote, Semiformula.eval_nrel];
-  · intro n t u v;
-    simp [quote_lt_sentence, isUTerm_quote, termVal_quote, Semiformula.eval_rel];
-  · intro n t u v;
-    simp [quote_nlt_sentence, isUTerm_quote, termVal_quote, Semiformula.eval_nrel];
-  · intro n φ ψ hφ hψ ihφ ihψ v;
-    simp [quote_and_sentence, ihφ v, ihψ v];
-  · intro n φ ψ hφ hψ ihφ ihψ v;
-    simp [quote_or_sentence, isBounded_quote_iff, isUFormula_quote, hφ, hψ, ihφ v, ihψ v];
+  · intro n v; simp [Sentence.quote_verum];
+  · intro n v; simp [Sentence.quote_falsum];
+  · intro n t u v; simp [termVal_quote, Semiformula.eval_rel];
+  · intro n t u v; simp [termVal_quote, Semiformula.eval_nrel];
+  · intro n t u v; simp [termVal_quote, Semiformula.eval_rel];
+  · intro n t u v; simp [termVal_quote, Semiformula.eval_nrel];
+  · intro n φ ψ hφ hψ ihφ ihψ v; simp [ihφ v, ihψ v];
+  · intro n φ ψ hφ hψ ihφ ihψ v; simp [isBounded_quote_iff, hφ, hψ, ihφ v, ihψ v];
   · intro n t φ hφ ihφ v;
-    rw [quote_ball_sentence, BoundedSatisfaction.ball_iff (isUTerm_quote t)
-      ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ), termVal_quote];
+    rw [quote_ball_sentence, BoundedSatisfaction.ball_iff (by simp) ((isBounded_quote_iff φ).mpr hφ)
+      (by simp), termVal_quote];
     simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel];
     apply forall_congr';
     intro x;
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)];
     simp [Function.comp_def];
   · intro n t φ hφ ihφ v;
-    rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (isUTerm_quote t), termVal_quote];
+    rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (by simp), termVal_quote];
     simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel];
     apply exists_congr;
     intro x;
@@ -189,15 +75,15 @@ lemma strictSatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticS
     intro v;
     rcases Γ₀ with _ | _;
     · change SigmaSatisfaction (s₀ + 1) _ _ ↔ _;
-      rw [SigmaSatisfaction.of_pi ((isStrictPi_quote_iff φ₀).mpr hφ₀) (isUFormula_quote φ₀)];
+      rw [SigmaSatisfaction.of_pi ((isStrictPi_quote_iff φ₀).mpr hφ₀) (by simp)];
       exact ih v;
     · change PiSatisfaction (s₀ + 1) _ _ ↔ _;
-      rw [PiSatisfaction.of_sigma ((isStrictSigma_quote_iff φ₀).mpr hφ₀) (isUFormula_quote φ₀)];
+      rw [PiSatisfaction.of_sigma ((isStrictSigma_quote_iff φ₀).mpr hφ₀) (by simp)];
       exact ih v;
   | @exs s₀ n₀ φ₀ hφ₀ ih =>
     intro v;
     change SigmaSatisfaction (s₀ + 1) _ _ ↔ _;
-    rw [quote_ex_sentence, SigmaSatisfaction.exs_iff];
+    rw [Sentence.quote_ex, SigmaSatisfaction.exs_iff];
     simp only [Semiformula.eval_ex];
     apply exists_congr;
     intro x;
@@ -206,7 +92,7 @@ lemma strictSatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticS
   | @all s₀ n₀ φ₀ hφ₀ ih =>
     intro v;
     change PiSatisfaction (s₀ + 1) _ _ ↔ _;
-    rw [quote_all_sentence, PiSatisfaction.all_iff];
+    rw [Sentence.quote_all, PiSatisfaction.all_iff];
     simp only [Semiformula.eval_all];
     apply forall_congr';
     intro x;
@@ -284,11 +170,11 @@ lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
 
 private lemma uTerm_quote_cast {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) :
     UTerm ((⌜t⌝ : ℕ) : M) :=
-  deltaOne_upward_absolute₁ (isUTerm ℒₒᵣ) (by simpa using isUTerm_quote (V := ℕ) t)
+  deltaOne_upward_absolute₁ (isUTerm ℒₒᵣ) (by simp)
 
 private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
     UFormula ((⌜φ⌝ : ℕ) : M) :=
-  deltaOne_upward_absolute₁ (isUFormula ℒₒᵣ) (by simpa using isUFormula_quote (V := ℕ) φ)
+  deltaOne_upward_absolute₁ (isUFormula ℒₒᵣ) (by simp)
 
 private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k}
     (h : ℬ[<, ℒₒᵣ].Closure φ) : Reading.Bounded ((⌜φ⌝ : ℕ) : M) :=
@@ -303,7 +189,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
   induction t with
   | bvar i =>
     have hb : M ⊧/![((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M), ((i.val : ℕ) : M)] qqBvarDef.val :=
-      sigmaZero_upward_absolute₂ qqBvarDef (by simp [Semiterm.empty_quote_eq]);
+      sigmaZero_upward_absolute₂ qqBvarDef (by simp);
     simpa using (read_termValBvar hM ev ((i.val : ℕ) : M) ((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
       (v i) hb).mpr (hev.2 i);
   | fvar x => exact x.elim;
@@ -311,12 +197,12 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
     match k', f, w, ih with
     | 0, .zero, w, _ =>
       have hq : (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟎 := by
-        simpa using quote_zeroTerm_sentence (V := ℕ) w;
+        simp;
       rw [hq];
       exact (read_termValZero hM ev 0).mpr rfl;
     | 0, .one, w, _ =>
       have hq : (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟏 := by
-        simpa using quote_oneTerm_sentence (V := ℕ) w;
+        simp;
       rw [hq];
       exact (read_termValOne hM ev 1).mpr rfl;
     | 2, .add, w, ih =>
@@ -324,7 +210,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
           ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
           ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
         sigmaOne_upward_absolute₃ Arithmetic.qqAddGraph
-          (by simpa using quote_addTerm_sentence (V := ℕ) w);
+          (by simp);
       exact (read_termValAdd hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
         ((⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
         ((w 0).valb v) ((w 1).valb v) ((w 0).valb v + (w 1).valb v)
@@ -334,7 +220,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
           ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
           ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
         sigmaOne_upward_absolute₃ Arithmetic.qqMulGraph
-          (by simpa using quote_mulTerm_sentence (V := ℕ) w);
+          (by simp);
       exact (read_termValMul hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
         ((⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
         ((w 0).valb v) ((w 1).valb v) ((w 0).valb v * (w 1).valb v)
@@ -353,16 +239,16 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
       (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ));
   · intro m v ev _;
     have hq : M ⊧/![((⌜(⊤ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqVerumDef.val :=
-      sigmaZero_upward_absolute₁ qqVerumDef (by simp [Sentence.quote_def]);
+      sigmaZero_upward_absolute₁ qqVerumDef (by simp [Sentence.quote_verum]);
     simpa using read_boundedSatisfactionVerum hM _ ev hq;
   · intro m v ev _;
     have hq : M ⊧/![((⌜(⊥ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqFalsumDef.val :=
-      sigmaZero_upward_absolute₁ qqFalsumDef (by simp [Sentence.quote_def]);
+      sigmaZero_upward_absolute₁ qqFalsumDef (by simp [Sentence.quote_falsum]);
     simpa using read_boundedSatisfactionFalsum hM _ ev hq;
   · intro m t u v ev hev;
     have hq : M ⊧/![((⌜(.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqEQDef.val :=
-      sigmaOne_upward_absolute₃ qqEQDef (by simpa using quote_eq_sentence (V := ℕ) t u);
+      sigmaOne_upward_absolute₃ qqEQDef (by simp);
     rw [read_boundedSatisfactionEq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)];
@@ -370,7 +256,7 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
   · intro m t u v ev hev;
     have hq : M ⊧/![((⌜(.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNEQDef.val :=
-      sigmaOne_upward_absolute₃ qqNEQDef (by simpa using quote_neq_sentence (V := ℕ) t u);
+      sigmaOne_upward_absolute₃ qqNEQDef (by simp);
     rw [read_boundedSatisfactionNeq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)];
@@ -378,7 +264,7 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
   · intro m t u v ev hev;
     have hq : M ⊧/![((⌜(.rel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqLTDef.val :=
-      sigmaOne_upward_absolute₃ qqLTDef (by simpa using quote_lt_sentence (V := ℕ) t u);
+      sigmaOne_upward_absolute₃ qqLTDef (by simp);
     rw [read_boundedSatisfactionLt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)];
@@ -386,20 +272,20 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
   · intro m t u v ev hev;
     have hq : M ⊧/![((⌜(.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNLTDef.val :=
-      sigmaOne_upward_absolute₃ qqNLTDef (by simpa using quote_nlt_sentence (V := ℕ) t u);
+      sigmaOne_upward_absolute₃ qqNLTDef (by simp);
     rw [read_boundedSatisfactionNlt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)];
     simp [Semiformula.eval_nrel];
   · intro m φ ψ _ _ ihφ ihψ v ev hev;
     have hq : M ⊧/![((⌜φ ⋏ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqAndDef.val :=
-      sigmaZero_upward_absolute₃ qqAndDef (by simpa using quote_and_sentence (V := ℕ) φ ψ);
+      sigmaZero_upward_absolute₃ qqAndDef (by simp);
     rw [read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev,
       ihψ v ev hev];
     simp;
   · intro m φ ψ hφ hψ ihφ ihψ v ev hev;
     have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
-      sigmaZero_upward_absolute₃ qqOrDef (by simpa using quote_or_sentence (V := ℕ) φ ψ);
+      sigmaZero_upward_absolute₃ qqOrDef (by simp);
     rw [read_boundedSatisfactionOr hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev
       (bounded_quote_cast hφ) (uFormula_quote_cast φ) (bounded_quote_cast hψ)
       (uFormula_quote_cast ψ) hq, ihφ v ev hev, ihψ v ev hev];
@@ -465,7 +351,7 @@ private lemma strictSatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
     intro hs v ev hev;
     have hq : M ⊧/![((⌜(∃¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
         qqExsDef.val :=
-      sigmaZero_upward_absolute₂ qqExsDef (by simpa using quote_ex_sentence (V := ℕ) φ₀);
+      sigmaZero_upward_absolute₂ qqExsDef (by simp);
     change Reading.SigmaSatisfaction s₀ _ _ ↔ _;
     rw [read_sigmaSatisfactionExs hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq];
     simp only [Semiformula.eval_ex];
@@ -479,7 +365,7 @@ private lemma strictSatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
     intro hs v ev hev;
     have hq : M ⊧/![((⌜(∀¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
         qqAllDef.val :=
-      sigmaZero_upward_absolute₂ qqAllDef (by simpa using quote_all_sentence (V := ℕ) φ₀);
+      sigmaZero_upward_absolute₂ qqAllDef (by simp);
     change Reading.PiSatisfaction s₀ _ _ ↔ _;
     rw [read_piSatisfactionAll hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq];
     simp only [Semiformula.eval_all];

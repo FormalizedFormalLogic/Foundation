@@ -205,6 +205,43 @@ theorem empty_quote_eq (t : ClosedSemiterm L n) :
 lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encode t) := by
   simp [empty_quote_def, quote_eq_encode]
 
+@[simp] lemma empty_quote_isUTerm (t : ClosedSemiterm L n) : IsUTerm L (⌜t⌝ : V) := by
+  simp [empty_quote_eq]
+
+@[simp] lemma empty_quote_bvar (x : Fin n) : (⌜(#x : ClosedSemiterm L n)⌝ : V) = ^#↑x := rfl
+
+@[simp] lemma empty_quote_bShift (t : ClosedSemiterm L n) :
+    (⌜Rew.bShift t⌝ : V) = termBShift L ⌜t⌝ := by
+  simp [empty_quote_def, ← Rew.emb_bShift_term, quote_def]
+
+section
+
+variable (w : Fin 0 → ClosedSemiterm ℒₒᵣ n)
+
+@[simp] lemma empty_quote_func_zero :
+    (⌜(func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 :=
+  coe_zero_eq.symm
+
+@[simp] lemma empty_quote_func_one :
+    (⌜(func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 :=
+  coe_one_eq.symm
+
+end
+
+section
+
+variable (w : Fin 2 → ClosedSemiterm ℒₒᵣ n)
+
+@[simp] lemma empty_quote_func_add :
+    (⌜(func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ n)⌝ : V) = ⌜w 0⌝ ^+ ⌜w 1⌝ :=
+  rfl
+
+@[simp] lemma empty_quote_func_mul :
+    (⌜(func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ n)⌝ : V) = ⌜w 0⌝ ^* ⌜w 1⌝ :=
+  rfl
+
+end
+
 @[simp] lemma coe_quote {ξ n m} (t : SyntacticSemiterm L n) :
     ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, quote_eq_encode]
