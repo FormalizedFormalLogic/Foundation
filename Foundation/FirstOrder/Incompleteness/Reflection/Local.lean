@@ -37,8 +37,6 @@ lemma strictlyWeakerThan_localReflection [𝗜𝚺₁ ⪯ T] [Consistent T] :
 
 theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] :
     T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1] T ≊ T ∪ T.Con := by
-  have : 𝗜𝚺₁ ⪯ T ∪ T.Con :=
-    (inferInstance : 𝗜𝚺₁ ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left);
   apply Equiv.antisymm;
   constructor;
   · apply WeakerThan.ofAxm!;
@@ -168,5 +166,33 @@ theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n �
     fun hσ ↦ (e.le.trans hle).pbl (h hσ)).of_ge (hge.trans e.symm.le);
 
 end
+
+section Iterate
+
+variable {U : ArithmeticTheory}
+
+lemma hierarchy_iterate_standardProvability_bot (n : ℕ) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (T.standardProvability^[n] ⊥) := by
+  rcases n with _ | n <;> simp [Function.iterate_succ_apply', standardProvability_def]
+
+lemma provable_neg_iterate_standardProvability_bot (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+    ∀ n, U ⊢ ∼T.standardProvability^[n] ⊥
+  | 0 => by simp
+  | n + 1 => by
+    rw [Function.iterate_succ_apply'];
+    cl_prover [hU ⟨_, hierarchy_iterate_standardProvability_bot n, rfl⟩,
+      provable_neg_iterate_standardProvability_bot hU n];
+
+variable [U.Δ₁]
+
+lemma provable_iterate_standardProvability_bot_imp
+    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
+    (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) (n : ℕ) :
+    𝗜𝚺₁ ⊢ T.standardProvability^[n + 1] ⊥ 🡒 U.standardProvability ⊥ := by
+  rw [Function.iterate_succ_apply'];
+  exact C_trans (hTU _) <| U.standardProvability.D2 ⨀
+    U.standardProvability.D1 (by cl_prover [provable_neg_iterate_standardProvability_bot hU n]);
+
+end Iterate
 
 end FFL.FirstOrder.Arithmetic

@@ -116,6 +116,15 @@ lemma provable_sigma_one_complete_of_E {σ π} [𝗜𝚺₁ ⪯ T]
   · apply T.standardProvability.mono'
     cl_prover [hσπ];
 
+variable [U.Δ₁] in
+lemma provable_standardProvability_imp_of_Δ₁Class_subset
+    (h : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (p : V), p ∈ T.Δ₁Class → p ∈ U.Δ₁Class)
+    (σ : ArithmeticSentence) :
+    𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ :=
+  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    simpa [models_iff, standardProvability_def] using
+      fun hp ↦ (hp.toDerivable.of_ss (h V)).toProvable
+
 end arithmetic
 
 open FFL.Entailment in
