@@ -248,14 +248,6 @@ lemma IsHierarchyOf.succ_iff :
 
 alias ⟨IsHierarchyOf.succ_case, IsHierarchyOf.succ_mk⟩ := IsHierarchyOf.succ_iff
 
-lemma IsStrictHierarchy.succ_iff :
-    IsStrictHierarchy Γ (n + 1) p ↔
-    IsStrictHierarchy Γ.alt n p ∨
-    (∃ p₁ p₂, IsStrictHierarchy Γ (n + 1) p₁ ∧ IsStrictHierarchy Γ (n + 1) p₂ ∧ p = p₁ ^⋏ p₂) ∨
-    (∃ p₁ p₂, IsStrictHierarchy Γ (n + 1) p₁ ∧ IsStrictHierarchy Γ (n + 1) p₂ ∧ p = p₁ ^⋎ p₂) ∨
-    (∃ q, IsStrictHierarchy Γ (n + 1) q ∧ p = qqQuant Γ q) := by
-  simpa using IsHierarchyOf.succ_iff (bq := false);
-
 lemma IsHierarchyOf.succ_induction (Γ' : Polarity) {P : V → Prop} (hP : Γ'ᴬ-[1]-Predicate P)
     (hbase : ∀ p, IsHierarchyOf bq Γ.alt n p → P p)
     (hand : ∀ p q, IsHierarchyOf bq Γ (n + 1) p → IsHierarchyOf bq Γ (n + 1) q → P p → P q →
@@ -281,24 +273,24 @@ lemma IsHierarchyOf.succ_induction (Γ' : Polarity) {P : V → Prop} (hP : Γ'�
 /-! ### Closure properties -/
 
 lemma IsHierarchyOf.of_alt (h : IsHierarchyOf bq Γ.alt n p) : IsHierarchyOf bq Γ (n + 1) p :=
-  IsHierarchyOf.succ_mk <| by left; exact h
+  .succ_mk <| by left; exact h
 
 lemma IsHierarchyOf.of_bounded (h : IsBounded p) : IsHierarchyOf bq Γ n p := by
   induction n generalizing Γ with
   | zero => exact IsHierarchyOf.zero_iff.mpr h;
-  | succ n ih => exact IsHierarchyOf.of_alt ih;
+  | succ n ih => exact ih.of_alt;
 
 @[simp] lemma IsHierarchyOf.verum : IsHierarchyOf bq Γ n (^⊤ : V) :=
-  IsHierarchyOf.of_bounded (by simp)
+  .of_bounded (by simp)
 
 @[simp] lemma IsHierarchyOf.falsum : IsHierarchyOf bq Γ n (^⊥ : V) :=
-  IsHierarchyOf.of_bounded (by simp)
+  .of_bounded (by simp)
 
 @[simp] lemma IsHierarchyOf.rel {k r v : V} : IsHierarchyOf bq Γ n (^rel k r v) :=
-  IsHierarchyOf.of_bounded (by simp)
+  .of_bounded (by simp)
 
 @[simp] lemma IsHierarchyOf.nrel {k r v : V} : IsHierarchyOf bq Γ n (^nrel k r v) :=
-  IsHierarchyOf.of_bounded (by simp)
+  .of_bounded (by simp)
 
 @[simp] lemma IsHierarchyOf.and_iff :
     IsHierarchyOf bq Γ n (p ^⋏ q) ↔ IsHierarchyOf bq Γ n p ∧ IsHierarchyOf bq Γ n q := by
@@ -311,7 +303,7 @@ lemma IsHierarchyOf.of_bounded (h : IsBounded p) : IsHierarchyOf bq Γ n p := by
       · exact ⟨(ih.mp h).1.of_alt, (ih.mp h).2.of_alt⟩;
       all_goals cases Γ <;> simp_all [qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex];
     · rintro ⟨hp, hq⟩;
-      exact IsHierarchyOf.succ_mk <| by disj 2; exact ⟨p, q, hp, hq, rfl⟩;
+      exact .succ_mk <| by disj 2; exact ⟨p, q, hp, hq, rfl⟩;
 
 @[simp] lemma IsHierarchyOf.or_iff :
     IsHierarchyOf bq Γ n (p ^⋎ q) ↔ IsHierarchyOf bq Γ n p ∧ IsHierarchyOf bq Γ n q := by
@@ -324,53 +316,49 @@ lemma IsHierarchyOf.of_bounded (h : IsBounded p) : IsHierarchyOf bq Γ n p := by
       · exact ⟨(ih.mp h).1.of_alt, (ih.mp h).2.of_alt⟩;
       all_goals cases Γ <;> simp_all [qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex];
     · rintro ⟨hp, hq⟩;
-      exact IsHierarchyOf.succ_mk <| by disj 3; exact ⟨p, q, hp, hq, rfl⟩;
+      exact .succ_mk <| by disj 3; exact ⟨p, q, hp, hq, rfl⟩;
 
 lemma IsHierarchyOf.ball {t : V} (hb : bq) (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchyOf bq Γ n q) :
     IsHierarchyOf bq Γ n (qqBall (termBShift ℒₒᵣ t) q) := by
   cases n with
   | zero => exact IsBounded.ball ht hq;
-  | succ n => exact IsHierarchyOf.succ_mk <| by disj 4; exact ⟨hb, _, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
+  | succ n => exact .succ_mk <| by disj 4; exact ⟨hb, _, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
 
 lemma IsHierarchyOf.bex {t : V} (hb : bq) (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchyOf bq Γ n q) :
     IsHierarchyOf bq Γ n (qqBex (termBShift ℒₒᵣ t) q) := by
   cases n with
   | zero => exact IsBounded.bex ht hq;
-  | succ n => exact IsHierarchyOf.succ_mk <| by disj 5; exact ⟨hb, _, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
+  | succ n => exact .succ_mk <| by disj 5; exact ⟨hb, _, q, ⟨t, ht, rfl⟩, hq, rfl⟩;
 
 lemma IsHierarchyOf.quant (h : IsHierarchyOf bq Γ (n + 1) p) :
     IsHierarchyOf bq Γ (n + 1) (qqQuant Γ p) :=
-  IsHierarchyOf.succ_mk <| by disj 6; exact ⟨p, h, rfl⟩
+  .succ_mk <| by disj 6; exact ⟨p, h, rfl⟩
 
 lemma IsHierarchyOf.ex (h : IsHierarchyOf bq 𝚺 (n + 1) p) : IsHierarchyOf bq 𝚺 (n + 1) (^∃ p) :=
-  IsHierarchyOf.quant h
+  .quant h
 
 lemma IsHierarchyOf.all (h : IsHierarchyOf bq 𝚷 (n + 1) p) : IsHierarchyOf bq 𝚷 (n + 1) (^∀ p) :=
-  IsHierarchyOf.quant h
+  .quant h
 
 lemma IsHierarchyOf.sigma (h : IsHierarchyOf bq 𝚷 n p) : IsHierarchyOf bq 𝚺 (n + 1) (^∃ p) :=
-  IsHierarchyOf.ex (IsHierarchyOf.of_alt (Γ := 𝚺) h)
+  .ex (.of_alt h)
 
 lemma IsHierarchyOf.pi (h : IsHierarchyOf bq 𝚺 n p) : IsHierarchyOf bq 𝚷 (n + 1) (^∀ p) :=
-  IsHierarchyOf.all (IsHierarchyOf.of_alt (Γ := 𝚷) h)
+  .all (.of_alt h)
 
 lemma IsHierarchyOf.succ (h : IsHierarchyOf bq Γ n p) : IsHierarchyOf bq Γ (n + 1) p := by
   induction n generalizing Γ p with
   | zero => exact IsHierarchyOf.of_bounded h;
   | succ n ih =>
-    apply IsHierarchyOf.succ_induction 𝚺 (P := IsHierarchyOf bq Γ (n + 1 + 1)) (by definability)
+    exact IsHierarchyOf.succ_induction 𝚺 (P := IsHierarchyOf bq Γ (n + 1 + 1)) (by definability)
       (fun p hp ↦ (ih hp).of_alt) (fun p q _ _ hp hq ↦ IsHierarchyOf.and_iff.mpr ⟨hp, hq⟩)
-      (fun p q _ _ hp hq ↦ IsHierarchyOf.or_iff.mpr ⟨hp, hq⟩)
-      (fun t q hb ht _ hq ↦ IsHierarchyOf.ball hb ht hq)
-      (fun t q hb ht _ hq ↦ IsHierarchyOf.bex hb ht hq) (fun q _ hq ↦ IsHierarchyOf.quant hq) p h;
+      (fun p q _ _ hp hq ↦ IsHierarchyOf.or_iff.mpr ⟨hp, hq⟩) (fun t q hb ht _ hq ↦ .ball hb ht hq)
+      (fun t q hb ht _ hq ↦ .bex hb ht hq) (fun q _ hq ↦ .quant hq) p h;
 
 lemma IsHierarchyOf.accum (Γ' : Polarity) (h : IsHierarchyOf bq Γ n p) :
     IsHierarchyOf bq Γ' (n + 1) p := by
   cases Γ <;> cases Γ';
-  · exact h.succ;
-  · exact IsHierarchyOf.of_alt (Γ := 𝚷) h;
-  · exact IsHierarchyOf.of_alt (Γ := 𝚺) h;
-  · exact h.succ;
+  exacts [h.succ, .of_alt h, .of_alt h, h.succ];
 
 lemma IsHierarchyOf.mono {m : ℕ} (hmn : m ≤ n) (h : IsHierarchyOf bq Γ m p) :
     IsHierarchyOf bq Γ n p := by
