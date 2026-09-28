@@ -65,23 +65,19 @@ namespace InitialClass
 
 variable (ℬ : Bounding L) (C : {n : ℕ} → Semiformula L ξ n → Prop)
 
-/-- `C` contains `⊤`, `⊥` and the (negated) atomic formulas. -/
 class HasAtoms : Prop where
   verum (n : ℕ) : C (⊤ : Semiformula L ξ n)
   falsum (n : ℕ) : C (⊥ : Semiformula L ξ n)
   rel {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : C (.rel r v)
   nrel {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : C (.nrel r v)
 
-/-- `C` is closed under `⋏` and `⋎`, and under their components. -/
 class AndOrIff : Prop where
   and_iff {n : ℕ} {φ ψ : Semiformula L ξ n} : C (φ ⋏ ψ) ↔ C φ ∧ C ψ
   or_iff {n : ℕ} {φ ψ : Semiformula L ξ n} : C (φ ⋎ ψ) ↔ C φ ∧ C ψ
 
-/-- `C` is closed under negation. -/
 class NegClosed : Prop where
   neg {n : ℕ} {φ : Semiformula L ξ n} : C φ → C (∼φ)
 
-/-- `C` is closed under `ℬ`-bounded quantifiers, and under their matrices. -/
 class BoundedIff : Prop where
   ball_iff {n : ℕ} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
@@ -90,37 +86,34 @@ class BoundedIff : Prop where
     {t : Semiterm L ξ (n + 1)} :
     R ∈ ℬ → t.Positive → (C (∃¹[R.operator ![#0, t]] φ) ↔ C φ)
 
-/-- The matrix of a quantified formula of `C` lies in `C`. -/
 class RemoveQuantifier : Prop where
   of_all {n : ℕ} {φ : Semiformula L ξ (n + 1)} : C (∀¹ φ) → C φ
   of_exs {n : ℕ} {φ : Semiformula L ξ (n + 1)} : C (∃¹ φ) → C φ
 
-/-- Every bounding operator of `ℬ` lies in `C`. -/
 class Small : Prop where
   operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {n : ℕ}
     (v : Fin 2 → Semiterm L ξ n) : C (R.operator v)
 
 variable {ℬ C}
 
-instance : HasAtoms (ℬ.Closure : {n : ℕ} → Semiformula L ξ n → Prop) where
+instance : HasAtoms (ℬ.Closure (ξ := ξ)) where
   verum := .verum
   falsum := .falsum
   rel := .rel
   nrel := .nrel
 
-instance : AndOrIff (ℬ.Closure : {n : ℕ} → Semiformula L ξ n → Prop) where
+instance : AndOrIff (ℬ.Closure (ξ := ξ)) where
   and_iff := Closure.and_iff
   or_iff := Closure.or_iff
 
-instance : NegClosed (ℬ.Closure : {n : ℕ} → Semiformula L ξ n → Prop) where
+instance : NegClosed (ℬ.Closure (ξ := ξ)) where
   neg := Closure.neg
 
-instance : BoundedIff ℬ (ℬ.Closure : {n : ℕ} → Semiformula L ξ n → Prop) where
+instance : BoundedIff ℬ (ℬ.Closure (ξ := ξ)) where
   ball_iff := Closure.ball_iff
   bexs_iff := Closure.bexs_iff
 
-instance [Small ℬ (ℬ.Closure : {n : ℕ} → Semiformula L ξ n → Prop)] :
-    RemoveQuantifier (ℬ.Closure : {n : ℕ} → Semiformula L ξ n → Prop) where
+instance [Small ℬ (ℬ.Closure (ξ := ξ))] : RemoveQuantifier (ℬ.Closure (ξ := ξ)) where
   of_all h := by
     cases h;
     case ball _ hR _ _ _ hp => exact .or (Closure.neg (Small.operator hR _)) hp;
@@ -478,8 +471,7 @@ variable [AndOrIff C] [BoundedIff ℬ C]
     case dummy_sigma hp _ =>
       rcases hq with rfl;
       exact (or_iff.mp hp).2.accum _;
-  · intro hp;
-    exact hp.ball hR ht;
+  · exact ball hR ht;
 
 @[simp] lemma bexs_iff {Γ s n} {R : Semiformula.Operator L 2} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} (hR : R ∈ ℬ) (ht : t.Positive) :
@@ -504,8 +496,7 @@ variable [AndOrIff C] [BoundedIff ℬ C]
     case dummy_pi hp _ =>
       rcases hq with rfl;
       exact (and_iff.mp hp).2.accum _;
-  · intro hp;
-    exact hp.bexs hR ht;
+  · exact bexs hR ht;
 
 end BoundedIff
 
@@ -713,7 +704,7 @@ variable {ℬ : Bounding L}
 lemma zero_iff_bounded {Γ} {φ : Semiformula L ξ n} : ℬ.Hierarchy Γ 0 φ ↔ ℬ.Closure φ :=
   zero_iff_initial
 
-lemma sigma₁_induction [Small ℬ (ℬ.Closure : {n : ℕ} → Semiformula L ξ n → Prop)]
+lemma sigma₁_induction [Small ℬ (ℬ.Closure (ξ := ξ))]
     {P : (n : ℕ) → Semiformula L ξ n → Prop}
     (hVerum : ∀ n, P n ⊤)
     (hFalsum : ∀ n, P n ⊥)
@@ -782,11 +773,11 @@ variable {ℬ : Bounding L}
 lemma hierarchy {φ : Semiformula L ξ n} : ℬ.StrictHierarchy Γ s φ → ℬ.Hierarchy Γ s φ :=
   mono_bounding (strict_le ℬ)
 
-lemma of_deltaZero {φ : Semiformula L ξ n} (h : ℬ.Hierarchy Γ' 0 φ) : ℬ.StrictHierarchy Γ s φ :=
+lemma of_deltaZero {φ : Semiformula L ξ n} (h : ℬ.Hierarchy 𝚺 0 φ) : ℬ.StrictHierarchy Γ s φ :=
   initial _ _ _ (Hierarchy.zero_iff_bounded.mp h)
 
 lemma zero_iff_hierarchy {φ : Semiformula L ξ n} :
-    ℬ.StrictHierarchy Γ 0 φ ↔ ℬ.Hierarchy Γ' 0 φ :=
+    ℬ.StrictHierarchy Γ 0 φ ↔ ℬ.Hierarchy 𝚺 0 φ :=
   zero_iff_initial.trans Hierarchy.zero_iff_bounded.symm
 
 end StrictHierarchy

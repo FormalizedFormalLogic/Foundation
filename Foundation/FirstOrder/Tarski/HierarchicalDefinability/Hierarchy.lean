@@ -105,10 +105,10 @@ def mkPolarity (φ : FirstOrder.Semiformula L ξ n) :
 
 @[simp] lemma hierarchy_zero {Γ Γ' m} (φ : Γ-[ℬ, 0].Semiformula ξ n) : ℬ.Hierarchy Γ' m φ.val := by
   cases Γ
-  · exact HierarchyOn.of_zero φ.sigma_prop
-  · exact HierarchyOn.of_zero φ.pi_prop
+  · exact φ.sigma_prop.of_zero
+  · exact φ.pi_prop.of_zero
   · cases φ
-    simpa using HierarchyOn.of_zero (sigma_prop _)
+    simpa using (sigma_prop _).of_zero
 
 lemma hierarchy_of_lt {C : HierarchySymbol ℬ} {Γ : Polarity} {s : ℕ} (φ : C.Semiformula ξ n)
     (h : C.rank < s) : ℬ.Hierarchy Γ s φ.val := by

@@ -212,15 +212,15 @@ end IsDefinedByWithParam
 namespace DefinableRel
 
 @[simp] instance eq [L.Eq] [Tarski.Structure.Eq L V] : ℌ.DefinableRel (Eq : V → V → Prop) :=
-  Defined.to_definable₀ (φ := .mkSigma “#0 = #1” (HierarchyOn.of_open (by simp))) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1” (.of_open (by simp))) ⟨by intro _; simp⟩
 
 @[simp] instance lt [L.LT] [LT V] [Tarski.Structure.LT L V] :
     ℌ.DefinableRel (LT.lt : V → V → Prop) :=
-  Defined.to_definable₀ (φ := .mkSigma “#0 < #1” (HierarchyOn.of_open (by simp))) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 < #1” (.of_open (by simp))) ⟨by intro _; simp⟩
 
 @[simp] instance mem [L.Mem] [Membership V V] [Tarski.Structure.Mem L V] :
     ℌ.DefinableRel (fun x y : V ↦ x ∈ y) :=
-  Defined.to_definable₀ (φ := .mkSigma “#0 ∈ #1” (HierarchyOn.of_open (by simp))) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 ∈ #1” (.of_open (by simp))) ⟨by intro _; simp⟩
 
 end DefinableRel
 
@@ -687,23 +687,23 @@ lemma of_sigmaOne [L.Eq] [Tarski.Structure.Eq L V]
 
 @[simp] lemma var [L.Eq] [Tarski.Structure.Eq L V] {k} (i : Fin k) :
     ℌ.DefinableFunction (fun v : Fin k → V ↦ v i) :=
-  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. x = !!#i.succ” (HierarchyOn.of_open (by simp)), by intro _; simp⟩
+  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. x = !!#i.succ” (.of_open (by simp)), by intro _; simp⟩
 
 @[simp] lemma const [L.Eq] [Tarski.Structure.Eq L V] {k} (c : V) :
     ℌ.DefinableFunction (fun _ : Fin k → V ↦ c) :=
-  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. #0 = &c” (HierarchyOn.of_open (by simp)), by intro v; simp⟩
+  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. #0 = &c” (.of_open (by simp)), by intro v; simp⟩
 
 @[simp] lemma term_retraction [L.Eq] [Tarski.Structure.Eq L V] (t : Semiterm L V n)
     (e : Fin n → Fin k) :
     ℌ.DefinableFunction fun v : Fin k → V ↦ t.val (fun x ↦ v (e x)) id :=
   .of_zero (Γ' := 𝚺)
-    ⟨.mkSigma “x. x = !!(Rew.subst (fun x ↦ #(e x).succ) t)” (HierarchyOn.of_open (by simp)),
+    ⟨.mkSigma “x. x = !!(Rew.subst (fun x ↦ #(e x).succ) t)” (.of_open (by simp)),
       fun v ↦ by
     simp [Semiterm.val_substs, Function.comp_def]⟩
 
 @[simp] lemma term [L.Eq] [Tarski.Structure.Eq L V] (t : Semiterm L V k) :
     ℌ.DefinableFunction fun v : Fin k → V ↦ t.val v id :=
-  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. x = !!(Rew.bShift t)” (HierarchyOn.of_open (by simp)),
+  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. x = !!(Rew.bShift t)” (.of_open (by simp)),
     fun v ↦ by simp [Semiterm.val_bShift']⟩
 
 lemma of_eq (g) (h : ∀ v, f v = g v) (H : ℌ.DefinableFunction f) : ℌ.DefinableFunction g := by
@@ -726,7 +726,7 @@ lemma rel (h : ℌ.DefinableFunction f) :
 @[simp] lemma nth [L.Eq] [Tarski.Structure.Eq L V] (ℌ : HierarchySymbol ℬ) (i : Fin k) :
   ℌ.DefinableFunction fun w : Fin k → V ↦ w i := by
   apply Definable.of_zero (Γ' := 𝚺)
-  exact ⟨.mkSigma “x. x = #i.succ” (HierarchyOn.of_open (by simp)), by intro v; simp⟩
+  exact ⟨.mkSigma “x. x = #i.succ” (.of_open (by simp)), by intro v; simp⟩
 
 lemma substitution [L.Eq] [Tarski.Structure.Eq L V] {f : Fin k → (Fin l → V) → V}
     (hF : Γ-[ℬ, m + 1].DefinableFunction F) (hf : ∀ i, 𝚺-[ℬ, m + 1].DefinableFunction (f i)) :
@@ -792,21 +792,19 @@ lemma ball_operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {Γ}
   match Γ with
   | 𝚺 => exact
     ⟨ .mkSigma (∃¹ (bf.val ⋏ (∀¹[R.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ)))))
-        (.exs (.and bf.sigma_prop (HierarchyOn.ball hR (by simp) (φ.sigma_prop.rew _)))),
+        (.exs (.and bf.sigma_prop (.ball hR (by simp) (φ.sigma_prop.rew _)))),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
     ⟨ .mkPi (∀¹ (bf.val 🡒 (∀¹[R.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ)))))
-        (.all (HierarchyOn.imp_iff.mpr ⟨bf.sigma_prop,
-          HierarchyOn.ball hR (by simp) (φ.pi_prop.rew _)⟩)),
+        (.all (HierarchyOn.imp_iff.mpr ⟨bf.sigma_prop, .ball hR (by simp) (φ.pi_prop.rew _)⟩)),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
       ⟨ .mkSigma (∃¹ (bf.val ⋏ (∀¹[R.operator ![#0, #1]] φ.sigma.val ⇜ (#0 :> (#·.succ.succ)))))
-        (.exs (.and bf.sigma_prop (HierarchyOn.ball hR (by simp) (φ.sigma.sigma_prop.rew _)))),
+        (.exs (.and bf.sigma_prop (.ball hR (by simp) (φ.sigma.sigma_prop.rew _)))),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
       ⟨ .mkPi (∀¹ (bf.val 🡒 (∀¹[R.operator ![#0, #1]] φ.pi.val ⇜ (#0 :> (#·.succ.succ)))))
-        (.all (HierarchyOn.imp_iff.mpr ⟨bf.sigma_prop,
-          HierarchyOn.ball hR (by simp) (φ.pi.pi_prop.rew _)⟩)),
+        (.all (HierarchyOn.imp_iff.mpr ⟨bf.sigma_prop, .ball hR (by simp) (φ.pi.pi_prop.rew _)⟩)),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 lemma bexs_operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {Γ}
@@ -819,21 +817,19 @@ lemma bexs_operator {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) {Γ}
   match Γ with
   | 𝚺 => exact
     ⟨ .mkSigma (∃¹ (bf.val ⋏ (∃¹[R.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ)))))
-        (.exs (.and bf.sigma_prop (HierarchyOn.bexs hR (by simp) (φ.sigma_prop.rew _)))),
+        (.exs (.and bf.sigma_prop (.bexs hR (by simp) (φ.sigma_prop.rew _)))),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
     ⟨ .mkPi (∀¹ (bf.val 🡒 (∃¹[R.operator ![#0, #1]] φ.val ⇜ (#0 :> (#·.succ.succ)))))
-        (.all (HierarchyOn.imp_iff.mpr ⟨bf.sigma_prop,
-          HierarchyOn.bexs hR (by simp) (φ.pi_prop.rew _)⟩)),
+        (.all (HierarchyOn.imp_iff.mpr ⟨bf.sigma_prop, .bexs hR (by simp) (φ.pi_prop.rew _)⟩)),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
       ⟨ .mkSigma (∃¹ (bf.val ⋏ (∃¹[R.operator ![#0, #1]] φ.sigma.val ⇜ (#0 :> (#·.succ.succ)))))
-        (.exs (.and bf.sigma_prop (HierarchyOn.bexs hR (by simp) (φ.sigma.sigma_prop.rew _)))),
+        (.exs (.and bf.sigma_prop (.bexs hR (by simp) (φ.sigma.sigma_prop.rew _)))),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
       ⟨ .mkPi (∀¹ (bf.val 🡒 (∃¹[R.operator ![#0, #1]] φ.pi.val ⇜ (#0 :> (#·.succ.succ)))))
-        (.all (HierarchyOn.imp_iff.mpr ⟨bf.sigma_prop,
-          HierarchyOn.bexs hR (by simp) (φ.pi.pi_prop.rew _)⟩)),
+        (.all (HierarchyOn.imp_iff.mpr ⟨bf.sigma_prop, .bexs hR (by simp) (φ.pi.pi_prop.rew _)⟩)),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 end Definable

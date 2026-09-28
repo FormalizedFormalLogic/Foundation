@@ -38,7 +38,7 @@ lemma strictDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺
     (hR : Γᴬ-[s].DefinableRel R) : StrictDefinableRel Γ s R := by
   rcases s with _ | t;
   · obtain ⟨φ, hφ⟩ := hR;
-    exact ⟨φ.val, .of_deltaZero φ.polarity_prop, fun v ↦ hφ.iff⟩;
+    exact ⟨φ.val, .of_deltaZero φ.polarity_prop.of_zero, fun v ↦ hφ.iff⟩;
   · have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := IBroadSigma.models_BSigma_succ;
     exact StrictDefinable.of_definable (Γ' := 𝚺) hR;
 

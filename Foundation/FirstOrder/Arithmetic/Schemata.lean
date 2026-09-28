@@ -232,7 +232,7 @@ lemma InductionOnHierarchy_zero_eq_InductionOnBroadHierarchy_zero (Γ Γ' : Pola
     (Set.union_subset_union_right _
       (InductionScheme_subset (·.hierarchy.of_zero)))
     (Set.union_subset_union_right _
-      (InductionScheme_subset (.of_deltaZero ·)))
+      (InductionScheme_subset fun H ↦ .of_deltaZero H.of_zero))
 
 lemma ISigmaZero_eq_IBroadSigmaZero : 𝗜𝚺₀ = 𝗜𝚺⁺₀ :=
   InductionOnHierarchy_zero_eq_InductionOnBroadHierarchy_zero 𝚺 𝚺
@@ -463,8 +463,7 @@ instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Str
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := inferInstance
   models_of_subtheory this
 
-/-- Induction for a predicate defined by a `ℬ[<, ℒₒᵣ].StrictHierarchy Γ s` formula with
-parameters. -/
+/-- Induction for a predicate defined by a strict `Γ-[s]` formula with parameters. -/
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
     (hP : ∃ e : ℕ → V, ∃ φ : ArithmeticSemiformula ℕ 1,
