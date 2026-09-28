@@ -9,6 +9,8 @@ public import Foundation.FirstOrder.Incompleteness.Second
 
 Local reflection schemas `Rfn_Γ(T)` for arithmetic theories via the standard provability predicate:
 their relation to consistency, their soundness, and their unboundedness over finite extensions.
+If `U` proves the local $\Sigma_1$ reflection principle of `T`, then `U` refutes every iterate
+`Pr_T^n(⊥)`.
 
 ## References
 
@@ -168,5 +170,37 @@ theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n �
     fun hσ ↦ (e.le.trans hle).pbl (h hσ)).of_ge (hge.trans e.symm.le);
 
 end
+
+section Iterate
+
+variable {U : ArithmeticTheory}
+
+lemma hierarchy_iterate_standardProvability_bot (n : ℕ) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (T.standardProvability^[n] ⊥) := by
+  rcases n with _ | n <;> simp [Function.iterate_succ_apply', standardProvability_def]
+
+lemma provable_neg_iterate_standardProvability_bot (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+    ∀ n, U ⊢ ∼T.standardProvability^[n] ⊥
+  | 0 => by simp
+  | n + 1 => by
+    have h₁ : U ⊢ T.standardProvability.refl (T.standardProvability^[n] ⊥) :=
+      hU ⟨_, hierarchy_iterate_standardProvability_bot n, rfl⟩;
+    have h₂ := provable_neg_iterate_standardProvability_bot hU n;
+    rw [Function.iterate_succ_apply'];
+    cl_prover [h₁, h₂];
+
+variable [U.Δ₁]
+
+lemma provable_iterate_standardProvability_bot_imp
+    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
+    (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) (n : ℕ) :
+    𝗜𝚺₁ ⊢ T.standardProvability^[n + 1] ⊥ 🡒 U.standardProvability ⊥ := by
+  have h₀ := provable_neg_iterate_standardProvability_bot hU n;
+  rw [Function.iterate_succ_apply'];
+  generalize T.standardProvability^[n] ⊥ = σ at h₀ ⊢;
+  have h₁ : U ⊢ σ 🡒 ⊥ := by cl_prover [h₀];
+  exact C_trans (hTU σ) (U.standardProvability.D2 ⨀ U.standardProvability.D1 h₁);
+
+end Iterate
 
 end FFL.FirstOrder.Arithmetic
