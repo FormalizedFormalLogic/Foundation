@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.Syntax.Classical.Padding
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
-public import Foundation.FirstOrder.Syntax.Classical.BoundingStrictHierarchy
 
 @[expose] public section
 
