@@ -14,9 +14,12 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Basic
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Bounded
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Coding
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Sigma1
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
@@ -70,7 +73,6 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.TA.Basic
 public import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
-public import Foundation.FirstOrder.Incompleteness.BoundedDefinability
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.Definability
@@ -93,7 +95,6 @@ public import Foundation.FirstOrder.Incompleteness.RosserProvability
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Speedup
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
-public import Foundation.FirstOrder.Incompleteness.StrictHierarchyDefinability
 public import Foundation.FirstOrder.Incompleteness.Tarski
 public import Foundation.FirstOrder.Incompleteness.WitnessComparison
 public import Foundation.FirstOrder.Kripke

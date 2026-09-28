@@ -1,14 +1,13 @@
 module
 
-public import Foundation.FirstOrder.Incompleteness.BoundedDefinability
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Bounded
 
 /-!
 # Internal strict prenex classes
 
 The coded blocks of existential quantifiers `qqExss` and the internal predicates `IsStrictSigma`
 and `IsStrictPi` on codes of strict prenex formulas: they are `𝚫ᴬ₁`-definable and agree with
-`StrictHierarchy` on quoted formulas. Consequently the induction schemata over strict prenex
-classes, and hence the theories `𝗜𝗡𝗗 Γ s` (in particular `𝗜𝚺 s`), are `Δ₁`.
+`StrictHierarchy` on quoted formulas.
 
 ## References
 
@@ -376,33 +375,3 @@ theorem isStrictPi_quote_iff (ψ : ArithmeticSemisentence n) :
 end quote
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
-
-namespace FFL.FirstOrder.Arithmetic
-
-/-! ## The strict induction theories are `Δ₁` -/
-
-open FFL.FirstOrder.Theory Bootstrapping
-
-noncomputable instance InductionScheme.delta1_strictHierarchy :
-    (Γ : Polarity) → (s : ℕ) → (InductionScheme ℒₒᵣ (StrictHierarchy Γ s)).Δ₁
-  | 𝚺, s =>
-    { ch := chInd (isStrictSigma s)
-      mem_iff φ := by
-        simpa using
-          (inductionR_quote_iff isStrictSigma_quote_iff_s φ).trans (mem_inductionScheme_iff φ).symm;
-      isDelta1 :=
-        Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
-          fun _ _ _ ↦ by simp }
-  | 𝚷, s =>
-    { ch := chInd (isStrictPi s)
-      mem_iff φ := by
-        simpa using
-          (inductionR_quote_iff isStrictPi_quote_iff_s φ).trans (mem_inductionScheme_iff φ).symm;
-      isDelta1 :=
-        Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
-          fun _ _ _ ↦ by simp }
-
-noncomputable instance InductionOnHierarchy.delta1 (Γ : Polarity) (s : ℕ) : (𝗜𝗡𝗗 Γ s).Δ₁ :=
-  Δ₁.add PeanoMinus.delta1 inferInstance
-
-end FFL.FirstOrder.Arithmetic

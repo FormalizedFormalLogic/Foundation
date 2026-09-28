@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Incompleteness.Definability
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Sigma1
 
 /-!
 # Internal $\Delta_0$ formulas
