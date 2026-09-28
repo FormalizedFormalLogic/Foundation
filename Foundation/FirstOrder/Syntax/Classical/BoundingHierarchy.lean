@@ -782,6 +782,12 @@ lemma zero_iff_hierarchy {φ : Semiformula L ξ n} :
 
 end StrictHierarchy
 
-end FFL.FirstOrder.Bounding
+@[simp] lemma Semiformula.hierarchy {ℬ : Bounding L} (φ : ℬ.Semiformula ξ n) :
+    ℬ.Hierarchy Γ s φ.val :=
+  .initial Γ s n φ.bounded
+
+end Bounding
+
+end FFL.FirstOrder
 
 end

@@ -18,7 +18,7 @@ open Bounding (HierarchySymbol)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x : V}
 
-variable (T : ArithmeticTheory) [T.Δ₁] (θ : 𝚺ᴬ₀.Semisentence 1)
+variable (T : ArithmeticTheory) [T.Δ₁] (θ : ℬ[<, ℒₒᵣ].Semisentence 1)
 
 
 def _root_.FFL.FirstOrder.Theory.WitnessedBefore (φ : V) :=
@@ -26,7 +26,7 @@ def _root_.FFL.FirstOrder.Theory.WitnessedBefore (φ : V) :=
 
 noncomputable def _root_.FFL.FirstOrder.Theory.witnessedBefore :
     𝚺ᴬ₁.Semisentence 1 := .mkSigma
-  “x. ∃ w, !θ w ∧ ∀ p < w, ¬!(proof T).pi p x”
+  “x. ∃ w, !θ.val w ∧ ∀ p < w, ¬!(proof T).pi p x”
 
 instance _root_.FFL.FirstOrder.Theory.WitnessedBefore.defined :
     𝚺ᴬ₁-Predicate[V] T.WitnessedBefore θ via T.witnessedBefore θ := .mk fun v ↦ by
@@ -41,7 +41,7 @@ def _root_.FFL.FirstOrder.Theory.ProvedBefore (φ : V) :=
   ∃ b, Proof T b φ ∧ ∀ b' ≤ b, ¬V ⊧/![b'] θ.val
 
 noncomputable def _root_.FFL.FirstOrder.Theory.provedBefore : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
-  “x. ∃ p, !(proof T).sigma p x ∧ ∀ w <⁺ p, ¬!θ w”
+  “x. ∃ p, !(proof T).sigma p x ∧ ∀ w <⁺ p, ¬!θ.val w”
 
 instance _root_.FFL.FirstOrder.Theory.ProvedBefore.defined :
     𝚺ᴬ₁-Predicate[V] T.ProvedBefore θ via T.provedBefore θ := .mk fun v ↦ by
@@ -58,7 +58,8 @@ noncomputable def _root_.FFL.FirstOrder.Theory.fghSentence' : 𝚺ᴬ₁.Sentenc
   (T.witnessedBefore θ).rew (Rew.subst ![⌜T.fghSentence θ⌝])
 
 
-variable {T : ArithmeticTheory} [T.Δ₁] {θ : 𝚺ᴬ₀.Semisentence 1} {σ : ArithmeticSentence}
+variable {T : ArithmeticTheory} [T.Δ₁] {θ : ℬ[<, ℒₒᵣ].Semisentence 1}
+  {σ : ArithmeticSentence}
 
 lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.WitnessedBefore θ x := by
   rintro ⟨p, hp, hbound⟩ ⟨w, hw, hbound'⟩;

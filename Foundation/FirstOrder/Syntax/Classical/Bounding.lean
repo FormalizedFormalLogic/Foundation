@@ -195,4 +195,25 @@ def inductionPrinciple (R : Operator L 2) (φ : Semiformula L ξ 1) : Formula L 
 def inductionSchema (ℬ : Bounding L) (C : Semisentence L 1 → Prop) : Theory L :=
   Set.image2 inductionPrinciple {R | R ∈ ℬ} {φ | C φ}
 
-end FFL.FirstOrder.Bounding
+/-- A formula bundled with a proof that it lies in `ℬ.Closure`. -/
+protected structure Semiformula (ℬ : Bounding L) (ξ : Type*) (n : ℕ) where
+  val : FirstOrder.Semiformula L ξ n
+  bounded : ℬ.Closure val
+
+protected abbrev Semisentence (ℬ : Bounding L) (n : ℕ) := ℬ.Semiformula Empty n
+
+namespace Semiformula
+
+variable {n₁ n₂ : ℕ}
+
+def rew (φ : ℬ.Semiformula ξ₁ n₁) (ω : Rew L ξ₁ n₁ ξ₂ n₂) : ℬ.Semiformula ξ₂ n₂ :=
+  ⟨ω ▹ φ.val, φ.bounded.rew ω⟩
+
+@[simp] lemma val_rew (φ : ℬ.Semiformula ξ₁ n₁) (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
+    (φ.rew ω).val = ω ▹ φ.val := rfl
+
+end Semiformula
+
+end Bounding
+
+end FFL.FirstOrder
