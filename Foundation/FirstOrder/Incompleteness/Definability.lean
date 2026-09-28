@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 
