@@ -18,7 +18,7 @@ open Bounding (HierarchySymbol)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x : V}
 
-variable (T : ArithmeticTheory) [T.Δ₁] (θ : ArithmeticBoundedSemisentence 1)
+variable (T : ArithmeticTheory) [T.Δ₁] (θ : ℬ[<, ℒₒᵣ].Semisentence 1)
 
 
 def _root_.FFL.FirstOrder.Theory.WitnessedBefore (φ : V) :=
@@ -58,7 +58,7 @@ noncomputable def _root_.FFL.FirstOrder.Theory.fghSentence' : 𝚺ᴬ₁.Sentenc
   (T.witnessedBefore θ).rew (Rew.subst ![⌜T.fghSentence θ⌝])
 
 
-variable {T : ArithmeticTheory} [T.Δ₁] {θ : ArithmeticBoundedSemisentence 1}
+variable {T : ArithmeticTheory} [T.Δ₁] {θ : ℬ[<, ℒₒᵣ].Semisentence 1}
   {σ : ArithmeticSentence}
 
 lemma not_witnessedBefore_of_provedBefore : T.ProvedBefore θ x → ¬T.WitnessedBefore θ x := by

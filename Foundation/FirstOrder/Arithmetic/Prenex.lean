@@ -9,7 +9,7 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 # Prenex normal form for the arithmetical hierarchy
 
 For `𝗕𝚺 s ⪯ T`, every `ℬ[<, ℒₒᵣ].Hierarchy Γ s` formula `φ` is `T`-provably
-equivalent to `φ₀.toPrenex Γ s` for some `φ₀ : ArithmeticBoundedSemisentence (n + s)`.
+equivalent to `φ₀.toPrenex Γ s` for some `φ₀ : ℬ[<, ℒₒᵣ].Semisentence (n + s)`.
 
 ## References
 
@@ -37,7 +37,7 @@ private lemma models_PrenexBase_of_models_CollectionOnHierarchy {V : Type*} [ORi
 /-- A formula in `Γ`-prenex form of level `s`, stored as the bounded matrix that remains after
 stripping the `s` leading alternating quantifiers. -/
 structure Prenex (Γ : Polarity) (s : ℕ) (ξ : Type*) (n : ℕ) where
-  matrix : ArithmeticBoundedSemiformula ξ (n + s)
+  matrix : ℬ[<, ℒₒᵣ].Semiformula ξ (n + s)
 
 namespace Prenex
 
@@ -73,7 +73,7 @@ def altUp (φ : Prenex Γ s ξ n) : Prenex Γ.alt (s + 1) ξ n := by
   · exact (φ.rew Rew.bShift).pi
   · exact (φ.rew Rew.bShift).sigma
 
-def ofΔ₀ (φ : ArithmeticBoundedSemiformula ξ n) : (Γ : Polarity) → (s : ℕ) → Prenex Γ s ξ n
+def ofΔ₀ (φ : ℬ[<, ℒₒᵣ].Semiformula ξ n) : (Γ : Polarity) → (s : ℕ) → Prenex Γ s ξ n
   | Γ, 0     => ⟨φ⟩
   | Γ, s + 1 => by simpa using altUp (ofΔ₀ φ Γ.alt s)
 
@@ -121,14 +121,14 @@ lemma val_pi {φ : Prenex 𝚺 s ξ (n + 1)} : φ.pi.val = ∀¹ φ.val := by
 @[simp, grind .]
 lemma val_sigmaInv {φ : Prenex 𝚺 (s + 1) ξ n} : φ.val = ∃¹ φ.sigmaInv.val := by
   unfold val sigmaInv;
-  rw [BoundedSemiformula.val_rew, ← Polarity.quant_sigma, ← Polarity.alt_sigma,
+  rw [Bounding.Semiformula.val_rew, ← Polarity.quant_sigma, ← Polarity.alt_sigma,
     ← Rewriting.quantItr_succ_smul_castLE, ← TransitiveRewriting.comp_app];
   simp;
 
 @[simp, grind .]
 lemma val_piInv {φ : Prenex 𝚷 (s + 1) ξ n} : φ.val = ∀¹ φ.piInv.val := by
   unfold val piInv;
-  rw [BoundedSemiformula.val_rew, ← Polarity.quant_pi, ← Polarity.alt_pi,
+  rw [Bounding.Semiformula.val_rew, ← Polarity.quant_pi, ← Polarity.alt_pi,
     ← Rewriting.quantItr_succ_smul_castLE, ← TransitiveRewriting.comp_app];
   simp;
 
@@ -154,7 +154,7 @@ lemma models_altUp (φ : Prenex Γ s ξ n) (e : Fin n → V) :
   Semiformula.Eval e f φ.altUp.val ↔ Semiformula.Eval e f φ.val := by
   rcases Γ <;> simp [altUp, -val_piInv, -val_sigmaInv];
 
-lemma models_ofΔ₀ (φ : ArithmeticBoundedSemiformula ξ n) (e : Fin n → V) :
+lemma models_ofΔ₀ (φ : ℬ[<, ℒₒᵣ].Semiformula ξ n) (e : Fin n → V) :
     Semiformula.Eval e f (ofΔ₀ φ Γ s).val ↔ Semiformula.Eval e f φ.val := by
   induction s generalizing Γ with
   | zero => rfl
@@ -612,7 +612,7 @@ theorem exists_prenex_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
   exact hφ' V e Empty.elim;
 
 theorem exists_matrix_provable (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
-  ∃ φ₀ : ArithmeticBoundedSemisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
+  ∃ φ₀ : ℬ[<, ℒₒᵣ].Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
   obtain ⟨_, hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨_, by simpa [Prenex.val] using hφ'⟩;
 
