@@ -117,6 +117,9 @@ lemma hierarchy_of_lt {C : HierarchySymbol ℬ} {Γ : Polarity} {s : ℕ} (φ : 
   · exact φ.pi_prop.strict_mono _ h
   · exact (val_sigma φ ▸ φ.sigma.sigma_prop).strict_mono _ h
 
+@[simp] lemma hierarchy_succ {C : HierarchySymbol ℬ} {Γ : Polarity} {s : ℕ} (φ : C.Semiformula ξ n)
+    (h : C.rank ≤ s + 1) : ℬ.Hierarchy Γ (s + 2) φ.val := hierarchy_of_lt φ (by omega)
+
 variable {M : Type*} [Tarski.Structure L M]
 
 variable (M)
