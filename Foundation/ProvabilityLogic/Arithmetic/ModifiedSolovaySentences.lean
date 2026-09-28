@@ -250,7 +250,7 @@ end comparison
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Formula α}
   (T : ArithmeticTheory) [T.Δ₁] (M : StrongReflexiveCountermodel κ A) [Fintype M.World]
-  (σ : ArithmeticSentence) (θ : 𝚺ᴬ₀.Semisentence 1)
+  (σ : ArithmeticSentence) (θ : ℬ[<, ℒₒᵣ].Semisentence 1)
 
 section stx
 
