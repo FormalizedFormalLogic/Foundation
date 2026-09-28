@@ -42,13 +42,20 @@ end FirstOrder.ArithmeticTheory
 
 namespace ProvabilityLogic
 
-open FirstOrder Formula LetterlessFormula
+open FirstOrder FirstOrder.Arithmetic Formula LetterlessFormula
 
 variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁] {N : Set ℕ} {A : Formula α}
 
 lemma provabilityLogic_weakerThan_addAlpha :
     T.provabilityLogicRelativeTo U (α := α) ⪯ T.provabilityLogicRelativeTo (T.addAlpha U N) :=
   ⟨fun _ hA f ↦ ArithmeticTheory.weakerThan_addAlpha.pbl (hA f)⟩
+
+lemma alpha_mem_provabilityLogic_of_provable_localReflectionOn_Sigma1
+    (h : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+    ∀ n, alpha n (α := α) ∈ T.provabilityLogicRelativeTo U := by
+  intro n f;
+  simpa [alpha, standardInterpret, interpret, interpret_boxItr, Function.iterate_succ_apply'] using
+    h ⟨_, hierarchy_iterate_standardProvability_bot n, rfl⟩
 
 section
 
@@ -153,20 +160,6 @@ lemma provabilityLogic_classification_equiv :
         T.provabilityLogicRelativeTo U (α := α) ≊ 𝐒 ∩ 𝐆𝐋β _ hL := by
   simpa only [Logic.equiv_iff] using provabilityLogic_classification
 
-end
-
-section
-
-open FirstOrder.Arithmetic
-
-lemma alpha_mem_provabilityLogic_of_provable_localReflectionOn_Sigma1
-    (h : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
-    ∀ n, alpha n (α := α) ∈ T.provabilityLogicRelativeTo U := by
-  intro n f;
-  simpa [alpha, standardInterpret, interpret, interpret_boxItr, Function.iterate_succ_apply'] using
-    h ⟨_, hierarchy_iterate_standardProvability_bot n, rfl⟩
-
-variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 
 lemma trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1
     (h : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
@@ -198,16 +191,17 @@ end
 
 section
 
-open FirstOrder.Arithmetic
-
 variable [U.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 omit [T.Δ₁] in
 local instance : 𝗜𝚺₁ ⪯ T ∪ U.Con := (inferInstance : 𝗜𝚺₁ ⪯ T).trans inferInstance
 
-lemma trace_provabilityLogic_add_con_eq_univ
-    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
-    (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+variable (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
+  (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T)
+
+include hTU hU
+
+lemma trace_provabilityLogic_add_con_eq_univ :
     (T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α)).trace = .univ := by
   apply Set.eq_univ_of_forall;
   intro n;
@@ -219,16 +213,12 @@ lemma trace_provabilityLogic_add_con_eq_univ
   simp only [alpha, standardInterpret, interpret, interpret_boxItr];
   cl_prover [h₁, h₂];
 
-lemma A_weakerThan_provabilityLogic_add_con
-    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
-    (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+lemma A_weakerThan_provabilityLogic_add_con :
     𝐀 ⪯ T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) :=
   A_weakerThan_provabilityLogic <| trace_provabilityLogic_add_con_eq_univ hTU hU
 
 /-- - [AB05, Example 63] -/
-theorem provabilityLogic_add_con_eq_A
-    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
-    (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) (hC : Consistent (T ∪ U.Con)) :
+theorem provabilityLogic_add_con_eq_A (hC : Consistent (T ∪ U.Con)) :
     T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) = 𝐀 := by
   apply Logic.weakerThan_antisymm;
   · by_contra! h;
