@@ -282,3 +282,4 @@ public import Foundation.Vorspiel.Rel.WCWF
 public import Foundation.Vorspiel.Set.Basic
 public import Foundation.Vorspiel.Small
 public import Foundation.Vorspiel.String
+public import Foundation.Vorspiel.Tactic.Disj
