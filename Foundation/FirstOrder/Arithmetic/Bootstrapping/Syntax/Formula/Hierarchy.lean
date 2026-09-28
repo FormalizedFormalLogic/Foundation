@@ -327,13 +327,45 @@ lemma IsHierarchy.of_all (h : IsHierarchy Γ (n + 1) (^∀ p)) :
     IsHierarchy Γ.alt n (^∀ p) ∨
     IsHierarchy Γ (n + 1) p ∧
       (Γ = 𝚷 ∨ ∃ t q, IsUTerm ℒₒᵣ t ∧ p = (^#0 ^≮ termBShift ℒₒᵣ t) ^⋎ q) := by
-  sorry
+  rcases h.succ_case with (h | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩ | ⟨_, q, ⟨t, ht, rfl⟩, hq, h⟩
+    | ⟨_, _, _, _, h⟩ | ⟨q, hq, h⟩);
+  · left; exact h;
+  · simp [qqAll, qqAnd] at h;
+  · simp [qqAll, qqOr] at h;
+  · right;
+    rw [qqBall, qqAll_inj] at h;
+    subst h;
+    constructor;
+    · exact IsHierarchy.or_iff.mpr ⟨by simp [Arithmetic.qqNLT], hq⟩;
+    · right; exact ⟨t, q, ht, rfl⟩;
+  · simp [qqAll, qqBex, qqExs] at h;
+  · cases Γ;
+    · simp [qqAll, qqExs] at h;
+    · right;
+      obtain rfl : p = q := (qqAll_inj _ _).mp h;
+      exact ⟨hq, by left; rfl⟩;
 
 lemma IsHierarchy.of_ex (h : IsHierarchy Γ (n + 1) (^∃ p)) :
     IsHierarchy Γ.alt n (^∃ p) ∨
     IsHierarchy Γ (n + 1) p ∧
       (Γ = 𝚺 ∨ ∃ t q, IsUTerm ℒₒᵣ t ∧ p = (^#0 ^< termBShift ℒₒᵣ t) ^⋏ q) := by
-  sorry
+  rcases h.succ_case with (h | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩
+    | ⟨_, q, ⟨t, ht, rfl⟩, hq, h⟩ | ⟨q, hq, h⟩);
+  · left; exact h;
+  · simp [qqExs, qqAnd] at h;
+  · simp [qqExs, qqOr] at h;
+  · simp [qqExs, qqBall, qqAll] at h;
+  · right;
+    rw [qqBex, qqExs_inj] at h;
+    subst h;
+    constructor;
+    · exact IsHierarchy.and_iff.mpr ⟨by simp [Arithmetic.qqLT], hq⟩;
+    · right; exact ⟨t, q, ht, rfl⟩;
+  · cases Γ;
+    · right;
+      obtain rfl : p = q := (qqExs_inj _ _).mp h;
+      exact ⟨hq, by left; rfl⟩;
+    · simp [qqAll, qqExs] at h;
 
 /-! ### Negation -/
 
