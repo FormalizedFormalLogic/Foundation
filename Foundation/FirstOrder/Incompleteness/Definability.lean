@@ -511,17 +511,16 @@ private lemma phi_iff (C p : V) :
   mp := by
     rintro (rfl | rfl | ⟨k, r, v, rfl⟩ | ⟨k, r, v, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
       | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, hp, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩)
-    · tauto
-    · tauto
-    · exact Or.inr (Or.inr (Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩))
-    · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩)))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        (Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩)))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, by simp, hp, rfl⟩))))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        ⟨termBShift ℒₒᵣ t, lt_u_qqBall _ _, q, lt_q_qqBall _ _,
-          ⟨t, lt_of_le_of_lt (le_termBShift ht) (lt_u_qqBall _ _), ht, rfl⟩, hq, rfl⟩))))))
+    · disj 1; rfl;
+    · disj 2; rfl;
+    · disj 3; exact ⟨k, by simp, r, by simp, v, by simp, rfl⟩;
+    · disj 4; exact ⟨k, by simp, r, by simp, v, by simp, rfl⟩;
+    · disj 5; exact ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩;
+    · disj 6; exact ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩;
+    · disj 7; exact ⟨p₁, by simp, hp, rfl⟩;
+    · disj 8;
+      exact ⟨termBShift ℒₒᵣ t, lt_u_qqBall _ _, q, lt_q_qqBall _ _,
+        ⟨t, lt_of_le_of_lt (le_termBShift ht) (lt_u_qqBall _ _), ht, rfl⟩, hq, rfl⟩;
   mpr := by
     unfold Phi
     rintro (rfl | rfl | ⟨k, _, r, _, v, _, rfl⟩ | ⟨k, _, r, _, v, _, rfl⟩
@@ -572,18 +571,14 @@ instance : construction.StrongFinite V where
     unfold construction Phi
     rintro C _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
       | ⟨p₁, hp, rfl⟩ | ⟨u, q, ht, hq, rfl⟩)
-    · exact Or.inl h
-    · exact Or.inr (Or.inl h)
-    · exact Or.inr (Or.inr (Or.inl h))
-    · exact Or.inr (Or.inr (Or.inr (Or.inl h)))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-        ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-        ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩)))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, ⟨hp, by simp⟩, rfl⟩))))))
-    · refine Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        ⟨u, q, ht, ⟨hq, ?_⟩, rfl⟩))))))
-      exact lt_q_qqBall _ _
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact h;
+    · disj 4; exact h;
+    · disj 5; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
+    · disj 6; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩;
+    · disj 7; exact ⟨p₁, ⟨hp, by simp⟩, rfl⟩;
+    · disj 8; exact ⟨u, q, ht, ⟨hq, lt_q_qqBall _ _⟩, rfl⟩;
 
 end IsSigma1F
 
@@ -1033,9 +1028,10 @@ lemma isSigma1_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n}
   · intro n φ ψ hφ hψ ihφ ihψ; simpa [Semiformula.quote_or] using ⟨ihφ, ihψ⟩
   · intro n t φ hφ ihφ
     rw [quote_ball]
-    refine IsSigma1.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-      ⟨termBShift ℒₒᵣ (⌜t⌝ : ℕ), (⌜φ⌝ : ℕ), ⟨(⌜t⌝ : ℕ), ?_, rfl⟩, ihφ, rfl⟩)))))))
-    simp [Semiterm.quote_def]
+    apply IsSigma1.mk;
+    disj 8;
+    exact ⟨termBShift ℒₒᵣ (⌜t⌝ : ℕ), (⌜φ⌝ : ℕ),
+      ⟨(⌜t⌝ : ℕ), by simp [Semiterm.quote_def], rfl⟩, ihφ, rfl⟩;
   · intro n φ hφ ihφ; simpa [Semiformula.quote_ex] using ihφ
 
 open Bootstrapping in
