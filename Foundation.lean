@@ -70,6 +70,7 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.TA.Basic
 public import Foundation.FirstOrder.Arithmetic.TA.Nonstandard
+public import Foundation.FirstOrder.Incompleteness.BoundedDefinability
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.Definability
