@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.Incompleteness.Second
 
 Local reflection schemas `Rfn_Γ(T)` for arithmetic theories via the standard provability predicate:
 their relation to consistency, their soundness, and their unboundedness over finite extensions.
-If `U` proves the local $\Sigma_1$ reflection principle of `T`, then `U` refutes every iterate
-`Pr_T^n(⊥)`.
 
 ## References
 

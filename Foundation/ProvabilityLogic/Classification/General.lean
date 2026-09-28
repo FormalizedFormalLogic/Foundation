@@ -2,6 +2,7 @@ module
 
 public import Foundation.ProvabilityLogic.Classification.AD
 public import Foundation.ProvabilityLogic.Classification.DS
+public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 
 /-!
 # Classification of provability logics
@@ -151,6 +152,96 @@ lemma provabilityLogic_classification_equiv :
         T.provabilityLogicRelativeTo U (α := α) ≊ 𝐃 ∩ 𝐆𝐋β _ hL ∨
         T.provabilityLogicRelativeTo U (α := α) ≊ 𝐒 ∩ 𝐆𝐋β _ hL := by
   simpa only [Logic.equiv_iff] using provabilityLogic_classification
+
+end
+
+section
+
+open FirstOrder.Arithmetic
+
+lemma alpha_mem_provabilityLogic_of_provable_localReflectionOn_Sigma1
+    (h : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+    ∀ n, alpha n (α := α) ∈ T.provabilityLogicRelativeTo U := by
+  intro n f;
+  simpa [alpha, standardInterpret, interpret, interpret_boxItr, Function.iterate_succ_apply'] using
+    h ⟨_, hierarchy_iterate_standardProvability_bot n, rfl⟩
+
+variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
+
+lemma trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1
+    (h : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+    (T.provabilityLogicRelativeTo U (α := α)).trace = .univ := by
+  apply Set.eq_univ_of_forall;
+  intro n;
+  exact mem_trace_provabilityLogic_iff.mpr
+    <| alpha_mem_provabilityLogic_of_provable_localReflectionOn_Sigma1 h _
+
+lemma D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1
+    (h : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+    𝐃 ⪯ T.provabilityLogicRelativeTo U (α := α) := by
+  apply sumQuasiNormal_weakerThan_provabilityLogic;
+  rintro _ (rfl | ⟨B, C, rfl⟩);
+  · exact (A_weakerThan_provabilityLogic
+      (trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1 h)).wk
+      (Logic.A.neg_boxItr_bot (n := 1));
+  · exact fun f ↦ h <| T.standardProvability.mem_localReflectionOn_iff.mpr
+      ⟨_, by simp [interpret, standardProvability_def], rfl⟩;
+
+lemma S_weakerThan_provabilityLogic_of_provable_localReflection
+    (h : U ⊢* 𝗥𝗳𝗻[Set.univ] T) :
+    𝐒 ⪯ T.provabilityLogicRelativeTo U (α := α) := by
+  apply sumQuasiNormal_weakerThan_provabilityLogic;
+  rintro _ ⟨C, rfl⟩ f;
+  exact h ⟨_, trivial, rfl⟩;
+
+end
+
+section
+
+open FirstOrder.Arithmetic
+
+variable [U.Δ₁] [𝗜𝚺₁ ⪯ T]
+
+omit [T.Δ₁] in
+local instance : 𝗜𝚺₁ ⪯ T ∪ U.Con := (inferInstance : 𝗜𝚺₁ ⪯ T).trans inferInstance
+
+lemma trace_provabilityLogic_add_con_eq_univ
+    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
+    (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+    (T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α)).trace = .univ := by
+  apply Set.eq_univ_of_forall;
+  intro n;
+  apply mem_trace_provabilityLogic_iff.mpr;
+  intro f;
+  have h₁ : T ∪ U.Con ⊢ ∼U.standardProvability ⊥ := by_axm <| Set.mem_union_right _ rfl;
+  have h₂ : T ∪ U.Con ⊢ T.standardProvability^[n + 1] ⊥ 🡒 U.standardProvability ⊥ :=
+    WeakerThan.pbl <| provable_iterate_standardProvability_bot_imp hTU hU n;
+  simp only [alpha, standardInterpret, interpret, interpret_boxItr];
+  cl_prover [h₁, h₂];
+
+lemma A_weakerThan_provabilityLogic_add_con
+    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
+    (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+    𝐀 ⪯ T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) :=
+  A_weakerThan_provabilityLogic <| trace_provabilityLogic_add_con_eq_univ hTU hU
+
+/-- - [AB05, Example 63] -/
+theorem provabilityLogic_add_con_eq_A
+    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
+    (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) (hC : Consistent (T ∪ U.Con)) :
+    T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) = 𝐀 := by
+  apply Logic.weakerThan_antisymm;
+  · by_contra! h;
+    obtain ⟨-, A, hAA, hAL⟩ :=
+      strictlyWeakerThan_iff.mp ⟨A_weakerThan_provabilityLogic_add_con hTU hU, h⟩;
+    have h₁ : T ∪ U.Con ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T :=
+      provable_localReflectionOn_sigma1_of_mem_of_not_A
+        (trace_provabilityLogic_add_con_eq_univ hTU hU) hAL hAA;
+    rw [Set.union_singleton] at h₁ hC;
+    exact (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+      (fun _ hσ ↦ by simpa using hσ)
+      (by simp : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 _) h₁).not_con hC;
+  · exact A_weakerThan_provabilityLogic_add_con hTU hU;
 
 end
 
