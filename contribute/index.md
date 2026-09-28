@@ -1,6 +1,6 @@
 # Contributing to Foundation
 
-How to contribute to Foundation: the flow to `master`, PR/commit titles, pre-submission checks, and disclosure of AI involvement. For the coding conventions of the Lean sources, see [style.md](./style.md).
+How to contribute to Foundation: the flow to `master`, PR/commit titles, pre-submission checks, the PR body, and disclosure of AI involvement. For the coding conventions of the Lean sources, see [style.md](./style.md).
 
 Items marked 🤖 are especially directed at AI coding agents.
 
@@ -46,6 +46,25 @@ PRs (title and body) are written in English.
   just format-references
   ```
 - 🤖 No development-time artifacts survive in the code — plan references, issue numbers, step numbers, stale skeleton-era comments. See [style.md](./style.md#stale-comments-and-planning-artifacts).
+
+## PR body
+
+Every PR body follows [the template](../.github/pull_request_template.md), which has two sections:
+
+- `## Comment` — a human's brief account of the intent. It may be left empty when the PR is opened and filled in later on GitHub by anyone involved.
+- `## LLM/Summary` — 🤖 written by the coding agent: the source and subject of the change in two or three sentences. Leave out build results and checklists, which CI already verifies.
+
+🤖 Agents use this template by default, even when opening the PR from the command line (e.g. `gh pr create --body`), leave `## Comment` empty unless told what to put there, and end the body with their own attribution line, for example:
+
+```
+## Comment
+
+## LLM/Summary
+
+...
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+```
 
 ## Disclosing AI involvement
 
