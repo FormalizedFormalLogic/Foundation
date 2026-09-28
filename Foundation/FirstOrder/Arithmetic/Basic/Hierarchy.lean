@@ -16,23 +16,23 @@ lemma arithmetic_ball {Γ s n} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
     t.Positive → ℬ[<, L].Hierarchy Γ s φ →
       ℬ[<, L].Hierarchy Γ s (∀¹[“x. x < !!t”] φ) :=
-  Hierarchy.ball (R := Semiformula.Operator.LT.lt) (by rfl)
+  HierarchyOn.ball (R := Semiformula.Operator.LT.lt) (by rfl)
 
 lemma arithmetic_bexs {Γ s n} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} :
     t.Positive → ℬ[<, L].Hierarchy Γ s φ →
       ℬ[<, L].Hierarchy Γ s (∃¹[“x. x < !!t”] φ) :=
-  Hierarchy.bexs (R := Semiformula.Operator.LT.lt) (by rfl)
+  HierarchyOn.bexs (R := Semiformula.Operator.LT.lt) (by rfl)
 
 @[simp] lemma arithmetic_ball_iff {Γ s n} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} (ht : t.Positive) :
     ℬ[<, L].Hierarchy Γ s (∀¹[“x. x < !!t”] φ) ↔ ℬ[<, L].Hierarchy Γ s φ :=
-  Hierarchy.ball_iff (R := Semiformula.Operator.LT.lt) (by rfl) ht
+  HierarchyOn.ball_iff (R := Semiformula.Operator.LT.lt) (by rfl) ht
 
 @[simp] lemma arithmetic_bexs_iff {Γ s n} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} (ht : t.Positive) :
     ℬ[<, L].Hierarchy Γ s (∃¹[“x. x < !!t”] φ) ↔ ℬ[<, L].Hierarchy Γ s φ :=
-  Hierarchy.bexs_iff (R := Semiformula.Operator.LT.lt) (by rfl) ht
+  HierarchyOn.bexs_iff (R := Semiformula.Operator.LT.lt) (by rfl) ht
 
 @[simp] lemma arithmetic_ballLT_iff {Γ s n} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ n} :

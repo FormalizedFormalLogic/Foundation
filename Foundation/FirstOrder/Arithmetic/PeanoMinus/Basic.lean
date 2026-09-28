@@ -149,7 +149,7 @@ lemma equiv_singleton_finiteConj :
       Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
         rcases hσ with rfl; exact hConj⟩
 
-open StrictHierarchy in
+open Bounding Bounding.HierarchyOn Bounding.StrictHierarchy in
 /--
 Every axiom of `𝗣𝗔⁻` is strict `Π₁`: a block of universal quantifiers over a `Δ₀` matrix.
 The bounded shape of `Axiom.addEqOfLt` is what makes this hold; an unbounded `∃ z` would not
@@ -158,32 +158,32 @@ be `Δ₀`.
 No citation: this is a routine inspection of the axiom list rather than a result from the
 literature.
 -/
-theorem strictHierarchy : ∀ φ ∈ 𝗣𝗔⁻, StrictHierarchy 𝚷 1 φ := by
+theorem strictHierarchy : ∀ φ ∈ 𝗣𝗔⁻, ℬ[<, ℒₒᵣ].StrictHierarchy 𝚷 1 φ := by
   rintro φ ⟨⟩
   case equal h =>
     rcases h
-    case refl => exact all (of_deltaZero (by simp))
-    case symm => exact all (all (of_deltaZero (by simp)))
-    case trans => exact all (all (all (of_deltaZero (by simp))))
-    case funcExt => exact StrictHierarchy.allClosure (of_deltaZero (by simp))
-    case relExt => exact StrictHierarchy.allClosure (of_deltaZero (by simp))
-  case addZero => exact all (of_deltaZero (by simp))
-  case addAssoc => exact all (all (all (of_deltaZero (by simp))))
-  case addComm => exact all (all (of_deltaZero (by simp)))
-  case addEqOfLt => exact all (all (of_deltaZero (by simp)))
-  case zeroLe => exact all (of_deltaZero (by simp))
-  case zeroLtOne => exact of_deltaZero (by simp)
-  case oneLeOfZeroLt => exact all (of_deltaZero (by simp))
-  case addLtAdd => exact all (all (all (of_deltaZero (by simp))))
-  case mulZero => exact all (of_deltaZero (by simp))
-  case mulOne => exact all (of_deltaZero (by simp))
-  case mulAssoc => exact all (all (all (of_deltaZero (by simp))))
-  case mulComm => exact all (all (of_deltaZero (by simp)))
-  case mulLtMul => exact all (all (all (of_deltaZero (by simp))))
-  case distr => exact all (all (all (of_deltaZero (by simp))))
-  case ltIrrefl => exact all (of_deltaZero (by simp))
-  case ltTrans => exact all (all (all (of_deltaZero (by simp))))
-  case ltTri => exact all (all (of_deltaZero (by simp)))
+    case refl => exact all (of_deltaZero (Γ' := 𝚺) (by simp))
+    case symm => exact all (all (of_deltaZero (Γ' := 𝚺) (by simp)))
+    case trans => exact all (all (all (of_deltaZero (Γ' := 𝚺) (by simp))))
+    case funcExt => exact HierarchyOn.allClosure (of_deltaZero (Γ' := 𝚺) (by simp))
+    case relExt => exact HierarchyOn.allClosure (of_deltaZero (Γ' := 𝚺) (by simp))
+  case addZero => exact all (of_deltaZero (Γ' := 𝚺) (by simp))
+  case addAssoc => exact all (all (all (of_deltaZero (Γ' := 𝚺) (by simp))))
+  case addComm => exact all (all (of_deltaZero (Γ' := 𝚺) (by simp)))
+  case addEqOfLt => exact all (all (of_deltaZero (Γ' := 𝚺) (by simp)))
+  case zeroLe => exact all (of_deltaZero (Γ' := 𝚺) (by simp))
+  case zeroLtOne => exact of_deltaZero (Γ' := 𝚺) (by simp)
+  case oneLeOfZeroLt => exact all (of_deltaZero (Γ' := 𝚺) (by simp))
+  case addLtAdd => exact all (all (all (of_deltaZero (Γ' := 𝚺) (by simp))))
+  case mulZero => exact all (of_deltaZero (Γ' := 𝚺) (by simp))
+  case mulOne => exact all (of_deltaZero (Γ' := 𝚺) (by simp))
+  case mulAssoc => exact all (all (all (of_deltaZero (Γ' := 𝚺) (by simp))))
+  case mulComm => exact all (all (of_deltaZero (Γ' := 𝚺) (by simp)))
+  case mulLtMul => exact all (all (all (of_deltaZero (Γ' := 𝚺) (by simp))))
+  case distr => exact all (all (all (of_deltaZero (Γ' := 𝚺) (by simp))))
+  case ltIrrefl => exact all (of_deltaZero (Γ' := 𝚺) (by simp))
+  case ltTrans => exact all (all (all (of_deltaZero (Γ' := 𝚺) (by simp))))
+  case ltTri => exact all (all (of_deltaZero (Γ' := 𝚺) (by simp)))
 
 set_option linter.flexible false in
 @[simp] instance : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ⟨by

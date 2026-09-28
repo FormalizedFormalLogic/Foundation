@@ -1040,14 +1040,14 @@ lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
   induction ψ using Semiformula.rec' with
   | hverum => intro _; simp
   | hfalsum => intro _; simp
-  | hrel R v => intro _; exact Bounding.Hierarchy.rel (ℬ := ℬ[<, ℒₒᵣ]) _ _ _ _
-  | hnrel R v => intro _; exact Bounding.Hierarchy.nrel (ℬ := ℬ[<, ℒₒᵣ]) _ _ _ _
+  | hrel R v => intro _; exact .rel _ _ _ _
+  | hnrel R v => intro _; exact .nrel _ _ _ _
   | hand φ ψ ihφ ihψ =>
     intro h; rw [Semiformula.quote_and (V := ℕ) φ ψ, IsSigma1.and_iff] at h
-    exact Bounding.Hierarchy.and (ℬ := ℬ[<, ℒₒᵣ]) (ihφ h.1) (ihψ h.2)
+    exact .and (ihφ h.1) (ihψ h.2)
   | hor φ ψ ihφ ihψ =>
     intro h; rw [Semiformula.quote_or (V := ℕ) φ ψ, IsSigma1.or_iff] at h
-    exact Bounding.Hierarchy.or (ℬ := ℬ[<, ℒₒᵣ]) (ihφ h.1) (ihψ h.2)
+    exact .or (ihφ h.1) (ihψ h.2)
   | hall φ ihφ =>
     intro h
     rw [Semiformula.quote_all (V := ℕ) φ] at h
@@ -1072,13 +1072,13 @@ lemma hierarchy_of_isSigma1 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     have hφ2 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ₂ := by
       have hform : φ = (“#0 < !!(Rew.bShift s)” 🡒 φ₂) :=
         (Semiformula.all_inj _ _).mp (by rw [← Semiformula.ball_eq]; exact heq)
-      rw [hform, Semiformula.imp_eq, Bounding.Hierarchy.or_iff] at hφ
-      exact hφ.2
+      rw [hform, Semiformula.imp_eq] at hφ
+      exact (Bounding.HierarchyOn.or_iff.mp hφ).2
     rw [heq]
     exact Bounding.Hierarchy.arithmetic_ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
   | hexs φ ihφ =>
     intro h; rw [Semiformula.quote_ex (V := ℕ) φ, IsSigma1.ex_iff] at h
-    exact Bounding.Hierarchy.exs (ℬ := ℬ[<, ℒₒᵣ]) (ihφ h)
+    exact .exs (ihφ h)
 
 /-- Correctness of the `𝚺ᴬ₁`-code recognizer. -/
 lemma isSigma1_iff_hierarchy {n : ℕ} (ψ : ArithmeticSemiproposition n) :

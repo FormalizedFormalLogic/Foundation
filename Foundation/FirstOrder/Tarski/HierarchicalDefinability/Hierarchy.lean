@@ -105,10 +105,10 @@ def mkPolarity (φ : FirstOrder.Semiformula L ξ n) :
 
 @[simp] lemma hierarchy_zero {Γ Γ' m} (φ : Γ-[ℬ, 0].Semiformula ξ n) : ℬ.Hierarchy Γ' m φ.val := by
   cases Γ
-  · exact Hierarchy.of_zero φ.sigma_prop
-  · exact Hierarchy.of_zero φ.pi_prop
+  · exact HierarchyOn.of_zero φ.sigma_prop
+  · exact HierarchyOn.of_zero φ.pi_prop
   · cases φ
-    simpa using Hierarchy.of_zero (sigma_prop _)
+    simpa using HierarchyOn.of_zero (sigma_prop _)
 
 lemma hierarchy_of_lt {C : HierarchySymbol ℬ} {Γ : Polarity} {s : ℕ} (φ : C.Semiformula ξ n)
     (h : C.rank < s) : ℬ.Hierarchy Γ s φ.val := by
@@ -433,8 +433,8 @@ def graphDelta [L.Eq] (φ : 𝚺-[ℬ, m].Semiformula ξ (k + 1)) : 𝚫-[ℬ, m
   match m with
   |     0 => φ.ofZero _
   | m + 1 => mkDelta φ (mkPi “x. ∀ y, !φ.val y ⋯ → y = x” (by
-      apply Hierarchy.all
-      apply Hierarchy.imp_iff.mpr
+      apply HierarchyOn.all
+      apply HierarchyOn.imp_iff.mpr
       exact ⟨φ.sigma_prop.rew _, by simp [FirstOrder.Semiformula.Operator.eq_def]⟩))
 
 @[simp] lemma graphDelta_val [L.Eq] (φ : 𝚺-[ℬ, m].Semiformula ξ (k + 1)) : φ.graphDelta.val =

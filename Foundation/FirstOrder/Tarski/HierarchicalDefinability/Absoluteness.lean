@@ -94,7 +94,7 @@ lemma sigma_one_upward {n} {φ : Semiformula L ξ n} (hφ : ℬ.Hierarchy 𝚺 1
     (e : Fin n → M) (ε : ξ → M) :
     φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε) := by
   revert e ε
-  apply Hierarchy.sigma_succ_induction (s := 0) (P := fun n φ ↦ ∀ (e : Fin n → M) (ε : ξ → M),
+  apply HierarchyOn.sigma_succ_induction (s := 0) (P := fun n φ ↦ ∀ (e : Fin n → M) (ε : ξ → M),
     φ.Eval e ε → φ.Eval (ι ∘ e) (ι ∘ ε)) _ _ _ _ _ _ n φ hφ
   · intro n φ h e ε
     exact (bounded_absolute ι (Hierarchy.zero_iff_bounded.mp h) e ε).mp
