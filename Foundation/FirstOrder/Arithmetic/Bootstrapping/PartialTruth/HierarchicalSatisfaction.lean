@@ -113,6 +113,10 @@ def PiSatisfaction : ℕ → V → V → Prop
 
 end
 
+def HierarchicalSatisfaction : Polarity → ℕ → V → V → Prop
+  | .sigma, n, z, e => SigmaSatisfaction n z e
+  | .pi, n, z, e => PiSatisfaction n z e
+
 noncomputable def piOfSigma (m : ℕ) (σ : 𝚺ᴬ-[m + 1].Semisentence 2) :
     𝚷ᴬ-[m + 1].Semisentence 2 := .mkPi
   “z e. !(isStrictHierarchy 𝚷 (m + 1)).pi z ∧ !(isUFormula ℒₒᵣ).pi z ∧

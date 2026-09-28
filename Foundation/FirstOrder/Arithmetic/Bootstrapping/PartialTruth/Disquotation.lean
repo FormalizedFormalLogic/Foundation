@@ -56,13 +56,9 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)];
     simp [Function.comp_def];
 
-def StrictSatisfaction : Polarity → ℕ → V → V → Prop
-  | .sigma, n, z, e => SigmaSatisfaction n z e
-  | .pi, n, z, e => PiSatisfaction n z e
-
-lemma strictSatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
+lemma hierarchicalSatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) :
-    ∀ v : Fin k → V, StrictSatisfaction Γ s (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
+    ∀ v : Fin k → V, HierarchicalSatisfaction Γ s (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
   induction h with
   | @zero Γ₀ n₀ φ₀ hφ₀ =>
     intro v;
@@ -103,10 +99,10 @@ section
 variable {n k : ℕ} {φ : ArithmeticSemisentence k}
 
 theorem sigmaSatisfaction_quote_iff (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
-    SigmaSatisfaction n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := strictSatisfaction_quote_iff hφ v
+    SigmaSatisfaction n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := hierarchicalSatisfaction_quote_iff hφ v
 
 theorem piSatisfaction_quote_iff (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
-    PiSatisfaction n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := strictSatisfaction_quote_iff hφ v
+    PiSatisfaction n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := hierarchicalSatisfaction_quote_iff hφ v
 
 end
 
@@ -330,11 +326,11 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
 /-! ### The strict prenex induction -/
 
 include hM in
-private lemma strictSatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
+private lemma hierarchicalSatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
     {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) (hs : s ≤ n + 1) :
     ∀ (v : Fin k → M) (ev : M), Codes v ev →
-      (Reading.StrictSatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+      (Reading.HierarchicalSatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   revert hs;
   induction h with
   | @zero Γ₀ m₀ φ₀ hφ₀ =>
@@ -380,7 +376,7 @@ include hM in
 theorem sigmaSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) {v : Fin k → M} {ev : M} (hev : Codes v ev) :
     Reading.SigmaSatisfaction n ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ :=
-  strictSatisfaction_quote_reading hM hφ le_rfl v ev hev
+  hierarchicalSatisfaction_quote_reading hM hφ le_rfl v ev hev
 
 /-! ### Assembling the disquotation lemma over `𝗣𝗔⁻` -/
 
@@ -422,8 +418,8 @@ theorem provable_disquotation_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence
   constructor;
   · intro h;
     obtain ⟨ev, hev⟩ := exists_codes hM e;
-    exact ⟨ev, hev, (strictSatisfaction_quote_reading hM hφ le_rfl e ev hev).mpr h⟩;
+    exact ⟨ev, hev, (hierarchicalSatisfaction_quote_reading hM hφ le_rfl e ev hev).mpr h⟩;
   · rintro ⟨ev, hev, hsat⟩;
-    exact (strictSatisfaction_quote_reading hM hφ le_rfl e ev hev).mp hsat;
+    exact (hierarchicalSatisfaction_quote_reading hM hφ le_rfl e ev hev).mp hsat;
 
 end FFL.FirstOrder.Arithmetic
