@@ -50,3 +50,29 @@ elab (name := disj) "disj " i:num : tactic =>
   liftMetaTactic1 fun goal => selectDisjunct goal i.getNat
 
 end Mathlib.Tactic
+
+end
+
+section
+
+variable {p q r s : Prop}
+
+example (hp : p) : p ∨ q ∨ r ∨ s := by disj 1; exact hp
+
+example (hq : q) : p ∨ q ∨ r ∨ s := by disj 2; exact hq
+
+example (hr : r) : p ∨ q ∨ r ∨ s := by disj 3; exact hr
+
+example (hs : s) : p ∨ q ∨ r ∨ s := by disj 4; exact hs
+
+example (hp : p) : p ∨ q := by disj 1; exact hp
+
+example (hp : p) : p ∨ q := by
+  fail_if_success disj 0;
+  fail_if_success disj 3;
+  disj 1;
+  exact hp;
+
+example (hq : q) : p ∨ (q ∨ r) ∨ s := by disj 2; disj 1; exact hq
+
+end
