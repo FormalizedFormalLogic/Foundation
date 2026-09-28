@@ -95,7 +95,11 @@ abbrev _root_.FFL.FirstOrder.ArithmeticTheory.provabilityLogic (T : ArithmeticTh
 
 section
 
-variable {T U : ArithmeticTheory} [T.Δ₁] {A B : Formula α}
+variable {T U V : ArithmeticTheory} [T.Δ₁] {A B : Formula α}
+
+lemma provabilityLogic_weakerThan_of_weakerThan [U ⪯ V] :
+    T.provabilityLogicRelativeTo U (α := α) ⪯ T.provabilityLogicRelativeTo V :=
+  ⟨fun _ hA f ↦ Entailment.WeakerThan.pbl (hA f)⟩
 
 lemma provabilityLogic_mdp
     (h₁ : (A 🡒 B) ∈ T.provabilityLogicRelativeTo U)

@@ -825,4 +825,7 @@ instance (T : ArithmeticTheory) [𝗣𝗔 ⪯ T] : 𝗣𝗔⁻ ⪯ T :=
   have : 𝗣𝗔⁻ ⪯ 𝗣𝗔 := inferInstance
   Entailment.WeakerThan.trans this inferInstance
 
+instance (T U : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] : 𝗜𝚺₁ ⪯ T ∪ U :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ T) inferInstance
+
 end FFL.FirstOrder.Arithmetic
