@@ -1,6 +1,5 @@
 module
 
-public import Foundation.Vorspiel.Tactic.Disj
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!

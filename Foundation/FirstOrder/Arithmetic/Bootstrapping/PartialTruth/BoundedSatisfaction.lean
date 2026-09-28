@@ -2,7 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.BoundedSatisfactionTable
 public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
-import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Ring.RingNF
 
 /-!
 # Satisfaction for $\Delta_0$ formulas
