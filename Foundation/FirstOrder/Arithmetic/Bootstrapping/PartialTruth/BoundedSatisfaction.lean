@@ -3,7 +3,6 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Bounded
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.FamilyRec
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.TermVal
-import Mathlib.Tactic.Bound
 
 /-!
 # Satisfaction for $\Delta_0$ formulas
@@ -28,18 +27,16 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## The truth value -/
 
-attribute [local instance] Classical.propDecidable
-
 namespace BoundedSatValue
 
 /-- The term `u` of `(^#0 ^≮ u) ^⋎ q` and of `(^#0 ^< u) ^⋏ q`. -/
 noncomputable def boundTerm (p : V) : V := (π₂ (π₂ (π₂ (π₁ (π₂ (p - 1)) - 1)))).[1]
 
 @[simp] lemma boundTerm_ball (u q : V) : boundTerm ((^#0 ^≮ u) ^⋎ q) = u := by
-  simp [boundTerm, qqOr, Arithmetic.qqNLT, qqNRel]
+  simp [boundTerm, qqOr, Arithmetic.qqNLT, qqNRel];
 
 @[simp] lemma boundTerm_bex (u q : V) : boundTerm ((^#0 ^< u) ^⋏ q) = u := by
-  simp [boundTerm, qqAnd, Arithmetic.qqLT, qqRel]
+  simp [boundTerm, qqAnd, Arithmetic.qqLT, qqRel];
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 lemma numeral_eqIndex : (ORingStructure.numeral Arithmetic.eqIndex : V) = 0 := rfl
@@ -78,6 +75,7 @@ noncomputable def blueprint : UformulaFamilyRec.Blueprint where
     ∃ u, !nthDef u w 1 ∧ ∃ e', !adjoinDef e' 0 e ∧ !termValGraph n e' u”
   changes := .mkSigma “e' e i. !adjoinDef e' i e”
 
+open Classical in
 noncomputable def construction : UformulaFamilyRec.Construction V blueprint where
   rel e _ r v := if r = Arithmetic.eqIndex ∧ termVal e v.[0] = termVal e v.[1] ∨
     r ≠ Arithmetic.eqIndex ∧ termVal e v.[0] < termVal e v.[1] then 1 else 0
@@ -92,29 +90,29 @@ noncomputable def construction : UformulaFamilyRec.Construction V blueprint wher
   size e p := termVal (0 ∷ e) (boundTerm p)
   changes e i := i ∷ e
   rel_defined := .mk fun v ↦ by
-    simp [blueprint, (termVal.defined (V := V)).df, numeral_eqIndex]
-    grind
+    simp [blueprint, (termVal.defined (V := V)).df, numeral_eqIndex];
+    grind;
   nrel_defined := .mk fun v ↦ by
-    simp [blueprint, (termVal.defined (V := V)).df, numeral_eqIndex]
-    grind
+    simp [blueprint, (termVal.defined (V := V)).df, numeral_eqIndex];
+    grind;
   verum_defined := .mk fun v ↦ by simp [blueprint]
   falsum_defined := .mk fun v ↦ by simp [blueprint]
   and_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
-      IsBounded.defined.proper.iff']
-    grind
+      IsBounded.defined.proper.iff'];
+    grind;
   or_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
-      IsBounded.defined.proper.iff']
-    grind
+      IsBounded.defined.proper.iff'];
+    grind;
   all_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
-      IsBounded.defined.proper.iff']
-    grind
+      IsBounded.defined.proper.iff'];
+    grind;
   exs_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
-      IsBounded.defined.proper.iff']
-    split_ifs <;> simp_all
+      IsBounded.defined.proper.iff'];
+    split_ifs <;> simp_all;
   size_defined := .mk fun v ↦ by simp [blueprint, boundTerm, (termVal.defined (V := V)).df]
   changes_defined := .mk fun v ↦ by simp [blueprint]
   changes_monotone h := adjoin_le_adjoin h le_rfl
@@ -139,30 +137,34 @@ section value
 variable {e t u p q : V}
 
 @[simp] lemma boundedSatValue_verum : boundedSatValue e (^⊤ : V) = 1 := by
-  simp [boundedSatValue, construction]
+  simp [boundedSatValue, construction];
 
 @[simp] lemma boundedSatValue_falsum : boundedSatValue e (^⊥ : V) = 0 := by
-  simp [boundedSatValue, construction]
+  simp [boundedSatValue, construction];
 
 section
 variable (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
 include ht hu
 
+open Classical in
 @[simp] lemma boundedSatValue_eq :
     boundedSatValue e (t ^= u) = if termVal e t = termVal e u then 1 else 0 := by
-  simp [boundedSatValue, construction, Arithmetic.qqEQ, ht, hu]
+  simp [boundedSatValue, construction, Arithmetic.qqEQ, ht, hu];
 
+open Classical in
 @[simp] lemma boundedSatValue_neq :
     boundedSatValue e (t ^≠ u) = if termVal e t = termVal e u then 0 else 1 := by
-  simp [boundedSatValue, construction, Arithmetic.qqNEQ, ht, hu]
+  simp [boundedSatValue, construction, Arithmetic.qqNEQ, ht, hu];
 
+open Classical in
 @[simp] lemma boundedSatValue_lt :
     boundedSatValue e (t ^< u) = if termVal e t < termVal e u then 1 else 0 := by
-  simp [boundedSatValue, construction, Arithmetic.qqLT, ht, hu]
+  simp [boundedSatValue, construction, Arithmetic.qqLT, ht, hu];
 
+open Classical in
 @[simp] lemma boundedSatValue_nlt :
     boundedSatValue e (t ^≮ u) = if termVal e t < termVal e u then 0 else 1 := by
-  simp [boundedSatValue, construction, Arithmetic.qqNLT, ht, hu]
+  simp [boundedSatValue, construction, Arithmetic.qqNLT, ht, hu];
 
 end
 
@@ -170,79 +172,85 @@ section
 variable (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q)
 include hp hq
 
+open Classical in
 @[simp] lemma boundedSatValue_and :
     boundedSatValue e (p ^⋏ q) = if IsBounded p ∧ IsBounded q then
       (if boundedSatValue e p = 1 ∧ boundedSatValue e q = 1 then 1 else 0) else 2 := by
-  rw [boundedSatValue, UformulaFamilyRec.Construction.result_and hp hq]; rfl
+  rw [boundedSatValue, UformulaFamilyRec.Construction.result_and hp hq]; rfl;
 
+open Classical in
 @[simp] lemma boundedSatValue_or :
     boundedSatValue e (p ^⋎ q) = if IsBounded p ∧ IsBounded q then
       (if boundedSatValue e p = 1 ∨ boundedSatValue e q = 1 then 1 else 0) else 2 := by
-  rw [boundedSatValue, UformulaFamilyRec.Construction.result_or hp hq]; rfl
+  rw [boundedSatValue, UformulaFamilyRec.Construction.result_or hp hq]; rfl;
 
 end
 
+open Classical in
 lemma boundedSatValue_all (hp : IsUFormula ℒₒᵣ p) :
     boundedSatValue e (^∀ p) = if IsBounded (^∀ p) then
       (if ∀ x < termVal (0 ∷ e) (boundTerm p), boundedSatValue (x ∷ e) p = 1 then 1 else 0)
       else 2 := by
-  obtain ⟨ys, ⟨hl, hys⟩, h⟩ := construction.result_all (param := e) hp
+  obtain ⟨ys, ⟨hl, hys⟩, h⟩ := construction.result_all (param := e) hp;
   have H : (∀ i < len ys, ys.[i] = 1) ↔
       ∀ x < termVal (0 ∷ e) (boundTerm p), boundedSatValue (x ∷ e) p = 1 := by
-    rw [hl]; exact forall₂_congr fun i hi ↦ by rw [hys i hi]; rfl
-  rw [boundedSatValue, h]
-  exact if_congr Iff.rfl (if_congr H rfl rfl) rfl
+    rw [hl]; exact forall₂_congr fun i hi ↦ by rw [hys i hi]; rfl;
+  rw [boundedSatValue, h];
+  exact if_congr Iff.rfl (if_congr H rfl rfl) rfl;
 
+open Classical in
 lemma boundedSatValue_exs (hp : IsUFormula ℒₒᵣ p) :
     boundedSatValue e (^∃ p) = if IsBounded (^∃ p) then
       (if ∃ x < termVal (0 ∷ e) (boundTerm p), boundedSatValue (x ∷ e) p = 1 then 1 else 0)
       else 2 := by
-  obtain ⟨ys, ⟨hl, hys⟩, h⟩ := construction.result_exs (param := e) hp
+  obtain ⟨ys, ⟨hl, hys⟩, h⟩ := construction.result_exs (param := e) hp;
   have H : (∃ i < len ys, ys.[i] = 1) ↔
       ∃ x < termVal (0 ∷ e) (boundTerm p), boundedSatValue (x ∷ e) p = 1 := by
-    rw [hl]; exact exists_congr fun i ↦ and_congr_right fun hi ↦ by rw [hys i hi]; rfl
-  rw [boundedSatValue, h]
-  exact if_congr Iff.rfl (if_congr H rfl rfl) rfl
+    rw [hl]; exact exists_congr fun i ↦ and_congr_right fun hi ↦ by rw [hys i hi]; rfl;
+  rw [boundedSatValue, h];
+  exact if_congr Iff.rfl (if_congr H rfl rfl) rfl;
 
 section
 variable (ht : IsUTerm ℒₒᵣ t) (hq : IsUFormula ℒₒᵣ q)
 include ht hq
 
+open Classical in
 @[simp] lemma boundedSatValue_ball :
     boundedSatValue e (qqBall (termBShift ℒₒᵣ t) q) = if IsBounded q then
       (if ∀ x < termVal e t, boundedSatValue (x ∷ e) q = 1 then 1 else 0) else 2 := by
   have hb : IsBounded (qqBall (termBShift ℒₒᵣ t) q) ↔ IsBounded q :=
-    ⟨IsBounded.of_qqBall, IsBounded.ball ht⟩
-  have hg : IsUFormula ℒₒᵣ (^#0 ^≮ termBShift ℒₒᵣ t) := by simp [Arithmetic.qqNLT, ht.termBShift]
-  rw [qqBall] at hb ⊢
-  rw [boundedSatValue_all (by simp [hg, hq]), hb, boundTerm_ball, termVal_termBShift ht]
-  by_cases hbq : IsBounded q
+    ⟨IsBounded.of_qqBall, IsBounded.ball ht⟩;
+  have hg : IsUFormula ℒₒᵣ (^#0 ^≮ termBShift ℒₒᵣ t) := by simp [Arithmetic.qqNLT, ht.termBShift];
+  rw [qqBall] at hb ⊢;
+  rw [boundedSatValue_all (by simp [hg, hq]), hb, boundTerm_ball, termVal_termBShift ht];
+  by_cases hbq : IsBounded q;
   · have H : (∀ x < termVal e t,
         boundedSatValue (x ∷ e) ((^#0 ^≮ termBShift ℒₒᵣ t) ^⋎ q) = 1) ↔
         ∀ x < termVal e t, boundedSatValue (x ∷ e) q = 1 :=
       forall₂_congr fun x hx ↦ by
         simp [ht.termBShift, hg, hq, hbq, termVal_termBShift ht, hx,
-          show IsBounded (^#0 ^≮ termBShift ℒₒᵣ t) by simp [Arithmetic.qqNLT]]
-    exact if_congr Iff.rfl (if_congr H rfl rfl) rfl
-  · simp [hbq]
+          show IsBounded (^#0 ^≮ termBShift ℒₒᵣ t) by simp [Arithmetic.qqNLT]];
+    exact if_congr Iff.rfl (if_congr H rfl rfl) rfl;
+  · simp [hbq];
 
+open Classical in
 @[simp] lemma boundedSatValue_bex :
     boundedSatValue e (qqBex (termBShift ℒₒᵣ t) q) = if IsBounded q then
       (if ∃ x < termVal e t, boundedSatValue (x ∷ e) q = 1 then 1 else 0) else 2 := by
   have hb : IsBounded (qqBex (termBShift ℒₒᵣ t) q) ↔ IsBounded q :=
-    ⟨IsBounded.of_qqBex, IsBounded.bex ht⟩
-  have hg : IsUFormula ℒₒᵣ (^#0 ^< termBShift ℒₒᵣ t) := by simp [Arithmetic.qqLT, ht.termBShift]
-  rw [qqBex] at hb ⊢
-  rw [boundedSatValue_exs (by simp [hg, hq]), hb, boundTerm_bex, termVal_termBShift ht]
-  by_cases hbq : IsBounded q
+    ⟨IsBounded.of_qqBex, IsBounded.bex ht⟩;
+  have hg : IsUFormula ℒₒᵣ (^#0 ^< termBShift ℒₒᵣ t) := by simp [Arithmetic.qqLT, ht.termBShift];
+  rw [qqBex] at hb ⊢;
+  rw [boundedSatValue_exs (by simp [hg, hq]), hb, boundTerm_bex, termVal_termBShift ht];
+  by_cases hbq : IsBounded q;
   · have H : (∃ x < termVal e t,
         boundedSatValue (x ∷ e) ((^#0 ^< termBShift ℒₒᵣ t) ^⋏ q) = 1) ↔
         ∃ x < termVal e t, boundedSatValue (x ∷ e) q = 1 :=
       exists_congr fun x ↦ and_congr_right fun hx ↦ by
         simp [ht.termBShift, hg, hq, hbq, termVal_termBShift ht, hx,
-          show IsBounded (^#0 ^< termBShift ℒₒᵣ t) by simp [Arithmetic.qqLT]]
-    exact if_congr Iff.rfl (if_congr H rfl rfl) rfl
-  · simp [hbq]
+          show IsBounded (^#0 ^< termBShift ℒₒᵣ t) by simp [Arithmetic.qqLT]];
+    exact if_congr Iff.rfl (if_congr H rfl rfl) rfl;
+  · simp [hbq];
 
 end
 
@@ -268,14 +276,14 @@ instance BoundedSatisfaction.definable : 𝚫ᴬ₁-Relation (BoundedSatisfactio
 namespace BoundedSatisfaction
 
 lemma dom {z e : V} (h : BoundedSatisfaction z e) : IsBounded z ∧ IsUFormula ℒₒᵣ z := by
-  by_cases hz : IsUFormula ℒₒᵣ z
-  · suffices IsBounded z from ⟨this, hz⟩
-    by_contra hb
+  by_cases hz : IsUFormula ℒₒᵣ z;
+  · suffices IsBounded z from ⟨this, hz⟩;
+    by_contra hb;
     rcases hz.case with (⟨k, r, v, -, -, rfl⟩ | ⟨k, r, v, -, -, rfl⟩ | rfl | rfl |
       ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
-      simp_all [BoundedSatisfaction, boundedSatValue_all, boundedSatValue_exs, ite_eq_iff]
+      simp_all [BoundedSatisfaction, boundedSatValue_all, boundedSatValue_exs, ite_eq_iff];
   · simp [BoundedSatisfaction, boundedSatValue,
-      UformulaFamilyRec.Construction.result_prop_not _ hz] at h
+      UformulaFamilyRec.Construction.result_prop_not _ hz] at h;
 
 @[simp] lemma verum (e : V) : BoundedSatisfaction (^⊤ : V) e := by simp [BoundedSatisfaction]
 
@@ -286,34 +294,29 @@ variable {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
 include ht hu
 
 @[simp] lemma eq_iff : BoundedSatisfaction (t ^= u) e ↔ termVal e t = termVal e u := by
-  simp [BoundedSatisfaction, ht, hu]
+  simp [BoundedSatisfaction, ht, hu];
 
 @[simp] lemma neq_iff : BoundedSatisfaction (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
-  simp [BoundedSatisfaction, ht, hu]
+  simp [BoundedSatisfaction, ht, hu];
 
 @[simp] lemma lt_iff : BoundedSatisfaction (t ^< u) e ↔ termVal e t < termVal e u := by
-  simp [BoundedSatisfaction, ht, hu]
+  simp [BoundedSatisfaction, ht, hu];
 
 @[simp] lemma nlt_iff : BoundedSatisfaction (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
-  simp [BoundedSatisfaction, ht, hu]
+  simp [BoundedSatisfaction, ht, hu];
 
 end
 
 @[simp] lemma and_iff {p q e : V} :
     BoundedSatisfaction (p ^⋏ q) e ↔ BoundedSatisfaction p e ∧ BoundedSatisfaction q e := by
-  constructor
-  · intro h
-    obtain ⟨hb, hf⟩ := h.dom
-    simp_all [BoundedSatisfaction]
-  · rintro ⟨h₁, h₂⟩
-    have := h₁.dom
-    have := h₂.dom
-    simp_all [BoundedSatisfaction]
+  constructor;
+  · intro h; have := h.dom; simp_all [BoundedSatisfaction];
+  · rintro ⟨h₁, h₂⟩; have := h₁.dom; have := h₂.dom; simp_all [BoundedSatisfaction];
 
 @[simp] lemma or_iff {p q e : V} (hdp : IsBounded p) (hfp : IsUFormula ℒₒᵣ p)
     (hdq : IsBounded q) (hfq : IsUFormula ℒₒᵣ q) :
     BoundedSatisfaction (p ^⋎ q) e ↔ BoundedSatisfaction p e ∨ BoundedSatisfaction q e := by
-  simp [BoundedSatisfaction, hdp, hfp, hdq, hfq, or_iff_not_imp_left]
+  simp [BoundedSatisfaction, hdp, hfp, hdq, hfq, or_iff_not_imp_left];
 
 section
 variable {t q e : V} (ht : IsUTerm ℒₒᵣ t)
@@ -322,7 +325,7 @@ include ht
 @[simp] lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
     BoundedSatisfaction (qqBall (termBShift ℒₒᵣ t) q) e ↔
       ∀ x < termVal e t, BoundedSatisfaction q (x ∷ e) := by
-  simp [BoundedSatisfaction, ht, hq, hq']
+  simp [BoundedSatisfaction, ht, hq, hq'];
 
 @[simp] lemma bex_iff :
     BoundedSatisfaction (qqBex (termBShift ℒₒᵣ t) q) e ↔

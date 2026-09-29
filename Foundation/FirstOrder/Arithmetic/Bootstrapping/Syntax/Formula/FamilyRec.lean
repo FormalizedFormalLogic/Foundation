@@ -159,14 +159,14 @@ private lemma phi_iff (C pr : V) :
     rw [← hl];
     exact len_repeatVec_of_nth_le fun i hi ↦ le_of_lt <|
       lt_of_le_of_lt ((le_pair_right _ _).trans (le_pair_right _ _)) (lt_of_mem (hys i (hl ▸ hi)));
-  constructor
-  · rintro ⟨param, p, y, rfl, hp, H⟩
+  constructor;
+  · rintro ⟨param, p, y, rfl, hp, H⟩;
     refine ⟨param, by simp,
       p, le_trans (le_pair_left p y) (le_pair_right _ _),
-      y, le_trans (le_pair_right p y) (le_pair_right _ _), rfl, hp, ?_⟩
+      y, le_trans (le_pair_right p y) (le_pair_right _ _), rfl, hp, ?_⟩;
     rcases H with (⟨k, r, v, rfl, rfl⟩ | ⟨k, r, v, rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
       ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ |
-      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)
+      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩);
     · disj 1; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩;
     · disj 2; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩;
     · disj 3; exact ⟨rfl, rfl⟩;
@@ -179,13 +179,13 @@ private lemma phi_iff (C pr : V) :
         y₂, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₂), h₁, h₂, rfl, rfl⟩;
     · disj 7; exact ⟨p₁, by simp, ys, hrv hl hys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
     · disj 8; exact ⟨p₁, by simp, ys, hrv hl hys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
-  · rintro ⟨param, _, p, _, y, _, rfl, hp, H⟩
-    refine ⟨param, p, y, rfl, hp, ?_⟩
+  · rintro ⟨param, _, p, _, y, _, rfl, hp, H⟩;
+    refine ⟨param, p, y, rfl, hp, ?_⟩;
     rcases H with (⟨k, _, r, _, v, _, rfl, rfl⟩ | ⟨k, _, r, _, v, _, rfl, rfl⟩ |
       ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
       ⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ |
       ⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ |
-      ⟨p₁, _, ys, _, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, _, ys, _, ⟨hl, hys⟩, rfl, rfl⟩)
+      ⟨p₁, _, ys, _, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, _, ys, _, ⟨hl, hys⟩, rfl, rfl⟩);
     · disj 1; exact ⟨k, r, v, rfl, rfl⟩;
     · disj 2; exact ⟨k, r, v, rfl, rfl⟩;
     · disj 3; exact ⟨rfl, rfl⟩;
@@ -198,8 +198,8 @@ private lemma phi_iff (C pr : V) :
 def construction : Fixpoint.Construction V (β.blueprint L) where
   Φ := fun _ ↦ c.Phi L
   defined := .mk <| by
-    constructor
-    · intro v
+    constructor;
+    · intro v;
       simp [Blueprint.blueprint,
         c.rel_defined.iff, c.rel_defined.graph_delta.proper.iff',
         c.nrel_defined.iff, c.nrel_defined.graph_delta.proper.iff',
@@ -209,19 +209,19 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
         c.or_defined.iff, c.or_defined.graph_delta.proper.iff',
         c.all_defined.iff, c.all_defined.graph_delta.proper.iff',
         c.exs_defined.iff, c.exs_defined.graph_delta.proper.iff',
-        c.size_defined.iff, c.changes_defined.iff]
-    · intro v
-      symm
+        c.size_defined.iff, c.changes_defined.iff];
+    · intro v;
+      symm;
       simpa [Blueprint.blueprint, c.rel_defined.iff, c.nrel_defined.iff, c.verum_defined.iff,
         c.falsum_defined.iff, c.and_defined.iff, c.or_defined.iff, c.all_defined.iff,
-        c.exs_defined.iff, c.size_defined.iff, c.changes_defined.iff] using c.phi_iff L _ _
+        c.exs_defined.iff, c.size_defined.iff, c.changes_defined.iff] using c.phi_iff L _ _;
   monotone := by
-    unfold Phi
-    rintro C C' hC _ _ ⟨param, p, y, rfl, hp, H⟩
-    refine ⟨param, p, y, rfl, hp, ?_⟩
+    unfold Phi;
+    rintro C C' hC _ _ ⟨param, p, y, rfl, hp, H⟩;
+    refine ⟨param, p, y, rfl, hp, ?_⟩;
     rcases H with (h | h | h | h | ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ |
       ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ |
-      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)
+      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩);
     · disj 1; exact h;
     · disj 2; exact h;
     · disj 3; exact h;
@@ -239,23 +239,23 @@ instance : (c.construction L).Finite where
         pair_le_pair le_rfl (by simp);
     rcases h with ⟨param, p, y, rfl, hp, (h | h | h | h |
       ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ |
-      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)⟩
-    · exact ⟨0, param, _, _, rfl, hp, by disj 1; exact h⟩
-    · exact ⟨0, param, _, _, rfl, hp, by disj 2; exact h⟩
-    · exact ⟨0, param, _, _, rfl, hp, by disj 3; exact h⟩
-    · exact ⟨0, param, _, _, rfl, hp, by disj 4; exact h⟩
+      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)⟩;
+    · exact ⟨0, param, _, _, rfl, hp, by disj 1; exact h⟩;
+    · exact ⟨0, param, _, _, rfl, hp, by disj 2; exact h⟩;
+    · exact ⟨0, param, _, _, rfl, hp, by disj 3; exact h⟩;
+    · exact ⟨0, param, _, _, rfl, hp, by disj 4; exact h⟩;
     · exact ⟨Max.max ⟪param, p₁, y₁⟫ ⟪param, p₂, y₂⟫ + 1, param, _, _, rfl, hp, by
         disj 5;
         exact ⟨p₁, p₂, y₁, y₂, by simp [h₁, lt_succ_iff_le], by simp [h₂, lt_succ_iff_le], rfl,
-          rfl⟩⟩
+          rfl⟩⟩;
     · exact ⟨Max.max ⟪param, p₁, y₁⟫ ⟪param, p₂, y₂⟫ + 1, param, _, _, rfl, hp, by
         disj 6;
         exact ⟨p₁, p₂, y₁, y₂, by simp [h₁, lt_succ_iff_le], by simp [h₂, lt_succ_iff_le], rfl,
-          rfl⟩⟩
+          rfl⟩⟩;
     · exact ⟨_, param, _, _, rfl, hp, by
-        disj 7; exact ⟨p₁, ys, ⟨hl, fun i hi ↦ ⟨hys i hi, hlt hi⟩⟩, rfl, rfl⟩⟩
+        disj 7; exact ⟨p₁, ys, ⟨hl, fun i hi ↦ ⟨hys i hi, hlt hi⟩⟩, rfl, rfl⟩⟩;
     · exact ⟨_, param, _, _, rfl, hp, by
-        disj 8; exact ⟨p₁, ys, ⟨hl, fun i hi ↦ ⟨hys i hi, hlt hi⟩⟩, rfl, rfl⟩⟩
+        disj 8; exact ⟨p₁, ys, ⟨hl, fun i hi ↦ ⟨hys i hi, hlt hi⟩⟩, rfl, rfl⟩⟩;
 
 def Graph (param : V) (x y : V) : Prop := (c.construction L).Fixpoint ![] ⟪param, x, y⟫
 
@@ -281,16 +281,16 @@ lemma Graph.case_iff {p y : V} :
         ∀ i < c.size param p₁, c.Graph L (c.changes param i) p₁ ys.[i]) ∧
       p = ^∃ p₁ ∧ y = c.exs param p₁ ys)) :=
   Iff.trans (c.construction L).case (by
-    constructor
+    constructor;
     · rintro ⟨param, p', y', e, H⟩;
-      rcases show _ = param ∧ p = p' ∧ y = y' by simpa using e with ⟨rfl, rfl, rfl⟩
-      exact H
+      rcases show _ = param ∧ p = p' ∧ y = y' by simpa using e with ⟨rfl, rfl, rfl⟩;
+      exact H;
     · intro H; exact ⟨_, _, _, rfl, H⟩)
 
 variable (c β)
 
 lemma graph_defined : 𝚺ᴬ₁-Relation₃ c.Graph L via β.graph L := .mk fun v ↦ by
-  simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Matrix.empty_eq]; rfl
+  simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Matrix.empty_eq]; rfl;
 
 @[simp] lemma eval_graphDef (v : Fin 3 → V) :
     (β.graph L).val.Evalb v ↔ c.Graph L (v 0) (v 1) (v 2) := (graph_defined β c).iff
@@ -301,44 +301,43 @@ variable {β c}
 
 section
 
--- Local, since the connectives are otherwise kept folded.
 attribute [local simp] qqRel qqNRel qqVerum qqFalsum qqAnd qqOr qqAll qqExs
 
 lemma graph_rel_iff {k r v y : V} :
     c.Graph L param (^rel k r v) y ↔ IsUFormula L (^rel k r v) ∧ y = c.rel param k r v := by
-  rw [Graph.case_iff]; simp
+  rw [Graph.case_iff]; simp;
 
 lemma graph_nrel_iff {k r v y : V} :
     c.Graph L param (^nrel k r v) y ↔ IsUFormula L (^nrel k r v) ∧ y = c.nrel param k r v := by
-  rw [Graph.case_iff]; simp
+  rw [Graph.case_iff]; simp;
 
 lemma graph_verum_iff {y : V} : c.Graph L param ^⊤ y ↔ y = c.verum param := by
-  rw [Graph.case_iff, and_iff_right IsUFormula.verum]; simp
+  rw [Graph.case_iff, and_iff_right IsUFormula.verum]; simp;
 
 lemma graph_falsum_iff {y : V} : c.Graph L param ^⊥ y ↔ y = c.falsum param := by
-  rw [Graph.case_iff, and_iff_right IsUFormula.falsum]; simp
+  rw [Graph.case_iff, and_iff_right IsUFormula.falsum]; simp;
 
 lemma graph_and_iff {p₁ p₂ y : V} :
     c.Graph L param (p₁ ^⋏ p₂) y ↔ IsUFormula L (p₁ ^⋏ p₂) ∧
       ∃ y₁ y₂, c.Graph L param p₁ y₁ ∧ c.Graph L param p₂ y₂ ∧ y = c.and param p₁ p₂ y₁ y₂ := by
-  rw [Graph.case_iff]; simp
+  rw [Graph.case_iff]; simp;
 
 lemma graph_or_iff {p₁ p₂ y : V} :
     c.Graph L param (p₁ ^⋎ p₂) y ↔ IsUFormula L (p₁ ^⋎ p₂) ∧
       ∃ y₁ y₂, c.Graph L param p₁ y₁ ∧ c.Graph L param p₂ y₂ ∧ y = c.or param p₁ p₂ y₁ y₂ := by
-  rw [Graph.case_iff]; simp
+  rw [Graph.case_iff]; simp;
 
 lemma graph_all_iff {p₁ y : V} :
     c.Graph L param (^∀ p₁) y ↔ IsUFormula L (^∀ p₁) ∧ ∃ ys, (len ys = c.size param p₁ ∧
       ∀ i < c.size param p₁, c.Graph L (c.changes param i) p₁ ys.[i]) ∧
       y = c.all param p₁ ys := by
-  rw [Graph.case_iff]; simp
+  rw [Graph.case_iff]; simp;
 
 lemma graph_exs_iff {p₁ y : V} :
     c.Graph L param (^∃ p₁) y ↔ IsUFormula L (^∃ p₁) ∧ ∃ ys, (len ys = c.size param p₁ ∧
       ∀ i < c.size param p₁, c.Graph L (c.changes param i) p₁ ys.[i]) ∧
       y = c.exs param p₁ ys := by
-  rw [Graph.case_iff]; simp
+  rw [Graph.case_iff]; simp;
 
 end
 
@@ -348,73 +347,73 @@ lemma graph_dom_uformula {p r : V} : c.Graph L param p r → IsUFormula L p :=
 variable (param)
 
 lemma graph_exists {p : V} : IsUFormula L p → ∃ y, c.Graph L param p y := by
-  have : 𝚺ᴬ₁-Function₂ c.size := c.size_defined.to_definable
-  have : 𝚺ᴬ₁-Function₂ c.changes := c.changes_defined.to_definable
-  let f : V → V → V := fun p param ↦ max param (c.changes param (c.size param (π₂ (p - 1))))
-  have hf : 𝚺ᴬ₁-Function₂ f := by definability
-  apply bounded_all_sigma1_order_induction hf ?_ ?_ p param
-  · definability
-  intro p param ih hp
+  have : 𝚺ᴬ₁-Function₂ c.size := c.size_defined.to_definable;
+  have : 𝚺ᴬ₁-Function₂ c.changes := c.changes_defined.to_definable;
+  let f : V → V → V := fun p param ↦ max param (c.changes param (c.size param (π₂ (p - 1))));
+  have hf : 𝚺ᴬ₁-Function₂ f := by definability;
+  apply bounded_all_sigma1_order_induction hf ?_ ?_ p param;
+  · definability;
+  intro p param ih hp;
   have hfam {p₁ : V} (hp₁ : IsUFormula L p₁) (hp : p₁ < p) (hf : π₂ (p - 1) = p₁) :
       ∃ ys, len ys = c.size param p₁ ∧
         ∀ i < c.size param p₁, c.Graph L (c.changes param i) p₁ ys.[i] :=
     sigmaOne_skolem_vec (by definability) fun i hi ↦
-      ih p₁ hp _ (le_max_of_le_right <| by simpa [f, hf] using c.changes_monotone hi.le) hp₁
+      ih p₁ hp _ (le_max_of_le_right <| by simpa [f, hf] using c.changes_monotone hi.le) hp₁;
   rcases hp.case with
     (⟨k, r, v, hkr, hv, rfl⟩ | ⟨k, r, v, hkr, hv, rfl⟩ | rfl | rfl |
-    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
-  · exact ⟨_, graph_rel_iff.mpr ⟨hp, rfl⟩⟩
-  · exact ⟨_, graph_nrel_iff.mpr ⟨hp, rfl⟩⟩
-  · exact ⟨_, graph_verum_iff.mpr rfl⟩
-  · exact ⟨_, graph_falsum_iff.mpr rfl⟩
-  · obtain ⟨y₁, h₁⟩ := ih p₁ (by simp) param (by simp [f]) hp₁
-    obtain ⟨y₂, h₂⟩ := ih p₂ (by simp) param (by simp [f]) hp₂
-    exact ⟨_, graph_and_iff.mpr ⟨hp, y₁, y₂, h₁, h₂, rfl⟩⟩
-  · obtain ⟨y₁, h₁⟩ := ih p₁ (by simp) param (by simp [f]) hp₁
-    obtain ⟨y₂, h₂⟩ := ih p₂ (by simp) param (by simp [f]) hp₂
-    exact ⟨_, graph_or_iff.mpr ⟨hp, y₁, y₂, h₁, h₂, rfl⟩⟩
-  · obtain ⟨ys, hys⟩ := hfam hp₁ (by simp) (by simp [qqAll])
-    exact ⟨_, graph_all_iff.mpr ⟨hp, ys, hys, rfl⟩⟩
-  · obtain ⟨ys, hys⟩ := hfam hp₁ (by simp) (by simp [qqExs])
-    exact ⟨_, graph_exs_iff.mpr ⟨hp, ys, hys, rfl⟩⟩
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩);
+  · exact ⟨_, graph_rel_iff.mpr ⟨hp, rfl⟩⟩;
+  · exact ⟨_, graph_nrel_iff.mpr ⟨hp, rfl⟩⟩;
+  · exact ⟨_, graph_verum_iff.mpr rfl⟩;
+  · exact ⟨_, graph_falsum_iff.mpr rfl⟩;
+  · obtain ⟨y₁, h₁⟩ := ih p₁ (by simp) param (by simp [f]) hp₁;
+    obtain ⟨y₂, h₂⟩ := ih p₂ (by simp) param (by simp [f]) hp₂;
+    exact ⟨_, graph_and_iff.mpr ⟨hp, y₁, y₂, h₁, h₂, rfl⟩⟩;
+  · obtain ⟨y₁, h₁⟩ := ih p₁ (by simp) param (by simp [f]) hp₁;
+    obtain ⟨y₂, h₂⟩ := ih p₂ (by simp) param (by simp [f]) hp₂;
+    exact ⟨_, graph_or_iff.mpr ⟨hp, y₁, y₂, h₁, h₂, rfl⟩⟩;
+  · obtain ⟨ys, hys⟩ := hfam hp₁ (by simp) (by simp [qqAll]);
+    exact ⟨_, graph_all_iff.mpr ⟨hp, ys, hys, rfl⟩⟩;
+  · obtain ⟨ys, hys⟩ := hfam hp₁ (by simp) (by simp [qqExs]);
+    exact ⟨_, graph_exs_iff.mpr ⟨hp, ys, hys, rfl⟩⟩;
 
 lemma graph_unique {p : V} : IsUFormula L p →
     ∀ {param r r'}, c.Graph L param p r → c.Graph L param p r' → r = r' := by
   apply IsUFormula.ISigma1.pi1_succ_induction (P := fun p ↦ ∀ {param r r'},
-    c.Graph L param p r → c.Graph L param p r' → r = r') (by definability)
-  case hrel => intro k R v _ _ param r r' hr hr'; simp_all [graph_rel_iff]
-  case hnrel => intro k R v _ _ param r r' hr hr'; simp_all [graph_nrel_iff]
-  case hverum => intro param r r' hr hr'; simp_all [graph_verum_iff]
-  case hfalsum => intro param r r' hr hr'; simp_all [graph_falsum_iff]
+    c.Graph L param p r → c.Graph L param p r' → r = r') (by definability);
+  case hrel => intro k R v _ _ param r r' hr hr'; simp_all [graph_rel_iff];
+  case hnrel => intro k R v _ _ param r r' hr hr'; simp_all [graph_nrel_iff];
+  case hverum => intro param r r' hr hr'; simp_all [graph_verum_iff];
+  case hfalsum => intro param r r' hr hr'; simp_all [graph_falsum_iff];
   case hand =>
-    intro p₁ p₂ _ _ ih₁ ih₂ param r r' hr hr'
-    obtain ⟨-, r₁, r₂, h₁, h₂, rfl⟩ := graph_and_iff.mp hr
-    obtain ⟨-, r₁', r₂', h₁', h₂', rfl⟩ := graph_and_iff.mp hr'
-    rw [ih₁ h₁ h₁', ih₂ h₂ h₂']
+    intro p₁ p₂ _ _ ih₁ ih₂ param r r' hr hr';
+    obtain ⟨-, r₁, r₂, h₁, h₂, rfl⟩ := graph_and_iff.mp hr;
+    obtain ⟨-, r₁', r₂', h₁', h₂', rfl⟩ := graph_and_iff.mp hr';
+    rw [ih₁ h₁ h₁', ih₂ h₂ h₂'];
   case hor =>
-    intro p₁ p₂ _ _ ih₁ ih₂ param r r' hr hr'
-    obtain ⟨-, r₁, r₂, h₁, h₂, rfl⟩ := graph_or_iff.mp hr
-    obtain ⟨-, r₁', r₂', h₁', h₂', rfl⟩ := graph_or_iff.mp hr'
-    rw [ih₁ h₁ h₁', ih₂ h₂ h₂']
+    intro p₁ p₂ _ _ ih₁ ih₂ param r r' hr hr';
+    obtain ⟨-, r₁, r₂, h₁, h₂, rfl⟩ := graph_or_iff.mp hr;
+    obtain ⟨-, r₁', r₂', h₁', h₂', rfl⟩ := graph_or_iff.mp hr';
+    rw [ih₁ h₁ h₁', ih₂ h₂ h₂'];
   case hall =>
-    intro p₁ _ ih param r r' hr hr'
-    obtain ⟨-, ys, ⟨hl, hys⟩, rfl⟩ := graph_all_iff.mp hr
-    obtain ⟨-, ys', ⟨hl', hys'⟩, rfl⟩ := graph_all_iff.mp hr'
-    rw [nth_ext (hl.trans hl'.symm) fun i hi ↦ ih (hys i (hl ▸ hi)) (hys' i (hl ▸ hi))]
+    intro p₁ _ ih param r r' hr hr';
+    obtain ⟨-, ys, ⟨hl, hys⟩, rfl⟩ := graph_all_iff.mp hr;
+    obtain ⟨-, ys', ⟨hl', hys'⟩, rfl⟩ := graph_all_iff.mp hr';
+    rw [nth_ext (hl.trans hl'.symm) fun i hi ↦ ih (hys i (hl ▸ hi)) (hys' i (hl ▸ hi))];
   case hexs =>
-    intro p₁ _ ih param r r' hr hr'
-    obtain ⟨-, ys, ⟨hl, hys⟩, rfl⟩ := graph_exs_iff.mp hr
-    obtain ⟨-, ys', ⟨hl', hys'⟩, rfl⟩ := graph_exs_iff.mp hr'
-    rw [nth_ext (hl.trans hl'.symm) fun i hi ↦ ih (hys i (hl ▸ hi)) (hys' i (hl ▸ hi))]
+    intro p₁ _ ih param r r' hr hr';
+    obtain ⟨-, ys, ⟨hl, hys⟩, rfl⟩ := graph_exs_iff.mp hr;
+    obtain ⟨-, ys', ⟨hl', hys'⟩, rfl⟩ := graph_exs_iff.mp hr';
+    rw [nth_ext (hl.trans hl'.symm) fun i hi ↦ ih (hys i (hl ▸ hi)) (hys' i (hl ▸ hi))];
 
 variable (L c)
 
 lemma exists_unique_all (p : V) :
     ∃! r, (IsUFormula L p → c.Graph L param p r) ∧ (¬IsUFormula L p → r = 0) := by
-  by_cases hp : IsUFormula L p
-  · obtain ⟨r, hr⟩ := graph_exists (c := c) param hp
-    exact ⟨r, by simp [hp, hr], fun r' hr' ↦ graph_unique hp (by simpa [hp] using hr') hr⟩
-  · simp [hp]
+  by_cases hp : IsUFormula L p;
+  · obtain ⟨r, hr⟩ := graph_exists (c := c) param hp;
+    exact ⟨r, by simp [hp, hr], fun r' hr' ↦ graph_unique hp (by simpa [hp] using hr') hr⟩;
+  · simp [hp];
 
 noncomputable def result (p : V) : V := Classical.choose! (c.exists_unique_all L param p)
 
@@ -459,20 +458,20 @@ lemma result_all {p : V} (hp : IsUFormula L p) :
     ∃ ys, (len ys = c.size param p ∧
       ∀ i < c.size param p, ys.[i] = c.result L (c.changes param i) p) ∧
       c.result L param (^∀ p) = c.all param p ys := by
-  obtain ⟨-, ys, ⟨hl, hys⟩, h⟩ := graph_all_iff.mp (result_prop (c := c) param (by simpa using hp))
-  exact ⟨ys, ⟨hl, fun i hi ↦ (result_eq_of_graph (hys i hi)).symm⟩, h⟩
+  obtain ⟨-, ys, ⟨hl, hys⟩, h⟩ := graph_all_iff.mp (result_prop (c := c) param (by simpa using hp));
+  exact ⟨ys, ⟨hl, fun i hi ↦ (result_eq_of_graph (hys i hi)).symm⟩, h⟩;
 
 lemma result_exs {p : V} (hp : IsUFormula L p) :
     ∃ ys, (len ys = c.size param p ∧
       ∀ i < c.size param p, ys.[i] = c.result L (c.changes param i) p) ∧
       c.result L param (^∃ p) = c.exs param p ys := by
-  obtain ⟨-, ys, ⟨hl, hys⟩, h⟩ := graph_exs_iff.mp (result_prop (c := c) param (by simpa using hp))
-  exact ⟨ys, ⟨hl, fun i hi ↦ (result_eq_of_graph (hys i hi)).symm⟩, h⟩
+  obtain ⟨-, ys, ⟨hl, hys⟩, h⟩ := graph_exs_iff.mp (result_prop (c := c) param (by simpa using hp));
+  exact ⟨ys, ⟨hl, fun i hi ↦ (result_eq_of_graph (hys i hi)).symm⟩, h⟩;
 
 variable (c β)
 
 lemma result_defined : 𝚺ᴬ₁-Function₂ c.result L via β.result L := .mk fun v ↦ by
-  simp [Blueprint.result, result, c.eval_graphDef]
+  simp [Blueprint.result, result, c.eval_graphDef];
 
 instance result_definable : 𝚺ᴬ-[0 + 1]-Function₂ c.result L := c.result_defined.to_definable
 
