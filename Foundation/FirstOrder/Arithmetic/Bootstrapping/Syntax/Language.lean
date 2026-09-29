@@ -217,9 +217,35 @@ lemma coe_addIndex_eq : (addIndex : V) = 0 := rfl
 
 lemma coe_mulIndex_eq : (mulIndex : V) = 1 := by simp [mulIndex]; rfl
 
+@[simp] lemma coe_eqIndex_eq : (eqIndex : V) = 0 := rfl
+
+@[simp] lemma coe_ltIndex_eq : (ltIndex : V) = 1 := by simp [ltIndex]; rfl
+
+@[simp] lemma isRel_two_zero : (ℒₒᵣ).IsRel (2 : V) 0 := by
+  simpa using LOR_rel_eqIndex (V := V);
+
+@[simp] lemma isRel_two_one : (ℒₒᵣ).IsRel (2 : V) 1 := by
+  simpa using LOR_rel_ltIndex (V := V);
+
 @[reducible] instance gödelQuoteFuncLOR (k) : GödelQuote ((ℒₒᵣ).Func k) V := gödelQuoteFunc k
 
 @[reducible] instance gödelQuoteRelLOR (k) : GödelQuote ((ℒₒᵣ).Rel k) V := gödelQuoteRel k
+
+lemma quote_zeroIndex_eq : (⌜(Language.ORing.Func.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 :=
+  coe_zeroIndex_eq
+
+lemma quote_oneIndex_eq : (⌜(Language.ORing.Func.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 :=
+  coe_oneIndex_eq
+
+lemma quote_addIndex_eq : (⌜(Language.ORing.Func.add : (ℒₒᵣ).Func 2)⌝ : V) = 0 :=
+  coe_addIndex_eq
+
+lemma quote_mulIndex_eq : (⌜(Language.ORing.Func.mul : (ℒₒᵣ).Func 2)⌝ : V) = 1 :=
+  coe_mulIndex_eq
+
+lemma coe_quote_eq : (⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝ : V) = 0 := coe_eqIndex_eq
+
+lemma coe_quote_lt : (⌜(Language.LT.lt : (ℒₒᵣ).Rel 2)⌝ : V) = 1 := coe_ltIndex_eq
 
 lemma isFunc_iff_LOR {k f : V} :
     (ℒₒᵣ).IsFunc k f ↔
@@ -238,6 +264,14 @@ lemma isFunc_iff_LOR {k f : V} :
   · calc
       (1 : V) = (1 : ℕ) := by simp
       _       = ⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝ := by rfl
+
+lemma isFunc_LOR_iff {k f : V} :
+    (ℒₒᵣ).IsFunc k f ↔ (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1) := by
+  rw [isFunc_iff_LOR,
+    show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq,
+    show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq,
+    show (⌜(Language.Add.add : (ℒₒᵣ).Func 2)⌝ : V) = 0 from quote_addIndex_eq,
+    show (⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝ : V) = 1 from quote_mulIndex_eq];
 
 lemma isRel_iff_LOR {k R : V} :
     (ℒₒᵣ).IsRel k R ↔

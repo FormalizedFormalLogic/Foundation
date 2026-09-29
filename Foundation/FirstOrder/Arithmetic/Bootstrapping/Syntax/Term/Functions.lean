@@ -492,6 +492,10 @@ lemma termBV_termBShift_le {t : V} (ht : IsUTerm L t) (m : V) :
       have := H i (by rw [len_termBVVec hv]; exact hi)
       rwa [nth_termBVVec hv hi] at this
 
+lemma isSemiterm_of_termBShift {n t : V} (ht : IsUTerm ℒₒᵣ t)
+    (h : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t)) : IsSemiterm ℒₒᵣ n t :=
+  IsSemiterm.def.mpr ⟨ht, (termBV_termBShift_le ht n).mp (IsSemiterm.def.mp h).2⟩
+
 end termBShift
 
 /-
@@ -781,6 +785,18 @@ lemma coe_zero_eq : (𝟎 : V) = (^func 0 ⌜(Language.Zero.zero : (ℒₒᵣ).F
 set_option backward.isDefEq.respectTransparency false in
 lemma coe_one_eq : (𝟏 : V) = (^func 0 ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ 0) := by
   simp [Arithmetic.one, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
+
+lemma qqZero_eq_qqFunc : (𝟎 : V) = ^func (0 : V) (0 : V) (0 : V) := by
+  rw [coe_zero_eq, show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq];
+
+lemma qqOne_eq_qqFunc : (𝟏 : V) = ^func (0 : V) (1 : V) (0 : V) := by
+  rw [coe_one_eq, show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq];
+
+lemma qqAdd_eq_qqFunc (a b : V) : (a ^+ b : V) = ^func (2 : V) (0 : V) (?[a, b] : V) := by
+  rw [qqAdd, coe_addIndex_eq];
+
+lemma qqMul_eq_qqFunc (a b : V) : (a ^* b : V) = ^func (2 : V) (1 : V) (?[a, b] : V) := by
+  rw [qqMul, coe_mulIndex_eq];
 
 namespace Numeral
 
