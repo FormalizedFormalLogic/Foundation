@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounde
 `HierarchicalSatisfaction Γ s p e` says that `Q₀ x₀ ⋯ Q_{s-1} x_{s-1} θ` holds under the
 assignment `e`, where `p` codes the $\Delta_0$ matrix `θ` and the quantifiers alternate starting
 with `Γ`; the value of `x_i` is pushed onto the front of `e`. The partial truth predicate
-`Truth Γ s` holds of the code of such a sentence exactly when its matrix is satisfied. For
+`PartialTruth Γ s` holds of the code of such a sentence exactly when its matrix is satisfied. For
 `s ≥ 1` both are definable at level `Γ`-`s`.
 
 ## References
@@ -47,43 +47,61 @@ variable {Γ : Polarity} {s : ℕ} {p e : V}
 
 end
 
-noncomputable def hierarchicalSatisfaction : (Γ : Polarity) → (s : ℕ) → Γᴬ-[s + 1].Semisentence 2
+noncomputable def hierarchicalSatisfaction' :
+    (Γ : Polarity) → (s : ℕ) → Γᴬ-[s + 1].Semisentence 2
   | 𝚺, 0 => .mkSigma “p e. ∃ x e', !adjoinDef e' x e ∧ !boundedSatisfaction.sigma p e'”
   | 𝚷, 0 => .mkPi “p e. ∀ x e', !adjoinDef e' x e → !boundedSatisfaction.pi p e'”
   | 𝚺, s + 1 => .mkSigma
-      “p e. ∃ x e', !adjoinDef e' x e ∧ !(hierarchicalSatisfaction 𝚷 s).val p e'”
-      (by simpa using (hierarchicalSatisfaction 𝚷 s).polarity_prop.accum 𝚺)
+      “p e. ∃ x e', !adjoinDef e' x e ∧ !(hierarchicalSatisfaction' 𝚷 s).val p e'”
+      (by simpa using (hierarchicalSatisfaction' 𝚷 s).polarity_prop.accum 𝚺)
   | 𝚷, s + 1 => .mkPi
-      “p e. ∀ x e', !adjoinDef e' x e → !(hierarchicalSatisfaction 𝚺 s).val p e'”
-      (by simpa using (hierarchicalSatisfaction 𝚺 s).polarity_prop.accum 𝚷)
+      “p e. ∀ x e', !adjoinDef e' x e → !(hierarchicalSatisfaction' 𝚺 s).val p e'”
+      (by simpa using (hierarchicalSatisfaction' 𝚺 s).polarity_prop.accum 𝚷)
+
+noncomputable def hierarchicalSatisfaction (Γ : Polarity) :
+    (s : ℕ) → [NeZero s] → Γᴬ-[s].Semisentence 2
+  | 0, h => absurd rfl h.out
+  | s + 1, _ => hierarchicalSatisfaction' Γ s
 
 mutual
 
-instance HierarchicalSatisfaction.sigma_defined : (s : ℕ) →
+instance HierarchicalSatisfaction.sigma_defined' : (s : ℕ) →
     𝚺ᴬ-[s + 1]-Relation (HierarchicalSatisfaction 𝚺 (s + 1) : V → V → Prop)
-      via hierarchicalSatisfaction 𝚺 s
-  | 0 => .mk fun v ↦ by simp [hierarchicalSatisfaction]
-  | s + 1 => .mk fun v ↦ by simp [hierarchicalSatisfaction, (pi_defined s).df]
+      via hierarchicalSatisfaction' 𝚺 s
+  | 0 => .mk fun v ↦ by simp [hierarchicalSatisfaction']
+  | s + 1 => .mk fun v ↦ by simp [hierarchicalSatisfaction', (pi_defined' s).df]
 
-instance HierarchicalSatisfaction.pi_defined : (s : ℕ) →
+instance HierarchicalSatisfaction.pi_defined' : (s : ℕ) →
     𝚷ᴬ-[s + 1]-Relation (HierarchicalSatisfaction 𝚷 (s + 1) : V → V → Prop)
-      via hierarchicalSatisfaction 𝚷 s
-  | 0 => .mk fun v ↦ by simp [hierarchicalSatisfaction]
-  | s + 1 => .mk fun v ↦ by simp [hierarchicalSatisfaction, (sigma_defined s).df]
+      via hierarchicalSatisfaction' 𝚷 s
+  | 0 => .mk fun v ↦ by simp [hierarchicalSatisfaction']
+  | s + 1 => .mk fun v ↦ by simp [hierarchicalSatisfaction', (sigma_defined' s).df]
 
 end
 
-instance HierarchicalSatisfaction.sigma_definable (s : ℕ) :
-    𝚺ᴬ-[s + 1]-Relation (HierarchicalSatisfaction 𝚺 (s + 1) : V → V → Prop) :=
+instance HierarchicalSatisfaction.sigma_defined : (s : ℕ) → [NeZero s] →
+    𝚺ᴬ-[s]-Relation (HierarchicalSatisfaction 𝚺 s : V → V → Prop)
+      via hierarchicalSatisfaction 𝚺 s
+  | 0, h => absurd rfl h.out
+  | s + 1, _ => sigma_defined' s
+
+instance HierarchicalSatisfaction.pi_defined : (s : ℕ) → [NeZero s] →
+    𝚷ᴬ-[s]-Relation (HierarchicalSatisfaction 𝚷 s : V → V → Prop)
+      via hierarchicalSatisfaction 𝚷 s
+  | 0, h => absurd rfl h.out
+  | s + 1, _ => pi_defined' s
+
+instance HierarchicalSatisfaction.sigma_definable (s : ℕ) [NeZero s] :
+    𝚺ᴬ-[s]-Relation (HierarchicalSatisfaction 𝚺 s : V → V → Prop) :=
   (sigma_defined s).to_definable
 
-instance HierarchicalSatisfaction.pi_definable (s : ℕ) :
-    𝚷ᴬ-[s + 1]-Relation (HierarchicalSatisfaction 𝚷 (s + 1) : V → V → Prop) :=
+instance HierarchicalSatisfaction.pi_definable (s : ℕ) [NeZero s] :
+    𝚷ᴬ-[s]-Relation (HierarchicalSatisfaction 𝚷 s : V → V → Prop) :=
   (pi_defined s).to_definable
 
 noncomputable def hierarchicalSatisfactionDef (Γ : Polarity) : ℕ → ArithmeticSemisentence 2
   | 0 => boundedSatisfaction.val
-  | s + 1 => (hierarchicalSatisfaction Γ s).val
+  | s + 1 => (hierarchicalSatisfaction Γ (s + 1)).val
 
 lemma eval_hierarchicalSatisfactionDef {Γ : Polarity} {s : ℕ} (p e : V) :
     V ⊧/![p, e] (hierarchicalSatisfactionDef Γ s) ↔ HierarchicalSatisfaction Γ s p e := by
@@ -91,9 +109,9 @@ lemma eval_hierarchicalSatisfactionDef {Γ : Polarity} {s : ℕ} (p e : V) :
   · simp [hierarchicalSatisfactionDef];
   · cases Γ;
     · simpa [hierarchicalSatisfactionDef] using
-        (HierarchicalSatisfaction.sigma_defined s).df ![p, e];
+        (HierarchicalSatisfaction.sigma_defined (s + 1)).df ![p, e];
     · simpa [hierarchicalSatisfactionDef] using
-        (HierarchicalSatisfaction.pi_defined s).df ![p, e];
+        (HierarchicalSatisfaction.pi_defined (s + 1)).df ![p, e];
 
 /-! ## Partial truth -/
 
@@ -139,31 +157,40 @@ instance qqToPrenex_defined : (Γ : Polarity) → (s : ℕ) →
   | 𝚷, s + 1 => .mk fun v ↦ by
     simp +contextual [qqToPrenexDef, (qqToPrenex_defined 𝚺 s).df, lt_forall]
 
-def Truth (Γ : Polarity) (s : ℕ) (x : V) : Prop :=
+def PartialTruth (Γ : Polarity) (s : ℕ) (x : V) : Prop :=
   ∃ θ ≤ x, x = qqToPrenex Γ s θ ∧ HierarchicalSatisfaction Γ s θ 0
 
-noncomputable def truthDef (Γ : Polarity) (s : ℕ) : ArithmeticSemisentence 1 :=
+noncomputable def partialTruthDef (Γ : Polarity) (s : ℕ) : ArithmeticSemisentence 1 :=
   “x. ∃ θ <⁺ x, !(qqToPrenexDef Γ s) x θ ∧ !(hierarchicalSatisfactionDef Γ s) θ 0”
 
-lemma eval_truthDef {Γ : Polarity} {s : ℕ} (v : Fin 1 → V) :
-    V ⊧/v (truthDef Γ s) ↔ Truth Γ s (v 0) := by
-  simp [truthDef, Truth, eval_hierarchicalSatisfactionDef];
+lemma eval_partialTruthDef {Γ : Polarity} {s : ℕ} (v : Fin 1 → V) :
+    V ⊧/v (partialTruthDef Γ s) ↔ PartialTruth Γ s (v 0) := by
+  simp [partialTruthDef, PartialTruth, eval_hierarchicalSatisfactionDef];
 
-noncomputable def truth (Γ : Polarity) (s : ℕ) : Γᴬ-[s + 1].Semisentence 1 :=
-  .mkPolarity (truthDef Γ (s + 1)) Γ (by simp [truthDef, hierarchicalSatisfactionDef])
+noncomputable def partialTruth' (Γ : Polarity) (s : ℕ) : Γᴬ-[s + 1].Semisentence 1 :=
+  .mkPolarity (partialTruthDef Γ (s + 1)) Γ (by
+    simp [partialTruthDef, hierarchicalSatisfactionDef, hierarchicalSatisfaction])
 
-instance Truth.sigma_defined (s : ℕ) :
-    𝚺ᴬ-[s + 1]-Predicate (Truth 𝚺 (s + 1) : V → Prop) via truth 𝚺 s :=
-  .mk fun v ↦ eval_truthDef v
+noncomputable def partialTruth (Γ : Polarity) : (s : ℕ) → [NeZero s] → Γᴬ-[s].Semisentence 1
+  | 0, h => absurd rfl h.out
+  | s + 1, _ => partialTruth' Γ s
 
-instance Truth.pi_defined (s : ℕ) :
-    𝚷ᴬ-[s + 1]-Predicate (Truth 𝚷 (s + 1) : V → Prop) via truth 𝚷 s :=
-  .mk fun v ↦ eval_truthDef v
+instance PartialTruth.sigma_defined : (s : ℕ) → [NeZero s] →
+    𝚺ᴬ-[s]-Predicate (PartialTruth 𝚺 s : V → Prop) via partialTruth 𝚺 s
+  | 0, h => absurd rfl h.out
+  | _ + 1, _ => .mk fun v ↦ eval_partialTruthDef v
 
-instance Truth.sigma_definable (s : ℕ) : 𝚺ᴬ-[s + 1]-Predicate (Truth 𝚺 (s + 1) : V → Prop) :=
-  (Truth.sigma_defined s).to_definable
+instance PartialTruth.pi_defined : (s : ℕ) → [NeZero s] →
+    𝚷ᴬ-[s]-Predicate (PartialTruth 𝚷 s : V → Prop) via partialTruth 𝚷 s
+  | 0, h => absurd rfl h.out
+  | _ + 1, _ => .mk fun v ↦ eval_partialTruthDef v
 
-instance Truth.pi_definable (s : ℕ) : 𝚷ᴬ-[s + 1]-Predicate (Truth 𝚷 (s + 1) : V → Prop) :=
-  (Truth.pi_defined s).to_definable
+instance PartialTruth.sigma_definable (s : ℕ) [NeZero s] :
+    𝚺ᴬ-[s]-Predicate (PartialTruth 𝚺 s : V → Prop) :=
+  (PartialTruth.sigma_defined s).to_definable
+
+instance PartialTruth.pi_definable (s : ℕ) [NeZero s] :
+    𝚷ᴬ-[s]-Predicate (PartialTruth 𝚷 s : V → Prop) :=
+  (PartialTruth.pi_defined s).to_definable
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

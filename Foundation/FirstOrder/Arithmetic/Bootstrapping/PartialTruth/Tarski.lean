@@ -340,7 +340,7 @@ lemma read_hierarchicalSatisfaction_sigma_succ {V : Type*} [ORingStructure V] (s
     Reading.HierarchicalSatisfaction 𝚺 (s + 1) p e ↔
       ∃ x e', Reading.Adjoin e' x e ∧ Reading.HierarchicalSatisfaction 𝚷 s p e' := by
   cases s <;> simp [Reading.HierarchicalSatisfaction, Reading.Adjoin, hierarchicalSatisfactionDef,
-    hierarchicalSatisfaction, HierarchySymbol.Semiformula.val_sigma];
+    hierarchicalSatisfaction, hierarchicalSatisfaction', HierarchySymbol.Semiformula.val_sigma];
 
 /-! ## Reading the sentences in a model of `𝗣𝗔⁻` -/
 
@@ -450,7 +450,7 @@ lemma read_hierarchicalSatisfaction_pi_succ (s : ℕ) (p e : V) :
       ∀ x e', Adjoin e' x e → HierarchicalSatisfaction 𝚺 s p e' := by
   have h := models_of_mem hV Tarski.boundedSatisfactionProper;
   cases s <;> simp_all [Tarski.boundedSatisfactionProper, hierarchicalSatisfactionDef,
-    hierarchicalSatisfaction, HierarchySymbol.Semiformula.val_sigma];
+    hierarchicalSatisfaction, hierarchicalSatisfaction', HierarchySymbol.Semiformula.val_sigma];
 
 end reading
 
