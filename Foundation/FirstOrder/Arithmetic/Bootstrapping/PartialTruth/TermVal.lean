@@ -8,8 +8,6 @@ import Mathlib.Tactic.Bound
 
 `termVal e t` evaluates the coded `ℒₒᵣ`-term `t` under the coded assignment `e` of its bound
 variables, reading free variables as `0`; `termVal' f e t` reads free variables from `f` instead.
-Both are `𝚺ᴬ₁`-definable, commute with the arithmetic operations, substitution and shifts, and
-agree with the external evaluation on quoted closed terms.
 
 ## References
 

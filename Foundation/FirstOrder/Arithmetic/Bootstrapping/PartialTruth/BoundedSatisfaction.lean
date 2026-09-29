@@ -10,14 +10,8 @@ import Mathlib.Tactic.Bound
 # Satisfaction for $\Delta_0$ formulas
 
 `BoundedSatisfactionTable q z e` says that `q` is a finite satisfaction table for the coded
-$\Delta_0$ formula `z` under the assignment `e`: a finite mapping from nodes `⟪p, e'⟫` to values
-`0`, `1` that obeys a Tarski clause at every node of its domain and whose nodes all descend from
-the root `⟪z, e⟫`. Tables are $\Delta_1$-definable and unique, and every well-formed $\Delta_0$
-code has one under every assignment.
-
-`BoundedSatisfaction z e` says that some table rooted at `⟪z, e⟫` gives it the value `1`. It is
-$\Delta_1$-definable, satisfies Tarski's conditions, commutes with negation and with
-substitution of coded terms, and agrees with truth on quoted $\Delta_0$ formulas.
+$\Delta_0$ formula `z` under the assignment `e`, and `BoundedSatisfaction z e` says that some
+table gives `⟪z, e⟫` the value `1`.
 
 ## References
 
@@ -248,13 +242,9 @@ structure BoundedSatisfactionTable (q z e : V) : Prop where
 
 namespace BoundedSatisfactionTable
 
-/-! ### Reading off the Tarski clause at a node of known shape -/
-
 section reading
 
--- Unfolding the coding operations to their underlying pairs is what tells two differently-shaped
--- codes apart when `Spec` is read off at a node. Scoped to this section, since unconditionally
--- unfolding these constructors defeats the ordinary simp set on coded formulas.
+-- Local, since unfolding these constructors globally defeats the simp set on coded formulas.
 attribute [local simp] qqAnd qqOr qqVerum qqFalsum qqRel qqNRel qqBall qqAll qqBex qqExs
   Arithmetic.qqEQ Arithmetic.qqNEQ Arithmetic.qqLT Arithmetic.qqNLT
 
@@ -335,8 +325,6 @@ lemma spec_bex (hn : ⟪qqBex u p, e'⟫ ∈ domain q) :
 
 end reading
 
-/-! ### The Tarski clauses in the form used by the satisfaction predicate -/
-
 variable {q z e e' t u p p₁ p₂ : V} (h : BoundedSatisfactionTable q z e)
 include h
 
@@ -390,17 +378,11 @@ end
 
 end BoundedSatisfactionTable
 
-/-! ## Definability of tables
-
-Each clause of `spec` and `minimal` gets a bounded `Prop` with a defining formula. Where a clause
-mentions `termVal`, whose graph is $\Sigma_1$, the value is hoisted out by an existential on the
-$\Sigma_1$ side and by a universal on the $\Pi_1$ side. -/
+/-! ## Definability of tables -/
 
 namespace BoundedSatisfactionTableF
 
 open Arithmetic (qqEQ_defined qqNEQ_defined qqLT_defined qqNLT_defined)
-
-/-! ### Nodes and values as $\Sigma_0$ relations -/
 
 def inDomDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma “q n. ∃ v < q, :⟪n, v⟫:∈ q”
 
@@ -445,8 +427,6 @@ def childPairDef : 𝚺ᴬ₀.Semisentence 4 := .mkSigma
 instance childPair_defined :
     𝚺ᴬ₀-Relation₄ (fun n p x e : V ↦ n = ⟪p, x ∷ e⟫) via childPairDef := .mk fun v ↦ by
   simp [childPairDef, adjoin_def];
-
-/-! ### The ten Tarski clauses -/
 
 def SpecVerum (q z e : V) : Prop := z = ^⊤ ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
 
@@ -680,8 +660,6 @@ instance specBex_defined : 𝚫ᴬ₁-Relation₃ (SpecBex : V → V → V → P
       (termVal.defined (V := V)).df, (termBShift.defined (L := ℒₒᵣ) (V := V)).df,
       (qqBex_defined (V := V)).df, bexMatrix_defined.df, adjoin_def];
 
-/-! ### The clause of `BoundedSatisfactionTable.spec`, assembled -/
-
 def SpecAt (q z e : V) : Prop :=
   SpecVerum q z e ∨ SpecFalsum q z e ∨ SpecEq q z e ∨ SpecNeq q z e ∨ SpecLt q z e ∨
     SpecNlt q z e ∨ SpecAnd q z e ∨ SpecOr q z e ∨ SpecBall q z e ∨ SpecBex q z e
@@ -698,8 +676,6 @@ instance specAt_defined : 𝚫ᴬ₁-Relation₃ (SpecAt : V → V → V → Pro
   constructor;
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma];
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma, SpecAt];
-
-/-! ### The clause of `BoundedSatisfactionTable.minimal` -/
 
 def MinAnd (q n : V) : Prop :=
   ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋏ p₂ ∧ ⟪c, e⟫ ∈ domain q ∧
@@ -784,8 +760,6 @@ instance minimalAt_defined :
   constructor;
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma];
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma, MinimalAt];
-
-/-! ### Assembling the definition -/
 
 open BoundedSatisfactionTable (Spec MinChild)
 
@@ -894,8 +868,6 @@ end defining
 namespace BoundedSatisfactionTable
 
 variable {q q₁ q₂ r z z₁ z₂ e e₁ e₂ e' n p p₁ p₂ u : V}
-
-/-! ### Values and uniqueness -/
 
 lemma val_one_ne_zero (h : BoundedSatisfactionTable q z e) (h1 : ⟪n, 1⟫ ∈ q) (h0 : ⟪n, 0⟫ ∈ q) :
     False := by
@@ -1009,8 +981,6 @@ theorem uniq (h₁ : BoundedSatisfactionTable q₁ z e) (h₂ : BoundedSatisfact
     rwa [k₁.val_agree k₂ hx hy'];
   exact mem_ext fun x ↦ ⟨sub h₁ h₂ x, sub h₂ h₁ x⟩;
 
-/-! ### Gluing tables together -/
-
 lemma isMapping_union (h₁ : BoundedSatisfactionTable q₁ z₁ e₁)
     (h₂ : BoundedSatisfactionTable q₂ z₂ e₂) : IsMapping (q₁ ∪ q₂) := by
   intro x hx;
@@ -1076,8 +1046,6 @@ lemma Spec.mono {Q : V} (hQ : IsMapping Q) (hsub : q ⊆ Q) (hd : ⟪z, e⟫ ∈
       (val hd).trans <| hA.trans <| exists_congr fun x ↦ and_congr_right fun hx ↦
         (val (hc x hx)).symm,
       (val hd).trans <| hB.trans <| forall₂_congr fun x hx ↦ (val (hc x hx)).symm⟩;
-
-/-! ### Building tables -/
 
 lemma of_insert {W v : V} (hW : IsMapping W) (hz : ⟪z, e⟫ ∉ domain W)
     (hsub : ∀ n ∈ domain W, ∃ r p e', BoundedSatisfactionTable r p e' ∧ r ⊆ W ∧ n ∈ domain r ∧
@@ -1323,11 +1291,6 @@ lemma of_bex (hp : p < qqBex u p) (hr : ∀ v ≤ 1, ⟪⟪qqBex u p, e⟫, v⟫
 
 end
 
-/-! ### The bound on a table
-
-`tableBound z e` is a tower of exponentials over `tableExp z e` whose height grows linearly in `z`;
-the tables of the children of `z` and the nodes `⟪⟪z, e⟫, v⟫` lie below its logarithm. -/
-
 def tableExp (z e : V) : V := z + e + 2
 
 noncomputable def tableBound (z e : V) : V := Exp.exp (iterExp (tableExp z e) (8 * z + 4))
@@ -1336,8 +1299,7 @@ section tableBound
 
 variable {x v : V}
 
--- Reducing `listMax v ≤ c` to `v ≤ c` can lose provability (see `termVal_le`), so this is a
--- `bound` rule only here, where the lists at hand are themselves bounded.
+-- Local, since reducing `listMax v ≤ c` to `v ≤ c` can lose provability (see `termVal_le`).
 attribute [local bound] listMax_le_of_le
 
 lemma le_tableExp_left (z e : V) : z ≤ tableExp z e := by simp [tableExp, add_assoc]
@@ -1379,8 +1341,6 @@ lemma adjoin_le_iterExp (hu : u < z) (hx : x < termVal (0 ∷ e) u) :
   bound [le_tableExp_right z e];
 
 end tableBound
-
-/-! ### Existence -/
 
 lemma exists_atom_table (hz : IsUFormula ℒₒᵣ z)
     (h : z = ^⊤ ∨ z = ^⊥ ∨ (∃ k r w, z = ^rel k r w) ∨ (∃ k r w, z = ^nrel k r w)) :
@@ -1481,8 +1441,6 @@ namespace BoundedSatisfaction
 
 variable {z e : V}
 
-/-! ### Reading satisfaction off a table -/
-
 lemma iff_mem {r z e p e' : V} (hr : BoundedSatisfactionTable r z e) (hn : ⟪p, e'⟫ ∈ domain r)
     (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
     BoundedSatisfaction p e' ↔ ⟪⟪p, e'⟫, 1⟫ ∈ r := by
@@ -1555,8 +1513,6 @@ instance BoundedSatisfaction.defined :
 
 instance BoundedSatisfaction.definable : 𝚫ᴬ₁-Relation (BoundedSatisfaction : V → V → Prop) :=
   BoundedSatisfaction.defined.to_definable
-
-/-! ### Tarski conditions -/
 
 namespace BoundedSatisfaction
 
@@ -1762,8 +1718,6 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
   exact H p hp' n m w e hw hp;
 
 end BoundedSatisfaction
-
-/-! ## Agreement with truth on quoted formulas -/
 
 theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : ℬ[<, ℒₒᵣ].Closure φ) (v : Fin k → V) :

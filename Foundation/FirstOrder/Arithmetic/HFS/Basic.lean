@@ -352,7 +352,6 @@ lemma mem_insert_iff_of_not_mem_domain {x y z s : V} (hx : x ∉ domain s) :
     ⟪x, z⟫ ∈ insert ⟪x, y⟫ s ↔ z = y := by
   simpa using fun h ↦ absurd (mem_domain_of_pair_mem h) hx
 
-/-- Descending induction on the first components of the elements of a domain. -/
 lemma forall_mem_domain_of_desc {s : V} {P : V → Prop} (hP : 𝚷ᴬ₁.DefinablePred P)
     (H : ∀ x ∈ domain s, (∀ y ∈ domain s, π₁ x < π₁ y → P y) → P x) : ∀ x ∈ domain s, P x := by
   suffices ∀ k x, x ∈ domain s → s ≤ π₁ x + k → P x from fun x hx ↦ this s x hx le_add_self

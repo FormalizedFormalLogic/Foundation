@@ -9,12 +9,7 @@ import Foundation.Meta.ClProver
 
 `HierarchicalSatisfaction Γ s p e` says that `Q₀ x₀ ⋯ Q_{s-1} x_{s-1} θ` holds under the
 assignment `e`, where `p` codes the $\Delta_0$ matrix `θ` and the quantifiers alternate starting
-with `Γ`; the value of `x_i` is pushed onto the front of `e`. The partial truth predicate
-`PartialTruth Γ s` holds of the code of such a sentence exactly when its matrix is satisfied. For
-`s ≥ 1` both are definable at level `Γ`-`s`. In every model of `𝗜𝚺₁` they agree with truth, so
-`𝗜𝚺₁` proves the Tarski biconditional `partialTruthDef Γ s (⌜φ⌝) ↔ φ`; by the prenex normal form
-theorem, over any theory containing `𝗕𝚺 s` and `𝗜𝚺₁` every sentence of level `Γ`-`s` of the
-bounded hierarchy is equivalent to the partial truth of the code of a prenex form of it.
+with `Γ`. `PartialTruth Γ s` is the partial truth predicate for the codes of such sentences.
 
 ## References
 

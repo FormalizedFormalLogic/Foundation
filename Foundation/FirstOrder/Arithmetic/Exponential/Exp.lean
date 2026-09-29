@@ -850,12 +850,6 @@ lemma nat_cast_exp (n : ℕ) : (Exp.exp n : ℕ) = Exp.exp (n : V) := by
   | zero => simp
   | succ n ih => simp [exp_succ, ih]
 
-/-! ### Bounds by exponentials
-
-`bound` proves `a ≤ Exp.exp (⋯ (Exp.exp c))` by splitting a sum one level of `Exp.exp` at a time
-(`add_le_exp`) and lifting a leaf `a ≤ c` through the remaining levels (`le_exp_of_le`, an unsafe
-rule so that the levels at which to split are searched for). -/
-
 section bound
 
 variable {a b c : V}
@@ -864,6 +858,7 @@ variable {a b c : V}
 
 lemma le_exp_of_le (h : a ≤ c) : a ≤ Exp.exp c := h.trans (lt_exp c).le
 
+-- Unsafe, so that `bound` searches for the level of `Exp.exp` at which to split a sum.
 attribute [aesop unsafe 50% apply (rule_sets := [Bound])] le_exp_of_le
 
 lemma two_mul_le_exp (a : V) : 2 * a ≤ Exp.exp a := by
