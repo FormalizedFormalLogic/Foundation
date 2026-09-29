@@ -80,10 +80,6 @@ lemma sigmaOne_upward_absolute {k} (φ : 𝚺ᴬ₁.Semisentence k) (v : Fin k �
     φ.val.Evalb v → φ.val.Evalb (M := V) (Nat.cast ∘ v) :=
   Bounding.sigmaOne_upward_absolute (natCastEmbedding V) φ v
 
-lemma deltaOne_upward_absolute {k} (φ : 𝚫ᴬ₁.Semisentence k) (v : Fin k → ℕ) :
-    φ.val.Evalb v → φ.val.Evalb (M := V) (Nat.cast ∘ v) := by
-  simpa [HierarchySymbol.Semiformula.val_sigma] using sigmaOne_upward_absolute V φ.sigma v
-
 lemma piOne_downward_absolute {k} (φ : 𝚷ᴬ₁.Semisentence k) (v : Fin k → ℕ) :
     φ.val.Evalb (M := V) (Nat.cast ∘ v) → φ.val.Evalb v :=
   Bounding.piOne_downward_absolute (natCastEmbedding V) φ v
@@ -108,42 +104,6 @@ lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} 
   HierarchySymbol.DefinedFunction.shigmaOne_absolute_func (natCastEmbedding V) hf hf' v
 
 variable {V}
-
-section
-
-variable {a b c : ℕ}
-
-lemma sigmaZero_upward_absolute₁ (σ : 𝚺ᴬ₀.Semisentence 1) (h : ℕ ⊧/![a] σ.val) :
-    V ⊧/![(a : V)] σ.val := by
-  simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using (sigmaZero_absolute V σ ![a]).mp h
-
-lemma sigmaZero_upward_absolute₂ (σ : 𝚺ᴬ₀.Semisentence 2) (h : ℕ ⊧/![a, b] σ.val) :
-    V ⊧/![(a : V), (b : V)] σ.val := by
-  simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using (sigmaZero_absolute V σ ![a, b]).mp h
-
-lemma sigmaZero_upward_absolute₃ (σ : 𝚺ᴬ₀.Semisentence 3) (h : ℕ ⊧/![a, b, c] σ.val) :
-    V ⊧/![(a : V), (b : V), (c : V)] σ.val := by
-  simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using (sigmaZero_absolute V σ ![a, b, c]).mp h
-
-lemma sigmaOne_upward_absolute₂ (σ : 𝚺ᴬ₁.Semisentence 2) (h : ℕ ⊧/![a, b] σ.val) :
-    V ⊧/![(a : V), (b : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using sigmaOne_upward_absolute V σ _ h
-
-lemma sigmaOne_upward_absolute₃ (σ : 𝚺ᴬ₁.Semisentence 3) (h : ℕ ⊧/![a, b, c] σ.val) :
-    V ⊧/![(a : V), (b : V), (c : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using sigmaOne_upward_absolute V σ _ h
-
-lemma deltaOne_upward_absolute₁ (σ : 𝚫ᴬ₁.Semisentence 1) (h : ℕ ⊧/![a] σ.val) :
-    V ⊧/![(a : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using deltaOne_upward_absolute V σ _ h
-
-end
 
 lemma models_iff_of_Sigma0 {n : ℕ} {σ : ArithmeticSemisentence n}
     (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
