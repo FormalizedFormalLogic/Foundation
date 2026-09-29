@@ -2,15 +2,18 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Tarski
 public import Foundation.FirstOrder.Arithmetic.Prenex
+import Foundation.Meta.ClProver
 
 /-!
 # Partial truth definitions agree with truth
 
 For a sentence `φ` in `Γ`-prenex form of level `s` with a $\Delta_0$ matrix,
 `PartialTruth Γ s ⌜φ⌝` holds exactly when `φ` does, in every model of `𝗜𝚺₁`; hence `𝗜𝚺₁` proves
-the Tarski biconditional `partialTruthDef Γ s (⌜φ⌝) ↔ φ`. For formulas with free variables,
-satisfaction of the code of the matrix agrees with truth, both in every model of `𝗜𝚺₁` and,
-uniformly in the level, over `𝗣𝗔⁻` together with the finite Tarski theory `tarski`.
+the Tarski biconditional `partialTruthDef Γ s (⌜φ⌝) ↔ φ`. By the prenex normal form theorem, over
+any theory containing `𝗕𝚺 s` and `𝗜𝚺₁` every sentence of level `Γ`-`s` of the bounded hierarchy
+is equivalent to the partial truth of the code of a prenex form of it. For formulas with free
+variables, satisfaction of the code of the matrix agrees with truth, both in every model of
+`𝗜𝚺₁` and, uniformly in the level, over `𝗣𝗔⁻` together with the finite Tarski theory `tarski`.
 
 ## References
 
@@ -104,6 +107,32 @@ theorem ISigma1.provable_partialTruth_iff {Γ : Polarity} {s : ℕ} (φ : Prenex
     𝗜𝚺₁ ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 φ.val :=
   Arithmetic.complete.{0} _ _ fun _ _ _ ↦ by
     simpa [models_iff, eval_partialTruthDef] using partialTruth_quote_iff φ
+
+section prenex
+
+variable {Γ : Polarity} {s : ℕ} {σ : ArithmeticSentence}
+
+theorem provable_partialTruth_iff_of_hierarchy (T : ArithmeticTheory) [𝗕𝚺s ⪯ T] [𝗜𝚺₁ ⪯ T]
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
+    ∃ φ : Prenex Γ s Empty 0,
+      T ⊢ σ 🡘 φ.val ∧ T ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 σ := by
+  obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T h;
+  have h₁ : T ⊢ σ 🡘 φ.val := hφ;
+  have h₂ : T ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 φ.val :=
+    Entailment.WeakerThan.pbl (ISigma1.provable_partialTruth_iff φ);
+  exact ⟨φ, h₁, by cl_prover [h₁, h₂]⟩
+
+lemma Peano.provable_partialTruth_iff_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
+    ∃ φ : Prenex Γ s Empty 0,
+      𝗣𝗔 ⊢ σ 🡘 φ.val ∧ 𝗣𝗔 ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 σ :=
+  Arithmetic.provable_partialTruth_iff_of_hierarchy 𝗣𝗔 h
+
+lemma ISigma1.provable_partialTruth_iff_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 1 σ) :
+    ∃ φ : Prenex Γ 1 Empty 0,
+      𝗜𝚺₁ ⊢ σ 🡘 φ.val ∧ 𝗜𝚺₁ ⊢ (partialTruthDef Γ 1)/[⌜φ.val⌝] 🡘 σ :=
+  Arithmetic.provable_partialTruth_iff_of_hierarchy 𝗜𝚺₁ h
+
+end prenex
 
 /-! ## The disquotation sentences -/
 
