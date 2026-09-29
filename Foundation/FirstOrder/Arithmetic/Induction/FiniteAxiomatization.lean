@@ -90,6 +90,11 @@ lemma eval_collFormula (x y : M) (g : ℕ → M) :
         ∃ ev, Reading.Adjoin ev y ev₀ ∧ Reading.HierarchicalSatisfaction 𝚺 (n + 1) (g 0) ev := by
   simp [collFormula, Reading.Adjoin, Reading.HierarchicalSatisfaction]
 
+private lemma models_succInd_iff (φ : ArithmeticSemiformula ℕ 1) :
+    M↓[ℒₒᵣ] ⊧ .univCl (succInd φ) ↔ ∀ f : ℕ → M, φ.Eval ![0] f →
+      (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) → ∀ x, φ.Eval ![x] f := by
+  simp [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
+
 end eval
 
 theorem provable_finiteAxiomatization (n : ℕ) : 𝗜𝚺 (n + 1) ⊢* finiteAxiomatization n := by
@@ -124,19 +129,18 @@ private lemma exists_assignment_eval_indFormula (φ : Prenex 𝚺 (n + 1) ℕ 1)
   obtain ⟨e₀, he₀⟩ := exists_codes hM (fun i : Fin φ.val.fvSup ↦ f i);
   use ((⌜ψ.matrix.val⌝ : ℕ) : M) :>ₙ fun _ ↦ e₀;
   intro x;
+  have hψ : M ⊧/(x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x] f :=
+    (Prenex.val_rew φ _).symm ▸ Semiformula.eval_toSemisentence_one φ.val x f;
   have H {ev : M} (hadj : Adjoin ev x e₀) :=
-    hierarchicalSatisfaction_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
-      (codes_cons hM he₀ hadj);
-  have hψ : M ⊧/(x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x] f := by
-    simp only [ψ, Prenex.val_rew];
-    exact Semiformula.eval_toSemisentence_one φ.val x f;
-  simp only [eval_indFormula, Nat.cases_zero, Nat.cases_succ];
+    (hierarchicalSatisfaction_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
+      (codes_cons hM he₀ hadj)).trans hψ;
+  apply (eval_indFormula x _).trans;
   constructor;
   · rintro ⟨ev, hadj, hsat⟩;
-    exact hψ.mp ((H hadj).mp hsat);
+    exact (H hadj).mp hsat;
   · intro h;
     obtain ⟨ev, hadj⟩ := read_adjoinTotal hM x e₀;
-    exact ⟨ev, hadj, (H hadj).mpr (hψ.mpr h)⟩;
+    exact ⟨ev, hadj, (H hadj).mpr h⟩;
 
 private lemma exists_assignment_eval_collFormula (φ : Prenex 𝚺 (n + 1) ℕ 2) (f : ℕ → M) :
     ∃ g : ℕ → M, ∀ x y : M, (collFormula n).Eval ![x, y] g ↔ φ.val.Eval ![x, y] f := by
@@ -146,34 +150,28 @@ private lemma exists_assignment_eval_collFormula (φ : Prenex 𝚺 (n + 1) ℕ 2
   obtain ⟨e₀, he₀⟩ := exists_codes hM (fun i : Fin φ.val.fvSup ↦ f i);
   use ((⌜ψ.matrix.val⌝ : ℕ) : M) :>ₙ fun _ ↦ e₀;
   intro x y;
+  have hψ : M ⊧/(y :> x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x, y] f :=
+    (Prenex.val_rew φ _).symm ▸ Semiformula.eval_toSemisentence_two φ.val x y f;
   have H {ev₀ ev : M} (hadj₀ : Adjoin ev₀ x e₀) (hadj : Adjoin ev y ev₀) :=
-    hierarchicalSatisfaction_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
-      (codes_cons hM (codes_cons hM he₀ hadj₀) hadj);
-  have hψ : M ⊧/(y :> x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x, y] f := by
-    simp only [ψ, Prenex.val_rew];
-    exact Semiformula.eval_toSemisentence_two φ.val x y f;
-  simp only [eval_collFormula, Nat.cases_zero, Nat.cases_succ];
+    (hierarchicalSatisfaction_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
+      (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).trans hψ;
+  apply (eval_collFormula x y _).trans;
   constructor;
   · rintro ⟨ev₀, hadj₀, ev, hadj, hsat⟩;
-    exact hψ.mp ((H hadj₀ hadj).mp hsat);
+    exact (H hadj₀ hadj).mp hsat;
   · intro h;
     obtain ⟨ev₀, hadj₀⟩ := read_adjoinTotal hM x e₀;
     obtain ⟨ev, hadj⟩ := read_adjoinTotal hM y ev₀;
-    exact ⟨ev₀, hadj₀, ev, hadj, (H hadj₀ hadj).mpr (hψ.mpr h)⟩;
+    exact ⟨ev₀, hadj₀, ev, hadj, (H hadj₀ hadj).mpr h⟩;
 
 lemma succ_induction_prenex (φ : Prenex 𝚺 (n + 1) ℕ 1) (f : ℕ → M) (zero : φ.val.Eval ![0] f)
     (succ : ∀ x, φ.val.Eval ![x] f → φ.val.Eval ![x + 1] f) : ∀ x, φ.val.Eval ![x] f := by
   have hInd : M↓[ℒₒᵣ] ⊧ indSentence n :=
     Semantics.ModelsSet.models _ indSentence_mem_finiteAxiomatization;
-  have hind : ∀ g : ℕ → M, (indFormula n).Eval ![0] g →
-      (∀ x, (indFormula n).Eval ![x] g → (indFormula n).Eval ![x + 1] g) →
-      ∀ x, (indFormula n).Eval ![x] g := by
-    simpa [indSentence, models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
-      Matrix.constant_eq_singleton, -eval_indFormula] using hInd;
   obtain ⟨g, hg⟩ := exists_assignment_eval_indFormula φ f;
   intro x;
-  exact (hg x).mp <|
-    hind g ((hg 0).mpr zero) (fun y hy ↦ (hg (y + 1)).mpr (succ y ((hg y).mp hy))) x;
+  exact (hg x).mp <| (models_succInd_iff _).mp hInd g ((hg 0).mpr zero)
+    (fun y hy ↦ (hg (y + 1)).mpr (succ y ((hg y).mp hy))) x;
 
 lemma collection_prenex (φ : Prenex 𝚺 (n + 1) ℕ 2) (f : ℕ → M) (a : M)
     (h : ∀ x < a, ∃ y, φ.val.Eval ![x, y] f) : ∃ b, ∀ x < a, ∃ y < b, φ.val.Eval ![x, y] f := by
@@ -192,18 +190,15 @@ private lemma models_IBroadSigma_of {s : ℕ}
       ∃ φ' : Prenex 𝚺 (n + 1) ℕ 1, ∀ (e : Fin 1 → M) (f : ℕ → M),
         φ'.val.Eval e f ↔ φ.Eval e f) :
     M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := by
-  have hPA := models_peanoMinus (n := n) (M := M);
-  suffices M↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s) by
-    simpa [InductionOnBroadHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩;
-  apply Semantics.ModelsSet.setOf_iff.mpr;
-  rintro _ ⟨φ, hφ, rfl⟩;
-  suffices ∀ f : ℕ → M, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
-      ∀ x, φ.Eval ![x] f by
-    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
-      Matrix.constant_eq_singleton] using this;
-  intro f;
-  obtain ⟨φ', hφ'⟩ := H φ hφ;
-  simpa only [hφ'] using succ_induction_prenex φ' f;
+  apply Semantics.ModelsSet.union_iff.mpr;
+  and_intros;
+  · exact models_peanoMinus (n := n);
+  · apply Semantics.ModelsSet.setOf_iff.mpr;
+    rintro _ ⟨φ, hφ, rfl⟩;
+    apply (models_succInd_iff φ).mpr;
+    intro f;
+    obtain ⟨φ', hφ'⟩ := H φ hφ;
+    simpa only [hφ'] using succ_induction_prenex φ' f;
 
 private lemma models_CollectionOnBroadHierarchy_of [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {Γ : Polarity} {s : ℕ}
     (H : ∀ φ : ArithmeticSemiformula ℕ 2, ℬ[<, ℒₒᵣ].Hierarchy Γ s φ →
@@ -242,8 +237,8 @@ private lemma models_BPi : ∀ j ≤ n, M↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := by
       CollectionOnHierarchy_subset_CollectionOnBroadHierarchy;
   | succ j ih =>
     have : M↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := ih (by omega);
-    apply models_of_ss (models_CollectionOnBroadHierarchy_of (n := n) ?_)
-      CollectionOnHierarchy_subset_CollectionOnBroadHierarchy;
+    apply models_of_ss _ CollectionOnHierarchy_subset_CollectionOnBroadHierarchy;
+    apply models_CollectionOnBroadHierarchy_of (n := n);
     intro φ hφ;
     obtain ⟨φ₁, h₁⟩ := Prenex.models_exists_prenex (Γ' := 𝚺) hφ;
     obtain ⟨φ₂, h₂⟩ := Prenex.exists_models_iff_of_le (V := M) (s' := n + 1) (by omega) φ₁.altUp;

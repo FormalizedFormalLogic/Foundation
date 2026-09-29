@@ -5,12 +5,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Hierar
 /-!
 # The Tarski conditions and disquotation over `𝗣𝗔⁻`
 
-The Tarski conditions for $\Delta_0$ satisfaction as explicit arithmetic sentences, together with
-the agreement of its $\Sigma_1$ and $\Pi_1$ definitions, collected into the finite theory
-`tarski`, which `𝗜𝚺₁` proves. Reading these sentences and the defining formulas of
-`HierarchicalSatisfaction` inside a model of `𝗣𝗔⁻ ∪ tarski` yields, uniformly in the level, the
-disquotation lemma `𝗣𝗔⁻ ∪ tarski ⊢ disquotation φ` for prenex formulas `φ` with a $\Delta_0$
-matrix and free variables.
+The finite theory `tarski` of Tarski conditions for $\Delta_0$ satisfaction, provable in `𝗜𝚺₁`.
+In a model of `𝗣𝗔⁻ ∪ tarski`, `hierarchicalSatisfactionDef Γ s` holds of the code of a prenex
+formula with a $\Delta_0$ matrix exactly when the formula holds.
 
 ## References
 
@@ -24,7 +21,6 @@ open FFL.FirstOrder.Bounding (HierarchySymbol)
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 /-! ## The Tarski conditions -/
-
 
 namespace Tarski
 
@@ -61,6 +57,7 @@ noncomputable def boundedSatisfactionOr : ArithmeticSentence :=
   “∀ p q z e, !isBounded.val p → !(isUFormula ℒₒᵣ).val p → !isBounded.val q →
     !(isUFormula ℒₒᵣ).val q → !qqOrDef.val z p q →
     (!boundedSatisfaction.val z e ↔ !boundedSatisfaction.val p e ∨ !boundedSatisfaction.val q e)”
+
 noncomputable def boundedSatisfactionBall : ArithmeticSentence :=
   “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !isBounded.val q → !(isUFormula ℒₒᵣ).val q →
     !(termBShiftGraph ℒₒᵣ).val u t →
@@ -96,6 +93,7 @@ noncomputable def termValMul : ArithmeticSentence :=
     (!termValGraph.val v e s ↔ v = vt * vu)”
 
 noncomputable def adjoinTotal : ArithmeticSentence := “∀ x v, ∃ e, !adjoinDef.val e x v”
+
 noncomputable def nthAdjoinZero : ArithmeticSentence :=
   “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
 
@@ -138,28 +136,6 @@ noncomputable def tarski : ArithmeticTheory := {
 }
 
 lemma tarski_finite : tarski.Finite := by simp [tarski]
-
-section
-
-open Bootstrapping.Tarski
-
--- Each Tarski sentence is a universal closure of a Boolean combination of formulas of level at
--- most `𝚺 2`: `iff_iff` splits the biconditionals, and `dummy_sigma`, `dummy_pi` absorb the
--- quantifier blocks that raise the level by one.
-attribute [local simp] Bounding.Hierarchy.iff_iff Bounding.Hierarchy.dummy_sigma
-  Bounding.Hierarchy.dummy_pi HierarchySymbol.Semiformula.hierarchy_of_lt
-
-lemma hierarchy_of_tarski {σ : ArithmeticSentence} (hσ : σ ∈ tarski) :
-    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 3 σ := by
-  rcases hσ with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
-    rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
-    simp [boundedSatisfactionVerum, boundedSatisfactionFalsum, boundedSatisfactionEq,
-      boundedSatisfactionNeq, boundedSatisfactionLt, boundedSatisfactionNlt,
-      boundedSatisfactionAnd, boundedSatisfactionOr, boundedSatisfactionBall,
-      boundedSatisfactionBex, boundedSatisfactionProper, termValBvar, termValZero, termValOne,
-      termValAdd, termValMul, adjoinTotal, nthAdjoinZero, nthAdjoinSucc, lenNil, lenAdjoin];
-
-end
 
 /-! ## `𝗜𝚺₁` proves the Tarski conditions -/
 
@@ -343,11 +319,9 @@ lemma read_hierarchicalSatisfaction_sigma_succ {V : Type*} [ORingStructure V] (s
   cases s <;> simp [Reading.HierarchicalSatisfaction, Reading.Adjoin, hierarchicalSatisfactionDef,
     hierarchicalSatisfaction, hierarchicalSatisfaction', HierarchySymbol.Semiformula.val_sigma];
 
-/-! ### The Tarski conditions read in a model of `𝗣𝗔⁻ ∪ tarski` -/
-
 section readings
 
-open Reading PeanoMinus
+open Reading
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
   (hM : ∀ σ ∈ tarski, M↓[ℒₒᵣ] ⊧ σ)
@@ -459,26 +433,14 @@ lemma read_hierarchicalSatisfaction_pi_succ (s : ℕ) (p e : M) :
 
 end readings
 
-/-! ## Disquotation over `𝗣𝗔⁻` -/
-
-noncomputable def hierarchicalSatisfactionVec (Γ : Polarity) (s k : ℕ) :
-    ArithmeticSemisentence (k + 1) :=
-  “p. ∃ e, !lenDef ↑k e ∧ (⋀ i, ∃ z, !nthDef z e ↑(i : Fin k).val ∧ z = #i.succ.succ.succ) ∧
-    !(hierarchicalSatisfactionDef Γ s) p e”
-
-noncomputable def disquotation {Γ : Polarity} {s k : ℕ} (φ : Prenex Γ s Empty k) :
-    ArithmeticSentence :=
-  ∀¹* (φ.val 🡘 (hierarchicalSatisfactionVec Γ s k) ⇜
-    ((⌜φ.matrix.val⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
+/-! ## Disquotation in models of `𝗣𝗔⁻ ∪ tarski` -/
 
 section disquotation
 
-open _root_.FFL.FirstOrder.Tarski Reading PeanoMinus
+open Reading
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
   (hM : ∀ σ ∈ tarski, M↓[ℒₒᵣ] ⊧ σ)
-
-/-! ### Codes of finite sequences -/
 
 def Reading.Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop :=
   Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
@@ -506,8 +468,6 @@ lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
     obtain ⟨ev', hadj⟩ := read_adjoinTotal hM (v 0) ev;
     exact ⟨ev', Matrix.cons_head_tail v ▸ codes_cons hM hev hadj⟩;
 
-/-! ### Coding facts about standard codes -/
-
 private lemma uTerm_quote_cast {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) :
     UTerm ((⌜t⌝ : ℕ) : M) :=
   deltaOne_upward_absolute₁ (isUTerm ℒₒᵣ) (by simp)
@@ -519,8 +479,6 @@ private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
 private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k}
     (h : ℬ[<, ℒₒᵣ].Closure φ) : Reading.Bounded ((⌜φ⌝ : ℕ) : M) :=
   deltaOne_upward_absolute₁ isBounded (by simpa using (isBounded_quote_iff (V := ℕ) φ).mpr h)
-
-/-! ### Evaluation of coded closed terms -/
 
 include hM in
 private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Codes v ev)
@@ -553,8 +511,6 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
         sigmaOne_upward_absolute₃ Arithmetic.qqMulGraph (by simp);
       exact (read_termValMul hM ev _ _ _ _ _ _ (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq
         (ih 0) (ih 1)).mpr rfl;
-
-/-! ### The $\Delta_0$ base case -/
 
 include hM in
 private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
@@ -629,8 +585,6 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
       exact ⟨x, by simpa [Function.comp_def] using hx, e', hadj,
         (ihφ (x :> v) e' (codes_cons hM hev hadj)).mpr (by simpa [Function.comp_def] using hsat)⟩;
 
-/-! ### The prenex induction -/
-
 include hM in
 lemma hierarchicalSatisfaction_quote_reading : ∀ {Γ : Polarity} {s k : ℕ}
     {θ : ArithmeticSemisentence (k + s)}, ℬ[<, ℒₒᵣ].Closure θ →
@@ -660,58 +614,6 @@ lemma hierarchicalSatisfaction_quote_reading : ∀ {Γ : Polarity} {s k : ℕ}
     · intro hsat x e' hadj;
       exact (ih (x :> v) e' (codes_cons hM hev hadj)).mpr (hsat x);
 
-/-! ### Assembling the disquotation lemma over `𝗣𝗔⁻` -/
-
-private lemma eval_hierarchicalSatisfactionVec {Γ : Polarity} {s k : ℕ} (p : M) (w : Fin k → M) :
-    M ⊧/(p :> w) (hierarchicalSatisfactionVec Γ s k) ↔
-      ∃ ev, Codes w ev ∧ Reading.HierarchicalSatisfaction Γ s p ev := by
-  simp only [hierarchicalSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd,
-    Semiformula.eval_ex,
-    LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
-    Semiterm.val_operator, Matrix.comp₀, Tarski.Structure.numeral_eq_numeral,
-    numeral_eq_natCast_app, Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one,
-    Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃,
-    Semiformula.eval_operator, Matrix.cons_val_succ, Tarski.Structure.eq_iff_eq,
-    LogicalConnective.Prop.and_eq, exists_eq_right, Reading.Codes, Reading.Len, Reading.Nth,
-    Reading.HierarchicalSatisfaction, and_assoc];
-
-private lemma eval_disquotation_rhs {Γ : Polarity} {s k m : ℕ} (φ : ArithmeticSemisentence m)
-    (e : Fin k → M) :
-    M ⊧/e ((hierarchicalSatisfactionVec Γ s k) ⇜
-        ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
-      ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (hierarchicalSatisfactionVec Γ s k) := by
-  simp only [Semiformula.eval_substs, Matrix.comp_vecCons'', Arithmetic.gödelNumber'_def,
-    Semiterm.Operator.encode, Semiterm.Operator.const, Semiterm.val_operator,
-    Tarski.Structure.numeral_eq_numeral, numeral_eq_natCast_app, Sentence.quote_eq_encode_nat,
-    Matrix.empty_eq];
-  simp only [Function.comp_def, Semiterm.val_bvar];
-
 end disquotation
-
-
-theorem provable_disquotation_of_tarski {Γ : Polarity} {s k : ℕ} (φ : Prenex Γ s Empty k) :
-    𝗣𝗔⁻ ∪ tarski ⊢ disquotation φ := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski) := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
-      (Entailment.Axiomatized.le_of_subset Set.subset_union_left);
-  apply Arithmetic.provable_iff_of_models_iff.{0} (T := 𝗣𝗔⁻ ∪ tarski);
-  intro M _ hMT e;
-  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hMT Set.subset_union_left;
-  have hM (σ : ArithmeticSentence) (hσ : σ ∈ tarski) : M↓[ℒₒᵣ] ⊧ σ :=
-    Semantics.ModelsSet.models _ (Set.mem_union_right 𝗣𝗔⁻ hσ);
-  rw [eval_disquotation_rhs, eval_hierarchicalSatisfactionVec];
-  obtain ⟨ev₀, hev₀⟩ := exists_codes hM e;
-  have H {ev : M} (hev : Reading.Codes e ev) :=
-    hierarchicalSatisfaction_quote_reading hM (Γ := Γ) φ.matrix.bounded e ev hev;
-  exact ⟨fun h ↦ ⟨ev₀, hev₀, (H hev₀).mpr h⟩, fun ⟨ev, hev, hsat⟩ ↦ (H hev).mp hsat⟩;
-
-theorem _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_disquotation {Γ : Polarity} {s k : ℕ}
-    (φ : Prenex Γ s Empty k) :
-    𝗜𝚺₁ ⊢ disquotation φ := by
-  have : 𝗣𝗔⁻ ∪ tarski ⪯ 𝗜𝚺₁ := Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
-    rcases hσ with h | h;
-    · exact Entailment.WeakerThan.pbl (Entailment.by_axm h);
-    · exact ISigma1.provable_tarski h;
-  exact this.pbl (provable_disquotation_of_tarski φ);
-
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
