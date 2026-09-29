@@ -204,11 +204,11 @@ instance PartialTruth.pi_definable (s : ℕ) [NeZero s] :
 section
 variable {a b : ℕ} (h : a = b) {θ : ArithmeticSemisentence a}
 
-private lemma closure_cast (hθ : ℬ[<, ℒₒᵣ].Closure θ) :
+lemma closure_cast (hθ : ℬ[<, ℒₒᵣ].Closure θ) :
     ℬ[<, ℒₒᵣ].Closure (cast (congrArg ArithmeticSemisentence h) θ) := by
   subst h; exact hθ
 
-private lemma quote_cast : (⌜cast (congrArg ArithmeticSemisentence h) θ⌝ : V) = ⌜θ⌝ := by
+lemma quote_cast : (⌜cast (congrArg ArithmeticSemisentence h) θ⌝ : V) = ⌜θ⌝ := by
   subst h; rfl
 
 end
