@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Disquotation
-public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`
@@ -94,14 +93,14 @@ lemma eval_collFormula (x y : M) (g : ℕ → M) :
 end eval
 
 theorem provable_finiteAxiomatization (n : ℕ) : 𝗜𝚺 (n + 1) ⊢* finiteAxiomatization n := by
-  rintro σ ((hσ | hσ) | rfl | rfl)
-  · exact by_axm (Set.mem_union_left _ hσ)
-  · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega)) (ISigma1.provable_tarski hσ)
+  rintro σ ((hσ | hσ) | rfl | rfl);
+  · exact by_axm (Set.mem_union_left _ hσ);
+  · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega)) (ISigma1.provable_tarski hσ);
   · exact WeakerThan.pbl (h := InductionOnBroadHierarchy_weakerThan_InductionOnHierarchy 𝚺 (n + 1))
-      (by_axm (Set.mem_union_right _ (mem_InductionScheme_of_mem hierarchy_indFormula)))
-  · have h : 𝗕⁺ 𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
+      (by_axm (Set.mem_union_right _ (mem_InductionScheme_of_mem hierarchy_indFormula)));
+  · have h : 𝗕⁺ 𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance;
     exact WeakerThan.pbl (h := h)
-      (by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hierarchy_collFormula)))
+      (by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hierarchy_collFormula)));
 
 section models
 
@@ -255,7 +254,7 @@ lemma models_ISigma : M↓[ℒₒᵣ] ⊧* 𝗜𝚺 (n + 1) := by
   have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (n + 1) := models_IBroadSigma_of fun φ hφ ↦ by
     obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex (Γ' := 𝚺) hφ;
     exact ⟨φ', fun e f ↦ (hφ' M e f).symm⟩;
-  infer_instance
+  infer_instance;
 
 end models
 
@@ -265,7 +264,7 @@ theorem finiteAxiomatization_equiv (n : ℕ) : finiteAxiomatization n ≊ 𝗜�
 
 theorem finiteAxiomatizable (hn : 1 ≤ n) : FiniteAxiomatizable (𝗜𝚺 n) := by
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le' hn;
-  exact ⟨finiteAxiomatization m, by simp, finiteAxiomatization_equiv m⟩
+  exact ⟨finiteAxiomatization m, by simp, finiteAxiomatization_equiv m⟩;
 
 end ISigma
 

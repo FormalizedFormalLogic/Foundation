@@ -510,13 +510,13 @@ lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
     {f : ℕ → M} (hb : ∀ i, Semiterm.val v Empty.elim (b i) = w i)
     (hv : ∀ y : Fin φ.fvSup, v ⟨y + k, by omega⟩ = f y) :
     M ⊧/v (φ.toSemisentence b) ↔ φ.Eval w f := by
-  rw [toSemisentence, Semiformula.eval_rew]
-  have hbv : (Semiterm.val v Empty.elim ∘ φ.paramSubst b ∘ Semiterm.bvar) = w := funext hb
-  rw [hbv]
-  apply Semiformula.eval_iff_of_funEqOn φ
-  intro y hy
-  have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy
-  simp [paramSubst, hlt, hv ⟨y, hlt⟩]
+  rw [toSemisentence, Semiformula.eval_rew];
+  have hbv : (Semiterm.val v Empty.elim ∘ φ.paramSubst b ∘ Semiterm.bvar) = w := funext hb;
+  rw [hbv];
+  apply Semiformula.eval_iff_of_funEqOn φ;
+  intro y hy;
+  have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy;
+  simp [paramSubst, hlt, hv ⟨y, hlt⟩];
 
 lemma eval_toSemisentence_one (φ : Semiformula L ℕ 1) (x : M) (f : ℕ → M) :
     M ⊧/(x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#0]) ↔ φ.Eval ![x] f :=

@@ -37,12 +37,9 @@ namespace CollectionScheme
 variable {C : ArithmeticSemiformula ℕ 2 → Prop} [V↓[ℒₒᵣ] ⊧* CollectionScheme C]
 
 private lemma collection_eval {φ : ArithmeticSemiformula ℕ 2} (hφ : C φ) (e : ℕ → V) (a : V) :
-    (∀ x < a, ∃ y, φ.Eval ![x, y] e) → ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] e := by
-  have h : V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom φ) :=
-    Theory.models (T := CollectionScheme C) V (by simpa using mem_CollectionScheme_of_mem hφ);
-  revert e a;
-  simpa [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
-    Semiformula.eval_bexsLT, Semiformula.eval_substs] using h;
+    (∀ x < a, ∃ y, φ.Eval ![x, y] e) → ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] e :=
+  (models_collectionAxiom_iff φ).mp
+    (Theory.models (T := CollectionScheme C) V (by simpa using mem_CollectionScheme_of_mem hφ)) e a
 
 lemma collection {R : V → V → Prop}
     (hR : ∃ e : ℕ → V, ∃ φ : ArithmeticSemiformula ℕ 2, C φ ∧ ∀ x y, R x y ↔ φ.Eval ![x, y] e)
@@ -60,10 +57,7 @@ lemma CollectionScheme.models_of_collection
   V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s) := by
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
-  suffices ∀ e : ℕ → V, ∀ a : V,
-      (∀ x < a, ∃ y, φ.Eval ![x, y] e) → ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] e by
-    simpa [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
-      Semiformula.eval_bexsLT, Semiformula.eval_substs] using this;
+  apply (models_collectionAxiom_iff φ).mpr;
   intro e a;
   exact H (Bounding.definableRel_of_hierarchy hφ e) a;
 
