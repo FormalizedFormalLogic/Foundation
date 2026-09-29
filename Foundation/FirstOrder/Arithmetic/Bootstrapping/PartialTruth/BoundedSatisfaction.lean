@@ -16,8 +16,8 @@ the root `⟪z, e⟫`. Tables are $\Delta_1$-definable and unique, and every wel
 code has one under every assignment.
 
 `BoundedSatisfaction z e` says that some table rooted at `⟪z, e⟫` gives it the value `1`. It is
-$\Delta_1$-definable, satisfies Tarski's conditions, and commutes with negation and with
-substitution of coded terms.
+$\Delta_1$-definable, satisfies Tarski's conditions, commutes with negation and with
+substitution of coded terms, and agrees with truth on quoted $\Delta_0$ formulas.
 
 ## References
 
@@ -1762,5 +1762,29 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
   exact H p hp' n m w e hw hp;
 
 end BoundedSatisfaction
+
+/-! ## Agreement with truth on quoted formulas -/
+
+theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : ℬ[<, ℒₒᵣ].Closure φ) (v : Fin k → V) :
+    BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
+  revert hφ v;
+  apply Bounding.Closure.arithmetic_induction (ξ := Empty)
+    (P := fun k φ ↦ ∀ v : Fin k → V, BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ);
+  · intro n v; simp [Sentence.quote_verum];
+  · intro n v; simp [Sentence.quote_falsum];
+  · intro n t u v; simp [termVal_quote, Semiformula.eval_rel];
+  · intro n t u v; simp [termVal_quote, Semiformula.eval_nrel];
+  · intro n t u v; simp [termVal_quote, Semiformula.eval_rel];
+  · intro n t u v; simp [termVal_quote, Semiformula.eval_nrel];
+  · intro n φ ψ hφ hψ ihφ ihψ v; simp [ihφ v, ihψ v];
+  · intro n φ ψ hφ hψ ihφ ihψ v; simp [isBounded_quote_iff, hφ, hψ, ihφ v, ihψ v];
+  · intro n t φ hφ ihφ v;
+    rw [quote_ball_sentence, BoundedSatisfaction.ball_iff (by simp) ((isBounded_quote_iff φ).mpr hφ)
+      (by simp), termVal_quote];
+    simp [← ihφ, Function.comp_def];
+  · intro n t φ hφ ihφ v;
+    rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (by simp), termVal_quote];
+    simp [← ihφ, Function.comp_def];
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

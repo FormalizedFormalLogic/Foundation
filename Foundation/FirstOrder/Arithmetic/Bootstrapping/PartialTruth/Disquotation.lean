@@ -1,140 +1,465 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Tarski
-public import Foundation.FirstOrder.Arithmetic.Prenex
-import Foundation.Meta.ClProver
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.HierarchicalSatisfaction
 
 /-!
-# Partial truth definitions agree with truth
+# The Tarski conditions and disquotation over `𝗣𝗔⁻`
 
-For a sentence `φ` in `Γ`-prenex form of level `s` with a $\Delta_0$ matrix,
-`PartialTruth Γ s ⌜φ⌝` holds exactly when `φ` does, in every model of `𝗜𝚺₁`; hence `𝗜𝚺₁` proves
-the Tarski biconditional `partialTruthDef Γ s (⌜φ⌝) ↔ φ`. By the prenex normal form theorem, over
-any theory containing `𝗕𝚺 s` and `𝗜𝚺₁` every sentence of level `Γ`-`s` of the bounded hierarchy
-is equivalent to the partial truth of the code of a prenex form of it. For formulas with free
-variables, satisfaction of the code of the matrix agrees with truth, both in every model of
-`𝗜𝚺₁` and, uniformly in the level, over `𝗣𝗔⁻` together with the finite Tarski theory `tarski`.
+The Tarski conditions for $\Delta_0$ satisfaction as explicit arithmetic sentences, together with
+the agreement of its $\Sigma_1$ and $\Pi_1$ definitions, collected into the finite theory
+`tarski`, which `𝗜𝚺₁` proves. Reading these sentences and the defining formulas of
+`HierarchicalSatisfaction` inside a model of `𝗣𝗔⁻ ∪ tarski` yields, uniformly in the level, the
+disquotation lemma `𝗣𝗔⁻ ∪ tarski ⊢ disquotation φ` for prenex formulas `φ` with a $\Delta_0$
+matrix and free variables.
 
 ## References
 
-- [HP98, 0.30, 1.66, Lemma I.1.68, Theorem I.1.70, Definition I.1.74, Corollary I.1.76,
-  Remark I.1.77, Remark I.1.80]
+- [HP98, 1.64(5), Theorem I.1.70, Remark I.1.77, Remark I.1.80]
 -/
 
 @[expose] public section
 
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-open Bootstrapping
+/-! ## The Tarski conditions -/
 
-section cast
 
-variable {a b : ℕ} (h : a = b) {θ : ArithmeticSemisentence a}
+namespace Tarski
 
-private lemma closure_cast (hθ : ℬ[<, ℒₒᵣ].Closure θ) :
-    ℬ[<, ℒₒᵣ].Closure (cast (congrArg ArithmeticSemisentence h) θ) := by
-  subst h; exact hθ
+noncomputable def boundedSatisfactionVerum : ArithmeticSentence :=
+  “∀ z e, !qqVerumDef.val z → !boundedSatisfaction.val z e”
 
-private lemma quote_cast {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
-    (⌜cast (congrArg ArithmeticSemisentence h) θ⌝ : V) = ⌜θ⌝ := by
-  subst h; rfl
+noncomputable def boundedSatisfactionFalsum : ArithmeticSentence :=
+  “∀ z e, !qqFalsumDef.val z → ¬!boundedSatisfaction.val z e”
 
-end cast
+noncomputable def boundedSatisfactionEq : ArithmeticSentence :=
+  “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
+    !qqEQDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
+    (!boundedSatisfaction.val z e ↔ vt = vu)”
+
+noncomputable def boundedSatisfactionNeq : ArithmeticSentence :=
+  “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
+    !qqNEQDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
+    (!boundedSatisfaction.val z e ↔ vt ≠ vu)”
+
+noncomputable def boundedSatisfactionLt : ArithmeticSentence :=
+  “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
+    !qqLTDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
+    (!boundedSatisfaction.val z e ↔ vt < vu)”
+
+noncomputable def boundedSatisfactionNlt : ArithmeticSentence :=
+  “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
+    !qqNLTDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
+    (!boundedSatisfaction.val z e ↔ ¬(vt < vu))”
+
+noncomputable def boundedSatisfactionAnd : ArithmeticSentence := “∀ p q z e, !qqAndDef.val z p q →
+    (!boundedSatisfaction.val z e ↔ !boundedSatisfaction.val p e ∧ !boundedSatisfaction.val q e)”
+
+noncomputable def boundedSatisfactionOr : ArithmeticSentence :=
+  “∀ p q z e, !isBounded.val p → !(isUFormula ℒₒᵣ).val p → !isBounded.val q →
+    !(isUFormula ℒₒᵣ).val q → !qqOrDef.val z p q →
+    (!boundedSatisfaction.val z e ↔ !boundedSatisfaction.val p e ∨ !boundedSatisfaction.val q e)”
+noncomputable def boundedSatisfactionBall : ArithmeticSentence :=
+  “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !isBounded.val q → !(isUFormula ℒₒᵣ).val q →
+    !(termBShiftGraph ℒₒᵣ).val u t →
+    !qqBallDef.val z u q → !termValGraph.val v e t →
+    (!boundedSatisfaction.val z e ↔ ∀ x < v, ∀ e', !adjoinDef.val e' x e →
+      !boundedSatisfaction.val q e')”
+
+noncomputable def boundedSatisfactionBex : ArithmeticSentence :=
+  “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !(termBShiftGraph ℒₒᵣ).val u t →
+    !qqBexDef.val z u q → !termValGraph.val v e t →
+    (!boundedSatisfaction.val z e ↔ ∃ x < v, ∃ e', !adjoinDef.val e' x e ∧
+      !boundedSatisfaction.val q e')”
+
+noncomputable def termValBvar : ArithmeticSentence :=
+  “∀ e z t v, !qqBvarDef.val t z → (!termValGraph.val v e t ↔ !nthDef.val v e z)”
+
+noncomputable def termValZero : ArithmeticSentence :=
+  “∀ e v, !termValGraph.val v e ↑Arithmetic.zero ↔ v = 0”
+
+noncomputable def termValOne : ArithmeticSentence :=
+  “∀ e v, !termValGraph.val v e ↑Arithmetic.one ↔ v = 1”
+
+noncomputable def termValAdd : ArithmeticSentence :=
+  “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
+    !Arithmetic.qqAddGraph.val s t u → !termValGraph.val vt e t →
+    !termValGraph.val vu e u →
+    (!termValGraph.val v e s ↔ v = vt + vu)”
+
+noncomputable def termValMul : ArithmeticSentence :=
+  “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
+    !Arithmetic.qqMulGraph.val s t u → !termValGraph.val vt e t →
+    !termValGraph.val vu e u →
+    (!termValGraph.val v e s ↔ v = vt * vu)”
+
+noncomputable def adjoinTotal : ArithmeticSentence := “∀ x v, ∃ e, !adjoinDef.val e x v”
+noncomputable def nthAdjoinZero : ArithmeticSentence :=
+  “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
+
+noncomputable def nthAdjoinSucc : ArithmeticSentence := “∀ x v e i y, !adjoinDef.val e x v →
+    (!nthDef.val y e (i + 1) ↔ !nthDef.val y v i)”
+
+noncomputable def lenNil : ArithmeticSentence := “∀ l, !lenDef.val l 0 ↔ l = 0”
+
+noncomputable def lenAdjoin : ArithmeticSentence :=
+  “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
+
+noncomputable def boundedSatisfactionProper : ArithmeticSentence :=
+  “∀ z e, !boundedSatisfaction.sigma.val z e ↔ !boundedSatisfaction.pi.val z e”
+
+end Tarski
+
+open Bootstrapping.Tarski in
+noncomputable def tarski : ArithmeticTheory := {
+  boundedSatisfactionVerum,
+  boundedSatisfactionFalsum,
+  boundedSatisfactionEq,
+  boundedSatisfactionNeq,
+  boundedSatisfactionLt,
+  boundedSatisfactionNlt,
+  boundedSatisfactionAnd,
+  boundedSatisfactionOr,
+  boundedSatisfactionBall,
+  boundedSatisfactionBex,
+  boundedSatisfactionProper,
+  termValBvar,
+  termValZero,
+  termValOne,
+  termValAdd,
+  termValMul,
+  adjoinTotal,
+  nthAdjoinZero,
+  nthAdjoinSucc,
+  lenNil,
+  lenAdjoin
+}
+
+lemma tarski_finite : tarski.Finite := by simp [tarski]
+
+section
+
+open Bootstrapping.Tarski
+
+-- Each Tarski sentence is a universal closure of a Boolean combination of formulas of level at
+-- most `𝚺 2`: `iff_iff` splits the biconditionals, and `dummy_sigma`, `dummy_pi` absorb the
+-- quantifier blocks that raise the level by one.
+attribute [local simp] Bounding.Hierarchy.iff_iff Bounding.Hierarchy.dummy_sigma
+  Bounding.Hierarchy.dummy_pi HierarchySymbol.Semiformula.hierarchy_of_lt
+
+lemma hierarchy_of_tarski {σ : ArithmeticSentence} (hσ : σ ∈ tarski) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 3 σ := by
+  rcases hσ with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+    rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp [boundedSatisfactionVerum, boundedSatisfactionFalsum, boundedSatisfactionEq,
+      boundedSatisfactionNeq, boundedSatisfactionLt, boundedSatisfactionNlt,
+      boundedSatisfactionAnd, boundedSatisfactionOr, boundedSatisfactionBall,
+      boundedSatisfactionBex, boundedSatisfactionProper, termValBvar, termValZero, termValOne,
+      termValAdd, termValMul, adjoinTotal, nthAdjoinZero, nthAdjoinSucc, lenNil, lenAdjoin];
+
+end
+
+/-! ## `𝗜𝚺₁` proves the Tarski conditions -/
+
+section models
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-! ## Agreement of satisfaction with truth -/
+namespace Tarski
 
-theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : ℬ[<, ℒₒᵣ].Closure φ) (v : Fin k → V) :
-    BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
-  revert hφ v;
-  apply Bounding.Closure.arithmetic_induction (ξ := Empty)
-    (P := fun k φ ↦ ∀ v : Fin k → V, BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ);
-  · intro n v; simp [Sentence.quote_verum];
-  · intro n v; simp [Sentence.quote_falsum];
-  · intro n t u v; simp [termVal_quote, Semiformula.eval_rel];
-  · intro n t u v; simp [termVal_quote, Semiformula.eval_nrel];
-  · intro n t u v; simp [termVal_quote, Semiformula.eval_rel];
-  · intro n t u v; simp [termVal_quote, Semiformula.eval_nrel];
-  · intro n φ ψ hφ hψ ihφ ihψ v; simp [ihφ v, ihψ v];
-  · intro n φ ψ hφ hψ ihφ ihψ v; simp [isBounded_quote_iff, hφ, hψ, ihφ v, ihψ v];
-  · intro n t φ hφ ihφ v;
-    rw [quote_ball_sentence, BoundedSatisfaction.ball_iff (by simp) ((isBounded_quote_iff φ).mpr hφ)
-      (by simp), termVal_quote];
-    simp [← ihφ, Function.comp_def];
-  · intro n t φ hφ ihφ v;
-    rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (by simp), termVal_quote];
-    simp [← ihφ, Function.comp_def];
+lemma models_boundedSatisfactionVerum : V↓[ℒₒᵣ] ⊧ boundedSatisfactionVerum := by
+  suffices ∀ z e : V, z = ^⊤ → BoundedSatisfaction z e by
+    simpa [models_iff, boundedSatisfactionVerum] using this;
+  rintro _ e rfl;
+  exact BoundedSatisfaction.verum e;
 
-private lemma hierarchicalSatisfaction_quote_toPrenex_iff : ∀ {Γ : Polarity} {s k : ℕ}
-    {θ : ArithmeticSemisentence (k + s)}, ℬ[<, ℒₒᵣ].Closure θ → ∀ v : Fin k → V,
-      HierarchicalSatisfaction Γ s (⌜θ⌝ : V) (matrixToVec v) ↔ V ⊧/v (θ.toPrenex Γ s)
-  | _, 0, _, _, hθ, v => by simpa using boundedSatisfaction_quote_iff hθ v
-  | 𝚺, s + 1, k, θ, hθ, v => by
-    have ih := hierarchicalSatisfaction_quote_toPrenex_iff (Γ := 𝚷)
-      (closure_cast (Nat.succ_add k s).symm hθ);
-    simp [Polarity.quantItr_succ, ← ih, quote_cast (Nat.succ_add k s).symm];
-  | 𝚷, s + 1, k, θ, hθ, v => by
-    have ih := hierarchicalSatisfaction_quote_toPrenex_iff (Γ := 𝚺)
-      (closure_cast (Nat.succ_add k s).symm hθ);
-    simp [Polarity.quantItr_succ, ← ih, quote_cast (Nat.succ_add k s).symm];
+lemma models_boundedSatisfactionFalsum : V↓[ℒₒᵣ] ⊧ boundedSatisfactionFalsum := by
+  suffices ∀ z e : V, z = ^⊥ → ¬BoundedSatisfaction z e by
+    simpa [models_iff, boundedSatisfactionFalsum] using this;
+  rintro _ e rfl;
+  exact BoundedSatisfaction.falsum e;
 
-theorem hierarchicalSatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} (φ : Prenex Γ s Empty k)
-    (v : Fin k → V) :
-    HierarchicalSatisfaction Γ s (⌜φ.matrix.val⌝ : V) (matrixToVec v) ↔ V ⊧/v φ.val :=
-  hierarchicalSatisfaction_quote_toPrenex_iff φ.matrix.bounded v
+lemma models_boundedSatisfactionEq : V↓[ℒₒᵣ] ⊧ boundedSatisfactionEq := by
+  suffices ∀ t u z e vt vu : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → z = t ^= u →
+      vt = termVal e t → vu = termVal e u → (BoundedSatisfaction z e ↔ vt = vu) by
+    simpa [models_iff, boundedSatisfactionEq] using this;
+  rintro t u _ e _ _ ht hu rfl rfl rfl;
+  exact BoundedSatisfaction.eq_iff ht hu;
 
-/-! ## Partial truth -/
+lemma models_boundedSatisfactionNeq : V↓[ℒₒᵣ] ⊧ boundedSatisfactionNeq := by
+  suffices ∀ t u z e vt vu : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → z = t ^≠ u →
+      vt = termVal e t → vu = termVal e u → (BoundedSatisfaction z e ↔ vt ≠ vu) by
+    simpa [models_iff, boundedSatisfactionNeq] using this;
+  rintro t u _ e _ _ ht hu rfl rfl rfl;
+  exact BoundedSatisfaction.neq_iff ht hu;
 
-lemma quote_toPrenex : ∀ {Γ : Polarity} {s n : ℕ} (θ : ArithmeticSemisentence (n + s)),
-    (⌜θ.toPrenex Γ s⌝ : V) = qqToPrenex Γ s ⌜θ⌝
-  | _, 0, _, _ => by simp
-  | 𝚺, s + 1, n, θ => by
-    simp [Polarity.quantItr_succ, quote_toPrenex (Γ := 𝚷), quote_cast (Nat.succ_add n s).symm]
-  | 𝚷, s + 1, n, θ => by
-    simp [Polarity.quantItr_succ, quote_toPrenex (Γ := 𝚺), quote_cast (Nat.succ_add n s).symm]
+lemma models_boundedSatisfactionLt : V↓[ℒₒᵣ] ⊧ boundedSatisfactionLt := by
+  suffices ∀ t u z e vt vu : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → z = t ^< u →
+      vt = termVal e t → vu = termVal e u → (BoundedSatisfaction z e ↔ vt < vu) by
+    simpa [models_iff, boundedSatisfactionLt] using this;
+  rintro t u _ e _ _ ht hu rfl rfl rfl;
+  exact BoundedSatisfaction.lt_iff ht hu;
 
-theorem partialTruth_quote_iff {Γ : Polarity} {s : ℕ} (φ : Prenex Γ s Empty 0) :
-    PartialTruth Γ s (⌜φ.val⌝ : V) ↔ V↓[ℒₒᵣ] ⊧ φ.val := by
-  have h := hierarchicalSatisfaction_quote_iff (V := V) φ ![];
-  rw [matrixToVec_nil] at h;
-  simpa [PartialTruth, Prenex.val, quote_toPrenex, models_iff] using h
+lemma models_boundedSatisfactionNlt : V↓[ℒₒᵣ] ⊧ boundedSatisfactionNlt := by
+  suffices ∀ t u z e vt vu : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → z = t ^≮ u →
+      vt = termVal e t → vu = termVal e u → (BoundedSatisfaction z e ↔ ¬(vt < vu)) by
+    simpa [models_iff, boundedSatisfactionNlt] using this;
+  rintro t u _ e _ _ ht hu rfl rfl rfl;
+  exact BoundedSatisfaction.nlt_iff ht hu;
 
-theorem ISigma1.provable_partialTruth_iff {Γ : Polarity} {s : ℕ} (φ : Prenex Γ s Empty 0) :
-    𝗜𝚺₁ ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 φ.val :=
-  Arithmetic.complete.{0} _ _ fun _ _ _ ↦ by
-    simpa [models_iff, eval_partialTruthDef] using partialTruth_quote_iff φ
+lemma models_boundedSatisfactionAnd : V↓[ℒₒᵣ] ⊧ boundedSatisfactionAnd := by
+  suffices ∀ p q z e : V, z = p ^⋏ q →
+    (BoundedSatisfaction z e ↔ BoundedSatisfaction p e ∧ BoundedSatisfaction q e) by
+    simpa [models_iff, boundedSatisfactionAnd] using this;
+  rintro p q _ e rfl;
+  exact BoundedSatisfaction.and_iff;
 
-section prenex
+lemma models_boundedSatisfactionOr : V↓[ℒₒᵣ] ⊧ boundedSatisfactionOr := by
+  suffices ∀ p q z e : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded q → IsUFormula ℒₒᵣ q →
+      z = p ^⋎ q → (BoundedSatisfaction z e ↔ BoundedSatisfaction p e ∨ BoundedSatisfaction q e) by
+    simpa [models_iff, boundedSatisfactionOr] using this;
+  rintro p q _ e hdp hfp hdq hfq rfl;
+  exact BoundedSatisfaction.or_iff hdp hfp hdq hfq;
 
-variable {Γ : Polarity} {s : ℕ} {σ : ArithmeticSentence}
+lemma models_boundedSatisfactionBall : V↓[ℒₒᵣ] ⊧ boundedSatisfactionBall := by
+  suffices ∀ t u q z e v : V, IsUTerm ℒₒᵣ t → IsBounded q → IsUFormula ℒₒᵣ q →
+      u = termBShift ℒₒᵣ t → z = qqBall u q → v = termVal e t →
+      (BoundedSatisfaction z e ↔ ∀ x < v, BoundedSatisfaction q (x ∷ e)) by
+    simpa [models_iff, boundedSatisfactionBall] using this;
+  rintro t _ q _ e _ ht hdq hfq rfl rfl rfl;
+  exact BoundedSatisfaction.ball_iff ht hdq hfq;
 
-theorem provable_partialTruth_iff_of_hierarchy (T : ArithmeticTheory) [𝗕𝚺s ⪯ T] [𝗜𝚺₁ ⪯ T]
-    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
-    ∃ φ : Prenex Γ s Empty 0,
-      T ⊢ σ 🡘 φ.val ∧ T ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 σ := by
-  obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T h;
-  have h₁ : T ⊢ σ 🡘 φ.val := hφ;
-  have h₂ : T ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 φ.val :=
-    Entailment.WeakerThan.pbl (ISigma1.provable_partialTruth_iff φ);
-  exact ⟨φ, h₁, by cl_prover [h₁, h₂]⟩
+lemma models_boundedSatisfactionBex : V↓[ℒₒᵣ] ⊧ boundedSatisfactionBex := by
+  suffices ∀ t u q z e v : V, IsUTerm ℒₒᵣ t → u = termBShift ℒₒᵣ t → z = qqBex u q →
+      v = termVal e t → (BoundedSatisfaction z e ↔ ∃ x < v, BoundedSatisfaction q (x ∷ e)) by
+    simpa [models_iff, boundedSatisfactionBex] using this;
+  rintro t _ q _ e _ ht rfl rfl rfl;
+  exact BoundedSatisfaction.bex_iff ht;
 
-lemma Peano.provable_partialTruth_iff_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
-    ∃ φ : Prenex Γ s Empty 0,
-      𝗣𝗔 ⊢ σ 🡘 φ.val ∧ 𝗣𝗔 ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 σ :=
-  Arithmetic.provable_partialTruth_iff_of_hierarchy 𝗣𝗔 h
+lemma models_termValBvar : V↓[ℒₒᵣ] ⊧ termValBvar := by
+  suffices ∀ e z t v : V, t = ^#z → (v = termVal e t ↔ v = e.[z]) by
+    simpa [models_iff, termValBvar] using this;
+  rintro e z _ v rfl;
+  simp;
 
-lemma ISigma1.provable_partialTruth_iff_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 1 σ) :
-    ∃ φ : Prenex Γ 1 Empty 0,
-      𝗜𝚺₁ ⊢ σ 🡘 φ.val ∧ 𝗜𝚺₁ ⊢ (partialTruthDef Γ 1)/[⌜φ.val⌝] 🡘 σ :=
-  Arithmetic.provable_partialTruth_iff_of_hierarchy 𝗜𝚺₁ h
+lemma models_termValZero : V↓[ℒₒᵣ] ⊧ termValZero := by
+  simp [models_iff, termValZero, numeral_eq_natCast];
 
-end prenex
+lemma models_termValOne : V↓[ℒₒᵣ] ⊧ termValOne := by
+  simp [models_iff, termValOne, numeral_eq_natCast];
 
-/-! ## The disquotation sentences -/
+lemma models_termValAdd : V↓[ℒₒᵣ] ⊧ termValAdd := by
+  suffices ∀ e t u s vt vu v : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → s = t ^+ u →
+      vt = termVal e t → vu = termVal e u → (v = termVal e s ↔ v = vt + vu) by
+    simpa [models_iff, termValAdd] using this;
+  rintro e t u _ _ _ v ht hu rfl rfl rfl;
+  simp [termVal_add ht hu];
+
+lemma models_termValMul : V↓[ℒₒᵣ] ⊧ termValMul := by
+  suffices ∀ e t u s vt vu v : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → s = t ^* u →
+      vt = termVal e t → vu = termVal e u → (v = termVal e s ↔ v = vt * vu) by
+    simpa [models_iff, termValMul] using this;
+  rintro e t u _ _ _ v ht hu rfl rfl rfl;
+  simp [termVal_mul ht hu];
+
+lemma models_adjoinTotal : V↓[ℒₒᵣ] ⊧ adjoinTotal := by
+  simp [models_iff, adjoinTotal];
+
+lemma models_nthAdjoinZero : V↓[ℒₒᵣ] ⊧ nthAdjoinZero := by
+  suffices ∀ x v e y : V, e = x ∷ v → (y = e.[0] ↔ y = x) by
+    simpa [models_iff, nthAdjoinZero] using this;
+  rintro x v _ y rfl;
+  simp;
+
+lemma models_nthAdjoinSucc : V↓[ℒₒᵣ] ⊧ nthAdjoinSucc := by
+  suffices ∀ x v e i y : V, e = x ∷ v → (y = e.[i + 1] ↔ y = v.[i]) by
+    simpa [models_iff, nthAdjoinSucc] using this;
+  rintro x v _ i y rfl;
+  simp;
+
+lemma models_lenNil : V↓[ℒₒᵣ] ⊧ lenNil := by
+  simp [models_iff, lenNil];
+
+lemma models_lenAdjoin : V↓[ℒₒᵣ] ⊧ lenAdjoin := by
+  suffices ∀ x v e l : V, e = x ∷ v → (l + 1 = len e ↔ l = len v) by
+    simpa [models_iff, lenAdjoin] using this;
+  rintro x v _ l rfl;
+  simp;
+
+lemma models_boundedSatisfactionProper : V↓[ℒₒᵣ] ⊧ boundedSatisfactionProper := by
+  simp [models_iff, boundedSatisfactionProper, BoundedSatisfaction.defined.proper.iff];
+
+end Tarski
+
+open Bootstrapping.Tarski in
+lemma models_tarski {σ : ArithmeticSentence} (h : σ ∈ tarski) : V↓[ℒₒᵣ] ⊧ σ := by
+  rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+    rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl;
+  exacts [models_boundedSatisfactionVerum, models_boundedSatisfactionFalsum,
+    models_boundedSatisfactionEq, models_boundedSatisfactionNeq, models_boundedSatisfactionLt,
+    models_boundedSatisfactionNlt, models_boundedSatisfactionAnd, models_boundedSatisfactionOr,
+    models_boundedSatisfactionBall, models_boundedSatisfactionBex,
+    models_boundedSatisfactionProper, models_termValBvar, models_termValZero, models_termValOne,
+    models_termValAdd, models_termValMul, models_adjoinTotal, models_nthAdjoinZero,
+    models_nthAdjoinSucc, models_lenNil, models_lenAdjoin];
+
+end models
+
+theorem _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_tarski : 𝗜𝚺₁ ⊢* tarski :=
+  fun {_} hσ ↦ Arithmetic.complete.{0} _ _ fun _ _ _ ↦ models_tarski hσ
+
+/-! ## Readings in models of `𝗣𝗔⁻` -/
+
+namespace Reading
+
+variable {V : Type*} [ORingStructure V]
+
+def BoundedSatisfaction (z e : V) : Prop := V ⊧/![z, e] boundedSatisfaction.val
+
+def HierarchicalSatisfaction (Γ : Polarity) (s : ℕ) (z e : V) : Prop :=
+  V ⊧/![z, e] (hierarchicalSatisfactionDef Γ s)
+
+def Bounded (z : V) : Prop := V ⊧/![z] isBounded.val
+
+def UFormula (z : V) : Prop := V ⊧/![z] (isUFormula ℒₒᵣ).val
+
+def UTerm (t : V) : Prop := V ⊧/![t] (isUTerm ℒₒᵣ).val
+
+def Adjoin (e' x e : V) : Prop := V ⊧/![e', x, e] adjoinDef.val
+
+def Nth (y e i : V) : Prop := V ⊧/![y, e, i] nthDef.val
+
+def Len (l e : V) : Prop := V ⊧/![l, e] lenDef.val
+
+def TermVal (y e t : V) : Prop := V ⊧/![y, e, t] termValGraph.val
+
+end Reading
+
+lemma read_hierarchicalSatisfaction_sigma_succ {V : Type*} [ORingStructure V] (s : ℕ) (p e : V) :
+    Reading.HierarchicalSatisfaction 𝚺 (s + 1) p e ↔
+      ∃ x e', Reading.Adjoin e' x e ∧ Reading.HierarchicalSatisfaction 𝚷 s p e' := by
+  cases s <;> simp [Reading.HierarchicalSatisfaction, Reading.Adjoin, hierarchicalSatisfactionDef,
+    hierarchicalSatisfaction, hierarchicalSatisfaction', HierarchySymbol.Semiformula.val_sigma];
+
+/-! ### The Tarski conditions read in a model of `𝗣𝗔⁻ ∪ tarski` -/
+
+section readings
+
+open Reading PeanoMinus
+
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+  (hM : ∀ σ ∈ tarski, M↓[ℒₒᵣ] ⊧ σ)
+
+include hM
+
+-- The readings are unfolded only here, to match them against the sentences of `tarski`.
+attribute [local simp] models_iff Reading.BoundedSatisfaction Reading.HierarchicalSatisfaction
+  Reading.Bounded Reading.UFormula Reading.UTerm Reading.Adjoin Reading.Nth Reading.Len
+  Reading.TermVal
+
+private lemma models_of_mem (σ : ArithmeticSentence) (hσ : σ ∈ tarski := by simp [tarski]) :
+    M↓[ℒₒᵣ] ⊧ σ :=
+  hM σ hσ
+
+lemma read_boundedSatisfactionVerum : ∀ z e : M, M ⊧/![z] qqVerumDef.val →
+    Reading.BoundedSatisfaction z e := by
+  simpa [Tarski.boundedSatisfactionVerum] using models_of_mem hM Tarski.boundedSatisfactionVerum;
+
+lemma read_boundedSatisfactionFalsum : ∀ z e : M, M ⊧/![z] qqFalsumDef.val →
+    ¬Reading.BoundedSatisfaction z e := by
+  simpa [Tarski.boundedSatisfactionFalsum] using models_of_mem hM Tarski.boundedSatisfactionFalsum;
+
+lemma read_boundedSatisfactionEq : ∀ t u z e vt vu : M, UTerm t → UTerm u →
+    M ⊧/![z, t, u] qqEQDef.val → TermVal vt e t → TermVal vu e u →
+      (Reading.BoundedSatisfaction z e ↔ vt = vu) := by
+  simpa [Tarski.boundedSatisfactionEq] using models_of_mem hM Tarski.boundedSatisfactionEq;
+
+lemma read_boundedSatisfactionNeq : ∀ t u z e vt vu : M, UTerm t → UTerm u →
+    M ⊧/![z, t, u] qqNEQDef.val → TermVal vt e t → TermVal vu e u →
+      (Reading.BoundedSatisfaction z e ↔ vt ≠ vu) := by
+  simpa [Tarski.boundedSatisfactionNeq] using models_of_mem hM Tarski.boundedSatisfactionNeq;
+
+lemma read_boundedSatisfactionLt : ∀ t u z e vt vu : M, UTerm t → UTerm u →
+    M ⊧/![z, t, u] qqLTDef.val → TermVal vt e t → TermVal vu e u →
+      (Reading.BoundedSatisfaction z e ↔ vt < vu) := by
+  simpa [Tarski.boundedSatisfactionLt] using models_of_mem hM Tarski.boundedSatisfactionLt;
+
+lemma read_boundedSatisfactionNlt : ∀ t u z e vt vu : M, UTerm t → UTerm u →
+    M ⊧/![z, t, u] qqNLTDef.val → TermVal vt e t → TermVal vu e u →
+    (Reading.BoundedSatisfaction z e ↔ ¬(vt < vu)) := by
+  simpa [Tarski.boundedSatisfactionNlt] using models_of_mem hM Tarski.boundedSatisfactionNlt;
+
+lemma read_boundedSatisfactionAnd : ∀ p q z e : M, M ⊧/![z, p, q] qqAndDef.val →
+    (Reading.BoundedSatisfaction z e ↔
+      Reading.BoundedSatisfaction p e ∧ Reading.BoundedSatisfaction q e) := by
+  simpa [Tarski.boundedSatisfactionAnd] using models_of_mem hM Tarski.boundedSatisfactionAnd;
+
+lemma read_boundedSatisfactionOr : ∀ p q z e : M, Reading.Bounded p → UFormula p →
+    Reading.Bounded q → UFormula q →
+    M ⊧/![z, p, q] qqOrDef.val →
+      (Reading.BoundedSatisfaction z e ↔
+        Reading.BoundedSatisfaction p e ∨ Reading.BoundedSatisfaction q e) := by
+  simpa [Tarski.boundedSatisfactionOr] using models_of_mem hM Tarski.boundedSatisfactionOr;
+
+lemma read_boundedSatisfactionBall : ∀ t u q z e v : M, UTerm t → Reading.Bounded q → UFormula q →
+    M ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → M ⊧/![z, u, q] qqBallDef.val → TermVal v e t →
+    (Reading.BoundedSatisfaction z e ↔
+      ∀ x < v, ∀ e', Adjoin e' x e → Reading.BoundedSatisfaction q e') := by
+  simpa [Tarski.boundedSatisfactionBall] using models_of_mem hM Tarski.boundedSatisfactionBall;
+
+lemma read_boundedSatisfactionBex : ∀ t u q z e v : M, UTerm t →
+    M ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → M ⊧/![z, u, q] qqBexDef.val → TermVal v e t →
+    (Reading.BoundedSatisfaction z e ↔
+      ∃ x < v, ∃ e', Adjoin e' x e ∧ Reading.BoundedSatisfaction q e') := by
+  simpa [Tarski.boundedSatisfactionBex] using models_of_mem hM Tarski.boundedSatisfactionBex;
+
+lemma read_termValBvar : ∀ e z t v : M, M ⊧/![t, z] qqBvarDef.val →
+    (TermVal v e t ↔ Nth v e z) := by
+  simpa [Tarski.termValBvar] using models_of_mem hM Tarski.termValBvar;
+
+lemma read_termValZero : ∀ e v : M, TermVal v e ((𝟎 : ℕ) : M) ↔ v = 0 := by
+  simpa [Tarski.termValZero, numeral_eq_natCast] using models_of_mem hM Tarski.termValZero;
+
+lemma read_termValOne : ∀ e v : M, TermVal v e ((𝟏 : ℕ) : M) ↔ v = 1 := by
+  simpa [Tarski.termValOne, numeral_eq_natCast] using models_of_mem hM Tarski.termValOne;
+
+lemma read_termValAdd : ∀ e t u s vt vu v : M, UTerm t → UTerm u →
+    M ⊧/![s, t, u] Arithmetic.qqAddGraph.val → TermVal vt e t → TermVal vu e u →
+    (TermVal v e s ↔ v = vt + vu) := by
+  simpa [Tarski.termValAdd] using models_of_mem hM Tarski.termValAdd;
+
+lemma read_termValMul : ∀ e t u s vt vu v : M, UTerm t → UTerm u →
+    M ⊧/![s, t, u] Arithmetic.qqMulGraph.val → TermVal vt e t → TermVal vu e u →
+    (TermVal v e s ↔ v = vt * vu) := by
+  simpa [Tarski.termValMul] using models_of_mem hM Tarski.termValMul;
+
+lemma read_adjoinTotal : ∀ x v : M, ∃ e, Adjoin e x v := by
+  simpa [Tarski.adjoinTotal] using models_of_mem hM Tarski.adjoinTotal;
+
+lemma read_nthAdjoinZero : ∀ x v e y : M, Adjoin e x v → (Nth y e 0 ↔ y = x) := by
+  simpa [Tarski.nthAdjoinZero] using models_of_mem hM Tarski.nthAdjoinZero;
+
+lemma read_nthAdjoinSucc : ∀ x v e i y : M, Adjoin e x v → (Nth y e (i + 1) ↔ Nth y v i) := by
+  simpa [Tarski.nthAdjoinSucc] using models_of_mem hM Tarski.nthAdjoinSucc;
+
+lemma read_lenNil : ∀ l : M, Len l 0 ↔ l = 0 := by
+  simpa [Tarski.lenNil] using models_of_mem hM Tarski.lenNil;
+
+lemma read_lenAdjoin : ∀ x v e l : M, Adjoin e x v → (Len (l + 1) e ↔ Len l v) := by
+  simpa [Tarski.lenAdjoin] using models_of_mem hM Tarski.lenAdjoin;
+
+lemma read_hierarchicalSatisfaction_pi_succ (s : ℕ) (p e : M) :
+    Reading.HierarchicalSatisfaction 𝚷 (s + 1) p e ↔
+      ∀ x e', Adjoin e' x e → Reading.HierarchicalSatisfaction 𝚺 s p e' := by
+  have h := models_of_mem hM Tarski.boundedSatisfactionProper;
+  cases s <;> simp_all [Tarski.boundedSatisfactionProper, hierarchicalSatisfactionDef,
+    hierarchicalSatisfaction, hierarchicalSatisfaction', HierarchySymbol.Semiformula.val_sigma];
+
+end readings
+
+/-! ## Disquotation over `𝗣𝗔⁻` -/
 
 noncomputable def hierarchicalSatisfactionVec (Γ : Polarity) (s k : ℕ) :
     ArithmeticSemisentence (k + 1) :=
@@ -146,9 +471,7 @@ noncomputable def disquotation {Γ : Polarity} {s k : ℕ} (φ : Prenex Γ s Emp
   ∀¹* (φ.val 🡘 (hierarchicalSatisfactionVec Γ s k) ⇜
     ((⌜φ.matrix.val⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
-/-! ## The disquotation lemma over `𝗣𝗔⁻` -/
-
-section peanoMinus
+section disquotation
 
 open _root_.FFL.FirstOrder.Tarski Reading PeanoMinus
 
@@ -157,12 +480,8 @@ variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 /-! ### Codes of finite sequences -/
 
-namespace Reading
-
-def Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop :=
+def Reading.Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop :=
   Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
-
-end Reading
 
 include hM in
 lemma codes_nil (v : Fin 0 → M) : Codes v 0 :=
@@ -215,22 +534,22 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
   | @func k' f w ih =>
     match k', f, w, ih with
     | 0, .zero, w, _ =>
-      rw [show (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟎 by
-        simp];
+      rw [show (⌜(FirstOrder.Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝
+        : ℕ) = 𝟎 by simp];
       exact (read_termValZero hM ev 0).mpr rfl;
     | 0, .one, w, _ =>
-      rw [show (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟏 by
-        simp];
+      rw [show (⌜(FirstOrder.Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝
+        : ℕ) = 𝟏 by simp];
       exact (read_termValOne hM ev 1).mpr rfl;
     | 2, .add, w, ih =>
-      have hq : M ⊧/![((⌜Semiterm.func Language.ORing.Func.add w⌝ : ℕ) : M), ((⌜w 0⌝ : ℕ) : M),
-          ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
+      have hq : M ⊧/![((⌜FirstOrder.Semiterm.func Language.ORing.Func.add w⌝ : ℕ) : M),
+          ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
         sigmaOne_upward_absolute₃ Arithmetic.qqAddGraph (by simp);
       exact (read_termValAdd hM ev _ _ _ _ _ _ (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq
         (ih 0) (ih 1)).mpr rfl;
     | 2, .mul, w, ih =>
-      have hq : M ⊧/![((⌜Semiterm.func Language.ORing.Func.mul w⌝ : ℕ) : M), ((⌜w 0⌝ : ℕ) : M),
-          ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
+      have hq : M ⊧/![((⌜FirstOrder.Semiterm.func Language.ORing.Func.mul w⌝ : ℕ) : M),
+          ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
         sigmaOne_upward_absolute₃ Arithmetic.qqMulGraph (by simp);
       exact (read_termValMul hM ev _ _ _ _ _ _ (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq
         (ih 0) (ih 1)).mpr rfl;
@@ -241,11 +560,11 @@ include hM in
 private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : ℬ[<, ℒₒᵣ].Closure φ) :
     ∀ (v : Fin k → M) (ev : M), Codes v ev →
-      (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+      (Reading.BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   revert hφ;
   apply Bounding.Closure.arithmetic_induction (ξ := Empty)
     (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
-      (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ));
+      (Reading.BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ));
   · intro m v ev _;
     exact iff_of_true (read_boundedSatisfactionVerum hM _ ev
       (sigmaZero_upward_absolute₁ qqVerumDef (by simp [Sentence.quote_verum]))) (by simp);
@@ -367,7 +686,8 @@ private lemma eval_disquotation_rhs {Γ : Polarity} {s k m : ℕ} (φ : Arithmet
     Matrix.empty_eq];
   simp only [Function.comp_def, Semiterm.val_bvar];
 
-end peanoMinus
+end disquotation
+
 
 theorem provable_disquotation_of_tarski {Γ : Polarity} {s k : ℕ} (φ : Prenex Γ s Empty k) :
     𝗣𝗔⁻ ∪ tarski ⊢ disquotation φ := by
@@ -384,7 +704,8 @@ theorem provable_disquotation_of_tarski {Γ : Polarity} {s k : ℕ} (φ : Prenex
     hierarchicalSatisfaction_quote_reading hM (Γ := Γ) φ.matrix.bounded e ev hev;
   exact ⟨fun h ↦ ⟨ev₀, hev₀, (H hev₀).mpr h⟩, fun ⟨ev, hev, hsat⟩ ↦ (H hev).mp hsat⟩;
 
-theorem ISigma1.provable_disquotation {Γ : Polarity} {s k : ℕ} (φ : Prenex Γ s Empty k) :
+theorem _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_disquotation {Γ : Polarity} {s k : ℕ}
+    (φ : Prenex Γ s Empty k) :
     𝗜𝚺₁ ⊢ disquotation φ := by
   have : 𝗣𝗔⁻ ∪ tarski ⪯ 𝗜𝚺₁ := Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
     rcases hσ with h | h;
@@ -392,4 +713,5 @@ theorem ISigma1.provable_disquotation {Γ : Polarity} {s k : ℕ} (φ : Prenex �
     · exact ISigma1.provable_tarski h;
   exact this.pbl (provable_disquotation_of_tarski φ);
 
-end FFL.FirstOrder.Arithmetic
+
+end FFL.FirstOrder.Arithmetic.Bootstrapping

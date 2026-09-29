@@ -14,7 +14,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.BoundedSatisfaction
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Disquotation
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.HierarchicalSatisfaction
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Tarski
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.TermVal
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick

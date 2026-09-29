@@ -1,6 +1,8 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.BoundedSatisfaction
+public import Foundation.FirstOrder.Arithmetic.Prenex
+import Foundation.Meta.ClProver
 
 /-!
 # Satisfaction and partial truth for prenex formulas with a $\Delta_0$ matrix
@@ -9,11 +11,15 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounde
 assignment `e`, where `p` codes the $\Delta_0$ matrix `θ` and the quantifiers alternate starting
 with `Γ`; the value of `x_i` is pushed onto the front of `e`. The partial truth predicate
 `PartialTruth Γ s` holds of the code of such a sentence exactly when its matrix is satisfied. For
-`s ≥ 1` both are definable at level `Γ`-`s`.
+`s ≥ 1` both are definable at level `Γ`-`s`. In every model of `𝗜𝚺₁` they agree with truth, so
+`𝗜𝚺₁` proves the Tarski biconditional `partialTruthDef Γ s (⌜φ⌝) ↔ φ`; by the prenex normal form
+theorem, over any theory containing `𝗕𝚺 s` and `𝗜𝚺₁` every sentence of level `Γ`-`s` of the
+bounded hierarchy is equivalent to the partial truth of the code of a prenex form of it.
 
 ## References
 
-- [HP98, 1.64, Definition I.1.74, Theorem I.1.75]
+- [HP98, 0.30, 1.64, 1.66, Lemma I.1.68, Theorem I.1.70, Definition I.1.74, Theorem I.1.75,
+  Corollary I.1.76]
 -/
 
 @[expose] public section
@@ -192,5 +198,85 @@ instance PartialTruth.sigma_definable (s : ℕ) [NeZero s] :
 instance PartialTruth.pi_definable (s : ℕ) [NeZero s] :
     𝚷ᴬ-[s]-Predicate (PartialTruth 𝚷 s : V → Prop) :=
   (PartialTruth.pi_defined s).to_definable
+
+/-! ## Agreement with truth in models of `𝗜𝚺₁` -/
+
+section
+variable {a b : ℕ} (h : a = b) {θ : ArithmeticSemisentence a}
+
+lemma closure_cast (hθ : ℬ[<, ℒₒᵣ].Closure θ) :
+    ℬ[<, ℒₒᵣ].Closure (cast (congrArg ArithmeticSemisentence h) θ) := by
+  subst h; exact hθ
+
+lemma quote_cast : (⌜cast (congrArg ArithmeticSemisentence h) θ⌝ : V) = ⌜θ⌝ := by
+  subst h; rfl
+
+end
+
+private lemma hierarchicalSatisfaction_quote_toPrenex_iff : ∀ {Γ : Polarity} {s k : ℕ}
+    {θ : ArithmeticSemisentence (k + s)}, ℬ[<, ℒₒᵣ].Closure θ → ∀ v : Fin k → V,
+      HierarchicalSatisfaction Γ s (⌜θ⌝ : V) (matrixToVec v) ↔ V ⊧/v (θ.toPrenex Γ s)
+  | _, 0, _, _, hθ, v => by simpa using boundedSatisfaction_quote_iff hθ v
+  | 𝚺, s + 1, k, θ, hθ, v => by
+    have ih := hierarchicalSatisfaction_quote_toPrenex_iff (Γ := 𝚷)
+      (closure_cast (Nat.succ_add k s).symm hθ);
+    simp [Polarity.quantItr_succ, ← ih, quote_cast (Nat.succ_add k s).symm];
+  | 𝚷, s + 1, k, θ, hθ, v => by
+    have ih := hierarchicalSatisfaction_quote_toPrenex_iff (Γ := 𝚺)
+      (closure_cast (Nat.succ_add k s).symm hθ);
+    simp [Polarity.quantItr_succ, ← ih, quote_cast (Nat.succ_add k s).symm];
+
+theorem hierarchicalSatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} (φ : Prenex Γ s Empty k)
+    (v : Fin k → V) :
+    HierarchicalSatisfaction Γ s (⌜φ.matrix.val⌝ : V) (matrixToVec v) ↔ V ⊧/v φ.val :=
+  hierarchicalSatisfaction_quote_toPrenex_iff φ.matrix.bounded v
+
+lemma quote_toPrenex : ∀ {Γ : Polarity} {s n : ℕ} (θ : ArithmeticSemisentence (n + s)),
+    (⌜θ.toPrenex Γ s⌝ : V) = qqToPrenex Γ s ⌜θ⌝
+  | _, 0, _, _ => by simp
+  | 𝚺, s + 1, n, θ => by
+    simp [Polarity.quantItr_succ, quote_toPrenex (Γ := 𝚷), quote_cast (Nat.succ_add n s).symm]
+  | 𝚷, s + 1, n, θ => by
+    simp [Polarity.quantItr_succ, quote_toPrenex (Γ := 𝚺), quote_cast (Nat.succ_add n s).symm]
+
+theorem partialTruth_quote_iff {Γ : Polarity} {s : ℕ} (φ : Prenex Γ s Empty 0) :
+    PartialTruth Γ s (⌜φ.val⌝ : V) ↔ V↓[ℒₒᵣ] ⊧ φ.val := by
+  have h := hierarchicalSatisfaction_quote_iff (V := V) φ ![];
+  rw [matrixToVec_nil] at h;
+  simpa [PartialTruth, Prenex.val, quote_toPrenex, models_iff] using h
+
+theorem _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_partialTruth_iff {Γ : Polarity} {s : ℕ}
+    (φ : Prenex Γ s Empty 0) :
+    𝗜𝚺₁ ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 φ.val :=
+  Arithmetic.complete.{0} _ _ fun _ _ _ ↦ by
+    simpa [models_iff, eval_partialTruthDef] using partialTruth_quote_iff φ
+
+section prenex
+
+variable {Γ : Polarity} {s : ℕ} {σ : ArithmeticSentence}
+
+theorem provable_partialTruth_iff_of_hierarchy (T : ArithmeticTheory) [𝗕𝚺s ⪯ T] [𝗜𝚺₁ ⪯ T]
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
+    ∃ φ : Prenex Γ s Empty 0,
+      T ⊢ σ 🡘 φ.val ∧ T ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 σ := by
+  obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T h;
+  have h₁ : T ⊢ σ 🡘 φ.val := hφ;
+  have h₂ : T ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 φ.val :=
+    Entailment.WeakerThan.pbl (ISigma1.provable_partialTruth_iff φ);
+  exact ⟨φ, h₁, by cl_prover [h₁, h₂]⟩
+
+lemma _root_.FFL.FirstOrder.Arithmetic.Peano.provable_partialTruth_iff_of_hierarchy
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
+    ∃ φ : Prenex Γ s Empty 0,
+      𝗣𝗔 ⊢ σ 🡘 φ.val ∧ 𝗣𝗔 ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 σ :=
+  Bootstrapping.provable_partialTruth_iff_of_hierarchy 𝗣𝗔 h
+
+lemma _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_partialTruth_iff_of_hierarchy
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 1 σ) :
+    ∃ φ : Prenex Γ 1 Empty 0,
+      𝗜𝚺₁ ⊢ σ 🡘 φ.val ∧ 𝗜𝚺₁ ⊢ (partialTruthDef Γ 1)/[⌜φ.val⌝] 🡘 σ :=
+  Bootstrapping.provable_partialTruth_iff_of_hierarchy 𝗜𝚺₁ h
+
+end prenex
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
