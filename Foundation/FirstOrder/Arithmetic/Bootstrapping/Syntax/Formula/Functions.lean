@@ -1303,10 +1303,12 @@ notation:78 x:78 " ^≮ " y:79 => qqNLT x y
   simpa using! nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqLT_left (x y : V) : x < x ^< y := by
-  simpa using! nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+  simpa [qqLT] using!
+    nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqLT_right (x y : V) : y < x ^< y := by
-  simpa using! nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+  simpa [qqLT] using!
+    nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqNEQ_left (x y : V) : x < x ^≠ y := by
   simpa using! nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
@@ -1315,10 +1317,24 @@ notation:78 x:78 " ^≮ " y:79 => qqNLT x y
   simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqNLT_left (x y : V) : x < x ^≮ y := by
-  simpa using! nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+  simpa [qqNLT] using!
+    nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqNLT_right (x y : V) : y < x ^≮ y := by
-  simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+  simpa [qqNLT] using!
+    nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma qqEQ_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^= u₁ = t₂ ^= u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [qqEQ, qqRel, adjoin_inj];
+
+@[simp] lemma qqNEQ_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^≠ u₁ = t₂ ^≠ u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [qqNEQ, qqNRel, adjoin_inj];
+
+@[simp] lemma qqLT_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^< u₁ = t₂ ^< u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [qqLT, qqRel, adjoin_inj];
+
+@[simp] lemma qqNLT_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^≮ u₁ = t₂ ^≮ u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [qqNLT, qqNRel, adjoin_inj];
 
 def _root_.FFL.FirstOrder.Arithmetic.qqEQDef : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑eqIndex v”
@@ -1368,11 +1384,48 @@ lemma neg_nlt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : 
   simp only [qqNLT, qqLT]
   rw [neg_nrel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
 
+lemma rel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^rel k r v)) :
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r v = t ^= u) ∨
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r v = t ^< u) := by
+  obtain ⟨hr, hv⟩ := IsUFormula.rel.mp h;
+  rcases isRel_iff_LOR.mp hr with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ <;>
+    obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv;
+  · left;
+    exact ⟨a, b, ha, hb, by rw [qqEQ, coe_quote_eq, coe_eqIndex_eq]⟩;
+  · right;
+    exact ⟨a, b, ha, hb, by rw [qqLT, coe_quote_lt, coe_ltIndex_eq]⟩;
+
+lemma nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r v = t ^≠ u) ∨
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r v = t ^≮ u) := by
+  obtain ⟨hr, hv⟩ := IsUFormula.nrel.mp h;
+  rcases isRel_iff_LOR.mp hr with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ <;>
+    obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv;
+  · left;
+    exact ⟨a, b, ha, hb, by rw [qqNEQ, coe_quote_eq, coe_eqIndex_eq]⟩;
+  · right;
+    exact ⟨a, b, ha, hb, by rw [qqNLT, coe_quote_lt, coe_ltIndex_eq]⟩;
+
 lemma substs_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     subst ℒₒᵣ w (t ^= u) = (termSubst ℒₒᵣ w t) ^= (termSubst ℒₒᵣ w u) := by
   simp only [qqEQ]
   rw [substs_rel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
   simp [termSubstVec_cons₂ ht hu]
+
+section
+variable {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
+include ht hu
+
+lemma substs_neq : subst ℒₒᵣ w (t ^≠ u) = termSubst ℒₒᵣ w t ^≠ termSubst ℒₒᵣ w u := by
+  simp [qqNEQ, ht, hu];
+
+lemma substs_lt : subst ℒₒᵣ w (t ^< u) = termSubst ℒₒᵣ w t ^< termSubst ℒₒᵣ w u := by
+  simp [qqLT, ht, hu];
+
+lemma substs_nlt : subst ℒₒᵣ w (t ^≮ u) = termSubst ℒₒᵣ w t ^≮ termSubst ℒₒᵣ w u := by
+  simp [qqNLT, ht, hu];
+
+end
 
 end Arithmetic
 
@@ -1398,6 +1451,9 @@ instance qqBall_defined :
 
 instance qqBall_definable (Γ m) : Γᴬ-[m + 1]-Function₂ (qqBall : V → V → V) :=
   .of_sigmaOne qqBall_defined.to_definable
+
+@[simp] lemma qqBall_inj {u₁ q₁ u₂ q₂ : V} : qqBall u₁ q₁ = qqBall u₂ q₂ ↔ u₁ = u₂ ∧ q₁ = q₂ := by
+  simp [qqBall, Arithmetic.qqNLT, qqNRel, adjoin_inj];
 
 end qqBall
 

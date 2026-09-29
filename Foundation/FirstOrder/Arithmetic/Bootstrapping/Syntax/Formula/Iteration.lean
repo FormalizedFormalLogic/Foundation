@@ -533,4 +533,50 @@ lemma IsSemiformula.qqAlls {n k p : V} (h : IsSemiformula L (n + k) p) :
 
 end qqAlls
 
+section qqToPrenex
+
+noncomputable def qqToPrenex : Polarity → ℕ → V → V
+  | _, 0, θ => θ
+  | 𝚺, s + 1, θ => ^∃ qqToPrenex 𝚷 s θ
+  | 𝚷, s + 1, θ => ^∀ qqToPrenex 𝚺 s θ
+
+def _root_.FFL.FirstOrder.Arithmetic.qqToPrenexDef : Polarity → ℕ → 𝚺ᴬ₀.Semisentence 2
+  | _, 0 => .mkSigma “y θ. y = θ”
+  | 𝚺, s + 1 => .mkSigma “y θ. ∃ z < y, !qqExsDef y z ∧ !(qqToPrenexDef 𝚷 s) z θ”
+  | 𝚷, s + 1 => .mkSigma “y θ. ∃ z < y, !qqAllDef y z ∧ !(qqToPrenexDef 𝚺 s) z θ”
+
+section
+variable {Γ : Polarity} {s : ℕ} {θ θ' : V}
+
+@[simp] lemma qqToPrenex_zero : qqToPrenex Γ 0 θ = θ := by cases Γ <;> rfl
+
+@[simp] lemma qqToPrenex_sigma_succ : qqToPrenex 𝚺 (s + 1) θ = ^∃ qqToPrenex 𝚷 s θ := rfl
+
+@[simp] lemma qqToPrenex_pi_succ : qqToPrenex 𝚷 (s + 1) θ = ^∀ qqToPrenex 𝚺 s θ := rfl
+
+@[simp] lemma qqToPrenex_inj : qqToPrenex Γ s θ = qqToPrenex Γ s θ' ↔ θ = θ' := by
+  induction s generalizing Γ with
+  | zero => simp;
+  | succ s ih => cases Γ <;> simp [ih];
+
+@[simp] lemma le_qqToPrenex : θ ≤ qqToPrenex Γ s θ := by
+  induction s generalizing Γ with
+  | zero => simp;
+  | succ s ih =>
+    cases Γ;
+    · exact ih.trans (lt_exists _).le;
+    · exact ih.trans (lt_forall _).le;
+
+end
+
+instance qqToPrenex_defined : (Γ : Polarity) → (s : ℕ) →
+    𝚺ᴬ₀-Function₁ (qqToPrenex Γ s : V → V) via qqToPrenexDef Γ s
+  | _, 0 => .mk fun v ↦ by simp [qqToPrenexDef]
+  | 𝚺, s + 1 => .mk fun v ↦ by
+    simp +contextual [qqToPrenexDef, (qqToPrenex_defined 𝚷 s).df, lt_exists]
+  | 𝚷, s + 1 => .mk fun v ↦ by
+    simp +contextual [qqToPrenexDef, (qqToPrenex_defined 𝚺 s).df, lt_forall]
+
+end qqToPrenex
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

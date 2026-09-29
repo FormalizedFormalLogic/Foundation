@@ -7,7 +7,7 @@ import Mathlib.Tactic.Bound
 # Internal evaluation of terms
 
 `termVal e t` evaluates the coded `ℒₒᵣ`-term `t` under the coded assignment `e` of its bound
-variables, reading free variables as `0`; `termVal' f e t` reads free variables from `f` instead.
+variables, reading free variables as `0`.
 
 ## References
 
@@ -20,43 +20,10 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
+open Arithmetic (isFunc_LOR_iff qqZero_eq_qqFunc qqOne_eq_qqFunc qqAdd_eq_qqFunc qqMul_eq_qqFunc
+  quote_zeroIndex_eq quote_oneIndex_eq quote_addIndex_eq quote_mulIndex_eq)
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-/-! ## Codes of the function symbols -/
-
-lemma quote_zeroIndex_eq : (⌜(Language.ORing.Func.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 :=
-  Arithmetic.coe_zeroIndex_eq
-
-lemma quote_oneIndex_eq : (⌜(Language.ORing.Func.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 :=
-  Arithmetic.coe_oneIndex_eq
-
-lemma quote_addIndex_eq : (⌜(Language.ORing.Func.add : (ℒₒᵣ).Func 2)⌝ : V) = 0 :=
-  Arithmetic.coe_addIndex_eq
-
-lemma quote_mulIndex_eq : (⌜(Language.ORing.Func.mul : (ℒₒᵣ).Func 2)⌝ : V) = 1 :=
-  Arithmetic.coe_mulIndex_eq
-
-lemma isFunc_LOR_iff {k f : V} :
-    (ℒₒᵣ).IsFunc k f ↔ (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1) := by
-  rw [Arithmetic.isFunc_iff_LOR,
-    show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq,
-    show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq,
-    show (⌜(Language.Add.add : (ℒₒᵣ).Func 2)⌝ : V) = 0 from quote_addIndex_eq,
-    show (⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝ : V) = 1 from quote_mulIndex_eq];
-
-lemma qqZero_eq_qqFunc : (𝟎 : V) = ^func (0 : V) (0 : V) (0 : V) := by
-  rw [Arithmetic.coe_zero_eq,
-    show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq];
-
-lemma qqOne_eq_qqFunc : (𝟏 : V) = ^func (0 : V) (1 : V) (0 : V) := by
-  rw [Arithmetic.coe_one_eq,
-    show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq];
-
-lemma qqAdd_eq_qqFunc (a b : V) : (a ^+ b : V) = ^func (2 : V) (0 : V) (?[a, b] : V) := by
-  rw [Arithmetic.qqAdd, Arithmetic.coe_addIndex_eq];
-
-lemma qqMul_eq_qqFunc (a b : V) : (a ^* b : V) = ^func (2 : V) (1 : V) (?[a, b] : V) := by
-  rw [Arithmetic.qqMul, Arithmetic.coe_mulIndex_eq];
 
 /-! ## Evaluation of terms -/
 
@@ -191,15 +158,20 @@ lemma termVal_termBShift (ht : IsUTerm ℒₒᵣ t) (x e : V) :
     exact termVal_func_congr hf hv.isSemitermVec.termBShiftVec.isUTerm hv fun i hi ↦ by
       rw [nth_termBShiftVec hv hi, ih i hi];
 
-lemma termVal_termShift (ht : IsUTerm ℒₒᵣ t) (e : V) :
-    termVal e (termShift ℒₒᵣ t) = termVal e t := by
-  apply IsUTerm.induction 𝚺 (by definability) ?_ ?_ ?_ t ht;
-  · simp;
-  · simp;
-  · intro k f v hf hv ih;
-    rw [termShift_func hf hv];
-    exact termVal_func_congr hf hv.termShiftVec hv fun i hi ↦ by
-      rw [nth_termShiftVec hv hi, ih i hi];
+lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
+    termValVec (x ∷ e) (n + 1) (qVec ℒₒᵣ w) = x ∷ termValVec e n w := by
+  have hq : IsUTermVec ℒₒᵣ (n + 1) (qVec ℒₒᵣ w) := hw.qVec.isUTerm;
+  apply nth_ext' (n + 1) (by simp [hq]) (by simp [len_termValVec hw.isUTerm]);
+  intro i hi;
+  rw [nth_termValVec hq hi];
+  rcases zero_or_succ i with rfl | ⟨j, rfl⟩;
+  · simp [qVec];
+  · have hj : j < n := by simpa using hi;
+    have hnth : (qVec ℒₒᵣ w).[j + 1] = termBShift ℒₒᵣ w.[j] := by
+      rw [qVec, hw.lh];
+      simp [nth_termBShiftVec hw.isUTerm hj];
+    rw [hnth, termVal_termBShift (hw.isUTerm.nth hj) x e];
+    simp [nth_termValVec hw.isUTerm hj];
 
 lemma termVal_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (v : Fin k → V) :
     termVal (matrixToVec v) ⌜t⌝ = t.valb v := by
@@ -268,152 +240,5 @@ theorem termVal_le (e t : V) : termVal e t ≤ Exp.exp (Exp.exp (listMax e + t))
           exact exp_add_exp_le_of_lt (by simp) (by simp);
 
 end termVal
-
-/-! ## Evaluation with free variables -/
-
-namespace TermValFree
-
-def blueprint : Language.TermRec.Blueprint 2 where
-  bvar := .mkSigma “y z f e. !nthDef y e z”
-  fvar := .mkSigma “y x f e. !nthDef y f x”
-  func := .mkSigma
-    “y k g v v' f e.
-      (k = 0 ∧ g = 0 → y = 0) ∧
-      (k = 0 ∧ g = 1 → y = 1) ∧
-      (k = 2 ∧ g = 0 → ∃ a, !nthDef a v' 0 ∧ ∃ b, !nthDef b v' 1 ∧ y = a + b) ∧
-      (k = 2 ∧ g = 1 → ∃ a, !nthDef a v' 0 ∧ ∃ b, !nthDef b v' 1 ∧ y = a * b) ∧
-      (¬(k = 0 ∧ g = 0) → ¬(k = 0 ∧ g = 1) → ¬(k = 2 ∧ g = 0) →
-        ¬(k = 2 ∧ g = 1) → y = 0)”
-
-noncomputable def construction : Language.TermRec.Construction V blueprint where
-  bvar (param z)        := (param 1).[z]
-  fvar (param x)        := (param 0).[x]
-  func (_     k g _ v') :=
-    if k = 0 ∧ g = 0 then 0
-    else if k = 0 ∧ g = 1 then 1
-    else if k = 2 ∧ g = 0 then v'.[0] + v'.[1]
-    else if k = 2 ∧ g = 1 then v'.[0] * v'.[1]
-    else 0
-  bvar_defined := .mk fun v ↦ by simp [blueprint]
-  fvar_defined := .mk fun v ↦ by simp [blueprint]
-  func_defined := .mk fun v ↦ by
-    simp only [blueprint];
-    split_ifs with h1 h2 h3 h4 <;> simp_all;
-    tauto;
-
-end TermValFree
-
-section termValFree
-
-open TermValFree
-
-noncomputable def termVal' (f e t : V) : V := construction.result ℒₒᵣ ![f, e] t
-
-noncomputable def termValVec' (f e k v : V) : V :=
-  construction.resultVec ℒₒᵣ (fun i ↦ ![f, e] i) k v
-
-noncomputable def termVal'Graph : 𝚺ᴬ₁.Semisentence 4 :=
-  (blueprint.result ℒₒᵣ).rew <| Rew.subst ![#0, #3, #1, #2]
-
-noncomputable def termValVec'Graph : 𝚺ᴬ₁.Semisentence 5 :=
-  (blueprint.resultVec ℒₒᵣ).rew <| Rew.subst ![#0, #3, #4, #1, #2]
-
-@[simp] lemma termVal'_bvar (f e z : V) : termVal' f e ^#z = e.[z] := by
-  simp [termVal', construction];
-
-@[simp] lemma termVal'_fvar (f e x : V) : termVal' f e ^&x = f.[x] := by
-  simp [termVal', construction];
-
-instance termVal'.defined : 𝚺ᴬ₁-Function₃ (termVal' : V → V → V → V) via termVal'Graph :=
-  .mk fun v ↦ by
-  simpa [termVal'Graph, termVal', Matrix.constant_eq_singleton, Matrix.comp_vecCons']
-    using construction.result_defined.defined ![v 0, v 3, v 1, v 2];
-
-instance termVal'.definable : 𝚫ᴬ₁-Function₃ (termVal' : V → V → V → V) :=
-  termVal'.defined.graph_delta.to_definable
-
-instance termValVec'.defined : 𝚺ᴬ₁-Function₄ (termValVec' : V → V → V → V → V) via
-    termValVec'Graph :=
-  .mk fun v ↦ by
-    simpa [termValVec'Graph, termValVec', Matrix.constant_eq_singleton, Matrix.comp_vecCons',
-      Function.comp_def]
-      using! (construction.resultVec_defined (L := ℒₒᵣ)).defined ![v 0, v 3, v 4, v 1, v 2];
-
-instance termValVec'.definable : 𝚫ᴬ₁-Function₄ (termValVec' : V → V → V → V → V) :=
-  termValVec'.defined.graph_delta.to_definable
-
-variable {f e t u k g v : V}
-
-@[simp] lemma len_termValVec' (hv : IsUTermVec ℒₒᵣ k v) : len (termValVec' f e k v) = k :=
-  construction.resultVec_lh ℒₒᵣ _ hv
-
-@[simp] lemma nth_termValVec' {i : V} (hv : IsUTermVec ℒₒᵣ k v) (hi : i < k) :
-    (termValVec' f e k v).[i] = termVal' f e v.[i] :=
-  construction.nth_resultVec ℒₒᵣ _ hv hi
-
-lemma termVal'_func (hkg : (ℒₒᵣ).IsFunc k g) (hv : IsUTermVec ℒₒᵣ k v) :
-    termVal' f e (^func k g v) = construction.func ![f, e] k g v (termValVec' f e k v) :=
-  construction.result_func' hkg hv
-
-lemma termVal'_func_congr {f' e' v' : V} (hkg : (ℒₒᵣ).IsFunc k g) (hv : IsUTermVec ℒₒᵣ k v)
-    (hv' : IsUTermVec ℒₒᵣ k v') (h : ∀ i < k, termVal' f e v.[i] = termVal' f' e' v'.[i]) :
-    termVal' f e (^func k g v) = termVal' f' e' (^func k g v') := by
-  have : termValVec' f e k v = termValVec' f' e' k v' :=
-    nth_ext' k (len_termValVec' hv) (len_termValVec' hv') fun i hi ↦ by simp [hv, hv', hi, h i hi];
-  simp [termVal'_func hkg hv, termVal'_func hkg hv', this, construction];
-
-section
-variable (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
-include ht hu
-
-@[simp] lemma termVal'_add : termVal' f e (t ^+ u) = termVal' f e t + termVal' f e u := by
-  have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩;
-  rw [qqAdd_eq_qqFunc, termVal'_func (isFunc_LOR_iff.mpr (by simp)) hv];
-  simp [construction, hv];
-
-@[simp] lemma termVal'_mul : termVal' f e (t ^* u) = termVal' f e t * termVal' f e u := by
-  have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩;
-  rw [qqMul_eq_qqFunc, termVal'_func (isFunc_LOR_iff.mpr (by simp)) hv];
-  simp [construction, hv];
-
-end
-
-lemma termVal'_not_uterm (h : ¬IsUTerm ℒₒᵣ t) : termVal' f e t = 0 :=
-  construction.result_prop_not ℒₒᵣ ![f, e] h
-
-lemma termVal'_empty (e t : V) : termVal' 0 e t = termVal e t := by
-  by_cases ht : IsUTerm ℒₒᵣ t;
-  case neg => simp [termVal'_not_uterm ht, termVal_not_uterm ht];
-  revert t;
-  apply IsUTerm.induction 𝚺 (P := fun t ↦ termVal' 0 e t = termVal e t) (by definability);
-  · simp;
-  · simp;
-  · intro k g v hkg hv ih;
-    have : termValVec' 0 e k v = termValVec e k v :=
-      nth_ext' k (len_termValVec' hv) (len_termValVec hv) fun i hi ↦ by simp [hv, hi, ih i hi];
-    simp [termVal'_func hkg hv, termVal_func hkg hv, this, construction, TermVal.construction];
-
-lemma termVal'_termSubst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t) :
-    termVal' f e (termSubst ℒₒᵣ w t) = termVal' f (termValVec' f e n w) t := by
-  apply IsSemiterm.induction 𝚺 (by definability) ?_ ?_ ?_ t ht;
-  · intro z hz;
-    simp [hw.isUTerm, hz];
-  · simp;
-  · intro k g v hkg hv ih;
-    rw [termSubst_func hkg hv.isUTerm];
-    exact termVal'_func_congr hkg (hw.termSubstVec hv).isUTerm hv.isUTerm fun i hi ↦ by
-      rw [nth_termSubstVec hv.isUTerm hi, ih i hi];
-
-lemma termVal'_termShift (ht : IsUTerm ℒₒᵣ t) :
-    termVal' f e (termShift ℒₒᵣ t) = termVal' (sndIdx f) e t := by
-  apply IsUTerm.induction 𝚺 (by definability) ?_ ?_ ?_ t ht;
-  · simp;
-  · simp [nth_succ];
-  · intro k g v hkg hv ih;
-    rw [termShift_func hkg hv];
-    exact termVal'_func_congr hkg hv.termShiftVec hv fun i hi ↦ by
-      rw [nth_termShiftVec hv hi, ih i hi];
-
-end termValFree
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

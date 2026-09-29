@@ -636,6 +636,15 @@ lemma quote_ball_sentence {n : ℕ} (t : ClosedSemiterm ℒₒᵣ n)
       = qqBall (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
   simp [Semiformula.ball_eq, Semiformula.imp_eq, Semiformula.Operator.lt_def, qqBall]
 
+section
+
+variable {a b : ℕ} (h : a = b) {θ : ArithmeticSemisentence a}
+
+lemma quote_cast : (⌜cast (congrArg ArithmeticSemisentence h) θ⌝ : V) = ⌜θ⌝ := by
+  subst h; rfl
+
+end
+
 lemma termBShift_quote {n : ℕ} (s : SyntacticSemiterm ℒₒᵣ n) :
     (⌜Rew.bShift s⌝ : ℕ) = termBShift ℒₒᵣ (⌜s⌝ : ℕ) := by
   simp [Semiterm.quote_def, Semiterm.typed_quote_bShift]
