@@ -311,10 +311,6 @@ theorem ISigma1.provable_tarski : 𝗜𝚺₁ ⊢* tarski := fun {_} hσ ↦
 
 /-! ## The readings of the defining formulas -/
 
-noncomputable def hierarchicalSatisfactionDef (Γ : Polarity) : ℕ → ArithmeticSemisentence 2
-  | 0 => boundedSatisfaction.val
-  | s + 1 => (hierarchicalSatisfaction Γ s).val
-
 namespace Reading
 
 variable {V : Type*} [ORingStructure V]

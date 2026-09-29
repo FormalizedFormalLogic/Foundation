@@ -6,9 +6,11 @@ public import Foundation.FirstOrder.Arithmetic.Prenex
 /-!
 # Partial truth definitions agree with truth
 
-The disquotation lemma for prenex formulas with a $\Delta_0$ matrix: satisfaction of the code of
-the matrix agrees with truth of the formula, both in every model of `𝗜𝚺₁` and, uniformly in the
-level, over `𝗣𝗔⁻` together with the finite Tarski theory `tarski`.
+For a sentence `φ` in `Γ`-prenex form of level `s` with a $\Delta_0$ matrix, `Truth Γ s ⌜φ⌝`
+holds exactly when `φ` does, in every model of `𝗜𝚺₁`; hence `𝗜𝚺₁` proves the Tarski
+biconditional `truthDef Γ s (⌜φ⌝) ↔ φ`. For formulas with free variables, satisfaction of the code
+of the matrix agrees with truth, both in every model of `𝗜𝚺₁` and, uniformly in the level, over
+`𝗣𝗔⁻` together with the finite Tarski theory `tarski`.
 
 ## References
 
@@ -81,6 +83,27 @@ theorem hierarchicalSatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} (φ : Pre
     (v : Fin k → V) :
     HierarchicalSatisfaction Γ s (⌜φ.matrix.val⌝ : V) (matrixToVec v) ↔ V ⊧/v φ.val :=
   hierarchicalSatisfaction_quote_toPrenex_iff φ.matrix.bounded v
+
+/-! ## Partial truth -/
+
+lemma quote_toPrenex : ∀ {Γ : Polarity} {s n : ℕ} (θ : ArithmeticSemisentence (n + s)),
+    (⌜θ.toPrenex Γ s⌝ : V) = qqToPrenex Γ s ⌜θ⌝
+  | _, 0, _, _ => by simp
+  | 𝚺, s + 1, n, θ => by
+    simp [Polarity.quantItr_succ, quote_toPrenex (Γ := 𝚷), quote_cast (Nat.succ_add n s).symm]
+  | 𝚷, s + 1, n, θ => by
+    simp [Polarity.quantItr_succ, quote_toPrenex (Γ := 𝚺), quote_cast (Nat.succ_add n s).symm]
+
+theorem truth_quote_iff {Γ : Polarity} {s : ℕ} (φ : Prenex Γ s Empty 0) :
+    Truth Γ s (⌜φ.val⌝ : V) ↔ V↓[ℒₒᵣ] ⊧ φ.val := by
+  have h := hierarchicalSatisfaction_quote_iff (V := V) φ ![];
+  rw [matrixToVec_nil] at h;
+  simpa [Truth, Prenex.val, quote_toPrenex, models_iff] using h
+
+theorem ISigma1.provable_truth_iff {Γ : Polarity} {s : ℕ} (φ : Prenex Γ s Empty 0) :
+    𝗜𝚺₁ ⊢ (truthDef Γ s)/[⌜φ.val⌝] 🡘 φ.val :=
+  Arithmetic.complete.{0} _ _ fun _ _ _ ↦ by
+    simpa [models_iff, eval_truthDef] using truth_quote_iff φ
 
 /-! ## The disquotation sentences -/
 
