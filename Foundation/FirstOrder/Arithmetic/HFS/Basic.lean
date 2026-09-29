@@ -338,36 +338,6 @@ instance : Bounded₁ (domain : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp
 lemma mem_domain_of_pair_mem {x y s : V} (h : ⟪x, y⟫ ∈ s) : x ∈ domain s :=
   mem_domain_iff.mpr ⟨y, h⟩
 
-lemma lt_of_mem_domain {x s : V} (h : x ∈ domain s) : x < s := by
-  obtain ⟨y, hy⟩ := mem_domain_iff.mp h
-  exact lt_of_mem_dom hy
-
-lemma fst_lt_of_mem_domain {x y s : V} (h : ⟪x, y⟫ ∈ domain s) : x < s :=
-  (le_pair_left x y).trans_lt (lt_of_mem_domain h)
-
-lemma snd_lt_of_mem_domain {x y s : V} (h : ⟪x, y⟫ ∈ domain s) : y < s :=
-  (le_pair_right x y).trans_lt (lt_of_mem_domain h)
-
-lemma mem_insert_iff_of_not_mem_domain {x y z s : V} (hx : x ∉ domain s) :
-    ⟪x, z⟫ ∈ insert ⟪x, y⟫ s ↔ z = y := by
-  simpa using fun h ↦ absurd (mem_domain_of_pair_mem h) hx
-
-lemma forall_mem_domain_of_desc {s : V} {P : V → Prop} (hP : 𝚷ᴬ₁.DefinablePred P)
-    (H : ∀ x ∈ domain s, (∀ y ∈ domain s, π₁ x < π₁ y → P y) → P x) : ∀ x ∈ domain s, P x := by
-  suffices ∀ k x, x ∈ domain s → s ≤ π₁ x + k → P x from fun x hx ↦ this s x hx le_add_self
-  intro k
-  induction k using ISigma1.pi1_succ_induction
-  · definability
-  case zero =>
-    intro x hx hle
-    exact absurd ((pi₁_le_self x).trans_lt (lt_of_mem_domain hx)) (by simpa using hle)
-  case succ k IH =>
-    intro x hx hle
-    exact H x hx fun y hy hlt ↦ IH y hy <|
-      calc s ≤ π₁ x + (k + 1) := hle
-        _ = π₁ x + 1 + k := by rw [← add_assoc, add_right_comm]
-        _ ≤ π₁ y + k := by gcongr; exact succ_le_iff_lt.mpr hlt
-
 lemma domain_subset_domain_of_subset {s t : V} (h : s ⊆ t) : domain s ⊆ domain t := by
   intro x hx
   rcases mem_domain_iff.mp hx with ⟨y, hy⟩
@@ -545,11 +515,6 @@ lemma IsMapping.of_subset {m m' : V} (h : IsMapping m) (ss : m' ⊆ m) : IsMappi
 lemma IsMapping.uniq {m x y₁ y₂ : V} (h : IsMapping m) :
     ⟪x, y₁⟫ ∈ m → ⟪x, y₂⟫ ∈ m → y₁ = y₂ := fun h₁ h₂ ↦
   h x (mem_domain_iff.mpr ⟨y₁, h₁⟩) |>.unique h₁ h₂
-
-lemma IsMapping.mem_iff_of_subset {m m' x y : V} (h : IsMapping m) (ss : m' ⊆ m)
-    (hx : x ∈ domain m') : ⟪x, y⟫ ∈ m ↔ ⟪x, y⟫ ∈ m' := by
-  obtain ⟨z, hz⟩ := mem_domain_iff.mp hx
-  exact ⟨fun h' ↦ h.uniq (ss hz) h' ▸ hz, fun h' ↦ ss h'⟩
 
 end mapping
 

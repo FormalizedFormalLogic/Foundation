@@ -281,6 +281,11 @@ lemma IsBounded.of_ex {p : V} (h : IsBounded (^∃ p)) :
     simp_all [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex,
       Arithmetic.qqLT];
 
+lemma IsBounded.of_qqBall {u p : V} (h : IsBounded (qqBall u p)) : IsBounded p := by
+  obtain ⟨u', q', -, hq', heq⟩ := IsBounded.of_all (p := (Arithmetic.qqNLT (qqBvar 0) u) ^⋎ p) h;
+  obtain ⟨-, rfl⟩ := (qqOr_inj _ _ _ _).mp heq;
+  exact hq';
+
 lemma IsBounded.of_qqBex {u p : V} (h : IsBounded (qqBex u p)) : IsBounded p := by
   obtain ⟨u', q', -, hq', heq⟩ := IsBounded.of_ex (p := (Arithmetic.qqLT (qqBvar 0) u) ^⋏ p) h;
   obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq;
