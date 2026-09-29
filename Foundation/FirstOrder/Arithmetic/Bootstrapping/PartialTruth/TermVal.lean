@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
-import Mathlib.Tactic.Bound
 
 /-!
 # Internal evaluation of terms
@@ -202,42 +201,6 @@ lemma termVal_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (v : Fin k → V)
       rw [heq, termVal_mul (by simp [Semiterm.empty_quote_eq]) (by simp [Semiterm.empty_quote_eq]),
         ih 0, ih 1];
       rfl;
-
-theorem termVal_le (e t : V) : termVal e t ≤ Exp.exp (Exp.exp (listMax e + t)) := by
-  by_cases ht : IsUTerm ℒₒᵣ t;
-  case neg => simp [termVal_not_uterm ht];
-  revert t;
-  apply IsUTerm.induction 𝚷 (P := fun t ↦ termVal e t ≤ Exp.exp (Exp.exp (listMax e + t)))
-    (by definability);
-  · intro z;
-    rw [termVal_bvar];
-    exact (nth_le_listMax_total e z).trans (by bound);
-  · simp;
-  · intro k f v hkf hv ih;
-    rcases isFunc_LOR_iff.mp hkf with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩;
-    · simp [termVal_func hkf hv, construction];
-    · simp [termVal_func hkf hv, construction];
-    · obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv;
-      have iha : termVal e a ≤ Exp.exp (Exp.exp (listMax e + a)) := by simpa using ih 0 (by simp);
-      have ihb : termVal e b ≤ Exp.exp (Exp.exp (listMax e + b)) := by simpa using ih 1 (by simp);
-      rw [← qqAdd_eq_qqFunc, termVal_add ha hb];
-      calc termVal e a + termVal e b
-          ≤ Exp.exp (Exp.exp (listMax e + a)) + Exp.exp (Exp.exp (listMax e + b)) := by gcongr
-        _ ≤ Exp.exp (Exp.exp (listMax e + a) + Exp.exp (listMax e + b)) :=
-          exp_add_exp_le_of_lt (by simp) (by simp)
-        _ ≤ Exp.exp (Exp.exp (listMax e + a ^+ b)) := by
-          gcongr;
-          exact exp_add_exp_le_of_lt (by simp) (by simp);
-    · obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv;
-      have iha : termVal e a ≤ Exp.exp (Exp.exp (listMax e + a)) := by simpa using ih 0 (by simp);
-      have ihb : termVal e b ≤ Exp.exp (Exp.exp (listMax e + b)) := by simpa using ih 1 (by simp);
-      rw [← qqMul_eq_qqFunc, termVal_mul ha hb];
-      calc termVal e a * termVal e b
-          ≤ Exp.exp (Exp.exp (listMax e + a)) * Exp.exp (Exp.exp (listMax e + b)) := by gcongr
-        _ = Exp.exp (Exp.exp (listMax e + a) + Exp.exp (listMax e + b)) := (exp_add _ _).symm
-        _ ≤ Exp.exp (Exp.exp (listMax e + a ^* b)) := by
-          gcongr;
-          exact exp_add_exp_le_of_lt (by simp) (by simp);
 
 end termVal
 

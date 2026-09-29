@@ -49,37 +49,6 @@ instance iterExp_definable : 𝚺ᴬ₁-Function₂[V] iterExp := iterExp_define
 instance iterExp_definable' (Γ) {m : ℕ} : Γᴬ-[m + 1]-Function₂ (iterExp : V → V → V) :=
   iterExp_definable.of_sigmaOne
 
-lemma le_iterExp (x n : V) : x ≤ iterExp x n := by
-  induction n using ISigma1.sigma1_succ_induction
-  · definability
-  case zero => simp
-  case succ n ih => simpa using le_exp_of_le ih
-
-lemma iterExp_add (x m n : V) : iterExp x (m + n) = iterExp (iterExp x m) n := by
-  induction n using ISigma1.sigma1_succ_induction
-  · definability
-  case zero => simp
-  case succ n ih => rw [← add_assoc, iterExp_succ, ih, iterExp_succ]
-
-@[gcongr] lemma iterExp_le_iterExp {x y m n : V} (hxy : x ≤ y) (hmn : m ≤ n) :
-    iterExp x m ≤ iterExp y n := by
-  have (m : V) : iterExp x m ≤ iterExp y m := by
-    induction m using ISigma1.sigma1_succ_induction
-    · definability
-    case zero => simpa using hxy
-    case succ m ih => simpa using ih
-  obtain ⟨k, rfl⟩ := le_iff_exists_add.mp hmn
-  exact (this m).trans (by simpa [iterExp_add] using le_iterExp (iterExp y m) k)
-
-lemma iterExp_natCast (x : V) (k : ℕ) : iterExp x k = Exp.exp^[k] x := by
-  induction k with
-  | zero => simp
-  | succ k ih => simp [Function.iterate_succ_apply', ih]
-
-@[simp] lemma iterExp_ofNat (x : V) (k : ℕ) [k.AtLeastTwo] :
-    iterExp x (no_index (OfNat.ofNat k : V)) = Exp.exp^[k] x :=
-  iterExp_natCast x k
-
 end iterExp
 
 section superexp

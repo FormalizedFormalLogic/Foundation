@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
-import Mathlib.Tactic.Bound.Attribute
 
 @[expose] public section
 set_option autoImplicit true
@@ -64,24 +63,6 @@ lemma nil_or_adjoin (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
 
 lemma adjoin_le_adjoin {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
     x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [adjoin_def] using pair_le_pair hx hv
-
-section bound
-
-variable {a b v c : V}
-
-@[bound] lemma adjoin_le_exp_exp (ha : a ≤ c) (hv : v ≤ c) : a ∷ v ≤ Exp.exp (Exp.exp c) :=
-  calc a ∷ v ≤ c ∷ c := adjoin_le_adjoin ha hv
-    _ = (c + 1) * (c + 1) := by simp [adjoin_def, pair, add_mul, mul_add, add_assoc]
-    _ ≤ Exp.exp c * Exp.exp c := by gcongr <;> exact succ_le_iff_lt.mpr (lt_exp c)
-    _ ≤ Exp.exp (Exp.exp c) := by rw [← exp_add]; exact exp_le_exp (add_le_exp le_rfl le_rfl)
-
-@[bound] lemma pair_lt_exp_exp (ha : a ≤ c) (hb : b ≤ c) : ⟪a, b⟫ < Exp.exp (Exp.exp c) :=
-  (lt_add_one _).trans_le (adjoin_le_exp_exp ha hb)
-
-@[bound] lemma pair_le_exp_exp (ha : a ≤ c) (hb : b ≤ c) : ⟪a, b⟫ ≤ Exp.exp (Exp.exp c) :=
-  (pair_lt_exp_exp ha hb).le
-
-end bound
 
 section
 
@@ -760,20 +741,6 @@ lemma listMaxss_le_iff {v z : V} : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ 
   constructor
   · intro h i hi; exact le_trans (nth_le_listMax hi) h
   · exact listMaxss_le
-
-lemma nth_le_listMax_total (v i : V) : v.[i] ≤ listMax v := by
-  rcases lt_or_ge i (len v) with h | h
-  · exact nth_le_listMax h
-  · simp [nth_lt_len h]
-
-lemma listMax_le_self (v : V) : listMax v ≤ v := by
-  induction v using adjoin_ISigma1.pi1_succ_induction
-  · definability
-  case nil => simp
-  case adjoin x v ih => simpa using ⟨(lt_adjoin x v).le, ih.trans (lt_adjoin' x v).le⟩
-
-lemma listMax_le_of_le {v c : V} (h : v ≤ c) : listMax v ≤ c :=
-  (listMax_le_self v).trans h
 
 /-
 lemma nth_le_listMaxs (v : V) (hv : v ≠ 0) : ∃ i < len v, v.[i] = listMax v := by

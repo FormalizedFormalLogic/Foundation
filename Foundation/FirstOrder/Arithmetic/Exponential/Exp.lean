@@ -2,7 +2,6 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Exponential.PPow2
 public import Mathlib.Algebra.Order.Ring.Basic
-import Mathlib.Tactic.Bound.Attribute
 
 @[expose] public section
 set_option autoImplicit true
@@ -849,35 +848,6 @@ lemma nat_cast_exp (n : ℕ) : (Exp.exp n : ℕ) = Exp.exp (n : V) := by
   induction n with
   | zero => simp
   | succ n ih => simp [exp_succ, ih]
-
-section bound
-
-variable {a b c : V}
-
-@[gcongr, bound] lemma exp_le_exp (h : a ≤ b) : Exp.exp a ≤ Exp.exp b := exp_monotone_le.mpr h
-
-lemma le_exp_of_le (h : a ≤ c) : a ≤ Exp.exp c := h.trans (lt_exp c).le
-
--- Unsafe, so that `bound` searches for the level of `Exp.exp` at which to split a sum.
-attribute [aesop unsafe 50% apply (rule_sets := [Bound])] le_exp_of_le
-
-lemma two_mul_le_exp (a : V) : 2 * a ≤ Exp.exp a := by
-  rcases zero_or_succ a with rfl | ⟨b, rfl⟩
-  · simp
-  · rw [exp_succ]
-    gcongr
-    exact succ_le_iff_lt.mpr (lt_exp b)
-
-@[bound] lemma add_le_exp (ha : a ≤ c) (hb : b ≤ c) : a + b ≤ Exp.exp c :=
-  calc a + b ≤ 2 * c := by rw [two_mul]; gcongr
-    _ ≤ Exp.exp c := two_mul_le_exp c
-
-lemma exp_add_exp_le_of_lt (ha : a < c) (hb : b < c) : Exp.exp a + Exp.exp b ≤ Exp.exp c := by
-  obtain ⟨d, rfl⟩ : ∃ d, c = d + 1 := (zero_or_succ c).resolve_left (by rintro rfl; simp at ha)
-  rw [exp_succ, two_mul]
-  gcongr <;> exact lt_succ_iff_le.mp ‹_›
-
-end bound
 
 end exponential
 
