@@ -90,21 +90,85 @@ lemma isAttempt_restrict_eq_of_le
   exact isAttempt_coherent hf hg hlhf hlhg β ⟨hβα, subset_refl β.val⟩ ▸
     IsFunction.restrict_eq_self g β.val hsubset
 
+-- lemma eq_of_isAttempt
+--     {F : V → V}
+--     {α β : Ordinal V} {f g : V}
+--     (hf : IsAttempt F f) (hg : IsAttempt F g)
+--     (hlh₁ : lh f = α) (hlh₂ : lh g = β)
+--     (h₁₂ : α ≤ β) {γ} (hγα : γ < α) {y₁ y₂} :
+--     ⟨γ.val, y₁⟩ₖ ∈ f → ⟨γ.val, y₂⟩ₖ ∈ g → y₁ = y₂ := by
+--   have hγα' : γ.val ∈ α.val := by simpa [Ordinal.lt_def] using hγα
+--   have hrestrict : f ↾ α = g ↾ α :=
+--     isAttempt_coherent (α := α) (β := β) hf hg hlh₁ hlh₂ α (by aesop)
+--   intro hy₁ hy₂
+--   have h := (mem_ext_iff.mp hrestrict) ⟨γ, y₁⟩ₖ
+--   have hy₁g : ⟨γ.val, y₁⟩ₖ ∈ g := by
+--     simpa [kpair_mem_restrict_iff, hy₁, hγα'] using fun h₂ ↦ h.mp h₂
+--   exact hg.1.1.unique hy₁g hy₂
+
 lemma eq_of_isAttempt
     {F : V → V}
-    {α β : Ordinal V} {f g : V}
+    {f g : V}
     (hf : IsAttempt F f) (hg : IsAttempt F g)
-    (hlh₁ : lh f = α) (hlh₂ : lh g = β)
-    (h₁₂ : α ≤ β) {γ} (hγα : γ < α) {y₁ y₂} :
+    {γ : Ordinal V} {y₁ y₂} :
     ⟨γ.val, y₁⟩ₖ ∈ f → ⟨γ.val, y₂⟩ₖ ∈ g → y₁ = y₂ := by
-  have hγα' : γ.val ∈ α.val := by simpa [Ordinal.lt_def] using hγα
-  have hrestrict : f ↾ α = g ↾ α :=
-    isAttempt_coherent (α := α) (β := β) hf hg hlh₁ hlh₂ α (by aesop)
+  have : IsOrdinal (lh f) := SetTheory.isOrdinal_lh f
+  have : IsOrdinal (lh g) := SetTheory.isOrdinal_lh g
+  let α := IsOrdinal.toOrdinal (lh f)
+  let β := IsOrdinal.toOrdinal (lh g)
   intro hy₁ hy₂
-  have h := (mem_ext_iff.mp hrestrict) ⟨γ, y₁⟩ₖ
-  have hy₁g : ⟨γ.val, y₁⟩ₖ ∈ g := by
-    simpa [kpair_mem_restrict_iff, hy₁, hγα'] using fun h₂ ↦ h.mp h₂
-  exact hg.1.1.unique hy₁g hy₂
+  have hγα : γ.val ∈ α.val := by simpa [hf.1.domain_eq, α] using mem_domain_of_kpair_mem hy₁
+  have hγβ : γ.val ∈ β.val := by simpa [hg.1.domain_eq, β] using mem_domain_of_kpair_mem hy₂
+  rcases LinearOrder.le_total α β with (hαβ | hβα)
+  · have hrestrict : f ↾ α.val = g ↾ α.val :=
+      isAttempt_coherent (α := α) (β := β) hf hg rfl rfl α (by aesop)
+    have h₁ := (mem_ext_iff.mp hrestrict) ⟨γ, y₁⟩ₖ
+    have h₂ := (mem_ext_iff.mp hrestrict) ⟨γ, y₂⟩ₖ
+    have hy₁g : ⟨γ.val, y₁⟩ₖ ∈ g := by
+      simpa [kpair_mem_restrict_iff, hy₁, hγα] using h₁.mp
+    exact hg.1.1.unique hy₁g hy₂
+  · have hrestrict : f ↾ β.val = g ↾ β.val :=
+      Eq.symm <| isAttempt_coherent (α := β) (β := α) hg hf rfl rfl β (by aesop)
+    have h₁ := (mem_ext_iff.mp hrestrict) ⟨γ, y₁⟩ₖ
+    have h₂ := (mem_ext_iff.mp hrestrict) ⟨γ, y₂⟩ₖ
+    have hy₂f : ⟨γ.val, y₂⟩ₖ ∈ f := by
+      simpa [kpair_mem_restrict_iff, hy₂, hγβ] using h₂.mpr
+    exact hf.1.1.unique hy₁ hy₂f
+
+/-! #### Various facts about attempt functions -/
+
+lemma initial {F : V → V} {f : V}
+    (hf : IsAttempt F f) (hlh : ∅ ∈ lh f) : ⟨∅, F ∅⟩ₖ ∈ f := by
+  have hrestrict {g : V} : g ↾ ∅ = ∅ := restrict_empty_eq
+  exact (hf.2 ∅ hlh (F ∅)).mpr (by aesop)
+
+lemma successor {F : V → V} {f : V} (hf : IsAttempt F f) : IsAttempt F (f ⁀' (F f)) :=
+  ⟨ hf.1.seqCons (F f), by
+    intro β hβ w
+    have := hf.1.IsFunction
+    let α := lh f
+    have : IsOrdinal α := SetTheory.isOrdinal_lh f
+    have : IsOrdinal (lh (f ⁀' (F f))) := Seq.lh_seqCons (F f) hf.1 ▸ IsOrdinal.succ
+    have : IsOrdinal β := IsOrdinal.of_mem hβ
+    have hβα : β ⊆ α := IsOrdinal.subset_iff.mpr (mem_succ_iff.mp (Seq.lh_seqCons (F f) hf.1 ▸ hβ))
+    have hβdomain : β ⊆ domain f := hf.1.domain_eq ▸ hβα
+    have hrestrictβ {z : V} : (f ⁀' z) ↾ β = f ↾ β :=
+        restrict_insert_kpair_eq_restrict_of_not_mem (f := f) (x := lh f) (y := z) (A := β)
+          fun h₂ ↦ mem_irrefl (lh f) (hf.1.domain_eq ▸ hβdomain (lh f) h₂)
+    have hrestrictlh := IsFunction.restrict_eq_self f (lh f)
+      (hf.1.domain_eq ▸ subset_refl (domain f))
+    rw [hrestrictβ] at *
+    rcases show β = α ∨ β ∈ α
+        from IsOrdinal.subset_iff.mp hβα
+        with (hβ | hβ)
+    · have hβeq : β = lh f := hβ
+      rw [hβeq, lh_mem_seqCons_iff hf.1, hrestrictlh]
+    · have hβneq : β ≠ lh f := fun h ↦ mem_irrefl β (h ▸ hβ)
+      rw [kpair_mem_seqCons_iff]
+      refine Iff.intro (fun h ↦ ?_) fun h ↦ ?_
+      · exact Or.elim h (by aesop) fun h ↦ (hf.2 β hβ w).mp h
+      · exact Or.inr ((hf.2 β hβ w).mpr h)
+  ⟩
 
 /-! #### Existence and choices of attempt functions -/
 

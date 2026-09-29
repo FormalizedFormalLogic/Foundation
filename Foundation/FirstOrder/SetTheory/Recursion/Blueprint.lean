@@ -194,61 +194,21 @@ lemma succ (hf : SetTheory.IsAttempt (c.map v) f) : ∀ β, SetTheory.succ β �
           And.intro (hlh.symm ▸ (mem_succ_self β)) ⟨y, by simp⟩⟩
   exact (spec hf (SetTheory.succ β) hβsucclh _).mpr (by rw [hrestrict.symm])
 
-lemma unique {f g α β : V}
+lemma unique {f g : V}
     (h₁ : SetTheory.IsAttempt (c.map v) f)
     (h₂ : SetTheory.IsAttempt (c.map v) g)
-    (hlh₁ : lh f = α) (hlh₂ : lh g = β)
-    (h₁₂ : α ⊆ β) {γ} (hγα : γ ∈ α) {y₁ y₂} :
+    {γ y₁ y₂} :
     ⟨γ, y₁⟩ₖ ∈ f → ⟨γ, y₂⟩ₖ ∈ g → y₁ = y₂ := by
-  have : IsOrdinal α := hlh₁ ▸ isOrdinal_lh f
-  have : IsOrdinal β := hlh₂ ▸ isOrdinal_lh g
-  let αo : Ordinal V := IsOrdinal.toOrdinal α
-  let βo : Ordinal V := IsOrdinal.toOrdinal β
-  have hαtest : αo.val = α := by simp [αo]
-  have hg := h₂.1.IsFunction
-  have hrestrict : f ↾ α = g ↾ α :=
-    IsAttempt.isAttempt_coherent (α := αo) (β := βo) h₁ h₂ (by aesop) (by aesop) αo (by aesop)
   intro hy₁ hy₂
-  have h := (mem_ext_iff.mp hrestrict) ⟨γ, y₁⟩ₖ
-  have hy₁g : ⟨γ, y₁⟩ₖ ∈ g := by simpa [kpair_mem_restrict_iff, hy₁, hγα] using fun h₂ ↦ h.mp h₂
-  exact hg.unique hy₁g hy₂
+  have : IsOrdinal (lh f) := SetTheory.isOrdinal_lh f
+  have : IsOrdinal (lh g) := SetTheory.isOrdinal_lh g
+  have : IsOrdinal γ := h₁.1.isOrdinal_of_mem_domain (mem_domain_of_kpair_mem hy₁)
+  let αo : Ordinal V := IsOrdinal.toOrdinal (lh f)
+  let βo : Ordinal V := IsOrdinal.toOrdinal (lh g)
+  let γo : Ordinal V := IsOrdinal.toOrdinal γ
+  exact IsAttempt.eq_of_isAttempt h₁ h₂ (γ := γo) hy₁ hy₂
 
 end IsAttempt
-
-/-! #### Various facts about attempt functions -/
-
-lemma IsAttempt.initial {F : V → V} {f : V}
-    (hf : IsAttempt F f) (hlh : ∅ ∈ lh f) : ⟨∅, F ∅⟩ₖ ∈ f := by
-  have hrestrict {g : V} : g ↾ ∅ = ∅ := restrict_empty_eq
-  exact (hf.2 ∅ hlh (F ∅)).mpr (by aesop)
-
-lemma IsAttempt.successor {F : V → V} {f : V} (hf : IsAttempt F f) : IsAttempt F (f ⁀' (F f)) :=
-  ⟨ hf.1.seqCons (F f), by
-    intro β hβ w
-    have := hf.1.IsFunction
-    let α := lh f
-    have : IsOrdinal α := SetTheory.isOrdinal_lh f
-    have : IsOrdinal (lh (f ⁀' (F f))) := Seq.lh_seqCons (F f) hf.1 ▸ IsOrdinal.succ
-    have : IsOrdinal β := IsOrdinal.of_mem hβ
-    have hβα : β ⊆ α := IsOrdinal.subset_iff.mpr (mem_succ_iff.mp (Seq.lh_seqCons (F f) hf.1 ▸ hβ))
-    have hβdomain : β ⊆ domain f := hf.1.domain_eq ▸ hβα
-    have hrestrictβ {z : V} : (f ⁀' z) ↾ β = f ↾ β :=
-        restrict_insert_kpair_eq_restrict_of_not_mem (f := f) (x := lh f) (y := z) (A := β)
-          fun h₂ ↦ mem_irrefl (lh f) (hf.1.domain_eq ▸ hβdomain (lh f) h₂)
-    have hrestrictlh := IsFunction.restrict_eq_self f (lh f)
-      (hf.1.domain_eq ▸ subset_refl (domain f))
-    rw [hrestrictβ] at *
-    rcases show β = α ∨ β ∈ α
-        from IsOrdinal.subset_iff.mp hβα
-        with (hβ | hβ)
-    · have hβeq : β = lh f := hβ
-      rw [hβeq, lh_mem_seqCons_iff hf.1, hrestrictlh]
-    · have hβneq : β ≠ lh f := fun h ↦ mem_irrefl β (h ▸ hβ)
-      rw [kpair_mem_seqCons_iff]
-      refine Iff.intro (fun h ↦ ?_) fun h ↦ ?_
-      · exact Or.elim h (by aesop) fun h ↦ (hf.2 β hβ w).mp h
-      · exact Or.inr ((hf.2 β hβ w).mpr h)
-  ⟩
 
 lemma attempt_result_existsUnique (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : V) : ∃! y,
     (IsOrdinal α → ∃ f, SetTheory.IsAttempt F f ∧ lh f = SetTheory.succ α ∧ ⟨α, y⟩ₖ ∈ f) ∧
@@ -263,7 +223,7 @@ lemma attempt_result_existsUnique (F : V → V) (hF : ℒₛₑₜ-function₁ F
     exact ExistsUnique.intro z ⟨f, hf, by simpa, hz⟩ (by
       rintro z' ⟨f', hf', hlhf', hz'⟩
       exact Eq.symm <|
-        SetTheory.IsAttempt.eq_of_isAttempt hf hf' hlhf hlhf' (by aesop) αo.lt_succ hz hz')
+        SetTheory.IsAttempt.eq_of_isAttempt hf hf' (γ := αo) hz hz')
   · refine ExistsUnique.intro (∅ : V) (by aesop) fun y ↦ by aesop
 
 noncomputable def result (α : V) : V :=
@@ -281,33 +241,35 @@ lemma result_spec_of_isOrdinal (α : V) [hα : IsOrdinal α] :
     ∃ f, SetTheory.IsAttempt (c.map v) f ∧ lh f = SetTheory.succ α ∧ ⟨α, c.result v α⟩ₖ ∈ f := by
   simpa [hα] using c.result_spec v α
 
+@[aesop safe] lemma result_not_isOrdinal (α : V) (hα : ¬IsOrdinal α) : c.result v α = ∅ := by
+  simpa [hα] using c.result_spec v α
+
+lemma result_eq_of_mem {f y} (α : V) (hf : IsAttempt (c.map v) f) (hmemf : ⟨α, y⟩ₖ ∈ f) :
+    y = c.result v α := by
+  have := hf.1.isOrdinal_of_mem_domain (mem_domain_of_kpair_mem hmemf)
+  rcases c.result_spec_of_isOrdinal v α with ⟨f', hf', hlhf, hmemf'⟩
+  exact IsAttempt.unique hf hf' hmemf hmemf'
+
 @[simp] theorem result_empty : c.result v ∅ = c.map v ∅ := by
   rcases c.result_spec_of_isOrdinal v ∅ with ⟨f, hf, hlhf, hempty⟩
   exact hf.1.IsFunction.unique hempty (IsAttempt.empty hf (hlhf ▸ mem_succ_self ∅))
 
-@[simp] theorem result_succ (α : V) [hα : IsOrdinal α] :
-    c.result v (SetTheory.succ α) = c.map v (Classical.choose (Replacement.attempt_function_exists
-      (c.map v) (c.map_definable v) (IsOrdinal.toOrdinal α).succ)) := by
-  rcases c.result_spec_of_isOrdinal v α with ⟨f, hf, hlhf, h⟩
+theorem result_succ_of_isAttempt {f} (α : V) [hα : IsOrdinal α]
+    (hf : IsAttempt (c.map v) f) (hlhf : lh f = succ α) :
+    c.result v (SetTheory.succ α) = c.map v f := by
   let αo : Ordinal V := IsOrdinal.toOrdinal α
-  have := IsAttempt.successor hf
-  have hmemcons := hlhf.symm ▸ SetTheory.lh_mem_seqCons f (c.map v f)
-  have hexists := Replacement.attempt_function_exists (c.map v) (c.map_definable v) αo.succ
-  let g := Classical.choose hexists
-  have hg := Classical.choose_spec hexists
-  have heq : Classical.choose hexists = f := by
-    exact Eq.symm <| IsAttempt.isAttempt_unique hf hg.1 (by aesop : lh f = αo.succ.val) hg.2
-  rw [heq]
-  exact Eq.symm
-    <| Classical.choose_uniq
-    (attempt_result_existsUnique (c.map v) (c.map_definable v) (SetTheory.succ α))
-    ⟨ by
-        simp only [IsOrdinal.succ, forall_const]
-        exact ⟨f ⁀' c.map v f, this, hlhf ▸ Seq.lh_seqCons (c.map v f) hf.1,
-          hlhf ▸ lh_mem_seqCons f (c.map v f)⟩
-        ,
-      by simp [IsOrdinal.succ]
-    ⟩
+  have huniq := by
+    simpa [IsOrdinal.succ] using attempt_result_existsUnique (c.map v) (c.map_definable v) (succ α)
+  obtain ⟨y, ⟨f', hf', hlhf', hmemf'⟩, hyuniq⟩ := huniq
+  have hrestrict : f = f' ↾ (succ α) :=
+    Eq.symm <| IsAttempt.isAttempt_restrict_eq_of_le (α := αo.succ.succ) (β := αo.succ)
+      (le_of_lt (by simp)) hf' hf hlhf' hlhf
+  rw [hyuniq (c.map v f)
+    (by
+      refine ⟨f', hf', hlhf', ?_⟩
+      exact (hf'.2 (succ α) (hlhf' ▸ mem_succ_self (succ α)) (c.map v f)).mpr (hrestrict ▸ rfl))
+    ]
+  exact Eq.symm <| c.result_eq_of_mem v (succ α) hf' hmemf'
 
 lemma result_graph (y α : V) : y = c.result v α ↔
     (IsOrdinal α → ∃ f, SetTheory.IsAttempt (c.map v) f ∧ lh f = SetTheory.succ α ∧ ⟨α, y⟩ₖ ∈ f) ∧
@@ -324,8 +286,7 @@ lemma result_graph (y α : V) : y = c.result v α ↔
         rcases hleft hα with ⟨f, hf, hlhf, h⟩
         let αo : Ordinal V := IsOrdinal.toOrdinal α
         exact Eq.symm <|
-          hf'.eq_of_isAttempt hf (by aesop : lh f' = αo.succ) (by aesop : lh f = αo.succ)
-          (le_refl αo.succ) (Ordinal.lt_succ αo) h' h
+          hf'.eq_of_isAttempt hf (γ := αo) h' h
       · exact Eq.symm <| hright hα ▸ (c.result_spec v α).2 hα⟩
 
 set_option linter.flexible false in
