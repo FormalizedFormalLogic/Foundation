@@ -632,7 +632,7 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
 /-! ### The prenex induction -/
 
 include hM in
-private lemma hierarchicalSatisfaction_quote_reading : ∀ {Γ : Polarity} {s k : ℕ}
+lemma hierarchicalSatisfaction_quote_reading : ∀ {Γ : Polarity} {s k : ℕ}
     {θ : ArithmeticSemisentence (k + s)}, ℬ[<, ℒₒᵣ].Closure θ →
     ∀ (v : Fin k → M) (ev : M), Codes v ev →
       (Reading.HierarchicalSatisfaction Γ s ((⌜θ⌝ : ℕ) : M) ev ↔ M ⊧/v (θ.toPrenex Γ s))

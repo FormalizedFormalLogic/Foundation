@@ -185,6 +185,30 @@ lemma models_nrel {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm 
       Semiformula.Eval e f (Semiformula.nrel r v) :=
   models_ofΔ₀ ⟨.nrel r v, .nrel r v⟩ e
 
+def lift : {Γ : Polarity} → {s n : ℕ} → Prenex Γ s ξ n → Prenex Γ (s + 1) ξ n
+  | Γ, 0, _, φ => ofΔ₀ φ.matrix Γ 1
+  | 𝚺, _ + 1, _, φ => φ.sigmaInv.lift.sigma
+  | 𝚷, _ + 1, _, φ => φ.piInv.lift.pi
+
+lemma models_lift : {Γ : Polarity} → {s n : ℕ} → (φ : Prenex Γ s ξ n) → (e : Fin n → V) →
+    (Semiformula.Eval e f φ.lift.val ↔ Semiformula.Eval e f φ.val)
+  | _, 0, _, φ, e => models_ofΔ₀ φ.matrix e
+  | 𝚺, _ + 1, _, φ, e => by
+    rw [lift, models_sigma, models_sigmaInv φ];
+    exact exists_congr fun x ↦ models_lift _ _;
+  | 𝚷, _ + 1, _, φ, e => by
+    rw [lift, models_pi, models_piInv φ];
+    exact forall_congr' fun x ↦ models_lift _ _;
+
+lemma exists_models_iff_of_le {s' : ℕ} (h : s ≤ s') (φ : Prenex Γ s ξ n) :
+    ∃ φ' : Prenex Γ s' ξ n, ∀ (e : Fin n → V) (f : ξ → V),
+      Semiformula.Eval e f φ'.val ↔ Semiformula.Eval e f φ.val := by
+  induction s', h using Nat.le_induction with
+  | base => exact ⟨φ, fun _ _ ↦ Iff.rfl⟩;
+  | succ s' _ ih =>
+    obtain ⟨φ', hφ'⟩ := ih;
+    exact ⟨φ'.lift, fun e f ↦ (models_lift φ' e).trans (hφ' e f)⟩;
+
 lemma provable_iff_sigmaInv {T : ArithmeticTheory} {φ : ArithmeticSemiformula Empty n}
   {φ' : Prenex 𝚺 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
   T ⊢ ∀¹* (φ 🡘 ∃¹ φ'.sigmaInv.val) := φ'.val_sigmaInv ▸ hφ'

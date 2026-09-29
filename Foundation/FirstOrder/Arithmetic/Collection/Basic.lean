@@ -25,6 +25,13 @@ open _root_.FFL.Entailment
 variable {V : Type*} [ORingStructure V] {R : V → V → Prop}
          {Γ : Polarity} {s : ℕ}
 
+lemma models_collectionAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
+    V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom φ) ↔
+      ∀ f : ℕ → V, ∀ a : V, (∀ x < a, ∃ y, φ.Eval ![x, y] f) →
+        ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] f := by
+  simp [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
+    Semiformula.eval_bexsLT, Semiformula.eval_substs]
+
 namespace CollectionScheme
 
 variable {C : ArithmeticSemiformula ℕ 2 → Prop} [V↓[ℒₒᵣ] ⊧* CollectionScheme C]
