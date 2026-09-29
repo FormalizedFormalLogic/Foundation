@@ -65,57 +65,66 @@ noncomputable def blueprint : UformulaFamilyRec.Blueprint where
       ((∀ i < l, ∃ z, !nthDef z ys i ∧ z = 1) ∧ y = 1 ∨
         (∃ i < l, ∃ z, !nthDef z ys i ∧ z ≠ 1) ∧ y = 0)) ∨
     (¬!isBounded.pi q ∧ y = 2))”
+  allSize := .mkSigma “n e p. ∃ p', !subDef p' p 1 ∧ ∃ c, !pi₂Def c p' ∧ ∃ a, !pi₁Def a c ∧
+    ∃ a', !subDef a' a 1 ∧ ∃ b, !pi₂Def b a' ∧ ∃ b', !pi₂Def b' b ∧ ∃ w, !pi₂Def w b' ∧
+    ∃ u, !nthDef u w 1 ∧ ∃ e', !adjoinDef e' 0 e ∧ !termValGraph n e' u”
+  allChanges := .mkSigma “e' e i. !adjoinDef e' i e”
   exs := .mkSigma “y e p ys. ∃ q, !qqExsDef q p ∧ ∃ l, !lenDef l ys ∧
     ((!isBounded.sigma q ∧
       ((∃ i < l, ∃ z, !nthDef z ys i ∧ z = 1) ∧ y = 1 ∨
         (∀ i < l, ∃ z, !nthDef z ys i ∧ z ≠ 1) ∧ y = 0)) ∨
     (¬!isBounded.pi q ∧ y = 2))”
-  size := .mkSigma “n e p. ∃ p', !subDef p' p 1 ∧ ∃ c, !pi₂Def c p' ∧ ∃ a, !pi₁Def a c ∧
+  exsSize := .mkSigma “n e p. ∃ p', !subDef p' p 1 ∧ ∃ c, !pi₂Def c p' ∧ ∃ a, !pi₁Def a c ∧
     ∃ a', !subDef a' a 1 ∧ ∃ b, !pi₂Def b a' ∧ ∃ b', !pi₂Def b' b ∧ ∃ w, !pi₂Def w b' ∧
     ∃ u, !nthDef u w 1 ∧ ∃ e', !adjoinDef e' 0 e ∧ !termValGraph n e' u”
-  changes := .mkSigma “e' e i. !adjoinDef e' i e”
+  exsChanges := .mkSigma “e' e i. !adjoinDef e' i e”
 
 open Classical in
 noncomputable def construction : UformulaFamilyRec.Construction V blueprint where
   rel e _ r v := if r = Arithmetic.eqIndex ∧ termVal e v.[0] = termVal e v.[1] ∨
     r ≠ Arithmetic.eqIndex ∧ termVal e v.[0] < termVal e v.[1] then 1 else 0
-  nrel e _ r v := if r = Arithmetic.eqIndex ∧ termVal e v.[0] = termVal e v.[1] ∨
-    r ≠ Arithmetic.eqIndex ∧ termVal e v.[0] < termVal e v.[1] then 0 else 1
-  verum _ := 1
-  falsum _ := 0
-  and _ p₁ p₂ y₁ y₂ := if IsBounded p₁ ∧ IsBounded p₂ then (if y₁ = 1 ∧ y₂ = 1 then 1 else 0) else 2
-  or _ p₁ p₂ y₁ y₂ := if IsBounded p₁ ∧ IsBounded p₂ then (if y₁ = 1 ∨ y₂ = 1 then 1 else 0) else 2
-  all _ p ys := if IsBounded (^∀ p) then (if ∀ i < len ys, ys.[i] = 1 then 1 else 0) else 2
-  exs _ p ys := if IsBounded (^∃ p) then (if ∃ i < len ys, ys.[i] = 1 then 1 else 0) else 2
-  size e p := termVal (0 ∷ e) (boundTerm p)
-  changes e i := i ∷ e
   rel_defined := .mk fun v ↦ by
     simp [blueprint, (termVal.defined (V := V)).df, numeral_eqIndex];
     grind;
+  nrel e _ r v := if r = Arithmetic.eqIndex ∧ termVal e v.[0] = termVal e v.[1] ∨
+    r ≠ Arithmetic.eqIndex ∧ termVal e v.[0] < termVal e v.[1] then 0 else 1
   nrel_defined := .mk fun v ↦ by
     simp [blueprint, (termVal.defined (V := V)).df, numeral_eqIndex];
     grind;
+  verum _ := 1
   verum_defined := .mk fun v ↦ by simp [blueprint]
+  falsum _ := 0
   falsum_defined := .mk fun v ↦ by simp [blueprint]
+  and _ p₁ p₂ y₁ y₂ := if IsBounded p₁ ∧ IsBounded p₂ then (if y₁ = 1 ∧ y₂ = 1 then 1 else 0) else 2
   and_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
       IsBounded.defined.proper.iff'];
     grind;
+  or _ p₁ p₂ y₁ y₂ := if IsBounded p₁ ∧ IsBounded p₂ then (if y₁ = 1 ∨ y₂ = 1 then 1 else 0) else 2
   or_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
       IsBounded.defined.proper.iff'];
     grind;
+  all _ p ys := if IsBounded (^∀ p) then (if ∀ i < len ys, ys.[i] = 1 then 1 else 0) else 2
   all_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
       IsBounded.defined.proper.iff'];
     grind;
+  allSize e p := termVal (0 ∷ e) (boundTerm p)
+  allSize_defined := .mk fun v ↦ by simp [blueprint, boundTerm, (termVal.defined (V := V)).df]
+  allChanges e i := i ∷ e
+  allChanges_defined := .mk fun v ↦ by simp [blueprint]
+  exs _ p ys := if IsBounded (^∃ p) then (if ∃ i < len ys, ys.[i] = 1 then 1 else 0) else 2
   exs_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
       IsBounded.defined.proper.iff'];
     split_ifs <;> simp_all;
-  size_defined := .mk fun v ↦ by simp [blueprint, boundTerm, (termVal.defined (V := V)).df]
-  changes_defined := .mk fun v ↦ by simp [blueprint]
-  changes_monotone h := adjoin_le_adjoin h le_rfl
+  exsSize e p := termVal (0 ∷ e) (boundTerm p)
+  exsSize_defined := .mk fun v ↦ by simp [blueprint, boundTerm, (termVal.defined (V := V)).df]
+  exsChanges e i := i ∷ e
+  exsChanges_defined := .mk fun v ↦ by simp [blueprint]
+  allChanges_monotone h := adjoin_le_adjoin h le_rfl
+  exsChanges_monotone h := adjoin_le_adjoin h le_rfl
 
 end BoundedSatValue
 
