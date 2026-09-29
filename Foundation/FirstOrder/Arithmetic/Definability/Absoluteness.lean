@@ -128,11 +128,6 @@ lemma sigmaZero_upward_absolute₃ (σ : 𝚺ᴬ₀.Semisentence 3) (h : ℕ ⊧
   simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
     using (sigmaZero_absolute V σ ![a, b, c]).mp h
 
-lemma sigmaOne_upward_absolute₁ (σ : 𝚺ᴬ₁.Semisentence 1) (h : ℕ ⊧/![a] σ.val) :
-    V ⊧/![(a : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using sigmaOne_upward_absolute V σ _ h
-
 lemma sigmaOne_upward_absolute₂ (σ : 𝚺ᴬ₁.Semisentence 2) (h : ℕ ⊧/![a, b] σ.val) :
     V ⊧/![(a : V), (b : V)] σ.val := by
   simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]

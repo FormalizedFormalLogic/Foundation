@@ -398,14 +398,6 @@ theorem quote_eq (σ : Semisentence L n) :
 @[simp] lemma quote_isUFormula (φ : Semisentence L n) : IsUFormula L (⌜φ⌝ : V) :=
   (quote_isSemiformula φ).isUFormula
 
-lemma quote_rel {k} (R : L.Rel k) (v : Fin k → ClosedSemiterm L n) :
-    (⌜(Semiformula.rel R v : Semisentence L n)⌝ : V) = ^rel ↑k ⌜R⌝
-      (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) := rfl
-
-lemma quote_nrel {k} (R : L.Rel k) (v : Fin k → ClosedSemiterm L n) :
-    (⌜(Semiformula.nrel R v : Semisentence L n)⌝ : V) = ^nrel ↑k ⌜R⌝
-      (SemitermVec.val fun i ↦ (⌜v i⌝ : Bootstrapping.Semiterm V L n)) := rfl
-
 lemma quote_verum : (⌜(⊤ : Semisentence L n)⌝ : V) = ^⊤ := rfl
 
 lemma quote_falsum : (⌜(⊥ : Semisentence L n)⌝ : V) = ^⊥ := rfl

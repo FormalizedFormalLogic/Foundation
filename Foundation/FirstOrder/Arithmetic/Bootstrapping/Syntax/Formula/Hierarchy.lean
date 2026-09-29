@@ -61,14 +61,6 @@ lemma neg_qqQuant (hp : IsUFormula ℒₒᵣ p) :
     neg ℒₒᵣ (qqQuant Γ p) = qqQuant Γ.alt (neg ℒₒᵣ p) := by
   cases Γ <;> simp [hp];
 
-@[simp] lemma substs_qqQuant (hp : IsUFormula ℒₒᵣ p) (w : V) :
-    subst ℒₒᵣ w (qqQuant Γ p) = qqQuant Γ (subst ℒₒᵣ (qVec ℒₒᵣ w) p) := by
-  cases Γ <;> simp [hp];
-
-@[simp] lemma isSemiformula_qqQuant {n : V} :
-    IsSemiformula ℒₒᵣ n (qqQuant Γ p) ↔ IsSemiformula ℒₒᵣ (n + 1) p := by
-  cases Γ <;> simp;
-
 end qqQuant
 
 /-! ## Internal hierarchy predicate `IsHierarchy` -/
@@ -470,25 +462,6 @@ lemma neg_qqQuants (hp : IsUFormula ℒₒᵣ p) :
   · definability;
   case zero => simp;
   case succ k ih => simp [neg_qqQuant (isUFormula_qqQuants.mpr hp), ih];
-
-lemma isSemiformula_qqQuants (k : V) :
-    ∀ n : V, (IsSemiformula ℒₒᵣ n (qqQuants Γ p k) ↔ IsSemiformula ℒₒᵣ (n + k) p) := by
-  induction k using ISigma1.pi1_succ_induction
-  · definability;
-  case zero => intro n; simp;
-  case succ k ih =>
-    intro n;
-    rw [qqQuants_succ, isSemiformula_qqQuant, ih, add_assoc, add_comm 1 k];
-
-lemma qqQuants_cancel (k : V) :
-    ∀ p p' j : V, qqQuants Γ p k = qqQuants Γ p' (k + j) → p = qqQuants Γ p' j := by
-  induction k using ISigma1.pi1_succ_induction
-  · definability;
-  case zero => intro p p' j h; simpa using h;
-  case succ k ih =>
-    intro p p' j h;
-    rw [qqQuants_succ, add_right_comm k 1 j, qqQuants_succ, qqQuant_inj] at h;
-    exact ih p p' j h.2;
 
 end qqQuants
 

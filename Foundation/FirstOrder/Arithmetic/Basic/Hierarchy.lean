@@ -54,45 +54,6 @@ lemma arithmetic_bexs {Γ s n} {φ : Semiformula L ξ (n + 1)}
     ℬ[<, L].Hierarchy Γ s (φ.bexsLTSucc t) ↔ ℬ[<, L].Hierarchy Γ s φ := by
   simp [Semiformula.bexsLTSucc]
 
-section
-
-variable {Γ : Polarity} {s n : ℕ}
-
-@[simp] lemma toEmpty_iff [DecidableEq ξ] {φ : Semiformula L ξ n} (h : φ.freeVariables = ∅) :
-    ℬ[<, L].Hierarchy Γ s (φ.toEmpty h) ↔ ℬ[<, L].Hierarchy Γ s φ := by
-  have : ℬ[<, L].Hierarchy Γ s (Rew.emb ▹ (φ.toEmpty h) : Semiformula L ξ n) ↔
-      ℬ[<, L].Hierarchy Γ s (φ.toEmpty h) := rew_iff;
-  rwa [show (Rew.emb ▹ (φ.toEmpty h) : Semiformula L ξ n) = φ from Semiformula.emb_toEmpty φ h,
-    iff_comm] at this;
-
-@[simp] lemma allClosure_iff {φ : Semiformula L ξ n} :
-    ℬ[<, L].Hierarchy 𝚷 (s + 1) (∀¹* φ) ↔ ℬ[<, L].Hierarchy 𝚷 (s + 1) φ := by
-  induction n with
-  | zero => simp;
-  | succ n ih => rw [allClosure_succ]; simp [ih];
-
-@[simp] lemma univCl_iff {φ : Proposition L} :
-    ℬ[<, L].Hierarchy 𝚷 (s + 1) (Semiformula.univCl φ) ↔ ℬ[<, L].Hierarchy 𝚷 (s + 1) φ := by
-  simp [Semiformula.univCl, Semiformula.univCl'];
-
-lemma exists_forall_hierarchy (φ : Semiformula L ξ n) : ∃ s, ∀ Γ, ℬ[<, L].Hierarchy Γ s φ := by
-  induction φ using Semiformula.rec' with
-  | hverum | hfalsum | hrel | hnrel => exact ⟨0, by simp⟩;
-  | hand φ ψ ihφ ihψ | hor φ ψ ihφ ihψ =>
-    obtain ⟨s, hs⟩ := ihφ;
-    obtain ⟨t, ht⟩ := ihψ;
-    use max s t;
-    intro Γ;
-    simp [(hs Γ).mono (le_max_left s t), (ht Γ).mono (le_max_right s t)];
-  | hall φ ih =>
-    obtain ⟨s, hs⟩ := ih;
-    exact ⟨s + 2, (pi (hs 𝚺)).accum⟩;
-  | hexs φ ih =>
-    obtain ⟨s, hs⟩ := ih;
-    exact ⟨s + 2, (sigma (hs 𝚷)).accum⟩;
-
-end
-
 section LOR
 
 lemma arithmetic_sigma₁_induction
@@ -173,63 +134,6 @@ open FFL.FirstOrder.Arithmetic
 
 section
 
-variable {L : Language} [L.LT] {ξ : Type*} {n : ℕ} {φ ψ : Semiformula L ξ n}
-
-@[grind ←]
-lemma hierarchy {Γ : Polarity} (h : ℬ[<, L].Closure φ) : ℬ[<, L].Hierarchy Γ 0 φ :=
-  .bounded _ _ _ h
-
-lemma arithmetic_ball {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} (ht : t.Positive)
-    (h : ℬ[<, L].Closure φ) : ℬ[<, L].Closure (∀¹[“x. x < !!t”] φ) :=
-  ball (R := Semiformula.Operator.LT.lt) (by rfl) ht h
-
-lemma arithmetic_bexs {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} (ht : t.Positive)
-    (h : ℬ[<, L].Closure φ) : ℬ[<, L].Closure (∃¹[“x. x < !!t”] φ) :=
-  bexs (R := Semiformula.Operator.LT.lt) (by rfl) ht h
-
-@[simp] lemma imp_iff : ℬ[<, L].Closure (φ 🡒 ψ) ↔ ℬ[<, L].Closure φ ∧ ℬ[<, L].Closure ψ := by
-  simp [Semiformula.imp_eq];
-
-@[simp] lemma ballLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
-    ℬ[<, L].Closure (φ.ballLT t) ↔ ℬ[<, L].Closure φ := by
-  simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)];
-
-@[simp] lemma bexsLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
-    ℬ[<, L].Closure (φ.bexsLT t) ↔ ℬ[<, L].Closure φ := by
-  simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)];
-
-lemma of_open (h : φ.Open) : ℬ[<, L].Closure φ :=
-  Bounding.Hierarchy.zero_iff_bounded.mp (Bounding.Hierarchy.of_open (Γ := 𝚺) (s := 0) h)
-
-@[grind →]
-lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : ℬ[<, L].Closure (∃¹ φ)) : ℬ[<, L].Closure φ := by
-  cases h with
-  | bexs hR _ hφ =>
-    obtain rfl := Set.mem_singleton_iff.mp hR;
-    exact .and (.rel _ _) hφ;
-
-@[grind →]
-lemma of_all {φ : Semiformula L ξ (n + 1)} (h : ℬ[<, L].Closure (∀¹ φ)) : ℬ[<, L].Closure φ := by
-  cases h with
-  | ball hR _ hφ =>
-    obtain rfl := Set.mem_singleton_iff.mp hR;
-    exact imp_iff.mpr ⟨.rel _ _, hφ⟩;
-
-@[grind →]
-lemma exists_of_all {φ : Semiformula L ξ (n + 1)} (h : ℬ[<, L].Closure (∀¹ φ)) :
-    ∃ (t : Semiterm L ξ n) (ψ : Semiformula L ξ (n + 1)),
-      φ = “#0 < !!(Rew.bShift t)” 🡒 ψ ∧ ℬ[<, L].Closure ψ := by
-  cases h with
-  | ball hR pt hψ =>
-    rename_i ψ _;
-    obtain rfl := Set.mem_singleton_iff.mp hR;
-    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp pt;
-    exact ⟨t, ψ, rfl, hψ⟩;
-
-end
-
-section
-
 variable {ξ : Type*}
 
 lemma arithmetic_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
@@ -268,26 +172,6 @@ lemma arithmetic_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Pro
     obtain rfl := Set.mem_singleton_iff.mp hR;
     obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht;
     exact hBex _ t _ hp ih;
-
-lemma arithmetic_induction_open {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
-    (hOpen : ∀ n φ, Semiformula.Open φ → P n φ)
-    (hAnd : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ →
-      P n φ → P n ψ → P n (φ ⋏ ψ))
-    (hOr : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ →
-      P n φ → P n ψ → P n (φ ⋎ ψ))
-    (hBall : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ →
-      P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
-    (hBex : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ →
-      P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
-    (n φ) : ℬ[<, ℒₒᵣ].Closure φ → P n φ :=
-  arithmetic_induction
-    (fun _ ↦ hOpen _ _ (by simp))
-    (fun _ ↦ hOpen _ _ (by simp))
-    (fun _ _ _ ↦ hOpen _ _ (by simp))
-    (fun _ _ _ ↦ hOpen _ _ (by simp))
-    (fun _ _ _ ↦ hOpen _ _ (by simp))
-    (fun _ _ _ ↦ hOpen _ _ (by simp))
-    hAnd hOr hBall hBex n φ
 
 end
 

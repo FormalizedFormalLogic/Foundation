@@ -143,10 +143,6 @@ lemma strict_mono {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (Γ') 
   · exact ofAlt (h.mono (by omega));
   · exact h.mono (by omega);
 
-@[grind =>]
-lemma of_bounded {φ : Semiformula L ξ n} (h : ℬ[<, L].Closure φ) : StrictHierarchy Γ s φ :=
-  (zero h).mono (Nat.zero_le s)
-
 lemma of_deltaZero {φ : Semiformula L ξ n} (h : ℬ[<, L].Hierarchy 𝚺 0 φ) :
     StrictHierarchy Γ s φ :=
   (zero (Bounding.Hierarchy.zero_iff_bounded.mp h)).mono (Nat.zero_le s)
@@ -164,26 +160,6 @@ lemma zero_iff {φ : Semiformula L ξ n} :
     all_goals omega;
   · intro h;
     exact zero (Bounding.Hierarchy.zero_iff_bounded.mp h);
-
-end
-
-section
-
-variable {n : ℕ}
-
-@[grind →]
-lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : StrictHierarchy 𝚺 1 (∃¹ φ)) :
-    StrictHierarchy 𝚺 1 φ := by
-  cases h with
-  | ofAlt h => exact .ofAlt (.zero (Bounding.Closure.of_exs (zero_iff_bounded.mp h)));
-  | exs h => exact h;
-
-@[grind →]
-lemma bounded_of_sigmaOne_of_piOne {φ : Semiformula L ξ n} (hσ : StrictHierarchy 𝚺 1 φ)
-    (hπ : StrictHierarchy 𝚷 1 φ) : ℬ[<, L].Closure φ := by
-  cases hσ with
-  | ofAlt h => exact zero_iff_bounded.mp h;
-  | exs _ => cases hπ with | ofAlt h => exact zero_iff_bounded.mp h;
 
 end
 

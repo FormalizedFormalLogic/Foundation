@@ -146,7 +146,7 @@ open Arithmetic.Tarski
 -- most `𝚺 2`: `iff_iff` splits the biconditionals, and `dummy_sigma`, `dummy_pi` absorb the
 -- quantifier blocks that raise the level by one.
 attribute [local simp] Bounding.Hierarchy.iff_iff Bounding.Hierarchy.dummy_sigma
-  Bounding.Hierarchy.dummy_pi
+  Bounding.Hierarchy.dummy_pi HierarchySymbol.Semiformula.hierarchy_of_lt
 
 lemma hierarchy_of_tarski {σ : ArithmeticSentence} (hσ : σ ∈ tarski) :
     ℬ[<, ℒₒᵣ].Hierarchy 𝚷 3 σ := by
