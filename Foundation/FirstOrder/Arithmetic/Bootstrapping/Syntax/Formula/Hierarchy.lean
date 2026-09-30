@@ -6,9 +6,10 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Boun
 # Internal arithmetical hierarchy
 
 The internal predicates `IsHierarchy Γ n` on codes of formulas of the (non-strict) bounded
-arithmetical hierarchy, and `IsStrictHierarchy Γ n` on codes of strict prenex formulas: they are
-`𝚫ᴬ₁`-definable and agree with `ℬ[<, ℒₒᵣ].Hierarchy` and `StrictHierarchy` on quoted formulas.
-Both are `IsBounded` at level `0`.
+arithmetical hierarchy, `IsStrictHierarchy Γ n` on codes of strict prenex formulas, and
+`IsPrenexHierarchy Γ n` on codes of prenex formulas with `n` single alternating quantifiers: they
+are `𝚫ᴬ₁`-definable and agree with `ℬ[<, ℒₒᵣ].Hierarchy`, `StrictHierarchy` and `PrenexHierarchy`
+on quoted formulas. All are `IsBounded` at level `0`.
 
 ## References
 
@@ -567,6 +568,56 @@ lemma IsStrictHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsStrictHierarchy
 
 end isStrictHierarchy
 
+/-! ### Internal prenex classes -/
+
+section isPrenexHierarchy
+
+def IsPrenexHierarchy : Polarity → ℕ → V → Prop
+  | _, 0 => IsBounded
+  | Γ, n + 1 => fun p ↦ ∃ q, p = qqQuant Γ q ∧ IsPrenexHierarchy Γ.alt n q
+
+noncomputable def isPrenexHierarchy : Polarity → ℕ → 𝚫ᴬ₁.Semisentence 1
+  | _, 0 => isBounded
+  | Γ, n + 1 => .mkDelta
+      (.mkSigma “p. ∃ q < p, !(qqQuantDef Γ) p q ∧ !(isPrenexHierarchy Γ.alt n).sigma q”)
+      (.mkPi “p. ∃ q < p, !(qqQuantDef Γ) p q ∧ !(isPrenexHierarchy Γ.alt n).pi q”)
+
+instance IsPrenexHierarchy.defined : (Γ : Polarity) → (n : ℕ) →
+    𝚫ᴬ₁-Predicate (IsPrenexHierarchy (V := V) Γ n) via isPrenexHierarchy Γ n
+  | _, 0 => IsBounded.defined
+  | Γ, n + 1 =>
+    have : 𝚫ᴬ₁-Predicate (IsPrenexHierarchy (V := V) Γ.alt n) via isPrenexHierarchy Γ.alt n :=
+      IsPrenexHierarchy.defined Γ.alt n
+    .mk ⟨fun v ↦ by
+        simp [isPrenexHierarchy, Bounding.HierarchySymbol.Semiformula.val_sigma],
+      fun v ↦ by
+        simp [isPrenexHierarchy, IsPrenexHierarchy, (qqQuant_defined Γ).df];
+        grind [lt_qqQuant]⟩
+
+instance IsPrenexHierarchy.definable (Γ : Polarity) (n : ℕ) :
+    𝚫ᴬ₁-Predicate (IsPrenexHierarchy (V := V) Γ n) :=
+  (IsPrenexHierarchy.defined Γ n).to_definable
+
+variable {Γ : Polarity} {n : ℕ} {p : V}
+
+@[simp] lemma IsPrenexHierarchy.quant_iff :
+    IsPrenexHierarchy Γ (n + 1) (qqQuant Γ p) ↔ IsPrenexHierarchy Γ.alt n p := by
+  simp [IsPrenexHierarchy];
+
+lemma IsPrenexHierarchy.quant (h : IsPrenexHierarchy Γ.alt n p) :
+    IsPrenexHierarchy Γ (n + 1) (qqQuant Γ p) := quant_iff.mpr h
+
+lemma IsPrenexHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy Γ n p) :
+    IsPrenexHierarchy Γ.alt n (neg ℒₒᵣ p) := by
+  induction n generalizing Γ p with
+  | zero => exact IsBounded.neg hp h;
+  | succ n ih =>
+    obtain ⟨q, rfl, hq⟩ := h;
+    have hq' : IsUFormula ℒₒᵣ q := isUFormula_qqQuant.mp hp;
+    exact ⟨neg ℒₒᵣ q, neg_qqQuant hq', ih hq' hq⟩;
+
+end isPrenexHierarchy
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping
 
 namespace FFL.FirstOrder.Arithmetic
@@ -707,6 +758,39 @@ theorem isStrictSigma_quote_iff (σ : ArithmeticSemisentence n) :
 
 theorem isStrictPi_quote_iff (σ : ArithmeticSemisentence n) :
     IsStrictPi s (⌜σ⌝ : V) ↔ StrictHierarchy 𝚷 s σ := isStrictHierarchy_quote_iff σ
+
+/-! ### `IsPrenexHierarchy` and `PrenexHierarchy` -/
+
+lemma isPrenexHierarchy_quote_iff_s (ψ : ArithmeticSemiproposition n) :
+    IsPrenexHierarchy Γ s (⌜ψ⌝ : V) ↔ PrenexHierarchy Γ s ψ := by
+  induction s generalizing Γ n with
+  | zero => exact (isBounded_quote_iff_s ψ).trans PrenexHierarchy.zero_iff_bounded.symm;
+  | succ s ih =>
+    cases Γ;
+    · constructor;
+      · rintro ⟨q, heq, hq⟩;
+        induction ψ using Semiformula.rec' with
+        | hexs φ _ =>
+          obtain rfl : ⌜φ⌝ = q := by simpa [Semiformula.quote_ex] using heq;
+          exact ((ih φ).mp hq).exs;
+        | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at heq;
+      · intro h;
+        obtain ⟨φ, hφ, rfl⟩ := PrenexHierarchy.sigma_succ_iff.mp h;
+        simpa [Semiformula.quote_ex] using IsPrenexHierarchy.quant (Γ := 𝚺) ((ih φ).mpr hφ);
+    · constructor;
+      · rintro ⟨q, heq, hq⟩;
+        induction ψ using Semiformula.rec' with
+        | hall φ _ =>
+          obtain rfl : ⌜φ⌝ = q := by simpa [Semiformula.quote_all] using heq;
+          exact ((ih φ).mp hq).all;
+        | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at heq;
+      · intro h;
+        obtain ⟨φ, hφ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h;
+        simpa [Semiformula.quote_all] using IsPrenexHierarchy.quant (Γ := 𝚷) ((ih φ).mpr hφ);
+
+theorem isPrenexHierarchy_quote_iff (σ : ArithmeticSemisentence n) :
+    IsPrenexHierarchy Γ s (⌜σ⌝ : V) ↔ PrenexHierarchy Γ s σ := by
+  simp [Sentence.quote_def, isPrenexHierarchy_quote_iff_s];
 
 end quote
 

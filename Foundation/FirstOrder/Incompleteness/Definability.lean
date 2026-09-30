@@ -235,6 +235,11 @@ noncomputable instance InductionScheme.delta1_strictHierarchy (Γ : Polarity) (s
   InductionScheme.delta1_of (fun _ _ _ ↦ IsStrictHierarchy.defined Γ s)
     isStrictHierarchy_quote_iff_s
 
+noncomputable instance InductionScheme.delta1_prenexHierarchy (Γ : Polarity) (s : ℕ) :
+    (InductionScheme ℒₒᵣ (PrenexHierarchy Γ s)).Δ₁ :=
+  InductionScheme.delta1_of (fun _ _ _ ↦ IsPrenexHierarchy.defined Γ s)
+    isPrenexHierarchy_quote_iff_s
+
 variable {Γ : Polarity} {s : ℕ} {p : V}
 
 lemma Peano.mem_Δ₁Class_iff :
