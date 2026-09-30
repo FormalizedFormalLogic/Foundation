@@ -242,11 +242,11 @@ lemma Peano.mem_Δ₁Class_iff :
   Δ₁Class.mem_union.trans <| .or .rfl <|
     (InductionR.defined (hcond := ⟨by simp, fun _ ↦ by simp⟩)).df ![p]
 
-lemma InductionOnBroadHierarchy.mem_Δ₁Class_iff :
+lemma InductionOnHierarchy.mem_Δ₁Class_iff :
     p ∈ (𝗜𝗡𝗗⁺ Γ s).Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (IsHierarchy Γ s) p :=
   Δ₁Class.mem_union.trans <| .or .rfl <| InductionR.defined.df ![p]
 
-lemma InductionOnHierarchy.mem_Δ₁Class_iff :
+lemma InductionOnPrenexHierarchy.mem_Δ₁Class_iff :
     p ∈ (𝗜𝗡𝗗 Γ s).Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (IsStrictHierarchy Γ s) p :=
   Δ₁Class.mem_union.trans <| .or .rfl <| InductionR.defined.df ![p]
 

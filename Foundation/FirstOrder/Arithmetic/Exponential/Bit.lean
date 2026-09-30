@@ -580,7 +580,7 @@ lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[m]-
     · simpa using Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₂
         (by definability) (by definability)
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : V) := by
-    simpa using InductionOnBroadHierarchy.least_number Γ.alt m this hs
+    simpa using InductionOnHierarchy.least_number Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩
   have t_le_s : t ≤ s := not_lt.mp (by
     intro lt

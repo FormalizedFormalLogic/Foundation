@@ -116,7 +116,7 @@ lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
   have : 𝗜𝚺₁ ⪯ S := (inferInstance : 𝗜𝚺₁ ⪯ T).trans hTS;
   have : 𝗕𝚺 n ⪯ T := by
     rcases n with _ | m;
-    · exact (CollectionOnHierarchy_weakerThan_of_le (Nat.zero_le 1)).trans
+    · exact (CollectionOnPrenexHierarchy_weakerThan_of_le (Nat.zero_le 1)).trans
         (BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺₁ ⪯ T));
     · exact BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺 (m + 1) ⪯ T);
   rintro φ ⟨σ, hσ, rfl⟩;
