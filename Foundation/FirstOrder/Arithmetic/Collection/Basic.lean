@@ -64,7 +64,7 @@ namespace CollectionOnPrenexHierarchy
 
 variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
 
-instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (StrictHierarchy Γ s) :=
+instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (PrenexHierarchy Γ s) :=
   models_of_subtheory ‹_›
 
 lemma collection (hR : PrenexDefinableRel Γ s R) (a : V)
@@ -147,7 +147,8 @@ theorem BSigma_weakerThan_IBroadSigma : 𝗕𝚺 (s + 1) ⪯ 𝗜𝚺⁺ (s + 1)
 
 @[instance]
 theorem BSigma_weakerThan_IBroadSigma_succ : 𝗕𝚺 s ⪯ 𝗜𝚺⁺ (s + 1) :=
-  WeakerThan.trans (CollectionOnPrenexHierarchy_weakerThan_of_le (by omega)) BSigma_weakerThan_IBroadSigma
+  WeakerThan.trans (CollectionOnPrenexHierarchy_weakerThan_of_le (by omega))
+    BSigma_weakerThan_IBroadSigma
 
 @[instance]
 theorem BSigma_weakerThan_Peano : 𝗕𝚺 s ⪯ 𝗣𝗔 :=

@@ -309,13 +309,9 @@ lemma models_IBroadSigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s 
       (IBroadSigmaZero_subset_ISigmaZero.trans Set.subset_union_left);
   | succ s ih =>
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hn;
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := models_of_ss hn
-      (CollectionOnPrenexHierarchy_subset_mono (by omega));
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := models_of_ss hn
-      ((CollectionOnPrenexHierarchy_subset_BSigma_succ 𝚷 s).trans
-      (CollectionOnPrenexHierarchy_subset_mono (by omega)));
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1) := models_of_ss hn
-      (CollectionOnPrenexHierarchy_subset_BSigma_succ 𝚷 (s + 1));
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := models_CollectionOnPrenexHierarchy_of_le (h := hn) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := models_CollectionOnPrenexHierarchy_of_lt (h := hn) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1) := models_CollectionOnPrenexHierarchy_of_lt (h := hn) (by omega);
     suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (s + 1)) by
       apply Semantics.ModelsSet.union_iff.mpr;
       simp_all;

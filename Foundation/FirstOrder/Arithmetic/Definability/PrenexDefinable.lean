@@ -1,10 +1,10 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
+public import Foundation.FirstOrder.Arithmetic.Basic.PrenexHierarchy
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 
 /-!
-# Definability by strict-hierarchy formulas
+# Definability by prenex formulas
 -/
 
 @[expose] public section
@@ -17,12 +17,12 @@ variable (Γ : Polarity) (s : ℕ)
 
 structure IsPrenexDefinedBy (R : (Fin k → V) → Prop)
     (φ : ArithmeticSemisentence k) : Prop where
-  strictHierarchy : StrictHierarchy Γ s φ
+  prenexHierarchy : PrenexHierarchy Γ s φ
   defined : FirstOrder.IsDefinedBy R φ
 
 structure IsPrenexDefinedByWithParam (R : (Fin k → V) → Prop) (φ : ArithmeticSemiformula V k) :
     Prop where
-  strictHierarchy : StrictHierarchy Γ s φ
+  prenexHierarchy : PrenexHierarchy Γ s φ
   defined : FirstOrder.IsDefinedByWithParam R φ
 
 abbrev PrenexDefinable {k} (P : (Fin k → V) → Prop) :=
@@ -55,7 +55,7 @@ lemma definable {P : (Fin k → V) → Prop} (h : PrenexDefinable Γ s P) :
 
 lemma exists_eval_iff {P : (Fin k → V) → Prop} (h : PrenexDefinable Γ s P) :
     ∃ (e : ℕ → V) (φ : ArithmeticSemiformula ℕ k),
-      StrictHierarchy Γ s φ ∧ ∀ v, P v ↔ φ.Eval v e := by
+      PrenexHierarchy Γ s φ ∧ ∀ v, P v ↔ φ.Eval v e := by
   classical
   obtain ⟨φ, hs, hφ⟩ := h;
   have : Inhabited V := Classical.inhabited_of_nonempty';
@@ -65,8 +65,8 @@ lemma exists_eval_iff {P : (Fin k → V) → Prop} (h : PrenexDefinable Γ s P) 
   · intro v;
     simp [Semiformula.eval_rewriteMap, hφ];
 
-lemma of_strictHierarchy {ξ : Type*} {m : ℕ} {θ : ArithmeticSemiformula ξ (m + 2)}
-    (hθ : StrictHierarchy Γ s θ) (e : Fin m → V) (f : ξ → V) :
+lemma of_prenexHierarchy {ξ : Type*} {m : ℕ} {θ : ArithmeticSemiformula ξ (m + 2)}
+    (hθ : PrenexHierarchy Γ s θ) (e : Fin m → V) (f : ξ → V) :
     PrenexDefinableRel Γ s fun x y ↦ Semiformula.Eval (y :> x :> e) f θ := by
   use Rew.bind (#1 :> #0 :> fun i : Fin m ↦ (&(e i) : ArithmeticSemiterm V 2))
     (fun x : ξ ↦ (&(f x) : ArithmeticSemiterm V 2)) ▹ θ;

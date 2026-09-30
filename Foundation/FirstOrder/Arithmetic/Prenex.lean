@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.PrenexHierarchy
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
@@ -32,18 +31,12 @@ private lemma models_PrenexBase_of_models_CollectionOnPrenexHierarchy {V : Type*
     (Γ : Polarity) (s : ℕ) [h : V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] : V↓[ℒₒᵣ] ⊧* PrenexBase s :=
   match s, h with
   | 0, h => models_of_ss h Set.subset_union_left
-  | s + 1, h => models_of_ss h (CollectionOnPrenexHierarchy_subset_of_lt (Nat.lt_succ_self s))
+  | s + 1, h => models_CollectionOnPrenexHierarchy_of_lt (h := h) (Nat.lt_succ_self s)
 
 namespace Prenex
 
 variable {Γ : Polarity} {s : ℕ} {ξ : Type*} {n : ℕ}
 variable {V : Type*} [ORingStructure V] {f : ξ → V}
-
--- The binders are spelled out rather than taken from `variable`, to fix the order `Γ s n ξ`.
-@[simp, grind .]
-lemma val_strictHierarchy {Γ : Polarity} {s n : ℕ} {ξ : Type*} {φ : Prenex Γ s ξ n} :
-    StrictHierarchy Γ s φ.val :=
-  StrictHierarchy.toPrenex_of_deltaZero φ.matrix.bounded
 
 mutual
 
@@ -188,7 +181,7 @@ private theorem models_ball :
       exact ⟨y, hy⟩;
     · intro h;
       exact (CollectionOnPrenexHierarchy.collection 𝚷 s
-        (.of_strictHierarchy φ.sigmaInv.val_strictHierarchy e f) (u.val e f) h).imp
+        (.of_prenexHierarchy φ.sigmaInv.val_prenexHierarchy e f) (u.val e f) h).imp
         fun b hb x hx ↦ (hb x hx).imp fun y hy ↦ ⟨le_of_lt hy.1, hy.2⟩;
   | 𝚷, s + 1, _, _, u, φ, e => by
     have ih : ∀ {m : ℕ} (u : ArithmeticSemiterm ξ m) (φ : Prenex 𝚺 (s + 1) ξ (m + 1))
@@ -468,10 +461,10 @@ theorem exists_matrix_provable (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
   obtain ⟨_, hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨_, by simpa [Prenex.val] using hφ'⟩;
 
-theorem exists_strictHierarchy_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
-  ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
+theorem exists_prenexHierarchy_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
+  ∃ ψ : ArithmeticSemisentence n, PrenexHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
-  exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;
+  exact ⟨φ'.val, Prenex.val_prenexHierarchy, hφ'⟩;
 
 end
 
@@ -480,7 +473,7 @@ lemma PrenexDefinable.of_definable {V : Type*} [ORingStructure V] {Γ Γ' : Pola
     PrenexDefinable Γ s P := by
   obtain ⟨φ, hφ⟩ := hP;
   obtain ⟨θ, hθ⟩ := Prenex.models_exists_prenex (Γ' := Γ') φ.polarity_prop;
-  exact ⟨θ.val, Prenex.val_strictHierarchy, fun v ↦ (hθ V v id).symm.trans hφ.iff⟩;
+  exact ⟨θ.val, Prenex.val_prenexHierarchy, fun v ↦ (hθ V v id).symm.trans hφ.iff⟩;
 
 end Arithmetic
 

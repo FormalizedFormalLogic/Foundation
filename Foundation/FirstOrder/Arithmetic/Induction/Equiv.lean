@@ -4,11 +4,10 @@ public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
 public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
 
 /-!
-# Induction over the strict and the broad hierarchy agree
+# Induction over prenex formulas and over the broad hierarchy agree
 
-Induction for the strict hierarchy proves collection, and collection turns every formula of the
-broad class into a strict one, so `𝗜𝗡𝗗 Γ s` and `𝗜𝗡𝗗⁺ Γ s` are the same theory. The least number
-schemata collapse the same way.
+`𝗜𝗡𝗗 Γ s` and `𝗜𝗡𝗗⁺ Γ s` are the same theory, and so are the least number schemata `𝗟 Γ s` and
+`𝗟⁺ Γ s`.
 
 ## References
 
@@ -28,30 +27,24 @@ open _root_.FFL.Entailment
 variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s k : ℕ}
          {P : V → Prop} {Q R : V → V → Prop}
 
-/-! ### Strict definitions of definable relations -/
+/-! ### Prenex definitions of definable relations -/
 
-/-- In a model of `𝗜𝚺⁺ s` every `Γᴬ-[s]`-definable relation is definable by a strict `Γᴬ-[s]`
-formula: below `s + 1` the collection `𝗕𝚺 (s + 1)` strictifies it, and at `0` the two classes
-are both `Δ₀`.
+/-- In a model of `𝗜𝚺⁺ s` every `Γᴬ-[s]`-definable relation is definable by a prenex formula.
 - [HP98, Lemma I.2.9] -/
 lemma prenexDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
     (hR : Γᴬ-[s].DefinableRel R) : PrenexDefinableRel Γ s R := by
   rcases s with _ | t;
   · obtain ⟨φ, hφ⟩ := hR;
-    exact ⟨φ.val, StrictHierarchy.zero_iff.mpr
+    exact ⟨φ.val, PrenexHierarchy.zero_iff.mpr
       (Bounding.Hierarchy.zero_iff (ℬ := ℬ[<, ℒₒᵣ]).mp φ.polarity_prop),
       fun v ↦ hφ.iff⟩;
   · have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := IBroadSigma.models_BSigma_succ;
     exact PrenexDefinable.of_definable (Γ' := 𝚺) hR;
 
-lemma models_ISigmaZero_of_models_InductionOnPrenexHierarchy (V : Type*) [ORingStructure V]
-    (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
-  models_of_ss inferInstance (ISigmaZero_subset_InductionOnPrenexHierarchy Γ s)
+/-! ### Successor induction over prenex formulas -/
 
-/-! ### Successor induction over the strict hierarchy -/
-
-/-- The universal quantification of a `𝚺ᴬ-[s]`-definable relation is a strict `𝚷ᴬ-[s + 1]` formula,
-so `𝗜𝗡𝗗 𝚷 (s + 1)` gives it successor induction. -/
+/-- Successor induction in a model of `𝗜𝗡𝗗 𝚷 (s + 1)` for the universal quantification of a
+`𝚺ᴬ-[s]`-definable relation. -/
 lemma succ_induction_forall_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
     (hQ : 𝚺ᴬ-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∀ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
@@ -62,8 +55,8 @@ lemma succ_induction_forall_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1
     refine forall_congr' fun w ↦
       Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
     simp [Semiformula.eval_substs];
-  exact InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚷 (s + 1))
-    ⟨f, _, (StrictHierarchy.ofAlt (Γ := 𝚷) (hχ.rew _)).all, hP⟩ zero succ;
+  exact InductionScheme.succ_induction (C := PrenexHierarchy 𝚷 (s + 1))
+    ⟨f, _, (hχ.rew _).all, hP⟩ zero succ;
 
 /-- - [HP98, Lemma I.2.12(2)] -/
 private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
@@ -95,8 +88,8 @@ private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)
       · exact le_tsub_of_add_le_left hx;
   exact nzero (by simpa using key a le_rfl);
 
-/-- Successor induction for the existential quantification of a `𝚷ᴬ-[s]`-definable relation: for
-`𝚺` it is a strict `𝚺ᴬ-[s + 1]` formula, for `𝚷` its negation is handled by `neg_succ_induction`. -/
+/-- Successor induction in a model of `𝗜𝗡𝗗 Γ (s + 1)` for the existential quantification of a
+`𝚷ᴬ-[s]`-definable relation. -/
 lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
     (hQ : 𝚷ᴬ-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
@@ -109,15 +102,15 @@ lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡�
       refine exists_congr fun w ↦
         Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
       simp [Semiformula.eval_substs];
-    exact InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚺 (s + 1))
-      ⟨f, _, (StrictHierarchy.ofAlt (Γ := 𝚺) (hχ.rew _)).exs, hP⟩ zero succ;
+    exact InductionScheme.succ_induction (C := PrenexHierarchy 𝚺 (s + 1))
+      ⟨f, _, (hχ.rew _).exs, hP⟩ zero succ;
   · have h := neg_succ_induction (P := fun x ↦ ¬P x) (Q := fun x w ↦ ¬Q x w)
       (Bounding.HierarchySymbol.Definable.not (Γ := 𝚺) hQ) (fun x ↦ by simp [hPQ x])
       (by simpa using zero) (fun x hx ↦ by simpa using succ x (by simpa using hx));
     intro x;
     simpa using h x;
 
-/-! ### Collection from induction over the strict hierarchy -/
+/-! ### Collection from induction over prenex formulas -/
 
 /-- - [HP98, Lemma I.2.11] -/
 lemma exists_bound_of_definable_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
@@ -203,8 +196,7 @@ private lemma models_IBroadSigma_of_models_InductionOnPrenexHierarchy_sigma :
   | zero => intro V _ _; exact models_of_ss inferInstance IBroadSigmaZero_subset_ISigmaZero;
   | succ t ih =>
     intro V _ _;
-    have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 t :=
-      models_of_ss inferInstance (InductionOnPrenexHierarchy_subset_mono (Nat.le_succ t));
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 t := models_InductionOnPrenexHierarchy_of_le (s' := t + 1) (by omega);
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺t := ih V;
     exact models_IBroadSigma_succ_of_models_InductionOnPrenexHierarchy 𝚺;
 
@@ -214,9 +206,9 @@ lemma models_IBroadSigma_of_models_InductionOnPrenexHierarchy (Γ : Polarity) (s
     [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s := by
   rcases s with _ | t;
   · exact models_of_ss inferInstance
-      (IBroadSigmaZero_subset_ISigmaZero.trans (ISigmaZero_subset_InductionOnPrenexHierarchy Γ 0));
+      (InductionOnPrenexHierarchy_zero_eq_InductionOnHierarchy_zero Γ 𝚺).ge;
   · have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 t :=
-      models_of_ss inferInstance (InductionOnPrenexHierarchy_subset_of_lt (Γ' := Γ) (Nat.lt_succ_self t));
+      models_InductionOnPrenexHierarchy_of_lt (Γ' := Γ) (s' := t + 1) (by omega);
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺t := models_IBroadSigma_of_models_InductionOnPrenexHierarchy_sigma t V;
     exact models_IBroadSigma_succ_of_models_InductionOnPrenexHierarchy Γ;
 
@@ -233,7 +225,7 @@ instance models_InductionOnHierarchy_of_models_InductionOnPrenexHierarchy
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s := models_IBroadSigma_of_models_InductionOnPrenexHierarchy Γ s V
   inferInstance
 
-/-- Induction for the broad hierarchy follows from induction for the strict one.
+/-- Induction for the broad hierarchy follows from induction for prenex formulas.
 - [HP98, Theorem I.2.4] -/
 @[instance]
 theorem InductionOnHierarchy_weakerThan_InductionOnPrenexHierarchy (Γ : Polarity) (s : ℕ) :
@@ -268,7 +260,7 @@ instance models_InductionOnPrenexHierarchy_of_models_IPi [V↓[ℒₒᵣ] ⊧* �
   models_of_ss (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s)
     InductionOnPrenexHierarchy_subset_InductionOnHierarchy
 
-/-! ### Collection below the strict induction schemata -/
+/-! ### Collection below the prenex induction schemata -/
 
 @[instance]
 theorem BSigma_weakerThan_ISigma : 𝗕𝚺 (s + 1) ⪯ 𝗜𝚺 (s + 1) :=
@@ -277,38 +269,38 @@ theorem BSigma_weakerThan_ISigma : 𝗕𝚺 (s + 1) ⪯ 𝗜𝚺 (s + 1) :=
 
 @[instance]
 theorem BSigma_weakerThan_ISigma_succ : 𝗕𝚺 s ⪯ 𝗜𝚺 (s + 1) :=
-  WeakerThan.trans (CollectionOnPrenexHierarchy_weakerThan_of_le (Nat.le_succ s)) BSigma_weakerThan_ISigma
+  WeakerThan.trans (CollectionOnPrenexHierarchy_weakerThan_of_le (Nat.le_succ s))
+    BSigma_weakerThan_ISigma
 
 @[instance]
 theorem ISigma_weakerThan_BSigma_succ : 𝗜𝚺 s ⪯ 𝗕𝚺 (s + 1) :=
   WeakerThan.trans (InductionOnPrenexHierarchy_weakerThan_InductionOnHierarchy 𝚺 s)
     IBroadSigma_weakerThan_BSigma_succ
 
-/-! ### The least number schemata over the strict hierarchy -/
+/-! ### The least number schemata over prenex formulas -/
 
 section leastNumber
 
-/-- Successor induction from the least number principle: the negation of a strict `Γ.alt-[s]`
-formula is strict `Γᴬ-[s]`. -/
+/-- Successor induction in a model of `𝗟 Γ s` for a prenex `Γ.alt`-formula of level `s`. -/
 lemma LeastNumberOnPrenexHierarchy.succ_induction (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟 Γ s]
-    {φ : ArithmeticSemiformula ℕ 1} (hφ : StrictHierarchy Γ.alt s φ) (f : ℕ → V)
+    {φ : ArithmeticSemiformula ℕ 1} (hφ : PrenexHierarchy Γ.alt s φ) (f : ℕ → V)
     (zero : φ.Eval ![0] f) (succ : ∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) :
     ∀ x, φ.Eval ![x] f := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_left;
-  have : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (Arithmetic.StrictHierarchy Γ s) :=
+  have : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (PrenexHierarchy Γ s) :=
     models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_right;
   by_contra! hcon;
   obtain ⟨a, ha⟩ := hcon;
   obtain ⟨y, hy, hmin⟩ := LeastNumberScheme.least_number
-    (C := Arithmetic.StrictHierarchy Γ s) (P := fun x ↦ ¬φ.Eval ![x] f)
+    (C := PrenexHierarchy Γ s) (P := fun x ↦ ¬φ.Eval ![x] f)
     ⟨f, ∼φ, by simpa using hφ, by simp⟩ ha;
   obtain ⟨z, rfl⟩ := Arithmetic.exists_succ_of_ne_zero <| show y ≠ 0 by rintro rfl; exact hy zero;
   exact hy (succ z (by simpa using hmin z (by simp)));
 
-lemma models_InductionOnPrenexHierarchy_of_models_LeastNumberOnPrenexHierarchy (Γ : Polarity) (s : ℕ)
-    [V↓[ℒₒᵣ] ⊧* 𝗟 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ.alt s := by
+lemma models_InductionOnPrenexHierarchy_of_models_LeastNumberOnPrenexHierarchy (Γ : Polarity)
+    (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ.alt s := by
   have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_left;
-  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Arithmetic.StrictHierarchy Γ.alt s) by
+  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (PrenexHierarchy Γ.alt s) by
     simpa [InductionOnPrenexHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩;
   simp only [InductionScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;
@@ -326,11 +318,12 @@ lemma models_LeastNumberOnPrenexHierarchy_of_models_ISigma (V : Type*) [ORingStr
   models_of_ss (models_LeastNumberOnHierarchy_of_IBroadSigma Γ s)
     (Set.union_subset_union_right _ (LeastNumberScheme_subset (·.hierarchy)))
 
-/-- The least number scheme for the strict hierarchy is `𝗜𝚺 s`.
+/-- The least number scheme for prenex formulas is `𝗜𝚺 s`.
 - [HP98, Theorem I.2.4] -/
 theorem LSigma_equiv_ISigma (s : ℕ) : 𝗟𝚺 s ≊ 𝗜𝚺 s :=
   Equiv.antisymm
-    ⟨weakerThan_of_models.{0} _ _ fun V _ _ ↦ models_LeastNumberOnPrenexHierarchy_of_models_ISigma V 𝚺 s,
+    ⟨weakerThan_of_models.{0} _ _ fun V _ _ ↦
+        models_LeastNumberOnPrenexHierarchy_of_models_ISigma V 𝚺 s,
       weakerThan_of_models.{0} _ _ fun V _ _ ↦
         have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 s :=
           models_InductionOnPrenexHierarchy_of_models_LeastNumberOnPrenexHierarchy 𝚺 s
@@ -339,7 +332,8 @@ theorem LSigma_equiv_ISigma (s : ℕ) : 𝗟𝚺 s ≊ 𝗜𝚺 s :=
 
 theorem LPi_equiv_ISigma (s : ℕ) : 𝗟𝚷 s ≊ 𝗜𝚺 s :=
   Equiv.antisymm
-    ⟨weakerThan_of_models.{0} _ _ fun V _ _ ↦ models_LeastNumberOnPrenexHierarchy_of_models_ISigma V 𝚷 s,
+    ⟨weakerThan_of_models.{0} _ _ fun V _ _ ↦
+        models_LeastNumberOnPrenexHierarchy_of_models_ISigma V 𝚷 s,
       weakerThan_of_models.{0} _ _ fun _ _ _ ↦
         models_InductionOnPrenexHierarchy_of_models_LeastNumberOnPrenexHierarchy 𝚷 s⟩
 

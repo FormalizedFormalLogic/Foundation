@@ -130,12 +130,6 @@ section
 
 variable {Γ : Polarity} {m n : ℕ}
 
-lemma InductionOnPrenexHierarchy.provable_standardProvability_imp_of_le (h : m ≤ n)
-    (σ : ArithmeticSentence) :
-    𝗜𝚺₁ ⊢ (𝗜𝗡𝗗 Γ m).standardProvability σ 🡒 (𝗜𝗡𝗗 Γ n).standardProvability σ :=
-  provable_standardProvability_imp_of_Δ₁Class_subset (fun _ _ _ _ hp ↦ mem_Δ₁Class_iff.mpr <|
-    (mem_Δ₁Class_iff.mp hp).imp_right <| InductionR.mono fun _ ↦ IsStrictHierarchy.mono h) σ
-
 lemma InductionOnPrenexHierarchy.provable_standardProvability_imp_Peano (m : ℕ)
     (σ : ArithmeticSentence) :
     𝗜𝚺₁ ⊢ (𝗜𝗡𝗗 Γ m).standardProvability σ 🡒 𝗣𝗔.standardProvability σ :=

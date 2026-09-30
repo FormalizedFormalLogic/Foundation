@@ -110,8 +110,8 @@ end Sigma1Sound
 section
 variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
 
-lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
-    {S : ArithmeticTheory} (hTS : T ⪯ S) (h : S ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ n] T) :
+lemma provable_localReflectionOn_hierarchy_of_prenexHierarchy [𝗜𝚺n ⪯ T]
+    {S : ArithmeticTheory} (hTS : T ⪯ S) (h : S ⊢* 𝗥𝗳𝗻[PrenexHierarchy Γ n] T) :
     S ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ n] T := by
   have : 𝗜𝚺₁ ⪯ S := (inferInstance : 𝗜𝚺₁ ⪯ T).trans hTS;
   have : 𝗕𝚺 n ⪯ T := by
@@ -120,7 +120,7 @@ lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
         (BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺₁ ⪯ T));
     · exact BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺 (m + 1) ⪯ T);
   rintro φ ⟨σ, hσ, rfl⟩;
-  obtain ⟨σ', hσ', e⟩ := exists_strictHierarchy_of_hierarchy (Γ := Γ) T hσ;
+  obtain ⟨σ', hσ', e⟩ := exists_prenexHierarchy_of_hierarchy (Γ := Γ) T hσ;
   have he : T ⊢ σ 🡘 σ' := by simpa using e;
   have hinst : S ⊢ T.standardProvability.refl σ' :=
     h ((Provability.mem_localReflectionOn_iff _).mpr ⟨σ', hσ', rfl⟩);
@@ -130,23 +130,23 @@ lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
   cl_prover [hinst, hext, he'];
 
 theorem inconsistent_of_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
-    (hπ : ℬ[<, ℒₒᵣ].Hierarchy Γ n π) (h : insert π T ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T) :
+    (hπ : ℬ[<, ℒₒᵣ].Hierarchy Γ n π) (h : insert π T ⊢* 𝗥𝗳𝗻[PrenexHierarchy Γ.alt n] T) :
     Inconsistent (insert π T) :=
   T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
     (fun _ hσ ↦ by simpa using hσ) hπ
-    (provable_localReflectionOn_hierarchy_of_strictHierarchy
+    (provable_localReflectionOn_hierarchy_of_prenexHierarchy
       (WeakerThan.ofSubset (Set.subset_insert _ _)) h)
 
 theorem not_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
     (hπ : ℬ[<, ℒₒᵣ].Hierarchy Γ n π) [Consistent (insert π T)] :
-    ¬insert π T ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T :=
+    ¬insert π T ⊢* 𝗥𝗳𝗻[PrenexHierarchy Γ.alt n] T :=
   fun h ↦ (inconsistent_of_provable_localReflectionOn_insert hπ h).not_con
     inferInstance
 
 theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n ⪯ T]
     {U U' : ArithmeticTheory} (e : U ≊ U') (hU' : U'.Finite)
     (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].Hierarchy Γ n σ)
-    (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T) : Inconsistent (T ∪ U) := by
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[PrenexHierarchy Γ.alt n] T) : Inconsistent (T ∪ U) := by
   classical
   have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right e T;
   have hmem : ∀ σ, σ ∈ hU'.toFinset.toList ↔ σ ∈ U' := by simp;
