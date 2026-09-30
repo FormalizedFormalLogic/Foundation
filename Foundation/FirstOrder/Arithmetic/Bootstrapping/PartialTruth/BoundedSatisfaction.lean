@@ -114,6 +114,7 @@ noncomputable def construction : UformulaFamilyRec.Construction V blueprint wher
   allSize_defined := .mk fun v ↦ by simp [blueprint, boundTerm, (termVal.defined (V := V)).df]
   allChanges e i := i ∷ e
   allChanges_defined := .mk fun v ↦ by simp [blueprint]
+  allChanges_monotone h := adjoin_le_adjoin h le_rfl
   exs _ p ys := if IsBounded (^∃ p) then (if ∃ i < len ys, ys.[i] = 1 then 1 else 0) else 2
   exs_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
@@ -123,7 +124,6 @@ noncomputable def construction : UformulaFamilyRec.Construction V blueprint wher
   exsSize_defined := .mk fun v ↦ by simp [blueprint, boundTerm, (termVal.defined (V := V)).df]
   exsChanges e i := i ∷ e
   exsChanges_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_monotone h := adjoin_le_adjoin h le_rfl
   exsChanges_monotone h := adjoin_le_adjoin h le_rfl
 
 end BoundedSatValue
