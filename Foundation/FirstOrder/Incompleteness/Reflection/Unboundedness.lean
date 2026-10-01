@@ -144,7 +144,27 @@ private lemma provable_imp_truncatedTruthSentence_iff {ψ : ArithmeticSentence} 
 private lemma provable_of_provable_imp_pi
     (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ) {ψ : ArithmeticSentence}
     (hψ : ψ ∈ Y) (h : T ⊢ truncatedTruthSentence T U Y n 𝚷 🡒 ψ) : T ∪ U ⊢ ψ := by
-  sorry
+  obtain ⟨d⟩ := provable_imp_truncatedTruthSentence_iff.mp h;
+  have hθ : T ∪ U ⊢ truncatedTruthSentence T U Y n 𝚷 := by
+    apply Arithmetic.complete.{0};
+    intro M _ _;
+    have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory M 𝗜𝚺₁ (T ∪ U) inferInstance;
+    apply models_truncatedTruthSentence_pi_iff.mpr;
+    intro y hmem hsemi hlt;
+    have hp : Proof T ((⌜d⌝ : ℕ) : M)
+        (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚷)⌝ (⌜ψ⌝ : M)) := by
+      have : Proof T ((⌜d⌝ : ℕ) : M) ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚷) 🡒 ψ⌝ := by
+        simp [coe_quote_proof_eq];
+      simpa [Sentence.quote_eq] using this;
+    have hle : y ≤ ((max ⌜d⌝ ⌜ψ⌝ : ℕ) : M) := not_lt.mp fun hy ↦
+      hlt _ (lt_of_le_of_lt (by rw [← Sentence.coe_quote_eq_quote]; simp) hy) _
+        (lt_of_le_of_lt (by simp) hy) (by simpa using hψ) hp;
+    obtain ⟨m, rfl⟩ := eq_nat_of_le_nat hle;
+    obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi;
+    obtain ⟨φ, rfl⟩ := hΓ σ hσ;
+    rw [hmσ];
+    exact (partialTruth_quote_iff φ).mpr (models_of_mem (Set.mem_union_right T hσ));
+  exact (WeakerThan.ofSubset Set.subset_union_left).pbl h ⨀ hθ;
 
 private lemma provable_of_provable_imp_sigma
     (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚺 (n + 1) Empty 0, φ.val = σ) {ψ : ArithmeticSentence}
