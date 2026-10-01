@@ -89,6 +89,18 @@ lemma exists_mem_eq_quote {m : ℕ} (hmem : (m : V) ∈ U.Δ₁Class)
   obtain ⟨σ, hσ, rfl⟩ := Δ₁Class.mem_iff_s.mp this;
   exact ⟨σ, hσ, by rw [← hF]; simp [Sentence.quote_def, Semiformula.coe_quote_eq_quote]⟩;
 
+private lemma quote_imply_eq_imp (σ ψ : ArithmeticSentence) :
+    (⌜σ 🡒 ψ⌝ : V) = imp ℒₒᵣ ⌜σ⌝ ⌜ψ⌝ := by
+  simp [Sentence.quote_eq];
+
+private lemma partialTruth_natCast_of_mem (hU : V↓[ℒₒᵣ] ⊧* U)
+    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) {m : ℕ}
+    (hmem : (m : V) ∈ U.Δ₁Class) (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V)) :
+    PartialTruth Γ (n + 1) (m : V) := by
+  obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi;
+  obtain ⟨φ, rfl⟩ := hΓ σ hσ;
+  exact hmσ ▸ (partialTruth_quote_iff φ).mpr (hU.models_set hσ);
+
 lemma models_truncatedTruthSentence_pi_iff :
     V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚷 ↔
       ∀ y ∈ U.Δ₁Class, IsSemiformula ℒₒᵣ (0 : V) y →
@@ -149,21 +161,17 @@ private lemma provable_of_provable_imp_pi
     apply Arithmetic.complete.{0};
     intro M _ _;
     have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory M 𝗜𝚺₁ (T ∪ U) inferInstance;
+    have hU : M↓[ℒₒᵣ] ⊧* U := .of_subset' (Set.subset_union_right (s := T));
     apply models_truncatedTruthSentence_pi_iff.mpr;
     intro y hmem hsemi hlt;
     have hp : Proof T ((⌜d⌝ : ℕ) : M)
         (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚷)⌝ (⌜ψ⌝ : M)) := by
-      have : Proof T ((⌜d⌝ : ℕ) : M) ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚷) 🡒 ψ⌝ := by
-        simp [coe_quote_proof_eq];
-      simpa [Sentence.quote_eq] using this;
+      simp [← quote_imply_eq_imp, coe_quote_proof_eq];
     have hle : y ≤ ((max ⌜d⌝ ⌜ψ⌝ : ℕ) : M) := not_lt.mp fun hy ↦
       hlt _ (lt_of_le_of_lt (by rw [← Sentence.coe_quote_eq_quote]; simp) hy) _
         (lt_of_le_of_lt (by simp) hy) (by simpa using hψ) hp;
     obtain ⟨m, rfl⟩ := eq_nat_of_le_nat hle;
-    obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi;
-    obtain ⟨φ, rfl⟩ := hΓ σ hσ;
-    rw [hmσ];
-    exact (partialTruth_quote_iff φ).mpr (models_of_mem (Set.mem_union_right T hσ));
+    exact partialTruth_natCast_of_mem hU hΓ hmem hsemi;
   exact (WeakerThan.ofSubset Set.subset_union_left).pbl h ⨀ hθ;
 
 private lemma provable_of_provable_imp_sigma
@@ -174,11 +182,10 @@ private lemma provable_of_provable_imp_sigma
     apply Arithmetic.complete.{0};
     intro M _ _;
     have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory M 𝗜𝚺₁ (T ∪ U) inferInstance;
+    have hU : M↓[ℒₒᵣ] ⊧* U := .of_subset' (Set.subset_union_right (s := T));
     have hp : Proof T ((⌜d⌝ : ℕ) : M)
         (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚺)⌝ (⌜ψ⌝ : M)) := by
-      have : Proof T ((⌜d⌝ : ℕ) : M) ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚺) 🡒 ψ⌝ := by
-        simp [coe_quote_proof_eq];
-      simpa [Sentence.quote_eq] using this;
+      simp [← quote_imply_eq_imp, coe_quote_proof_eq];
     apply models_truncatedTruthSentence_sigma_iff.mpr;
     use ((max ⌜d⌝ ⌜ψ⌝ + 1 : ℕ) : M);
     and_intros;
@@ -186,10 +193,7 @@ private lemma provable_of_provable_imp_sigma
         by push_cast; simp, by simpa using hψ, hp⟩;
     · intro z hz hmem hsemi;
       obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz;
-      obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi;
-      obtain ⟨φ, rfl⟩ := hΓ σ hσ;
-      rw [hmσ];
-      exact (partialTruth_quote_iff φ).mpr (models_of_mem (Set.mem_union_right T hσ));
+      exact partialTruth_natCast_of_mem hU hΓ hmem hsemi;
   exact (WeakerThan.ofSubset Set.subset_union_left).pbl h ⨀ hθ;
 
 private lemma provable_of_provable_imp
@@ -208,7 +212,7 @@ private lemma not_proof_imp_natCast {V : Type*} [ORingStructure V] [V↓[ℒₒ�
     (IsSemiformula.imp.mp (hp.isFormulaSet _ (mem_singleton_iff.mpr rfl))).2;
   rw [hmψ] at hp;
   exact hY ψ hψ <| provable_imp_truncatedTruthSentence_iff.mpr <|
-    provable_of_standard_proof (V := V) (by simpa [Sentence.quote_eq] using hp);
+    provable_of_standard_proof (V := V) (by rwa [quote_imply_eq_imp]);
 
 private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n 𝚷 🡒 ψ) {σ : ArithmeticSentence}
