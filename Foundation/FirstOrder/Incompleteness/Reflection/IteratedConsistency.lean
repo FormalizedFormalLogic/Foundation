@@ -1,14 +1,15 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 
 /-!
 # A prenex $\Pi_1$ axiomatization of $T_\omega$
 
-$T_\omega = T + \{\neg\Box_T^{n + 1}\bot\}_n$, the $\omega$-th stage of the Turing progression of
-`T` by consistency, is `T ∪ 𝗥𝗳𝗻[Set.range (T.standardProvability^[·] ⊥)] T`. It is equivalent to
-`T` extended by the $\Delta_1$-presented set `notProvableIterateBotTheory T` of prenex $\Pi_1$
-sentences: the numeral instances of one prenex $\Pi_1$ formula, which `𝗜𝚺₁` proves equivalent to
+$T_\omega = T + \{\neg\Box_T^n\bot\}_{n \in \omega}$, the extension of `T` by all iterated
+consistency statements, is equivalent to `T` extended by the $\Delta_1$-presented set
+`notProvableIterateBotTheory T` of prenex $\Pi_1$ sentences: the numeral instances of one prenex
+$\Pi_1$ formula, which `𝗜𝚺₁` proves equivalent to
 $\neg\mathrm{Pr}_T(\ulcorner\Box_T^{x}\bot\urcorner)$.
 
 ## References
@@ -100,14 +101,14 @@ lemma eval_notProvableIterateBotPrenex (x : V) :
 end
 
 lemma provable_notProvableIterateBotPrenex_iff (n : ℕ) :
-    𝗜𝚺₁ ⊢ (notProvableIterateBotPrenex T).val/[↑n] 🡘 ∼(T.standardProvability^[n + 1] ⊥) :=
+    𝗜𝚺₁ ⊢ (notProvableIterateBotPrenex T).val/[↑n] 🡘 T.standardProvability.conItr (n + 1) :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     have h : V ⊧/![(n : V)] (notProvableIterateBotPrenex T).val ↔
         ¬Provable T (⌜T.standardProvability^[n] ⊥⌝ : V) := by
       rw [eval_notProvableIterateBotPrenex, eval_notProvableIterateBot,
         substNumeralItr_provable_bot];
-    simpa [models_iff, Function.iterate_succ_apply', Arithmetic.standardProvability_def,
-      numeral_eq_natCast, -Prenex.val_piInv] using h
+    simpa [models_iff, ProvabilityAbstraction.Provability.conItr, Function.iterate_succ_apply',
+      Arithmetic.standardProvability_def, numeral_eq_natCast, -Prenex.val_piInv] using h
 
 variable (T) in
 noncomputable def notProvableIterateBotTheory : ArithmeticTheory :=
@@ -116,44 +117,30 @@ noncomputable def notProvableIterateBotTheory : ArithmeticTheory :=
 noncomputable instance : (notProvableIterateBotTheory T).Δ₁ :=
   Theory.Δ₁.numeralInstances _ le_quote_notProvableIterateBotPrenex
 
-lemma provable_neg_iterate_turingOmega :
-    ∀ n, T ∪ 𝗥𝗳𝗻[Set.range (T.standardProvability^[·] ⊥)] T ⊢ ∼T.standardProvability^[n] ⊥
-  | 0 => by simp
-  | n + 1 => by
-    have h : T ∪ 𝗥𝗳𝗻[Set.range (T.standardProvability^[·] ⊥)] T ⊢
-        T.standardProvability.refl (T.standardProvability^[n] ⊥) :=
-      by_axm <| Set.mem_union_right _ ⟨_, ⟨n, rfl⟩, rfl⟩;
-    rw [Function.iterate_succ_apply'];
-    cl_prover [h, provable_neg_iterate_turingOmega n];
-
 variable [𝗜𝚺₁ ⪯ T]
 
 theorem turingOmega_equiv_union_notProvableIterateBotTheory :
-    T ∪ 𝗥𝗳𝗻[Set.range (T.standardProvability^[·] ⊥)] T ≊ T ∪ notProvableIterateBotTheory T := by
+    T ∪ Set.range T.standardProvability.conItr ≊ T ∪ notProvableIterateBotTheory T := by
   apply Equiv.antisymm;
   constructor;
   · apply WeakerThan.ofAxm!;
-    rintro σ (hσ | ⟨_, ⟨n, rfl⟩, rfl⟩);
+    rintro σ (hσ | ⟨_ | n, rfl⟩);
     · exact by_axm <| Set.mem_union_left _ hσ;
+    · simp [ProvabilityAbstraction.Provability.conItr];
     · have h₁ : T ∪ notProvableIterateBotTheory T ⊢ (notProvableIterateBotPrenex T).val/[↑n] :=
         by_axm <| Set.mem_union_right _ ⟨n, rfl⟩;
-      have h₂ : T ∪ notProvableIterateBotTheory T ⊢
-          (notProvableIterateBotPrenex T).val/[↑n] 🡘 ∼T.standardProvability^[n + 1] ⊥ :=
-        WeakerThan.pbl <| provable_notProvableIterateBotPrenex_iff n;
-      rw [Function.iterate_succ_apply'] at h₂;
-      cl_prover [h₁, h₂];
+      exact (K_left <| WeakerThan.pbl <| provable_notProvableIterateBotPrenex_iff n) ⨀ h₁;
   · apply WeakerThan.ofAxm!;
     rintro σ (hσ | ⟨n, rfl⟩);
     · exact by_axm <| Set.mem_union_left _ hσ;
-    · have h₁ := provable_neg_iterate_turingOmega (T := T) (n + 1);
-      have h₂ : T ∪ 𝗥𝗳𝗻[Set.range (T.standardProvability^[·] ⊥)] T ⊢
-          (notProvableIterateBotPrenex T).val/[↑n] 🡘 ∼T.standardProvability^[n + 1] ⊥ :=
-        WeakerThan.pbl <| provable_notProvableIterateBotPrenex_iff n;
-      cl_prover [h₁, h₂];
+    · have h₁ : T ∪ Set.range T.standardProvability.conItr ⊢
+          T.standardProvability.conItr (n + 1) :=
+        by_axm <| Set.mem_union_right _ ⟨n + 1, rfl⟩;
+      exact (K_right <| WeakerThan.pbl <| provable_notProvableIterateBotPrenex_iff n) ⨀ h₁;
 
 theorem exists_prenex_axiomatization_turingOmega :
     ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, ∃ φ : Prenex 𝚷 1 Empty 0, φ.val = σ) ∧
-      T ∪ 𝗥𝗳𝗻[Set.range (T.standardProvability^[·] ⊥)] T ≊ T ∪ U := by
+      T ∪ Set.range T.standardProvability.conItr ≊ T ∪ U := by
   use notProvableIterateBotTheory T, inferInstance;
   and_intros;
   · rintro _ ⟨n, rfl⟩;
