@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 
 /-!

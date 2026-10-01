@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Incompleteness.Reflection.Unboundedness
 
 /-!
@@ -112,7 +111,7 @@ lemma exists_matrix_sigma1ReflectionPremise :
     ∃ θ : ℬ[<, ℒₒᵣ].Semisentence 2, 𝗜𝚺₁ ⊢ ∀¹* ((sigma1ReflectionPremise T).val 🡘 ∃¹ θ.val) :=
   ISigma1.exists_matrix_provable (by simp)
 
-lemma exists_matrix_partialTruth :
+lemma exists_matrix_sigma1ReflectionConclusion :
     ∃ θ : ℬ[<, ℒₒᵣ].Semisentence 2, 𝗜𝚺₁ ⊢ ∀¹* ((partialTruth 𝚺 1).val 🡘 ∃¹ θ.val) :=
   ISigma1.exists_matrix_provable (partialTruth 𝚺 1).sigma_prop
 
@@ -120,21 +119,21 @@ variable (T) in
 noncomputable def sigma1ReflectionPremiseMatrix : ℬ[<, ℒₒᵣ].Semisentence 2 :=
   (exists_matrix_sigma1ReflectionPremise T).choose
 
-noncomputable def partialTruthMatrix : ℬ[<, ℒₒᵣ].Semisentence 2 :=
-  exists_matrix_partialTruth.choose
+noncomputable def sigma1ReflectionConclusionMatrix : ℬ[<, ℒₒᵣ].Semisentence 2 :=
+  exists_matrix_sigma1ReflectionConclusion.choose
 
 -- The vacuous disjunct `x ≠ x` makes the free variable occur in every numeral instance.
 variable (T) in
 noncomputable def sigma1ReflectionFormulaPrenex : Prenex 𝚷 2 Empty 1 :=
   ⟨⟨“w u x. x ≠ x ∨ ¬!(sigma1ReflectionPremiseMatrix T).val u x ∨
-      !partialTruthMatrix.val w x”,
-    by simp [(sigma1ReflectionPremiseMatrix T).bounded.rew, partialTruthMatrix.bounded.rew,
-      Semiformula.Operator.eq_def]⟩⟩
+      !sigma1ReflectionConclusionMatrix.val w x”,
+    by simp [(sigma1ReflectionPremiseMatrix T).bounded.rew,
+      sigma1ReflectionConclusionMatrix.bounded.rew, Semiformula.Operator.eq_def]⟩⟩
 
 lemma val_sigma1ReflectionFormulaPrenex :
     (sigma1ReflectionFormulaPrenex T).val =
       “x. ∀ u, ∃ w, x ≠ x ∨ ¬!(sigma1ReflectionPremiseMatrix T).val u x ∨
-        !partialTruthMatrix.val w x” :=
+        !sigma1ReflectionConclusionMatrix.val w x” :=
   rfl
 
 lemma le_quote_sigma1ReflectionFormulaPrenex (n : ℕ) :
@@ -156,17 +155,22 @@ lemma le_quote_sigma1ReflectionFormulaPrenex (n : ℕ) :
   · exact e ▸ h.le;
   · exact (e.trans h).le;
 
-lemma eval_sigma1ReflectionFormulaPrenex {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-    (x : V) :
+section
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+lemma eval_sigma1ReflectionFormulaPrenex (x : V) :
     V ⊧/![x] (sigma1ReflectionFormulaPrenex T).val ↔ V ⊧/![x] (sigma1ReflectionFormula T) := by
   have hA := models_of_provable (M := V) inferInstance
     (exists_matrix_sigma1ReflectionPremise T).choose_spec;
-  have hB := models_of_provable (M := V) inferInstance exists_matrix_partialTruth.choose_spec;
+  have hB := models_of_provable (M := V) inferInstance
+    exists_matrix_sigma1ReflectionConclusion.choose_spec;
   simp [models_iff] at hA hB;
   rw [val_sigma1ReflectionFormulaPrenex];
-  simp [sigma1ReflectionFormula, hA, hB,
-    sigma1ReflectionPremiseMatrix, partialTruthMatrix, exists_or, imp_iff_not_or,
-    forall_or_right];
+  simp [sigma1ReflectionFormula, hA, hB, sigma1ReflectionPremiseMatrix,
+    sigma1ReflectionConclusionMatrix, exists_or, imp_iff_not_or, forall_or_right];
+
+end
 
 lemma provable_sigma1ReflectionFormulaPrenex_iff (n : ℕ) :
     𝗜𝚺₁ ⊢ (sigma1ReflectionFormulaPrenex T).val/[↑n] 🡘 (sigma1ReflectionFormula T)/[↑n] :=

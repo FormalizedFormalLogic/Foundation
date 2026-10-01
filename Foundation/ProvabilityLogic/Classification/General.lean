@@ -236,15 +236,14 @@ theorem provabilityLogic_turingOmega_eq_A :
     letI Tω := T ∪ 𝗥𝗳𝗻[Set.range (T.standardProvability^[·] ⊥)] T;
     Consistent Tω → T.provabilityLogicRelativeTo Tω (α := α) = 𝐀 := by
   intro hC;
+  have hT := trace_provabilityLogic_turingOmega_eq_univ (T := T) (α := α);
   apply Logic.weakerThan_antisymm;
   · by_contra! h;
-    obtain ⟨-, A, hAA, hAL⟩ := strictlyWeakerThan_iff.mp
-      ⟨A_weakerThan_provabilityLogic trace_provabilityLogic_turingOmega_eq_univ, h⟩;
+    obtain ⟨-, A, hAA, hAL⟩ := strictlyWeakerThan_iff.mp ⟨A_weakerThan_provabilityLogic hT, h⟩;
     obtain ⟨U, _, hU, e⟩ := exists_prenex_axiomatization_turingOmega (T := T);
     exact (inconsistent_of_provable_localReflectionOn_union (n := 0) hU e <|
-      provable_localReflectionOn_sigma1_of_mem_of_not_A
-        trace_provabilityLogic_turingOmega_eq_univ hAL hAA).not_con hC;
-  · exact A_weakerThan_provabilityLogic trace_provabilityLogic_turingOmega_eq_univ;
+      provable_localReflectionOn_sigma1_of_mem_of_not_A hT hAL hAA).not_con hC;
+  · exact A_weakerThan_provabilityLogic hT;
 
 /-- - [AB05, Example 60] -/
 theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D :
