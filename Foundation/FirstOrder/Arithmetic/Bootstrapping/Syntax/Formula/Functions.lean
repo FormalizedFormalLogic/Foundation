@@ -26,10 +26,8 @@ def blueprint : UformulaRec1.Blueprint where
   falsum := .mkSigma “y param. !qqVerumDef y”
   and := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂”
   or := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂”
-  all := .mkSigma “y param p₁ y₁. !qqExsDef y y₁”
-  exs := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
-  allChanges := .mkSigma “param' param. param' = 0”
-  exsChanges := .mkSigma “param' param. param' = 0”
+  all := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ !qqExsDef y y₁”
+  exs := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ !qqAllDef y y₁”
 
 noncomputable def construction : UformulaRec1.Construction V blueprint where
   rel {_} := fun k R v ↦ ^nrel k R v
@@ -38,10 +36,8 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   falsum {_} := ^⊤
   and {_} := fun _ _ y₁ y₂ ↦ y₁ ^⋎ y₂
   or {_} := fun _ _ y₁ y₂ ↦ y₁ ^⋏ y₂
-  all {_} := fun _ y₁ ↦ ^∃ y₁
-  exs {_} := fun _ y₁ ↦ ^∀ y₁
-  allChanges := fun _ ↦ 0
-  exsChanges := fun _ ↦ 0
+  all {_} := fun _ ys ↦ ^∃ ys.[0]
+  exs {_} := fun _ ys ↦ ^∀ ys.[0]
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -50,8 +46,6 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
   exs_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_defined := .mk fun v ↦ by simp [blueprint]
-  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end Negation
 
@@ -253,10 +247,8 @@ noncomputable def blueprint : UformulaRec1.Blueprint where
   falsum := .mkSigma “y param. !qqFalsumDef y”
   and := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂”
   or := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂”
-  all := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
-  exs := .mkSigma “y param p₁ y₁. !qqExsDef y y₁”
-  allChanges := .mkSigma “param' param. param' = 0”
-  exsChanges := .mkSigma “param' param. param' = 0”
+  all := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ !qqAllDef y y₁”
+  exs := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ !qqExsDef y y₁”
 
 noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   rel {_} := fun k R v ↦ ^rel k R (termShiftVec L k v)
@@ -265,10 +257,8 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   falsum {_} := ^⊥
   and {_} := fun _ _ y₁ y₂ ↦ y₁ ^⋏ y₂
   or {_} := fun _ _ y₁ y₂ ↦ y₁ ^⋎ y₂
-  all {_} := fun _ y₁ ↦ ^∀ y₁
-  exs {_} := fun _ y₁ ↦ ^∃ y₁
-  allChanges := fun _ ↦ 0
-  exsChanges := fun _ ↦ 0
+  all {_} := fun _ ys ↦ ^∀ ys.[0]
+  exs {_} := fun _ ys ↦ ^∃ ys.[0]
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -277,8 +267,6 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
   exs_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_defined := .mk fun v ↦ by simp [blueprint]
-  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end Shift
 
@@ -413,10 +401,10 @@ noncomputable def blueprint : UformulaRec1.Blueprint where
   falsum := .mkSigma “y param. !qqFalsumDef y”
   and    := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂”
   or     := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂”
-  all    := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
-  exs     := .mkSigma “y param p₁ y₁. !qqExsDef y y₁”
-  allChanges := .mkSigma “param' param. !(qVecGraph L) param' param”
-  exsChanges  := .mkSigma “param' param. !(qVecGraph L) param' param”
+  all    := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ !qqAllDef y y₁”
+  exs     := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ !qqExsDef y y₁”
+  allChanges := .mkSigma “param' param i. !(qVecGraph L) param' param”
+  exsChanges  := .mkSigma “param' param i. !(qVecGraph L) param' param”
 
 noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   rel (param)  := fun k R v ↦ ^rel k R (termSubstVec L k param v)
@@ -425,10 +413,10 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   falsum _     := ^⊥
   and _        := fun _ _ y₁ y₂ ↦ y₁ ^⋏ y₂
   or _         := fun _ _ y₁ y₂ ↦ y₁ ^⋎ y₂
-  all _        := fun _ y₁ ↦ ^∀ y₁
-  exs _         := fun _ y₁ ↦ ^∃ y₁
-  allChanges (param) := qVec L param
-  exsChanges (param) := qVec L param
+  all _        := fun _ ys ↦ ^∀ ys.[0]
+  exs _         := fun _ ys ↦ ^∃ ys.[0]
+  allChanges (param) _ := qVec L param
+  exsChanges (param) _ := qVec L param
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -528,9 +516,9 @@ lemma isUFormula_subst_ISigma1.sigma1_succ_induction {P : V → V → V → Prop
     simpa [subst] using!
       hor param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
   · intro param p hp ihp
-    simpa using! hall param p hp (by simpa [construction] using! ihp)
+    simpa [hp, construction] using! hall param p hp (by simpa [construction] using! ihp)
   · intro param p hp ihp
-    simpa using! hexs param p hp (by simpa [construction] using! ihp)
+    simpa [hp, construction] using! hexs param p hp (by simpa [construction] using! ihp)
 
 lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺ᴬ₁-Relation₄ P)
     (hRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v →
@@ -563,9 +551,11 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
     simpa [subst] using!
       hor n param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
   · intro n param p hp ihp
-    simpa using! hall n param p hp (by simpa [construction] using! ihp)
+    simpa [hp.isUFormula, construction] using!
+      hall n param p hp (by simpa [construction] using! ihp)
   · intro n param p hp ihp
-    simpa using! hexs n param p hp (by simpa [construction] using! ihp)
+    simpa [hp.isUFormula, construction] using!
+      hexs n param p hp (by simpa [construction] using! ihp)
 
 @[simp] lemma IsSemiformula.subst {n p m w : V} :
     IsSemiformula L n p → IsSemitermVec L n m w → IsSemiformula L m (subst L w p) := by
@@ -888,10 +878,8 @@ def blueprint : UformulaRec1.Blueprint where
   falsum := .mkSigma “y param. y = 0”
   and := .mkSigma “y param p₁ p₂ y₁ y₂. !max.dfn y (y₁ + 1) (y₂ + 1)”
   or := .mkSigma “y param p₁ p₂ y₁ y₂. !max.dfn y (y₁ + 1) (y₂ + 1)”
-  all := .mkSigma “y param p₁ y₁. y = y₁ + 1”
-  exs := .mkSigma “y param p₁ y₁. y = y₁ + 1”
-  allChanges := .mkSigma “param' param. param' = 0”
-  exsChanges := .mkSigma “param' param. param' = 0”
+  all := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ y = y₁ + 1”
+  exs := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ y = y₁ + 1”
 
 noncomputable def construction : UformulaRec1.Construction V blueprint where
   rel {_} := fun k R v ↦ 0
@@ -900,10 +888,8 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   falsum {_} := 0
   and {_} := fun _ _ y₁ y₂ ↦ max y₁ y₂ + 1
   or {_} := fun _ _ y₁ y₂ ↦ max y₁ y₂ + 1
-  all {_} := fun _ y₁ ↦ y₁ + 1
-  exs {_} := fun _ y₁ ↦ y₁ + 1
-  allChanges := fun _ ↦ 0
-  exsChanges := fun _ ↦ 0
+  all {_} := fun _ ys ↦ ys.[0] + 1
+  exs {_} := fun _ ys ↦ ys.[0] + 1
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -912,8 +898,6 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   or_defined := .mk fun v ↦ by simp [blueprint, max_add_add_right]
   all_defined := .mk fun v ↦ by simp [blueprint]
   exs_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_defined := .mk fun v ↦ by simp [blueprint]
-  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end FormulaComplexity
 
