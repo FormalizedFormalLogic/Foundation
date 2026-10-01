@@ -6,11 +6,8 @@ public import Foundation.FirstOrder.Arithmetic.TA.Basic
 /-!
 # Induction and least number schemata of Arithmetic
 
-The schemata come in two flavours, following [Bus98, p. 85]: the plain one is taken over the
-prenex normal forms `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`, and the `⁺` one over the broad hierarchy
-`ℬ[<, ℒₒᵣ].Hierarchy Γ s`.
-Buss writes these `IΓ_s` and `IΓ_s⁺`. The prenex scheme is contained in the broad one; the converse
-needs the collection scheme and is not available here.
+The plain schemata are taken over prenex formulas `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`, the `⁺` ones
+over the broad hierarchy `ℬ[<, ℒₒᵣ].Hierarchy Γ s`.
 
 ## References
 
@@ -193,9 +190,6 @@ lemma IBroadSigma_weakerThan_of_le_trans {T : ArithmeticTheory} {s₁ s₂} (h :
     (hT : 𝗜𝚺⁺s₂ ⪯ T) :
     𝗜𝚺⁺ s₁ ⪯ T :=
   Entailment.WeakerThan.trans (IBroadSigma_weakerThan_of_le h) hT
-
-/-! The prenex scheme is contained in the broad one, and the two agree at level `0`, where both
-classes are `Δ₀`. -/
 
 lemma InductionOnPrenexHierarchy_subset_InductionOnHierarchy {Γ : Polarity} {s : ℕ} :
     𝗜𝗡𝗗 Γ s ⊆ 𝗜𝗡𝗗⁺ Γ s :=
@@ -403,8 +397,6 @@ lemma succ_induction {P : V → Prop}
   InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) hP zero succ
 
 end InductionOnPrenexHierarchy
-
-/-! ### Transfer along formulas with the same evaluation -/
 
 section
 

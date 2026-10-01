@@ -7,8 +7,7 @@ public import Foundation.FirstOrder.Syntax.Classical.Padding
 # Hierarchies over a bounding
 
 `ℬ.Hierarchy Γ s` is the `Γ`-hierarchy of level `s` over `ℬ`-bounded formulas, and
-`ℬ.PrenexHierarchy Γ s` singles out its prenex formulas: a `ℬ`-bounded matrix beneath `s`
-alternating quantifiers, the outermost being `Γ`.
+`ℬ.PrenexHierarchy Γ s` is its subclass of prenex formulas.
 
 ## References
 
@@ -612,8 +611,7 @@ end Hierarchy
     ℬ.Hierarchy Γ s φ.val :=
   .bounded Γ s n φ.bounded
 
-/-- A formula in `Γ`-prenex form of level `s`: a `ℬ`-bounded matrix beneath `s` alternating
-quantifiers, the outermost being `Γ`. -/
+/-- A `Γ`-prenex formula of level `s` with a `ℬ`-bounded matrix. -/
 structure Prenex (ℬ : Bounding L) (Γ : Polarity) (s : ℕ) (ξ : Type*) (n : ℕ) where
   matrix : ℬ.Semiformula ξ (n + s)
 
@@ -781,8 +779,6 @@ lemma provable_iff_piInv {T : Theory L} {φ : Semisentence L n} {φ' : ℬ.Prene
 
 end Prenex
 
-/-- `φ` is syntactically a `ℬ`-bounded matrix beneath `s` alternating quantifiers, the outermost
-being `Γ`. -/
 def PrenexHierarchy (ℬ : Bounding L) (Γ : Polarity) (s : ℕ) (φ : Semiformula L ξ n) : Prop :=
   ∃ ψ : ℬ.Prenex Γ s ξ n, φ = ψ.val
 

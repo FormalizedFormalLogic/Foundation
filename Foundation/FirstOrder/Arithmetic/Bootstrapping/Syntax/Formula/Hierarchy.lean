@@ -5,10 +5,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Boun
 /-!
 # Internal arithmetical hierarchy
 
-The internal predicates `IsHierarchy Γ n` on codes of formulas of the bounded arithmetical
-hierarchy and `IsPrenexHierarchy Γ n` on codes of prenex formulas with `n` alternating
-quantifiers: they are `𝚫ᴬ₁`-definable and agree with `ℬ[<, ℒₒᵣ].Hierarchy` and
-`ℬ[<, ℒₒᵣ].PrenexHierarchy` on quoted formulas. Both are `IsBounded` at level `0`.
+The internal predicates `IsHierarchy Γ n` and `IsPrenexHierarchy Γ n` on codes of formulas: they
+are `𝚫ᴬ₁`-definable and agree with `ℬ[<, ℒₒᵣ].Hierarchy` and `ℬ[<, ℒₒᵣ].PrenexHierarchy` on
+quoted formulas.
 
 ## References
 
