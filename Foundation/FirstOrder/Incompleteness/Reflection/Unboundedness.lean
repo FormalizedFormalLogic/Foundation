@@ -45,7 +45,20 @@ noncomputable def truncatedTruthSentence (Γ : Polarity) : ArithmeticSentence :=
 
 lemma hierarchy_truncatedTruthSentence (Γ : Polarity) :
     ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) (truncatedTruthSentence T U Y n Γ) := by
-  sorry
+  have h : 1 ≤ n + 1 := Nat.le_add_left 1 n;
+  suffices ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) (truncatedTruthFormula T U Y n Γ) by
+    simpa [truncatedTruthSentence];
+  cases Γ with
+  | sigma =>
+    simpa [truncatedTruthFormula, Y.Δ₁ch.sigma.sigma_prop.mono h,
+      (impGraph ℒₒᵣ).sigma_prop.mono h, (proof T).sigma.sigma_prop.mono h,
+      U.Δ₁ch.pi.pi_prop.mono h, (isSemiformula ℒₒᵣ).pi.pi_prop.mono h]
+      using (partialTruth 𝚺 (n + 1)).sigma_prop;
+  | pi =>
+    simpa [truncatedTruthFormula, U.Δ₁ch.sigma.sigma_prop.mono h,
+      (isSemiformula ℒₒᵣ).sigma.sigma_prop.mono h, Y.Δ₁ch.pi.pi_prop.mono h,
+      (impGraph ℒₒᵣ).sigma_prop.mono h, (proof T).pi.pi_prop.mono h]
+      using (partialTruth 𝚷 (n + 1)).pi_prop;
 
 end truncatedTruth
 
