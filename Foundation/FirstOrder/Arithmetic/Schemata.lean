@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.TA.Basic
 # Induction and least number schemata of Arithmetic
 
 The schemata come in two flavours, following [Bus98, p. 85]: the plain one is taken over
-the strict hierarchy `StrictHierarchy Γ s`, and the `⁺` one over the broad hierarchy
+the strict hierarchy `ℬ[<, ℒₒᵣ].StrictHierarchy Γ s`, and the `⁺` one over the broad hierarchy
 `ℬ[<, ℒₒᵣ].Hierarchy Γ s`.
 Buss writes these `IΓ_s` and `IΓ_s⁺`. The strict scheme is contained in the broad one; the converse
 needs the collection scheme and is not available here.
@@ -58,7 +58,7 @@ abbrev IOpen : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ Sem
 notation "𝗜𝗢𝗽𝗲𝗻" => IOpen
 
 abbrev InductionOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (Arithmetic.StrictHierarchy Γ s)
+  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].StrictHierarchy Γ s)
 
 prefix:max "𝗜𝗡𝗗 " => InductionOnHierarchy
 
@@ -112,7 +112,7 @@ def LeastNumberScheme (Γ : ArithmeticSemiformula ℕ 1 → Prop) : ArithmeticTh
   { ψ | ∃ φ : ArithmeticSemiformula ℕ 1, Γ φ ∧ ψ = .univCl (leastNumber φ) }
 
 abbrev LeastNumberOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ LeastNumberScheme (Arithmetic.StrictHierarchy Γ s)
+  𝗣𝗔⁻ ∪ LeastNumberScheme (ℬ[<, ℒₒᵣ].StrictHierarchy Γ s)
 
 prefix:max "𝗟 " => LeastNumberOnHierarchy
 
@@ -144,7 +144,7 @@ def CollectionScheme (Γ : Set (ArithmeticSemiformula ℕ 2)) : Set ArithmeticSe
   (fun φ => .univCl (collectionAxiom φ)) '' Γ
 
 abbrev CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.StrictHierarchy Γ s)
+  𝗜𝚺₀ ∪ CollectionScheme (ℬ[<, ℒₒᵣ].StrictHierarchy Γ s)
 
 prefix:max "𝗕 " => CollectionOnHierarchy
 
@@ -220,8 +220,7 @@ lemma InductionOnHierarchy_weakerThan_of_lt {Γ Γ' : Polarity} {s s' : ℕ} (h 
   Entailment.WeakerThan.ofSubset (InductionOnHierarchy_subset_of_lt h)
 
 lemma ISigmaZero_subset_InductionOnHierarchy (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⊆ 𝗜𝗡𝗗 Γ s :=
-  Set.union_subset_union_right _
-    (InductionScheme_subset fun H ↦ .of_deltaZero (Arithmetic.StrictHierarchy.zero_iff.mp H))
+  Set.union_subset_union_right _ (InductionScheme_subset (·.of_zero))
 
 lemma InductionOnHierarchy_subset_InductionOnBroadHierarchy {Γ : Polarity} {s : ℕ} :
     𝗜𝗡𝗗 Γ s ⊆ 𝗜𝗡𝗗⁺ Γ s :=
@@ -231,16 +230,16 @@ lemma InductionOnHierarchy_zero_eq_InductionOnBroadHierarchy_zero (Γ Γ' : Pola
     𝗜𝗡𝗗 Γ 0 = 𝗜𝗡𝗗⁺ Γ' 0 :=
   Set.Subset.antisymm
     (Set.union_subset_union_right _
-      (InductionScheme_subset fun H ↦ (Arithmetic.StrictHierarchy.zero_iff.mp H).of_zero))
+      (InductionScheme_subset (·.hierarchy.of_zero)))
     (Set.union_subset_union_right _
-      (InductionScheme_subset fun H ↦ Arithmetic.StrictHierarchy.zero_iff.mpr H.of_zero))
+      (InductionScheme_subset fun H ↦ .of_deltaZero H.of_zero))
 
 lemma ISigmaZero_eq_IBroadSigmaZero : 𝗜𝚺₀ = 𝗜𝚺⁺₀ :=
   InductionOnHierarchy_zero_eq_InductionOnBroadHierarchy_zero 𝚺 𝚺
 
 lemma ISigmaZero_subset_IBroadSigma {s : ℕ} : 𝗜𝚺₀ ⊆ 𝗜𝚺⁺ s :=
   Set.union_subset_union_right _
-    (InductionScheme_subset fun H ↦ (Arithmetic.StrictHierarchy.zero_iff.mp H).of_zero)
+    (InductionScheme_subset (·.hierarchy.of_zero))
 
 lemma IBroadSigmaZero_subset_ISigmaZero : 𝗜𝚺⁺₀ ⊆ 𝗜𝚺₀ :=
   le_of_eq ISigmaZero_eq_IBroadSigmaZero.symm
@@ -335,11 +334,11 @@ instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝗢𝗽𝗲𝗻 :=
 
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗 Γ s :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _ <|
-    InductionScheme_subset Arithmetic.StrictHierarchy.of_open
+    InductionScheme_subset Bounding.HierarchyOn.of_open
 
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗⁺ Γ s :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _ <|
-    InductionScheme_subset Bounding.Hierarchy.of_open
+    InductionScheme_subset Bounding.HierarchyOn.of_open
 
 instance InductionOnHierarchy_weakerThan_InductionOnBroadHierarchy (Γ : Polarity) (s : ℕ) :
     𝗜𝗡𝗗 Γ s ⪯ 𝗜𝗡𝗗⁺ Γ s :=
@@ -460,17 +459,17 @@ namespace InductionOnHierarchy
 
 variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s]
 
-instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (StrictHierarchy Γ s) :=
+instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].StrictHierarchy Γ s) :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := inferInstance
   models_of_subtheory this
 
-/-- Induction for a predicate defined by a `StrictHierarchy Γ s` formula with parameters. -/
+/-- Induction for a predicate defined by a strict `Γ-[s]` formula with parameters. -/
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
     (hP : ∃ e : ℕ → V, ∃ φ : ArithmeticSemiformula ℕ 1,
-      StrictHierarchy Γ s φ ∧ ∀ x, P x ↔ φ.Eval ![x] e)
+      ℬ[<, ℒₒᵣ].StrictHierarchy Γ s φ ∧ ∀ x, P x ↔ φ.Eval ![x] e)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionScheme.succ_induction (C := StrictHierarchy Γ s) hP zero succ
+  InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].StrictHierarchy Γ s) hP zero succ
 
 end InductionOnHierarchy
 

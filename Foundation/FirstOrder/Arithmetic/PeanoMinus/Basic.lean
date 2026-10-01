@@ -149,7 +149,7 @@ lemma equiv_singleton_finiteConj :
       Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ by
         rcases hσ with rfl; exact hConj⟩
 
-open StrictHierarchy in
+open Bounding.HierarchyOn Bounding.StrictHierarchy in
 /--
 Every axiom of `𝗣𝗔⁻` is strict `Π₁`: a block of universal quantifiers over a `Δ₀` matrix.
 The bounded shape of `Axiom.addEqOfLt` is what makes this hold; an unbounded `∃ z` would not
@@ -158,15 +158,15 @@ be `Δ₀`.
 No citation: this is a routine inspection of the axiom list rather than a result from the
 literature.
 -/
-theorem strictHierarchy : ∀ φ ∈ 𝗣𝗔⁻, StrictHierarchy 𝚷 1 φ := by
+theorem strictHierarchy : ∀ φ ∈ 𝗣𝗔⁻, ℬ[<, ℒₒᵣ].StrictHierarchy 𝚷 1 φ := by
   rintro φ ⟨⟩
   case equal h =>
     rcases h
     case refl => exact all (of_deltaZero (by simp))
     case symm => exact all (all (of_deltaZero (by simp)))
     case trans => exact all (all (all (of_deltaZero (by simp))))
-    case funcExt => exact StrictHierarchy.allClosure (of_deltaZero (by simp))
-    case relExt => exact StrictHierarchy.allClosure (of_deltaZero (by simp))
+    case funcExt => exact .allClosure (of_deltaZero (by simp))
+    case relExt => exact .allClosure (of_deltaZero (by simp))
   case addZero => exact all (of_deltaZero (by simp))
   case addAssoc => exact all (all (all (of_deltaZero (by simp))))
   case addComm => exact all (all (of_deltaZero (by simp)))

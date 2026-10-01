@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
@@ -90,7 +89,7 @@ def nrel {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ 
 
 @[simp, grind .]
 lemma val_hierarchy {φ : Prenex Γ s ξ n} : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ.val := by
-  simpa [val] using Bounding.Hierarchy.toPrenex (Γ := Γ) (j := 0) φ.matrix.hierarchy;
+  simpa [val] using Bounding.HierarchyOn.toPrenex (Γ := Γ) (j := 0) φ.matrix.hierarchy;
 
 @[simp, grind .]
 lemma val_deltaZero {φ : Prenex Γ 0 ξ n} : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ.val := φ.matrix.hierarchy
@@ -98,8 +97,8 @@ lemma val_deltaZero {φ : Prenex Γ 0 ξ n} : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0
 -- The binders are spelled out rather than taken from `variable`, to fix the order `Γ s n ξ`.
 @[simp, grind .]
 lemma val_strictHierarchy {Γ : Polarity} {s n : ℕ} {ξ : Type*} {φ : Prenex Γ s ξ n} :
-    StrictHierarchy Γ s φ.val :=
-  StrictHierarchy.toPrenex_of_deltaZero φ.matrix.bounded
+    ℬ[<, ℒₒᵣ].StrictHierarchy Γ s φ.val :=
+  .toPrenex_of_initial φ.matrix.bounded
 
 @[simp, grind .]
 lemma val_neg (φ : Prenex Γ s ξ n) : (∼φ).val = ∼φ.val :=
@@ -517,7 +516,7 @@ theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSem
     have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnHierarchy Γ' s;
     exact hφ' V e f;
   induction h with
-  | @bounded Γ s n φ h =>
+  | @initial Γ s n φ h =>
     use ofΔ₀ ⟨φ, h⟩ Γ s;
     intro V _ _ e f;
     exact (models_ofΔ₀ ⟨φ, h⟩ e).symm;
@@ -617,7 +616,7 @@ theorem exists_matrix_provable (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
   exact ⟨_, by simpa [Prenex.val] using hφ'⟩;
 
 theorem exists_strictHierarchy_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
-  ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
+  ∃ ψ : ArithmeticSemisentence n, ℬ[<, ℒₒᵣ].StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩;
 

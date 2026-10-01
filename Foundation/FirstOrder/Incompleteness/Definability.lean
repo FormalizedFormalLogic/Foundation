@@ -6,9 +6,9 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 /-!
 # $\Delta_1$ and r.e. presentations of arithmetic theories
 
-The induction schemata over all formulas, over `ℬ[<, ℒₒᵣ].Hierarchy Γ s` and over the strict
-prenex classes are `Δ₁`, hence so are `𝗣𝗔`, `𝗜𝗡𝗗⁺ Γ s` (in particular `𝗜𝚺⁺ n`) and `𝗜𝗡𝗗 Γ s`;
-`𝗣𝗔` and `𝗜𝗡𝗗⁺ Γ s` are also recursively enumerable.
+The induction schemata over all formulas, over `ℬ[<, ℒₒᵣ].Hierarchy Γ s` and over
+`ℬ[<, ℒₒᵣ].StrictHierarchy Γ s` are `Δ₁`, hence so are `𝗣𝗔`, `𝗜𝗡𝗗⁺ Γ s` (in particular `𝗜𝚺⁺ n`)
+and `𝗜𝗡𝗗 Γ s`; `𝗣𝗔` and `𝗜𝗡𝗗⁺ Γ s` are also recursively enumerable.
 -/
 
 @[expose] public section
@@ -231,7 +231,7 @@ noncomputable instance InductionScheme.delta1_hierarchy (Γ : Polarity) (s : ℕ
   InductionScheme.delta1_of (fun _ _ _ ↦ IsHierarchy.defined Γ s) isHierarchy_quote_iff_s
 
 noncomputable instance InductionScheme.delta1_strictHierarchy (Γ : Polarity) (s : ℕ) :
-    (InductionScheme ℒₒᵣ (StrictHierarchy Γ s)).Δ₁ :=
+    (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].StrictHierarchy Γ s)).Δ₁ :=
   InductionScheme.delta1_of (fun _ _ _ ↦ IsStrictHierarchy.defined Γ s)
     isStrictHierarchy_quote_iff_s
 

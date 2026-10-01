@@ -38,9 +38,7 @@ lemma strictDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺
     (hR : Γᴬ-[s].DefinableRel R) : StrictDefinableRel Γ s R := by
   rcases s with _ | t;
   · obtain ⟨φ, hφ⟩ := hR;
-    exact ⟨φ.val, StrictHierarchy.zero_iff.mpr
-      (Bounding.Hierarchy.zero_iff (ℬ := ℬ[<, ℒₒᵣ]).mp φ.polarity_prop),
-      fun v ↦ hφ.iff⟩;
+    exact ⟨φ.val, .of_deltaZero φ.polarity_prop.of_zero, fun v ↦ hφ.iff⟩;
   · have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := IBroadSigma.models_BSigma_succ;
     exact StrictDefinable.of_definable (Γ' := 𝚺) hR;
 
@@ -62,8 +60,8 @@ lemma succ_induction_forall_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1
     refine forall_congr' fun w ↦
       Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
     simp [Semiformula.eval_substs];
-  exact InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚷 (s + 1))
-    ⟨f, _, (StrictHierarchy.ofAlt (Γ := 𝚷) (hχ.rew _)).all, hP⟩ zero succ;
+  exact InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].StrictHierarchy 𝚷 (s + 1))
+    ⟨f, _, ((hχ.rew _).accum 𝚷).all, hP⟩ zero succ;
 
 /-- - [HP98, Lemma I.2.12(2)] -/
 private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
@@ -109,8 +107,8 @@ lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡�
       refine exists_congr fun w ↦
         Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
       simp [Semiformula.eval_substs];
-    exact InductionScheme.succ_induction (C := Arithmetic.StrictHierarchy 𝚺 (s + 1))
-      ⟨f, _, (StrictHierarchy.ofAlt (Γ := 𝚺) (hχ.rew _)).exs, hP⟩ zero succ;
+    exact InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].StrictHierarchy 𝚺 (s + 1))
+      ⟨f, _, ((hχ.rew _).accum 𝚺).exs, hP⟩ zero succ;
   · have h := neg_succ_induction (P := fun x ↦ ¬P x) (Q := fun x w ↦ ¬Q x w)
       (Bounding.HierarchySymbol.Definable.not (Γ := 𝚺) hQ) (fun x ↦ by simp [hPQ x])
       (by simpa using zero) (fun x hx ↦ by simpa using succ x (by simpa using hx));
@@ -291,16 +289,16 @@ section leastNumber
 /-- Successor induction from the least number principle: the negation of a strict `Γ.alt-[s]`
 formula is strict `Γᴬ-[s]`. -/
 lemma LeastNumberOnHierarchy.succ_induction (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟 Γ s]
-    {φ : ArithmeticSemiformula ℕ 1} (hφ : StrictHierarchy Γ.alt s φ) (f : ℕ → V)
+    {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].StrictHierarchy Γ.alt s φ) (f : ℕ → V)
     (zero : φ.Eval ![0] f) (succ : ∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) :
     ∀ x, φ.Eval ![x] f := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_left;
-  have : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (Arithmetic.StrictHierarchy Γ s) :=
+  have : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (ℬ[<, ℒₒᵣ].StrictHierarchy Γ s) :=
     models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_right;
   by_contra! hcon;
   obtain ⟨a, ha⟩ := hcon;
   obtain ⟨y, hy, hmin⟩ := LeastNumberScheme.least_number
-    (C := Arithmetic.StrictHierarchy Γ s) (P := fun x ↦ ¬φ.Eval ![x] f)
+    (C := ℬ[<, ℒₒᵣ].StrictHierarchy Γ s) (P := fun x ↦ ¬φ.Eval ![x] f)
     ⟨f, ∼φ, by simpa using hφ, by simp⟩ ha;
   obtain ⟨z, rfl⟩ := Arithmetic.exists_succ_of_ne_zero <| show y ≠ 0 by rintro rfl; exact hy zero;
   exact hy (succ z (by simpa using hmin z (by simp)));
@@ -308,7 +306,7 @@ lemma LeastNumberOnHierarchy.succ_induction (Γ : Polarity) (s : ℕ) [V↓[ℒ�
 lemma models_InductionOnHierarchy_of_models_LeastNumberOnHierarchy (Γ : Polarity) (s : ℕ)
     [V↓[ℒₒᵣ] ⊧* 𝗟 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ.alt s := by
   have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_left;
-  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Arithmetic.StrictHierarchy Γ.alt s) by
+  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].StrictHierarchy Γ.alt s) by
     simpa [InductionOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩;
   simp only [InductionScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;

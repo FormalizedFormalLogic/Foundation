@@ -30,12 +30,22 @@ instance : SetLike (Bounding L) (Semiformula.Operator L 2) where
   coe ℬ := ℬ.set
   coe_injective := by rintro ⟨s⟩ ⟨t⟩; simp
 
+instance : PartialOrder (Bounding L) := .ofSetLike (Bounding L) (Semiformula.Operator L 2)
+
+@[simp] lemma not_mem_strict {R : Semiformula.Operator L 2} : R ∉ ℬ[L] :=
+  Set.notMem_empty R
+
+lemma strict_le (ℬ : Bounding L) : ℬ[L] ≤ ℬ := fun _ h ↦ absurd h not_mem_strict
+
 open Semiformula
 
 variable {ξ ξ₁ ξ₂ : Type*} {n : ℕ} (ℬ : Bounding L)
 
 class SymbolLike (ξ₁ ξ₂ : Type*) : Prop where
   symbolLike {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) : R.SymbolLike ξ₁ ξ₂
+
+instance strict.symbolLike : ℬ[L].SymbolLike ξ₁ ξ₂ where
+  symbolLike hR := absurd hR not_mem_strict
 
 instance lt.symbolLike [L.LT] : ℬ[<, L].SymbolLike ξ₁ ξ₂ where
   symbolLike hR := by
@@ -168,13 +178,7 @@ end Closure
     ℬ[L].Closure φ ↔ φ.Open := by
   constructor
   · intro h
-    induction h <;> try simp_all [Bounding.strict]
-    case ball R φ t hR ht hp ih =>
-      change R ∈ (∅ : Set (Semiformula.Operator L 2)) at hR
-      simp at hR
-    case bexs R φ t hR ht hp ih =>
-      change R ∈ (∅ : Set (Semiformula.Operator L 2)) at hR
-      simp at hR
+    induction h <;> simp_all
   · intro h
     induction φ using Semiformula.rec' <;> simp_all [Semiformula.Open]
 
