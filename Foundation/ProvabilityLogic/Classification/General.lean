@@ -212,7 +212,7 @@ theorem provabilityLogic_add_con_eq_A (hC : Consistent (T ∪ U.Con)) :
 
 lemma provabilityLogic_add_con_equiv_A (hC : Consistent (T ∪ U.Con)) :
     T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) ≊ 𝐀 :=
-  Logic.equiv_iff.mpr (provabilityLogic_add_con_eq_A hTU hU hC)
+  Logic.equiv_of_eq <| provabilityLogic_add_con_eq_A hTU hU hC
 
 end
 
@@ -248,7 +248,7 @@ theorem provabilityLogic_turingOmega_eq_A :
 lemma provabilityLogic_turingOmega_equiv_A :
     letI Tω := T ∪ 𝗥𝗳𝗻[Set.range (T.standardProvability^[·] ⊥)] T;
     Consistent Tω → T.provabilityLogicRelativeTo Tω (α := α) ≊ 𝐀 :=
-  fun hC ↦ Logic.equiv_iff.mpr (provabilityLogic_turingOmega_eq_A hC)
+  fun hC ↦ Logic.equiv_of_eq <| provabilityLogic_turingOmega_eq_A hC
 
 lemma provabilityLogic_turingOmega_eq_A_of_sigma1Sound [T.SoundOnHierarchy 𝚺 1] :
     T.provabilityLogicRelativeTo (T ∪ 𝗥𝗳𝗻[Set.range (T.standardProvability^[·] ⊥)] T)
@@ -289,27 +289,27 @@ lemma provabilityLogic_add_localReflectionOn_Sigma1_eq_D_of_sigma1Sound
 lemma provabilityLogic_add_localReflectionOn_Sigma1_equiv_D :
     letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T;
     Consistent T' → T.provabilityLogicRelativeTo T' (α := α) ≊ 𝐃 :=
-  fun hC ↦ Logic.equiv_iff.mpr (provabilityLogic_add_localReflectionOn_Sigma1_eq_D hC)
+  fun hC ↦ Logic.equiv_of_eq <| provabilityLogic_add_localReflectionOn_Sigma1_eq_D hC
 
 end
 
-lemma A_equiv_provabilityLogic_turingOmega_ISigma1 :
-    𝐀 ≊ 𝗜𝚺₁.provabilityLogicRelativeTo
-      (𝗜𝚺₁ ∪ 𝗥𝗳𝗻[Set.range (𝗜𝚺₁.standardProvability^[·] ⊥)] 𝗜𝚺₁) (α := α) :=
-  Logic.equiv_iff.mpr provabilityLogic_turingOmega_eq_A_of_sigma1Sound.symm
+lemma provabilityLogic_turingOmega_equiv_A_ISigma1 :
+    𝗜𝚺₁.provabilityLogicRelativeTo
+      (𝗜𝚺₁ ∪ 𝗥𝗳𝗻[Set.range (𝗜𝚺₁.standardProvability^[·] ⊥)] 𝗜𝚺₁) (α := α) ≊ 𝐀 :=
+  Logic.equiv_of_eq provabilityLogic_turingOmega_eq_A_of_sigma1Sound
 
-lemma A_equiv_provabilityLogic_turingOmega_peano :
-    𝐀 ≊ 𝗣𝗔.provabilityLogicRelativeTo
-      (𝗣𝗔 ∪ 𝗥𝗳𝗻[Set.range (𝗣𝗔.standardProvability^[·] ⊥)] 𝗣𝗔) (α := α) :=
-  Logic.equiv_iff.mpr provabilityLogic_turingOmega_eq_A_of_sigma1Sound.symm
+lemma provabilityLogic_turingOmega_equiv_A_peano :
+    𝗣𝗔.provabilityLogicRelativeTo
+      (𝗣𝗔 ∪ 𝗥𝗳𝗻[Set.range (𝗣𝗔.standardProvability^[·] ⊥)] 𝗣𝗔) (α := α) ≊ 𝐀 :=
+  Logic.equiv_of_eq provabilityLogic_turingOmega_eq_A_of_sigma1Sound
 
-lemma D_equiv_provabilityLogic_add_localReflectionOn_Sigma1_ISigma1 :
-    𝐃 ≊ 𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗜𝚺₁) (α := α) :=
-  Logic.equiv_iff.mpr provabilityLogic_add_localReflectionOn_Sigma1_eq_D_of_sigma1Sound.symm
+lemma provabilityLogic_add_localReflectionOn_Sigma1_equiv_D_ISigma1 :
+    𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗜𝚺₁) (α := α) ≊ 𝐃 :=
+  Logic.equiv_of_eq provabilityLogic_add_localReflectionOn_Sigma1_eq_D_of_sigma1Sound
 
-lemma D_equiv_provabilityLogic_add_localReflectionOn_Sigma1_peano :
-    𝐃 ≊ 𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗣𝗔) (α := α) :=
-  Logic.equiv_iff.mpr provabilityLogic_add_localReflectionOn_Sigma1_eq_D_of_sigma1Sound.symm
+lemma provabilityLogic_add_localReflectionOn_Sigma1_equiv_D_peano :
+    𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗣𝗔) (α := α) ≊ 𝐃 :=
+  Logic.equiv_of_eq provabilityLogic_add_localReflectionOn_Sigma1_eq_D_of_sigma1Sound
 
 end ProvabilityLogic
 
