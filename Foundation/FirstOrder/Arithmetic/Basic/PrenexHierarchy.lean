@@ -74,7 +74,6 @@ def rel {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n
 def nrel {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticSemiterm ξ n) : Prenex Γ s ξ n :=
   ofΔ₀ ⟨.nrel r v, .nrel r v⟩ Γ s
 
-/-- Raises the level by an innermost dummy quantifier. -/
 def succ : {Γ : Polarity} → {s n : ℕ} → Prenex Γ s ξ n → Prenex Γ (s + 1) ξ n
   | Γ, 0,     _, φ => ofΔ₀ φ.matrix Γ 1
   | 𝚺, _ + 1, _, φ => φ.sigmaInv.succ.sigma
@@ -93,7 +92,7 @@ lemma val_neg (φ : Prenex Γ s ξ n) : (∼φ).val = ∼φ.val :=
 
 @[simp, grind .]
 lemma val_rew (φ : Prenex Γ s ξ₁ n₁) (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) :
-  (φ.rew ω).val = ω ▹ φ.val := by
+    (φ.rew ω).val = ω ▹ φ.val := by
   simp [val, rew]
 
 @[simp, grind .]
@@ -137,7 +136,7 @@ lemma models_pi (φ : Prenex 𝚺 s ξ (n + 1)) (e : Fin n → V) :
   rw [val_pi, Semiformula.eval_all];
 
 lemma models_altUp (φ : Prenex Γ s ξ n) (e : Fin n → V) :
-  Semiformula.Eval e f φ.altUp.val ↔ Semiformula.Eval e f φ.val := by
+    Semiformula.Eval e f φ.altUp.val ↔ Semiformula.Eval e f φ.val := by
   rcases Γ <;> simp [altUp, -val_piInv, -val_sigmaInv];
 
 lemma models_ofΔ₀ (φ : ℬ[<, ℒₒᵣ].Semiformula ξ n) (e : Fin n → V) :
@@ -181,12 +180,12 @@ lemma models_succ (φ : Prenex Γ s ξ n) (e : Fin n → V) :
     · simp only [succ, models_pi, ih, models_piInv φ];
 
 lemma provable_iff_sigmaInv {T : ArithmeticTheory} {φ : ArithmeticSemiformula Empty n}
-  {φ' : Prenex 𝚺 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
-  T ⊢ ∀¹* (φ 🡘 ∃¹ φ'.sigmaInv.val) := φ'.val_sigmaInv ▸ hφ'
+    {φ' : Prenex 𝚺 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
+    T ⊢ ∀¹* (φ 🡘 ∃¹ φ'.sigmaInv.val) := φ'.val_sigmaInv ▸ hφ'
 
 lemma provable_iff_piInv {T : ArithmeticTheory} {φ : ArithmeticSemiformula Empty n}
-  {φ' : Prenex 𝚷 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
-  T ⊢ ∀¹* (φ 🡘 ∀¹ φ'.piInv.val) := φ'.val_piInv ▸ hφ'
+    {φ' : Prenex 𝚷 (s + 1) Empty n} (hφ' : T ⊢ ∀¹* (φ 🡘 φ'.val)) :
+    T ⊢ ∀¹* (φ 🡘 ∀¹ φ'.piInv.val) := φ'.val_piInv ▸ hφ'
 
 end Prenex
 
@@ -211,8 +210,7 @@ lemma zero_iff_bounded : PrenexHierarchy Γ 0 φ ↔ ℬ[<, ℒₒᵣ].Closure �
   constructor;
   · rintro ⟨ψ, rfl⟩;
     exact ψ.matrix.bounded;
-  · intro h;
-    exact ⟨⟨⟨φ, h⟩⟩, rfl⟩;
+  · exact fun h ↦ ⟨⟨⟨φ, h⟩⟩, rfl⟩;
 
 lemma zero_iff : PrenexHierarchy Γ 0 φ ↔ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ :=
   zero_iff_bounded.trans Bounding.Hierarchy.zero_iff_bounded.symm
@@ -296,19 +294,18 @@ lemma exists_eval_iff_of_lt (h : PrenexHierarchy Γ s φ) (Γ' : Polarity) {s' :
     ∃ ψ, PrenexHierarchy Γ' s' ψ ∧
       ∀ (V : Type*) [ORingStructure V] (e : Fin n → V) (f : ξ → V),
         Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ := by
-  obtain ⟨t, rfl⟩ : ∃ t, s' = t + 1 := ⟨s' - 1, by omega⟩;
-  obtain ⟨_, ⟨χ, rfl⟩, hχ⟩ := h.exists_eval_iff_of_le (s' := t) (by omega);
   obtain rfl | rfl : Γ' = Γ ∨ Γ' = Γ.alt := by rcases Γ <;> rcases Γ' <;> simp;
-  · exact ⟨χ.succ.val, χ.succ.val_prenexHierarchy,
-      fun V _ e f ↦ (hχ V e f).trans (χ.models_succ e).symm⟩;
-  · exact ⟨χ.altUp.val, χ.altUp.val_prenexHierarchy,
-      fun V _ e f ↦ (hχ V e f).trans (χ.models_altUp e).symm⟩;
+  · exact h.exists_eval_iff_of_le hs.le;
+  obtain ⟨t, rfl⟩ : ∃ t, s' = t + 1 := ⟨s' - 1, by omega⟩;
+  obtain ⟨_, ⟨χ, rfl⟩, hχ⟩ := h.exists_eval_iff_of_le (Nat.le_of_lt_succ hs);
+  exact ⟨χ.altUp.val, χ.altUp.val_prenexHierarchy,
+    fun V _ e f ↦ (hχ V e f).trans (χ.models_altUp e).symm⟩;
 
 lemma exists_eval_iff_of_deltaZero (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ) (Γ : Polarity) (s : ℕ) :
     ∃ ψ, PrenexHierarchy Γ s ψ ∧
       ∀ (V : Type*) [ORingStructure V] (e : Fin n → V) (f : ξ → V),
         Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ := by
-  have hφ := Bounding.Hierarchy.zero_iff_bounded.mp h;
+  have hφ : ℬ[<, ℒₒᵣ].Closure φ := Bounding.Hierarchy.zero_iff_bounded.mp h;
   exact ⟨_, (Prenex.ofΔ₀ ⟨φ, hφ⟩ Γ s).val_prenexHierarchy,
     fun _ _ e _ ↦ (Prenex.models_ofΔ₀ ⟨φ, hφ⟩ e).symm⟩;
 

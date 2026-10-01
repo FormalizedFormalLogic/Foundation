@@ -29,8 +29,7 @@ variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s k : ℕ}
 
 /-! ### Prenex definitions of definable relations -/
 
-/-- In a model of `𝗜𝚺⁺ s` every `Γᴬ-[s]`-definable relation is definable by a prenex formula.
-- [HP98, Lemma I.2.9] -/
+/-- - [HP98, Lemma I.2.9] -/
 lemma prenexDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
     (hR : Γᴬ-[s].DefinableRel R) : PrenexDefinableRel Γ s R := by
   rcases s with _ | t;
@@ -43,8 +42,6 @@ lemma prenexDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺
 
 /-! ### Successor induction over prenex formulas -/
 
-/-- Successor induction in a model of `𝗜𝗡𝗗 𝚷 (s + 1)` for the universal quantification of a
-`𝚺ᴬ-[s]`-definable relation. -/
 lemma succ_induction_forall_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
     (hQ : 𝚺ᴬ-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∀ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
@@ -88,8 +85,6 @@ private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)
       · exact le_tsub_of_add_le_left hx;
   exact nzero (by simpa using key a le_rfl);
 
-/-- Successor induction in a model of `𝗜𝗡𝗗 Γ (s + 1)` for the existential quantification of a
-`𝚷ᴬ-[s]`-definable relation. -/
 lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
     (hQ : 𝚷ᴬ-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
@@ -225,8 +220,7 @@ instance models_InductionOnHierarchy_of_models_InductionOnPrenexHierarchy
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s := models_IBroadSigma_of_models_InductionOnPrenexHierarchy Γ s V
   inferInstance
 
-/-- Induction for the broad hierarchy follows from induction for prenex formulas.
-- [HP98, Theorem I.2.4] -/
+/-- - [HP98, Theorem I.2.4] -/
 @[instance]
 theorem InductionOnHierarchy_weakerThan_InductionOnPrenexHierarchy (Γ : Polarity) (s : ℕ) :
     𝗜𝗡𝗗⁺ Γ s ⪯ 𝗜𝗡𝗗 Γ s :=
@@ -281,7 +275,6 @@ theorem ISigma_weakerThan_BSigma_succ : 𝗜𝚺 s ⪯ 𝗕𝚺 (s + 1) :=
 
 section leastNumber
 
-/-- Successor induction in a model of `𝗟 Γ s` for a prenex `Γ.alt`-formula of level `s`. -/
 lemma LeastNumberOnPrenexHierarchy.succ_induction (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟 Γ s]
     {φ : ArithmeticSemiformula ℕ 1} (hφ : PrenexHierarchy Γ.alt s φ) (f : ℕ → V)
     (zero : φ.Eval ![0] f) (succ : ∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) :
@@ -318,8 +311,7 @@ lemma models_LeastNumberOnPrenexHierarchy_of_models_ISigma (V : Type*) [ORingStr
   models_of_ss (models_LeastNumberOnHierarchy_of_IBroadSigma Γ s)
     (Set.union_subset_union_right _ (LeastNumberScheme_subset (·.hierarchy)))
 
-/-- The least number scheme for prenex formulas is `𝗜𝚺 s`.
-- [HP98, Theorem I.2.4] -/
+/-- - [HP98, Theorem I.2.4] -/
 theorem LSigma_equiv_ISigma (s : ℕ) : 𝗟𝚺 s ≊ 𝗜𝚺 s :=
   Equiv.antisymm
     ⟨weakerThan_of_models.{0} _ _ fun V _ _ ↦

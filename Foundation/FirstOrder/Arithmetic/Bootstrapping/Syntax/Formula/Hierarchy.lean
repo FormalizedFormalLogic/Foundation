@@ -432,9 +432,6 @@ variable {Γ : Polarity} {n : ℕ} {p : V}
     IsPrenexHierarchy Γ (n + 1) (qqQuant Γ p) ↔ IsPrenexHierarchy Γ.alt n p := by
   simp [IsPrenexHierarchy];
 
-lemma IsPrenexHierarchy.quant (h : IsPrenexHierarchy Γ.alt n p) :
-    IsPrenexHierarchy Γ (n + 1) (qqQuant Γ p) := quant_iff.mpr h
-
 lemma IsPrenexHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy Γ n p) :
     IsPrenexHierarchy Γ.alt n (neg ℒₒᵣ p) := by
   induction n generalizing Γ p with
@@ -553,24 +550,24 @@ lemma isPrenexHierarchy_quote_iff_s (ψ : ArithmeticSemiproposition n) :
     cases Γ;
     · constructor;
       · rintro ⟨q, heq, hq⟩;
-        induction ψ using Semiformula.rec' with
-        | hexs φ _ =>
+        cases ψ using Semiformula.cases' with
+        | hexs φ =>
           obtain rfl : ⌜φ⌝ = q := by simpa [Semiformula.quote_ex] using heq;
           exact ((ih φ).mp hq).exs;
         | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at heq;
       · intro h;
         obtain ⟨φ, hφ, rfl⟩ := PrenexHierarchy.sigma_succ_iff.mp h;
-        simpa [Semiformula.quote_ex] using IsPrenexHierarchy.quant (Γ := 𝚺) ((ih φ).mpr hφ);
+        exact ⟨⌜φ⌝, by simp [Semiformula.quote_ex], (ih φ).mpr hφ⟩;
     · constructor;
       · rintro ⟨q, heq, hq⟩;
-        induction ψ using Semiformula.rec' with
-        | hall φ _ =>
+        cases ψ using Semiformula.cases' with
+        | hall φ =>
           obtain rfl : ⌜φ⌝ = q := by simpa [Semiformula.quote_all] using heq;
           exact ((ih φ).mp hq).all;
         | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at heq;
       · intro h;
         obtain ⟨φ, hφ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h;
-        simpa [Semiformula.quote_all] using IsPrenexHierarchy.quant (Γ := 𝚷) ((ih φ).mpr hφ);
+        exact ⟨⌜φ⌝, by simp [Semiformula.quote_all], (ih φ).mpr hφ⟩;
 
 theorem isPrenexHierarchy_quote_iff (σ : ArithmeticSemisentence n) :
     IsPrenexHierarchy Γ s (⌜σ⌝ : V) ↔ PrenexHierarchy Γ s σ := by

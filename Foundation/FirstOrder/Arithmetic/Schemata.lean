@@ -826,11 +826,10 @@ instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝚺₀ := inferInstance
 
 instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₁ := ISigma_weakerThan_of_le (by decide)
 
-instance (s : ℕ) : 𝗜𝚺⁺₀ ⪯ 𝗜𝚺 s :=
+instance : 𝗜𝚺⁺₀ ⪯ 𝗜𝚺 s :=
   (Entailment.WeakerThan.ofSubset IBroadSigmaZero_subset_ISigmaZero).trans
     (ISigma_weakerThan_of_le (Nat.zero_le s))
 
-/-- `𝗜𝚺₀` and `𝗜𝚺⁺₀` are the same theory: at level `0` the two hierarchies both cut out `Δ₀`. -/
 instance ISigmaZero_equiv_IBroadSigmaZero : 𝗜𝚺₀ ≊ 𝗜𝚺⁺₀ :=
   Entailment.Equiv.antisymm ⟨inferInstance, inferInstance⟩
 
