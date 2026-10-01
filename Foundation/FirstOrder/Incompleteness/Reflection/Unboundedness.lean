@@ -199,6 +199,17 @@ private lemma provable_of_provable_imp
   | sigma => exact provable_of_provable_imp_sigma hΓ hψ h;
   | pi => exact provable_of_provable_imp_pi hΓ hψ h;
 
+private lemma not_proof_imp_natCast {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+    (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n Γ 🡒 ψ) {m j : ℕ}
+    (hm : (m : V) ∈ Y.Δ₁Class) :
+    ¬Proof T (j : V) (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n Γ)⌝ (m : V)) := by
+  intro hp;
+  obtain ⟨ψ, hψ, hmψ⟩ := exists_mem_eq_quote hm
+    (IsSemiformula.imp.mp (hp.isFormulaSet _ (mem_singleton_iff.mpr rfl))).2;
+  rw [hmψ] at hp;
+  exact hY ψ hψ <| provable_imp_truncatedTruthSentence_iff.mpr <|
+    provable_of_standard_proof (V := V) (by simpa [Sentence.quote_eq] using hp);
+
 private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n 𝚷 🡒 ψ) {σ : ArithmeticSentence}
     (hσ : σ ∈ U) : 𝗜𝚺₁ ⊢ truncatedTruthSentence T U Y n 𝚷 🡒 σ := by
@@ -209,21 +220,28 @@ private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 
   intro hθ;
   apply (partialTruth_quote_iff φ).mp;
   apply models_truncatedTruthSentence_pi_iff.mp hθ _ (Δ₁Class.mem_iff.mpr hσ) (by simp);
-  intro z hz u hu hzY hpu;
+  intro z hz u hu hzY;
   rw [← Sentence.coe_quote_eq_quote] at hz hu;
   obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz;
   obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat hu;
-  have hsemi : IsSemiformula ℒₒᵣ (0 : M) (m : M) :=
-    (IsSemiformula.imp.mp (hpu.isFormulaSet _ (mem_singleton_iff.mpr rfl))).2;
-  obtain ⟨ψ, hψ, hmψ⟩ := exists_mem_eq_quote hzY hsemi;
-  rw [hmψ] at hpu;
-  exact hY ψ hψ <| provable_imp_truncatedTruthSentence_iff.mpr <|
-    provable_of_standard_proof (V := M) (by simpa [Sentence.quote_eq] using hpu);
+  exact not_proof_imp_natCast hY hzY;
 
 private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚺 (n + 1) Empty 0, φ.val = σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n 𝚺 🡒 ψ) {σ : ArithmeticSentence}
     (hσ : σ ∈ U) : 𝗜𝚺₁ ⊢ truncatedTruthSentence T U Y n 𝚺 🡒 σ := by
-  sorry
+  obtain ⟨φ, rfl⟩ := hΓ σ hσ;
+  apply Arithmetic.complete.{0};
+  intro M _ _;
+  apply Semantics.Imp.models_imply.mpr;
+  intro hθ;
+  obtain ⟨y, ⟨z, hzy, u, huy, hzY, hpu⟩, hall⟩ := models_truncatedTruthSentence_sigma_iff.mp hθ;
+  have hlt : (⌜φ.val⌝ : M) < y := by
+    by_contra! hle;
+    rw [← Sentence.coe_quote_eq_quote] at hle;
+    obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat (lt_of_lt_of_le hzy hle);
+    obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat (lt_of_lt_of_le huy hle);
+    exact not_proof_imp_natCast hY hzY hpu;
+  exact (partialTruth_quote_iff φ).mp (hall _ hlt (Δ₁Class.mem_iff.mpr hσ) (by simp));
 
 private lemma provable_of_mem (hΓ : ∀ σ ∈ U, ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n Γ 🡒 ψ) {σ : ArithmeticSentence}
