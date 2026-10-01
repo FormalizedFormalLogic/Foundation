@@ -26,6 +26,7 @@
       "𝗜𝗢𝗽𝗲𝗻": $Theory("IOpen")$,
       "𝗜𝚺₀": ISigma(0),
       "𝗜𝚺₀ ∪ 𝝮₁": $ISigma(0) + Omega_1$,
+      "𝗘𝗔": $Theory("EA")$,
       "𝗜𝚺₁": ISigma(1),
       "𝗜𝚺⁺₀": IBroadSigma(0),
       "𝗜𝚺⁺₁": IBroadSigma(1),
