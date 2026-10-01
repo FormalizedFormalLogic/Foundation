@@ -195,8 +195,7 @@ private lemma models_IBroadSigma_of_models_InductionOnPrenexHierarchy_sigma :
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺t := ih V;
     exact models_IBroadSigma_succ_of_models_InductionOnPrenexHierarchy 𝚺;
 
-/-- Every model of `𝗜𝗡𝗗 Γ s` is a model of `𝗜𝚺⁺ s`.
-- [HP98, Theorem I.2.4] -/
+/-- - [HP98, Theorem I.2.4] -/
 lemma models_IBroadSigma_of_models_InductionOnPrenexHierarchy (Γ : Polarity) (s : ℕ) (V : Type*)
     [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s := by
   rcases s with _ | t;
@@ -210,8 +209,6 @@ lemma models_IBroadSigma_of_models_InductionOnPrenexHierarchy (Γ : Polarity) (s
 instance models_IBroadSigma_of_models_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s :=
   models_IBroadSigma_of_models_InductionOnPrenexHierarchy 𝚺 s V
 
-/-- The converse of `models_IBroadSigma_of_models_ISigma`, by `𝗜𝚺 s ⊆ 𝗜𝚺⁺ s`. Together the two
-let a model hypothesis be stated on either side. -/
 instance models_ISigma_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s :=
   mod_ISigma_of_IBroadSigma
 
