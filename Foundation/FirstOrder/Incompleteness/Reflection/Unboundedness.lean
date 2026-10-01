@@ -95,14 +95,40 @@ lemma models_truncatedTruthSentence_pi_iff :
         (∀ z < y, ∀ u < y, z ∈ Y.Δ₁Class →
           ¬Proof T u (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚷)⌝ z)) →
           PartialTruth 𝚷 (n + 1) y := by
-  sorry
+  have h : V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚷 ↔
+      V ⊧/![(⌜fixedpoint (truncatedTruthFormula T U Y n 𝚷)⌝ : V)]
+        (truncatedTruthFormula T U Y n 𝚷) := by
+    simp [truncatedTruthSentence, models_iff];
+  rw [h];
+  simp [truncatedTruthFormula, HierarchySymbol.Semiformula.val_sigma,
+    (Δ₁Class.defined (T := U) (V := V)).df,
+    (Δ₁Class.defined (T := Y) (V := V)).proper.iff',
+    (Δ₁Class.defined (T := Y) (V := V)).df,
+    (IsSemiformula.defined (L := ℒₒᵣ) (V := V)).df,
+    (imp.defined (L := ℒₒᵣ) (V := V)).df,
+    (Proof.defined (T := T) (V := V)).proper.iff',
+    (Proof.defined (T := T) (V := V)).df,
+    (PartialTruth.pi_defined (V := V) (n + 1)).df];
 
 lemma models_truncatedTruthSentence_sigma_iff :
     V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚺 ↔
       ∃ y : V, (∃ z < y, ∃ u < y, z ∈ Y.Δ₁Class ∧
           Proof T u (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚺)⌝ z)) ∧
         ∀ z < y, z ∈ U.Δ₁Class → IsSemiformula ℒₒᵣ (0 : V) z → PartialTruth 𝚺 (n + 1) z := by
-  sorry
+  have h : V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚺 ↔
+      V ⊧/![(⌜fixedpoint (truncatedTruthFormula T U Y n 𝚺)⌝ : V)]
+        (truncatedTruthFormula T U Y n 𝚺) := by
+    simp [truncatedTruthSentence, models_iff];
+  rw [h];
+  simp [truncatedTruthFormula, HierarchySymbol.Semiformula.val_sigma,
+    (Δ₁Class.defined (T := U) (V := V)).proper.iff',
+    (Δ₁Class.defined (T := U) (V := V)).df,
+    (Δ₁Class.defined (T := Y) (V := V)).df,
+    (IsSemiformula.defined (L := ℒₒᵣ) (V := V)).proper.iff',
+    (IsSemiformula.defined (L := ℒₒᵣ) (V := V)).df,
+    (imp.defined (L := ℒₒᵣ) (V := V)).df,
+    (Proof.defined (T := T) (V := V)).df,
+    (PartialTruth.sigma_defined (V := V) (n + 1)).df];
 
 end
 
