@@ -137,7 +137,9 @@ variable [𝗜𝚺₁ ⪯ T]
 private lemma provable_imp_truncatedTruthSentence_iff {ψ : ArithmeticSentence} :
     T ⊢ truncatedTruthSentence T U Y n Γ 🡒 ψ ↔
       T ⊢ fixedpoint (truncatedTruthFormula T U Y n Γ) 🡒 ψ := by
-  sorry
+  have e : T ⊢ fixedpoint (truncatedTruthFormula T U Y n Γ) 🡘 truncatedTruthSentence T U Y n Γ :=
+    WeakerThan.pbl (𝓢 := 𝗜𝚺₁) (diagonal _);
+  exact ⟨C_trans (K_left e), C_trans (K_right e)⟩;
 
 private lemma provable_of_provable_imp_pi
     (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ) {ψ : ArithmeticSentence}
