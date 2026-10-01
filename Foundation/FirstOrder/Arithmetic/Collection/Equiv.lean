@@ -30,23 +30,23 @@ section BroadHierarchy
 
 /-! ### Collection for the broad hierarchy -/
 
-lemma CollectionOnHierarchy.collection_of_definable {Γ : Polarity} [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
+lemma CollectionOnPrenexHierarchy.collection_of_definable {Γ : Polarity} [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
     {R : V → V → Prop} (hR : Γᴬ-[s].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y :=
-  CollectionOnHierarchy.collection Γ s (StrictDefinable.of_definable (Γ' := Γ) hR) a h
+  CollectionOnPrenexHierarchy.collection Γ s (PrenexDefinable.of_definable (Γ' := Γ) hR) a h
 
-instance CollectionOnHierarchy.models_CollectionOnBroadHierarchy {Γ : Polarity}
+instance CollectionOnPrenexHierarchy.models_CollectionOnHierarchy {Γ : Polarity}
     [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗕⁺ Γ s := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
   · exact models_of_ss (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕 Γ s) Set.subset_union_left;
-  · exact CollectionScheme.models_of_collection CollectionOnHierarchy.collection_of_definable;
+  · exact CollectionScheme.models_of_collection CollectionOnPrenexHierarchy.collection_of_definable;
 
 /-- - [Bus98, pp. 84-85] -/
-theorem CollectionOnBroadHierarchy_equiv_CollectionOnHierarchy {Γ : Polarity} {s : ℕ}
+theorem CollectionOnHierarchy_equiv_CollectionOnPrenexHierarchy {Γ : Polarity} {s : ℕ}
   : 𝗕⁺ Γ s ≊ 𝗕 Γ s := Equiv.antisymm ⟨
     weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
-    CollectionOnHierarchy_weakerThan_CollectionOnBroadHierarchy Γ s
+    CollectionOnPrenexHierarchy_weakerThan_CollectionOnHierarchy Γ s
   ⟩
 
 end BroadHierarchy
@@ -135,7 +135,7 @@ private lemma exists_monotoneWitness {P : (Fin k → V) → Prop} (hP : 𝚺ᴬ-
                 cases i using Fin.cases with
                 | zero => simp;
                 | succ i => cases i using Fin.cases <;> simp;
-          obtain ⟨b, hb⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷) hQe
+          obtain ⟨b, hb⟩ := CollectionOnPrenexHierarchy.collection_of_definable (Γ := 𝚷) hQe
             (t.val e id) fun x hx ↦ (hM.iff (x :> e)).mp (h x hx);
           use b;
           intro x hx;
@@ -203,7 +203,7 @@ lemma BPi.collection_sigma_succ {R : V → V → Prop}
       ((hQ.retraction ![2, 1, 0]).of_iff fun u ↦
         Iff.of_eq <| congrArg Q <| funext fun i ↦ by match i with | 0 | 1 | 2 => simp) #1)
     (by simp);
-  obtain ⟨b, hb⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷) hS a <| by
+  obtain ⟨b, hb⟩ := CollectionOnPrenexHierarchy.collection_of_definable (Γ := 𝚷) hS a <| by
     intro x hx;
     obtain ⟨y, hy⟩ := h x hx;
     obtain ⟨v, hv⟩ := (hM.iff ![x, y]).mp (by simpa using hy);
@@ -243,7 +243,7 @@ theorem BSigma_succ_weakerThan_BPi : 𝗕𝚺 (s + 1) ⪯ 𝗕𝚷 s :=
 
 @[instance]
 theorem BSigma_succ_equiv_BPi : 𝗕𝚺 (s + 1) ≊ 𝗕𝚷 s :=
-  Equiv.antisymm ⟨inferInstance, CollectionOnHierarchy_weakerThan_BSigma_succ 𝚷 s⟩
+  Equiv.antisymm ⟨inferInstance, CollectionOnPrenexHierarchy_weakerThan_BSigma_succ 𝚷 s⟩
 
 end BSigma_succ_BPi
 
@@ -266,7 +266,7 @@ lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] [V↓[ℒ�
     · exact .of_iff (hex.notSigma.retraction ![0]) (by intro v; simp)
     · exact .of_iff (Definable.retractiont (n := 2)
         (hQ.of_lt (s := s + 1) (Γ := 𝚷) (by simp)) ![‘#0 + 1’, #1]) (by intro v; simp);
-  obtain ⟨v, hv⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷) hstep a <| by
+  obtain ⟨v, hv⟩ := CollectionOnPrenexHierarchy.collection_of_definable (Γ := 𝚷) hstep a <| by
       intro x _;
       by_cases hx : ∃ z, Q x z;
       · exact ((hPQ (x + 1)).mp (succ x ((hPQ x).mpr hx))).imp fun w hw ↦ by tauto;
@@ -284,7 +284,7 @@ lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] [V↓[ℒ�
       exact .of_iff (hQ.retraction ![1, 0]) (by intro w; simp);
     exact (hlt.or hbexs).of_iff (by intro v; simp);
   have key : ∀ x, a < x ∨ ∃ y < b, Q x y := by
-    apply InductionOnBroadHierarchy.succ_induction 𝚷 s hbdd;
+    apply InductionOnHierarchy.succ_induction 𝚷 s hbdd;
     · right;
       exact ⟨w₀, hw₀b, hw₀⟩;
     · rintro x (hx | ⟨y, -, hy⟩);
@@ -309,13 +309,9 @@ lemma models_IBroadSigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s 
       (IBroadSigmaZero_subset_ISigmaZero.trans Set.subset_union_left);
   | succ s ih =>
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hn;
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := models_of_ss hn
-      (CollectionOnHierarchy_subset_mono (by omega));
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := models_of_ss hn
-      ((CollectionOnHierarchy_subset_BSigma_succ 𝚷 s).trans
-      (CollectionOnHierarchy_subset_mono (by omega)));
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1) := models_of_ss hn
-      (CollectionOnHierarchy_subset_BSigma_succ 𝚷 (s + 1));
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) := models_CollectionOnPrenexHierarchy_of_le (h := hn) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := models_CollectionOnPrenexHierarchy_of_lt (h := hn) (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 (s + 1) := models_CollectionOnPrenexHierarchy_of_lt (h := hn) (by omega);
     suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (s + 1)) by
       apply Semantics.ModelsSet.union_iff.mpr;
       simp_all;
