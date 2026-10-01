@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.TA.Basic
 # Induction and least number schemata of Arithmetic
 
 The schemata come in two flavours, following [Bus98, p. 85]: the plain one is taken over the
-prenex normal forms `PrenexHierarchy Γ s`, and the `⁺` one over the broad hierarchy
+prenex normal forms `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`, and the `⁺` one over the broad hierarchy
 `ℬ[<, ℒₒᵣ].Hierarchy Γ s`.
 Buss writes these `IΓ_s` and `IΓ_s⁺`. The prenex scheme is contained in the broad one; the converse
 needs the collection scheme and is not available here.
@@ -58,7 +58,7 @@ abbrev IOpen : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ Sem
 notation "𝗜𝗢𝗽𝗲𝗻" => IOpen
 
 abbrev InductionOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (PrenexHierarchy Γ s)
+  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)
 
 prefix:max "𝗜𝗡𝗗 " => InductionOnPrenexHierarchy
 
@@ -112,7 +112,7 @@ def LeastNumberScheme (Γ : ArithmeticSemiformula ℕ 1 → Prop) : ArithmeticTh
   { ψ | ∃ φ : ArithmeticSemiformula ℕ 1, Γ φ ∧ ψ = .univCl (leastNumber φ) }
 
 abbrev LeastNumberOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ LeastNumberScheme (PrenexHierarchy Γ s)
+  𝗣𝗔⁻ ∪ LeastNumberScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)
 
 prefix:max "𝗟 " => LeastNumberOnPrenexHierarchy
 
@@ -144,7 +144,7 @@ def CollectionScheme (Γ : Set (ArithmeticSemiformula ℕ 2)) : Set ArithmeticSe
   (fun φ => .univCl (collectionAxiom φ)) '' Γ
 
 abbrev CollectionOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗜𝚺₀ ∪ CollectionScheme (PrenexHierarchy Γ s)
+  𝗜𝚺₀ ∪ CollectionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)
 
 prefix:max "𝗕 " => CollectionOnPrenexHierarchy
 
@@ -205,16 +205,16 @@ lemma InductionOnPrenexHierarchy_zero_eq_InductionOnHierarchy_zero (Γ Γ' : Pol
     𝗜𝗡𝗗 Γ 0 = 𝗜𝗡𝗗⁺ Γ' 0 :=
   Set.Subset.antisymm
     (Set.union_subset_union_right _
-      (InductionScheme_subset fun H ↦ (PrenexHierarchy.zero_iff.mp H).of_zero))
+      (InductionScheme_subset fun H ↦ (Bounding.PrenexHierarchy.zero_iff.mp H).of_zero))
     (Set.union_subset_union_right _
-      (InductionScheme_subset fun H ↦ PrenexHierarchy.zero_iff.mpr H.of_zero))
+      (InductionScheme_subset fun H ↦ Bounding.PrenexHierarchy.zero_iff.mpr H.of_zero))
 
 lemma ISigmaZero_eq_IBroadSigmaZero : 𝗜𝚺₀ = 𝗜𝚺⁺₀ :=
   InductionOnPrenexHierarchy_zero_eq_InductionOnHierarchy_zero 𝚺 𝚺
 
 lemma ISigmaZero_subset_IBroadSigma {s : ℕ} : 𝗜𝚺₀ ⊆ 𝗜𝚺⁺ s :=
   Set.union_subset_union_right _
-    (InductionScheme_subset fun H ↦ (PrenexHierarchy.zero_iff.mp H).of_zero)
+    (InductionScheme_subset fun H ↦ (Bounding.PrenexHierarchy.zero_iff.mp H).of_zero)
 
 lemma IBroadSigmaZero_subset_ISigmaZero : 𝗜𝚺⁺₀ ⊆ 𝗜𝚺₀ :=
   le_of_eq ISigmaZero_eq_IBroadSigmaZero.symm
@@ -391,16 +391,16 @@ namespace InductionOnPrenexHierarchy
 
 variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s]
 
-instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (PrenexHierarchy Γ s) :=
+instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := inferInstance
   models_of_subtheory this
 
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
     (hP : ∃ e : ℕ → V, ∃ φ : ArithmeticSemiformula ℕ 1,
-      PrenexHierarchy Γ s φ ∧ ∀ x, P x ↔ φ.Eval ![x] e)
+      ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s φ ∧ ∀ x, P x ↔ φ.Eval ![x] e)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  InductionScheme.succ_induction (C := PrenexHierarchy Γ s) hP zero succ
+  InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) hP zero succ
 
 end InductionOnPrenexHierarchy
 
@@ -469,19 +469,19 @@ lemma models_ISigmaZero_of_models_InductionOnPrenexHierarchy (V : Type*) [ORingS
     (Γ : Polarity) (s : ℕ) [h : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
   Semantics.ModelsSet.union_iff.mpr ⟨models_of_ss h Set.subset_union_left,
     InductionScheme.models_of_exists_eval_iff fun _ hφ ↦
-      (PrenexHierarchy.exists_eval_iff_of_deltaZero (PrenexHierarchy.zero_iff.mp hφ) Γ s).imp
-        fun _ h ↦ ⟨h.1, h.2 V⟩⟩
+      (Bounding.PrenexHierarchy.exists_eval_iff_of_deltaZero
+        (Bounding.PrenexHierarchy.zero_iff.mp hφ) Γ s).imp fun _ h ↦ ⟨h.1, h.2 V⟩⟩
 
 lemma models_IOpen_of_models_InductionOnPrenexHierarchy [h : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s] :
     V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 :=
   Semantics.ModelsSet.union_iff.mpr ⟨models_of_ss h Set.subset_union_left,
     InductionScheme.models_of_exists_eval_iff fun _ hφ ↦
-      (PrenexHierarchy.exists_eval_iff_of_deltaZero (Bounding.Hierarchy.of_open hφ) Γ s).imp
-        fun _ h ↦ ⟨h.1, h.2 V⟩⟩
+      (Bounding.PrenexHierarchy.exists_eval_iff_of_deltaZero (ℬ := ℬ[<, ℒₒᵣ])
+        (Bounding.Hierarchy.of_open hφ) Γ s).imp fun _ h ↦ ⟨h.1, h.2 V⟩⟩
 
 lemma models_LeastNumberOnPrenexHierarchy_of_le (hs : s ≤ s') [h : V↓[ℒₒᵣ] ⊧* 𝗟 Γ s'] :
     V↓[ℒₒᵣ] ⊧* 𝗟 Γ s :=
-  have : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (PrenexHierarchy Γ s') :=
+  have : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s') :=
     models_of_ss h Set.subset_union_right
   Semantics.ModelsSet.union_iff.mpr ⟨models_of_ss h Set.subset_union_left,
     LeastNumberScheme.models_of_exists_eval_iff fun _ hφ ↦
@@ -489,7 +489,7 @@ lemma models_LeastNumberOnPrenexHierarchy_of_le (hs : s ≤ s') [h : V↓[ℒₒ
 
 lemma models_CollectionOnPrenexHierarchy_of_le (hs : s ≤ s') [h : V↓[ℒₒᵣ] ⊧* 𝗕 Γ s'] :
     V↓[ℒₒᵣ] ⊧* 𝗕 Γ s :=
-  have : V↓[ℒₒᵣ] ⊧* CollectionScheme (PrenexHierarchy Γ s') :=
+  have : V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s') :=
     models_of_ss h Set.subset_union_right
   Semantics.ModelsSet.union_iff.mpr ⟨models_of_ss h Set.subset_union_left,
     CollectionScheme.models_of_exists_eval_iff fun _ hφ ↦
@@ -497,7 +497,7 @@ lemma models_CollectionOnPrenexHierarchy_of_le (hs : s ≤ s') [h : V↓[ℒₒ�
 
 lemma models_CollectionOnPrenexHierarchy_of_lt (hs : s < s') [h : V↓[ℒₒᵣ] ⊧* 𝗕 Γ' s'] :
     V↓[ℒₒᵣ] ⊧* 𝗕 Γ s :=
-  have : V↓[ℒₒᵣ] ⊧* CollectionScheme (PrenexHierarchy Γ' s') :=
+  have : V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ' s') :=
     models_of_ss h Set.subset_union_right
   Semantics.ModelsSet.union_iff.mpr ⟨models_of_ss h Set.subset_union_left,
     CollectionScheme.models_of_exists_eval_iff fun _ hφ ↦

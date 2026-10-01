@@ -7,8 +7,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Boun
 
 The internal predicates `IsHierarchy Γ n` on codes of formulas of the bounded arithmetical
 hierarchy and `IsPrenexHierarchy Γ n` on codes of prenex formulas with `n` alternating
-quantifiers: they are `𝚫ᴬ₁`-definable and agree with `ℬ[<, ℒₒᵣ].Hierarchy` and `PrenexHierarchy`
-on quoted formulas. Both are `IsBounded` at level `0`.
+quantifiers: they are `𝚫ᴬ₁`-definable and agree with `ℬ[<, ℒₒᵣ].Hierarchy` and
+`ℬ[<, ℒₒᵣ].PrenexHierarchy` on quoted formulas. Both are `IsBounded` at level `0`.
 
 ## References
 
@@ -540,12 +540,12 @@ theorem isSigma_quote_iff (σ : ArithmeticSemisentence n) :
 theorem isPi_quote_iff (σ : ArithmeticSemisentence n) :
     IsPi s (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 s σ := isHierarchy_quote_iff σ
 
-/-! ### `IsPrenexHierarchy` and `PrenexHierarchy` -/
+/-! ### `IsPrenexHierarchy` and `ℬ[<, ℒₒᵣ].PrenexHierarchy` -/
 
 lemma isPrenexHierarchy_quote_iff_s (ψ : ArithmeticSemiproposition n) :
-    IsPrenexHierarchy Γ s (⌜ψ⌝ : V) ↔ PrenexHierarchy Γ s ψ := by
+    IsPrenexHierarchy Γ s (⌜ψ⌝ : V) ↔ ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s ψ := by
   induction s generalizing Γ n with
-  | zero => exact (isBounded_quote_iff_s ψ).trans PrenexHierarchy.zero_iff_bounded.symm;
+  | zero => exact (isBounded_quote_iff_s ψ).trans Bounding.PrenexHierarchy.zero_iff_bounded.symm;
   | succ s ih =>
     cases Γ;
     · constructor;
@@ -556,7 +556,7 @@ lemma isPrenexHierarchy_quote_iff_s (ψ : ArithmeticSemiproposition n) :
           exact ((ih φ).mp hq).exs;
         | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at heq;
       · intro h;
-        obtain ⟨φ, hφ, rfl⟩ := PrenexHierarchy.sigma_succ_iff.mp h;
+        obtain ⟨φ, hφ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp h;
         exact ⟨⌜φ⌝, by simp [Semiformula.quote_ex], (ih φ).mpr hφ⟩;
     · constructor;
       · rintro ⟨q, heq, hq⟩;
@@ -566,11 +566,11 @@ lemma isPrenexHierarchy_quote_iff_s (ψ : ArithmeticSemiproposition n) :
           exact ((ih φ).mp hq).all;
         | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at heq;
       · intro h;
-        obtain ⟨φ, hφ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h;
+        obtain ⟨φ, hφ, rfl⟩ := Bounding.PrenexHierarchy.pi_succ_iff.mp h;
         exact ⟨⌜φ⌝, by simp [Semiformula.quote_all], (ih φ).mpr hφ⟩;
 
 theorem isPrenexHierarchy_quote_iff (σ : ArithmeticSemisentence n) :
-    IsPrenexHierarchy Γ s (⌜σ⌝ : V) ↔ PrenexHierarchy Γ s σ := by
+    IsPrenexHierarchy Γ s (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s σ := by
   simp [Sentence.quote_def, isPrenexHierarchy_quote_iff_s];
 
 end quote

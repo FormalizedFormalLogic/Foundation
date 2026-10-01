@@ -231,7 +231,7 @@ noncomputable instance InductionScheme.delta1_hierarchy (Γ : Polarity) (s : ℕ
   InductionScheme.delta1_of (fun _ _ _ ↦ IsHierarchy.defined Γ s) isHierarchy_quote_iff_s
 
 noncomputable instance InductionScheme.delta1_prenexHierarchy (Γ : Polarity) (s : ℕ) :
-    (InductionScheme ℒₒᵣ (PrenexHierarchy Γ s)).Δ₁ :=
+    (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)).Δ₁ :=
   InductionScheme.delta1_of (fun _ _ _ ↦ IsPrenexHierarchy.defined Γ s)
     isPrenexHierarchy_quote_iff_s
 

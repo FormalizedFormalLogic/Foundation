@@ -64,7 +64,7 @@ namespace CollectionOnPrenexHierarchy
 
 variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
 
-instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (PrenexHierarchy Γ s) :=
+instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) :=
   models_of_subtheory ‹_›
 
 lemma collection (hR : PrenexDefinableRel Γ s R) (a : V)

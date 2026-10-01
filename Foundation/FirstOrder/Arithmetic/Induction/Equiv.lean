@@ -34,7 +34,7 @@ lemma prenexDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺
     (hR : Γᴬ-[s].DefinableRel R) : PrenexDefinableRel Γ s R := by
   rcases s with _ | t;
   · obtain ⟨φ, hφ⟩ := hR;
-    exact ⟨φ.val, PrenexHierarchy.zero_iff.mpr
+    exact ⟨φ.val, Bounding.PrenexHierarchy.zero_iff.mpr
       (Bounding.Hierarchy.zero_iff (ℬ := ℬ[<, ℒₒᵣ]).mp φ.polarity_prop),
       fun v ↦ hφ.iff⟩;
   · have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := IBroadSigma.models_BSigma_succ;
@@ -52,7 +52,7 @@ lemma succ_induction_forall_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1
     refine forall_congr' fun w ↦
       Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
     simp [Semiformula.eval_substs];
-  exact InductionScheme.succ_induction (C := PrenexHierarchy 𝚷 (s + 1))
+  exact InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (s + 1))
     ⟨f, _, (hχ.rew _).all, hP⟩ zero succ;
 
 /-- - [HP98, Lemma I.2.12(2)] -/
@@ -97,7 +97,7 @@ lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡�
       refine exists_congr fun w ↦
         Iff.trans (show Q x w ↔ χ.Eval ![x, w] f by simpa using hiff ![x, w]) ?_;
       simp [Semiformula.eval_substs];
-    exact InductionScheme.succ_induction (C := PrenexHierarchy 𝚺 (s + 1))
+    exact InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 (s + 1))
       ⟨f, _, (hχ.rew _).exs, hP⟩ zero succ;
   · have h := neg_succ_induction (P := fun x ↦ ¬P x) (Q := fun x w ↦ ¬Q x w)
       (Bounding.HierarchySymbol.Definable.not (Γ := 𝚺) hQ) (fun x ↦ by simp [hPQ x])
@@ -276,16 +276,16 @@ theorem ISigma_weakerThan_BSigma_succ : 𝗜𝚺 s ⪯ 𝗕𝚺 (s + 1) :=
 section leastNumber
 
 lemma LeastNumberOnPrenexHierarchy.succ_induction (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟 Γ s]
-    {φ : ArithmeticSemiformula ℕ 1} (hφ : PrenexHierarchy Γ.alt s φ) (f : ℕ → V)
+    {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ.alt s φ) (f : ℕ → V)
     (zero : φ.Eval ![0] f) (succ : ∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) :
     ∀ x, φ.Eval ![x] f := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_left;
-  have : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (PrenexHierarchy Γ s) :=
+  have : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) :=
     models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_right;
   by_contra! hcon;
   obtain ⟨a, ha⟩ := hcon;
   obtain ⟨y, hy, hmin⟩ := LeastNumberScheme.least_number
-    (C := PrenexHierarchy Γ s) (P := fun x ↦ ¬φ.Eval ![x] f)
+    (C := ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) (P := fun x ↦ ¬φ.Eval ![x] f)
     ⟨f, ∼φ, by simpa using hφ, by simp⟩ ha;
   obtain ⟨z, rfl⟩ := Arithmetic.exists_succ_of_ne_zero <| show y ≠ 0 by rintro rfl; exact hy zero;
   exact hy (succ z (by simpa using hmin z (by simp)));
@@ -293,7 +293,7 @@ lemma LeastNumberOnPrenexHierarchy.succ_induction (Γ : Polarity) (s : ℕ) [V�
 lemma models_InductionOnPrenexHierarchy_of_models_LeastNumberOnPrenexHierarchy (Γ : Polarity)
     (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ.alt s := by
   have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_left;
-  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (PrenexHierarchy Γ.alt s) by
+  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ.alt s) by
     simpa [InductionOnPrenexHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩;
   simp only [InductionScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;
