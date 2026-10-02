@@ -463,10 +463,6 @@ lemma primrec_quote_natCast [L.Primcodable] : Primrec (fun σ : Semisentence L n
     (⌜σ₁⌝ : V) = ⌜σ₂⌝ ↔ σ₁ = σ₂ := by
   simp [quote_eq_encode]
 
-@[simp] lemma shift_quote (σ : ArithmeticSentence) : shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝ := by
-  rw [Sentence.quote_def, ← Semiformula.quote_shift];
-  simp;
-
 end Sentence
 
 end FirstOrder

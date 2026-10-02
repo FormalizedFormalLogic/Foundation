@@ -121,6 +121,21 @@ lemma InductionR.mono {S S' : V → Prop} (hS : ∀ K, S K → S' K) {p : V} (h 
   obtain ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hKS, hsub⟩ := h;
   exact ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hS K hKS, hsub⟩;
 
+private lemma freeVariables_eq_empty_of_shift {m : ℕ} (β : ArithmeticSemiproposition m)
+    (hsh : shift ℒₒᵣ (⌜β⌝ : ℕ) = ⌜β⌝) : β.freeVariables = ∅ := by
+  have hsβ : Rewriting.shift β = β :=
+    (Semiformula.quote_inj_iff (V := ℕ)).mp <| by rw [Semiformula.quote_shift]; exact hsh;
+  by_contra! hne;
+  obtain ⟨x, hx, hmin⟩ : ∃ x ∈ β.freeVariables, ∀ y ∈ β.freeVariables, x ≤ y :=
+    ⟨_, β.freeVariables.min'_mem hne, fun y hy ↦ β.freeVariables.min'_le y hy⟩;
+  rw [← hsβ] at hx;
+  rcases Semiformula.fvar?_rew hx with (⟨i, hi⟩ | ⟨z, hz, hi⟩);
+  · simp [Rew.shift_bvar, Semiterm.FVar?] at hi;
+  · have : x = z + 1 := by
+      simpa [Rew.shift_fvar, Semiterm.FVar?, Semiterm.freeVariables_fvar] using hi;
+    have := hmin z hz;
+    omega;
+
 private lemma allClosure_eq_univCl' {m : ℕ} (β : ArithmeticSemiproposition m)
     (hfree : β.freeVariables = ∅) (hbv : bv ℒₒᵣ (⌜β⌝ : ℕ) = m) :
     (∀¹* β : ArithmeticSemiproposition 0)
@@ -171,12 +186,10 @@ lemma inductionR_quote_iff {S : ℕ → Prop} {C : ArithmeticSemiproposition 1 �
         simpa [hsubst, indBodyVal_quote] using (subst_fvarVec_quote' (V := ℕ) β).symm;
     have hφ : φ = ∀¹* β := (Semiformula.quote_inj_iff (V := ℕ)).mp <| by
       simp [hp, quote_allClosure];
-    have hfree : β.freeVariables = ∅ := Semiformula.freeVariables_eq_empty_of_shift_eq <|
-      (Semiformula.quote_inj_iff (V := ℕ)).mp <| by rw [Semiformula.quote_shift]; exact hsh;
     use (succInd γ).univCl;
     and_intros;
     · exact ⟨γ, (hS γ).mp hKS, rfl⟩;
-    · simp [hφ, allClosure_eq_univCl' β hfree hbv, hβγ];
+    · simp [hφ, allClosure_eq_univCl' β (freeVariables_eq_empty_of_shift β hsh) hbv, hβγ];
   · rintro ⟨_, ⟨ψ, hψ, rfl⟩, rfl⟩;
     set χ := succInd ψ;
     have hs : subst ℒₒᵣ (fvarVec (0 + χ.fvSup : ℕ))
