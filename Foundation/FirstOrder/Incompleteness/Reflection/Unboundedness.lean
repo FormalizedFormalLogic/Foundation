@@ -8,9 +8,9 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 
 Let `X` be a $\Delta_1$-definable set of prenex `Γ (n + 1)` sentences and `Y` a
 $\Delta_1$-definable set of sentences none of which is provable in `T + X`. Then a single
-`Γ (n + 1)` sentence `truncatedTruthSentence` implies `X` over `T` without making any member of
-`Y` provable. With `Y = {⊥}`, the local reflection schema of `T` on `Γ.alt (n + 1)` sentences is
-not provable in any consistent extension of `T` by `X`.
+`Γ (n + 1)` sentence implies `X` over `T` without making any member of `Y` provable. With
+`Y = {⊥}`, the local reflection schema of `T` on `Γ.alt (n + 1)` sentences is not provable in any
+consistent extension of `T` by `X`.
 
 ## References
 
@@ -30,7 +30,7 @@ section truncatedTruth
 
 variable (T U Y : ArithmeticTheory) [T.Δ₁] [U.Δ₁] [Y.Δ₁] (n : ℕ)
 
-noncomputable def truncatedTruthFormula : Polarity → ArithmeticSemisentence 1
+private noncomputable def truncatedTruthFormula : Polarity → ArithmeticSemisentence 1
   | 𝚷 => “v. ∀ y, ((!U.Δ₁ch.sigma.val y ∧ !(isSemiformula ℒₒᵣ).sigma.val 0 y ∧
         ∀ z < y, ∀ u < y, (!Y.Δ₁ch.pi.val z →
           ∃ w, !(impGraph ℒₒᵣ).val w v z ∧ ¬!(proof T).pi.val u w))
@@ -40,25 +40,31 @@ noncomputable def truncatedTruthFormula : Polarity → ArithmeticSemisentence 1
       ∀ z < y, ((!U.Δ₁ch.pi.val z ∧ !(isSemiformula ℒₒᵣ).pi.val 0 z)
         → !(partialTruth 𝚺 (n + 1)).val z))”
 
-noncomputable def truncatedTruthSentence (Γ : Polarity) : ArithmeticSentence :=
+private noncomputable def truncatedTruthSentence (Γ : Polarity) : ArithmeticSentence :=
   (truncatedTruthFormula T U Y n Γ)/[⌜fixedpoint (truncatedTruthFormula T U Y n Γ)⌝]
 
-lemma hierarchy_truncatedTruthSentence (Γ : Polarity) :
+private lemma hierarchy_truncatedTruthSentence (Γ : Polarity) :
     ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) (truncatedTruthSentence T U Y n Γ) := by
   have h : 1 ≤ n + 1 := Nat.le_add_left 1 n;
   suffices ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) (truncatedTruthFormula T U Y n Γ) by
     simpa [truncatedTruthSentence];
   cases Γ with
   | sigma =>
-    simpa [truncatedTruthFormula, Y.Δ₁ch.sigma.sigma_prop.mono h,
-      (impGraph ℒₒᵣ).sigma_prop.mono h, (proof T).sigma.sigma_prop.mono h,
-      U.Δ₁ch.pi.pi_prop.mono h, (isSemiformula ℒₒᵣ).pi.pi_prop.mono h]
-      using (partialTruth 𝚺 (n + 1)).sigma_prop;
+    simpa [
+      truncatedTruthFormula,
+      Y.Δ₁ch.sigma.sigma_prop.mono h,
+      (impGraph ℒₒᵣ).sigma_prop.mono h,
+      (proof T).sigma.sigma_prop.mono h,
+      U.Δ₁ch.pi.pi_prop.mono h, (isSemiformula ℒₒᵣ).pi.pi_prop.mono h
+    ] using (partialTruth 𝚺 (n + 1)).sigma_prop;
   | pi =>
-    simpa [truncatedTruthFormula, U.Δ₁ch.sigma.sigma_prop.mono h,
-      (isSemiformula ℒₒᵣ).sigma.sigma_prop.mono h, Y.Δ₁ch.pi.pi_prop.mono h,
-      (impGraph ℒₒᵣ).sigma_prop.mono h, (proof T).pi.pi_prop.mono h]
-      using (partialTruth 𝚷 (n + 1)).pi_prop;
+    simpa [
+      truncatedTruthFormula, U.Δ₁ch.sigma.sigma_prop.mono h,
+      (isSemiformula ℒₒᵣ).sigma.sigma_prop.mono h,
+      Y.Δ₁ch.pi.pi_prop.mono h,
+      (impGraph ℒₒᵣ).sigma_prop.mono h,
+      (proof T).pi.pi_prop.mono h
+    ] using (partialTruth 𝚷 (n + 1)).pi_prop;
 
 end truncatedTruth
 
@@ -93,7 +99,7 @@ private lemma quote_imply_eq_imp (σ ψ : ArithmeticSentence) :
     (⌜σ 🡒 ψ⌝ : V) = imp ℒₒᵣ ⌜σ⌝ ⌜ψ⌝ := by
   simp [Sentence.quote_eq];
 
-private lemma partialTruth_natCast_of_mem (hU : V↓[ℒₒᵣ] ⊧* U)
+private lemma partialTruth_natCast_of_mem_Δ₁Class (hU : V↓[ℒₒᵣ] ⊧* U)
     (hΓ : ∀ σ ∈ U, ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) {m : ℕ}
     (hmem : (m : V) ∈ U.Δ₁Class) (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V)) :
     PartialTruth Γ (n + 1) (m : V) := by
@@ -101,7 +107,7 @@ private lemma partialTruth_natCast_of_mem (hU : V↓[ℒₒᵣ] ⊧* U)
   obtain ⟨φ, rfl⟩ := hΓ σ hσ;
   exact hmσ ▸ (partialTruth_quote_iff φ).mpr (hU.models_set hσ);
 
-lemma models_truncatedTruthSentence_pi_iff :
+private lemma models_truncatedTruthSentence_pi_iff :
     V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚷 ↔
       ∀ y ∈ U.Δ₁Class, IsSemiformula ℒₒᵣ (0 : V) y →
         (∀ z < y, ∀ u < y, z ∈ Y.Δ₁Class →
@@ -122,7 +128,7 @@ lemma models_truncatedTruthSentence_pi_iff :
     (Proof.defined (T := T) (V := V)).df,
     (PartialTruth.pi_defined (V := V) (n + 1)).df];
 
-lemma models_truncatedTruthSentence_sigma_iff :
+private lemma models_truncatedTruthSentence_sigma_iff :
     V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚺 ↔
       ∃ y : V, (∃ z < y, ∃ u < y, z ∈ Y.Δ₁Class ∧
           Proof T u (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚺)⌝ z)) ∧
@@ -146,17 +152,17 @@ end
 
 variable [𝗜𝚺₁ ⪯ T]
 
-private lemma provable_imp_truncatedTruthSentence_iff {ψ : ArithmeticSentence} :
+private lemma truncatedTruthSentence_imp_iff_fixedpoint_imp {ψ : ArithmeticSentence} :
     T ⊢ truncatedTruthSentence T U Y n Γ 🡒 ψ ↔
       T ⊢ fixedpoint (truncatedTruthFormula T U Y n Γ) 🡒 ψ := by
   have e : T ⊢ fixedpoint (truncatedTruthFormula T U Y n Γ) 🡘 truncatedTruthSentence T U Y n Γ :=
     WeakerThan.pbl (𝓢 := 𝗜𝚺₁) (diagonal _);
   exact ⟨C_trans (K_left e), C_trans (K_right e)⟩;
 
-private lemma provable_of_provable_imp_pi
+private lemma provable_union_of_truncatedTruthSentence_imp_pi
     (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ) {ψ : ArithmeticSentence}
     (hψ : ψ ∈ Y) (h : T ⊢ truncatedTruthSentence T U Y n 𝚷 🡒 ψ) : T ∪ U ⊢ ψ := by
-  obtain ⟨d⟩ := provable_imp_truncatedTruthSentence_iff.mp h;
+  obtain ⟨d⟩ := truncatedTruthSentence_imp_iff_fixedpoint_imp.mp h;
   have hθ : T ∪ U ⊢ truncatedTruthSentence T U Y n 𝚷 := by
     apply Arithmetic.complete.{0};
     intro M _ _;
@@ -171,13 +177,13 @@ private lemma provable_of_provable_imp_pi
       hlt _ (lt_of_le_of_lt (by rw [← Sentence.coe_quote_eq_quote]; simp) hy) _
         (lt_of_le_of_lt (by simp) hy) (by simpa using hψ) hp;
     obtain ⟨m, rfl⟩ := eq_nat_of_le_nat hle;
-    exact partialTruth_natCast_of_mem hU hΓ hmem hsemi;
+    exact partialTruth_natCast_of_mem_Δ₁Class hU hΓ hmem hsemi;
   exact (WeakerThan.ofSubset Set.subset_union_left).pbl h ⨀ hθ;
 
-private lemma provable_of_provable_imp_sigma
+private lemma provable_union_of_truncatedTruthSentence_imp_sigma
     (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚺 (n + 1) Empty 0, φ.val = σ) {ψ : ArithmeticSentence}
     (hψ : ψ ∈ Y) (h : T ⊢ truncatedTruthSentence T U Y n 𝚺 🡒 ψ) : T ∪ U ⊢ ψ := by
-  obtain ⟨d⟩ := provable_imp_truncatedTruthSentence_iff.mp h;
+  obtain ⟨d⟩ := truncatedTruthSentence_imp_iff_fixedpoint_imp.mp h;
   have hθ : T ∪ U ⊢ truncatedTruthSentence T U Y n 𝚺 := by
     apply Arithmetic.complete.{0};
     intro M _ _;
@@ -193,17 +199,18 @@ private lemma provable_of_provable_imp_sigma
         by push_cast; simp, by simpa using hψ, hp⟩;
     · intro z hz hmem hsemi;
       obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz;
-      exact partialTruth_natCast_of_mem hU hΓ hmem hsemi;
+      exact partialTruth_natCast_of_mem_Δ₁Class hU hΓ hmem hsemi;
   exact (WeakerThan.ofSubset Set.subset_union_left).pbl h ⨀ hθ;
 
-private lemma provable_of_provable_imp
+private lemma provable_union_of_truncatedTruthSentence_imp
     (hΓ : ∀ σ ∈ U, ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) {ψ : ArithmeticSentence}
     (hψ : ψ ∈ Y) (h : T ⊢ truncatedTruthSentence T U Y n Γ 🡒 ψ) : T ∪ U ⊢ ψ := by
   cases Γ with
-  | sigma => exact provable_of_provable_imp_sigma hΓ hψ h;
-  | pi => exact provable_of_provable_imp_pi hΓ hψ h;
+  | sigma => exact provable_union_of_truncatedTruthSentence_imp_sigma hΓ hψ h;
+  | pi => exact provable_union_of_truncatedTruthSentence_imp_pi hΓ hψ h;
 
-private lemma not_proof_imp_natCast {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+private lemma not_proof_natCast_fixedpoint_imp
+    {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n Γ 🡒 ψ) {m j : ℕ}
     (hm : (m : V) ∈ Y.Δ₁Class) :
     ¬Proof T (j : V) (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n Γ)⌝ (m : V)) := by
@@ -211,10 +218,11 @@ private lemma not_proof_imp_natCast {V : Type*} [ORingStructure V] [V↓[ℒₒ�
   obtain ⟨ψ, hψ, hmψ⟩ := exists_mem_eq_quote hm
     (IsSemiformula.imp.mp (hp.isFormulaSet _ (mem_singleton_iff.mpr rfl))).2;
   rw [hmψ] at hp;
-  exact hY ψ hψ <| provable_imp_truncatedTruthSentence_iff.mpr <|
+  exact hY ψ hψ <| truncatedTruthSentence_imp_iff_fixedpoint_imp.mpr <|
     provable_of_standard_proof (V := V) (by rwa [quote_imply_eq_imp]);
 
-private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ)
+private lemma truncatedTruthSentence_imp_of_mem_pi
+    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n 𝚷 🡒 ψ) {σ : ArithmeticSentence}
     (hσ : σ ∈ U) : 𝗜𝚺₁ ⊢ truncatedTruthSentence T U Y n 𝚷 🡒 σ := by
   obtain ⟨φ, rfl⟩ := hΓ σ hσ;
@@ -228,9 +236,10 @@ private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 
   rw [← Sentence.coe_quote_eq_quote] at hz hu;
   obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz;
   obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat hu;
-  exact not_proof_imp_natCast hY hzY;
+  exact not_proof_natCast_fixedpoint_imp hY hzY;
 
-private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚺 (n + 1) Empty 0, φ.val = σ)
+private lemma truncatedTruthSentence_imp_of_mem_sigma
+    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚺 (n + 1) Empty 0, φ.val = σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n 𝚺 🡒 ψ) {σ : ArithmeticSentence}
     (hσ : σ ∈ U) : 𝗜𝚺₁ ⊢ truncatedTruthSentence T U Y n 𝚺 🡒 σ := by
   obtain ⟨φ, rfl⟩ := hΓ σ hσ;
@@ -244,15 +253,16 @@ private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚺 (n
     rw [← Sentence.coe_quote_eq_quote] at hle;
     obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat (lt_of_lt_of_le hzy hle);
     obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat (lt_of_lt_of_le huy hle);
-    exact not_proof_imp_natCast hY hzY hpu;
+    exact not_proof_natCast_fixedpoint_imp hY hzY hpu;
   exact (partialTruth_quote_iff φ).mp (hall _ hlt (Δ₁Class.mem_iff.mpr hσ) (by simp));
 
-private lemma provable_of_mem (hΓ : ∀ σ ∈ U, ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ)
+private lemma truncatedTruthSentence_imp_of_mem
+    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n Γ 🡒 ψ) {σ : ArithmeticSentence}
     (hσ : σ ∈ U) : 𝗜𝚺₁ ⊢ truncatedTruthSentence T U Y n Γ 🡒 σ := by
   cases Γ with
-  | sigma => exact provable_of_mem_sigma hΓ hY hσ;
-  | pi => exact provable_of_mem_pi hΓ hY hσ;
+  | sigma => exact truncatedTruthSentence_imp_of_mem_sigma hΓ hY hσ;
+  | pi => exact truncatedTruthSentence_imp_of_mem_pi hΓ hY hσ;
 
 end
 
@@ -265,7 +275,7 @@ theorem exists_sentence_weakerThan_of_unprovable
     ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ ∀ ψ ∈ Y, insert θ T ⊬ ψ := by
   have hY' : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U' Y n Γ 🡒 ψ := fun ψ hψ h ↦
-    hY ψ hψ (e.symm.le.pbl (provable_of_provable_imp hΓ hψ h));
+    hY ψ hψ (e.symm.le.pbl (provable_union_of_truncatedTruthSentence_imp hΓ hψ h));
   have hT : T ⪯ insert (truncatedTruthSentence T U' Y n Γ) T :=
     WeakerThan.ofSubset (Set.subset_insert _ _);
   use truncatedTruthSentence T U' Y n Γ;
@@ -275,20 +285,21 @@ theorem exists_sentence_weakerThan_of_unprovable
     apply WeakerThan.ofAxm!;
     rintro φ (hφ | hφ);
     · exact by_axm (Set.mem_insert_of_mem _ hφ);
-    · exact hT.pbl (WeakerThan.pbl (provable_of_mem hΓ hY' hφ)) ⨀ by_axm (Set.mem_insert _ _);
+    · exact hT.pbl (WeakerThan.pbl (truncatedTruthSentence_imp_of_mem hΓ hY' hφ)) ⨀
+        by_axm (Set.mem_insert _ _);
   · intro ψ hψ;
     simpa [Set.cons_eq] using deduction_iff.not.mpr (hY' ψ hψ);
 
 theorem inconsistent_of_provable_localReflectionOn_union
     (hΓ : ∀ σ ∈ U', ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) (e : T ∪ U ≊ T ∪ U')
     (h : T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
-  by_contra hC;
-  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_unprovable (Y := {⊥}) hΓ e
-    (by simpa [consistent_iff_unprovable_bot] using hC);
+  by_contra! hC;
+  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_unprovable (Y := {⊥}) hΓ e <| by
+    simpa [consistent_iff_unprovable_bot] using hC;
   apply hcon ⊥ rfl;
-  exact inconsistent_iff_provable_bot.mp <|
-    T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
-      (fun _ hσ ↦ by simpa using hσ) hθ fun hσ ↦ hle.pbl (h hσ);
+  apply inconsistent_iff_provable_bot.mp;
+  apply T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+    (fun _ hσ ↦ by simpa using hσ) hθ fun hσ ↦ hle.pbl (h hσ);
 
 theorem not_provable_localReflectionOn_union
     (hΓ : ∀ σ ∈ U', ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) (e : T ∪ U ≊ T ∪ U')
