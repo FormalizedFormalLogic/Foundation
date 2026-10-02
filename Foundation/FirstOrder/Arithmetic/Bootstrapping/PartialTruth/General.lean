@@ -8,7 +8,7 @@ import Foundation.Meta.ClProver
 /-!
 # Satisfaction and partial truth for prenex formulas with a $\Delta_0$ matrix
 
-`PrenexSatisfied Γ s p e` says that `Q₀ x₀ ⋯ Q_{s-1} x_{s-1} θ` holds under the
+`PrenexSatisfied Γ s e p` says that `Q₀ x₀ ⋯ Q_{s-1} x_{s-1} θ` holds under the
 assignment `e`, where `p` codes the $\Delta_0$ matrix `θ` and the quantifiers alternate starting
 with `Γ`. `PrenexTrue Γ s` is the partial truth predicate for the codes of such sentences.
 
@@ -29,35 +29,35 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 def PrenexSatisfied : Polarity → ℕ → V → V → Prop
   | _, 0 => BoundedSatisfied
-  | 𝚺, s + 1 => fun p e ↦ ∃ x, PrenexSatisfied 𝚷 s p (x ∷ e)
-  | 𝚷, s + 1 => fun p e ↦ ∀ x, PrenexSatisfied 𝚺 s p (x ∷ e)
+  | 𝚺, s + 1 => fun e p ↦ ∃ x, PrenexSatisfied 𝚷 s (x ∷ e) p
+  | 𝚷, s + 1 => fun e p ↦ ∀ x, PrenexSatisfied 𝚺 s (x ∷ e) p
 
 section
-variable {Γ : Polarity} {s : ℕ} {p e : V}
+variable {Γ : Polarity} {s : ℕ} {e p : V}
 
 @[simp] lemma PrenexSatisfied.zero_iff :
-    PrenexSatisfied Γ 0 p e ↔ BoundedSatisfied p e := by
+    PrenexSatisfied Γ 0 e p ↔ BoundedSatisfied e p := by
   cases Γ <;> rfl
 
 @[simp] lemma PrenexSatisfied.sigma_succ_iff :
-    PrenexSatisfied 𝚺 (s + 1) p e ↔ ∃ x, PrenexSatisfied 𝚷 s p (x ∷ e) :=
+    PrenexSatisfied 𝚺 (s + 1) e p ↔ ∃ x, PrenexSatisfied 𝚷 s (x ∷ e) p :=
   Iff.rfl
 
 @[simp] lemma PrenexSatisfied.pi_succ_iff :
-    PrenexSatisfied 𝚷 (s + 1) p e ↔ ∀ x, PrenexSatisfied 𝚺 s p (x ∷ e) :=
+    PrenexSatisfied 𝚷 (s + 1) e p ↔ ∀ x, PrenexSatisfied 𝚺 s (x ∷ e) p :=
   Iff.rfl
 
 end
 
 noncomputable def prenexSatisfied' :
     (Γ : Polarity) → (s : ℕ) → Γᴬ-[s + 1].Semisentence 2
-  | 𝚺, 0 => .mkSigma “p e. ∃ x e', !adjoinDef e' x e ∧ !boundedSatisfied.sigma p e'”
-  | 𝚷, 0 => .mkPi “p e. ∀ x e', !adjoinDef e' x e → !boundedSatisfied.pi p e'”
+  | 𝚺, 0 => .mkSigma “e p. ∃ x e', !adjoinDef e' x e ∧ !boundedSatisfied.sigma e' p”
+  | 𝚷, 0 => .mkPi “e p. ∀ x e', !adjoinDef e' x e → !boundedSatisfied.pi e' p”
   | 𝚺, s + 1 => .mkSigma
-      “p e. ∃ x e', !adjoinDef e' x e ∧ !(prenexSatisfied' 𝚷 s).val p e'”
+      “e p. ∃ x e', !adjoinDef e' x e ∧ !(prenexSatisfied' 𝚷 s).val e' p”
       (by simpa using (prenexSatisfied' 𝚷 s).polarity_prop.accum 𝚺)
   | 𝚷, s + 1 => .mkPi
-      “p e. ∀ x e', !adjoinDef e' x e → !(prenexSatisfied' 𝚺 s).val p e'”
+      “e p. ∀ x e', !adjoinDef e' x e → !(prenexSatisfied' 𝚺 s).val e' p”
       (by simpa using (prenexSatisfied' 𝚺 s).polarity_prop.accum 𝚷)
 
 noncomputable def prenexSatisfied (Γ : Polarity) :
@@ -104,11 +104,11 @@ instance PrenexSatisfied.pi_definable (s : ℕ) [NeZero s] :
 /-! ## Partial truth -/
 
 def PrenexTrue (Γ : Polarity) (s : ℕ) (x : V) : Prop :=
-  ∃ θ ≤ x, x = qqToPrenex Γ s θ ∧ PrenexSatisfied Γ s θ 0
+  ∃ θ ≤ x, x = qqToPrenex Γ s θ ∧ PrenexSatisfied Γ s 0 θ
 
 noncomputable def prenexTrue' (Γ : Polarity) (s : ℕ) : Γᴬ-[s + 1].Semisentence 1 :=
   .mkPolarity
-    “x. ∃ θ <⁺ x, !(qqToPrenexDef Γ (s + 1)) x θ ∧ !(prenexSatisfied' Γ s).val θ 0” Γ
+    “x. ∃ θ <⁺ x, !(qqToPrenexDef Γ (s + 1)) x θ ∧ !(prenexSatisfied' Γ s).val 0 θ” Γ
     (by simp)
 
 private lemma eval_prenexTrue' {Γ : Polarity} {s : ℕ} (v : Fin 1 → V) :
@@ -147,7 +147,7 @@ instance PrenexTrue.pi_definable (s : ℕ) [NeZero s] :
 
 private lemma prenexSatisfied_quote_toPrenex_iff : ∀ {Γ : Polarity} {s k : ℕ}
     {θ : ArithmeticSemisentence (k + s)}, ℬ[<, ℒₒᵣ].Closure θ → ∀ v : Fin k → V,
-      PrenexSatisfied Γ s (⌜θ⌝ : V) (matrixToVec v) ↔ V ⊧/v (θ.toPrenex Γ s)
+      PrenexSatisfied Γ s (matrixToVec v) (⌜θ⌝ : V) ↔ V ⊧/v (θ.toPrenex Γ s)
   | _, 0, _, _, hθ, v => by simpa using boundedSatisfied_quote_iff hθ v
   | 𝚺, s + 1, k, θ, hθ, v => by
     have ih := prenexSatisfied_quote_toPrenex_iff (Γ := 𝚷)
@@ -160,7 +160,7 @@ private lemma prenexSatisfied_quote_toPrenex_iff : ∀ {Γ : Polarity} {s k : �
 
 theorem prenexSatisfied_quote_iff {Γ : Polarity} {s k : ℕ}
     (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty k) (v : Fin k → V) :
-    PrenexSatisfied Γ s (⌜φ.matrix.val⌝ : V) (matrixToVec v) ↔ V ⊧/v φ.val :=
+    PrenexSatisfied Γ s (matrixToVec v) (⌜φ.matrix.val⌝ : V) ↔ V ⊧/v φ.val :=
   prenexSatisfied_quote_toPrenex_iff φ.matrix.bounded v
 
 lemma quote_toPrenex : ∀ {Γ : Polarity} {s n : ℕ} (θ : ArithmeticSemisentence (n + s)),

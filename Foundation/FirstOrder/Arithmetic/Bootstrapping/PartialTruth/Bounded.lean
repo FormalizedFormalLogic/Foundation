@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.TermVa
 # Satisfaction and truth for $\Delta_0$ formulas
 
 `boundedSatValue e z` is the truth value of the coded formula `z` under the assignment `e`: `1`
-(true) or `0` (false) if `z` is $\Delta_0$, and `2` otherwise. `BoundedSatisfied z e` says that
+(true) or `0` (false) if `z` is $\Delta_0$, and `2` otherwise. `BoundedSatisfied e z` says that
 this value is `1`, and `BoundedTrue` is the truth predicate for the codes of $\Delta_0$ sentences.
 
 ## References
@@ -271,11 +271,11 @@ end value
 
 /-! ## The satisfaction predicate -/
 
-def BoundedSatisfied (z e : V) : Prop := boundedSatValue e z = 1
+def BoundedSatisfied (e z : V) : Prop := boundedSatValue e z = 1
 
 noncomputable def boundedSatisfied : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
-  (.mkSigma “z e. ∃ y, !boundedSatValueGraph y e z ∧ y = 1”)
-  (.mkPi “z e. ∀ y, !boundedSatValueGraph y e z → y = 1”)
+  (.mkSigma “e z. ∃ y, !boundedSatValueGraph y e z ∧ y = 1”)
+  (.mkPi “e z. ∀ y, !boundedSatValueGraph y e z → y = 1”)
 
 instance BoundedSatisfied.defined :
     𝚫ᴬ₁-Relation (BoundedSatisfied : V → V → Prop) via boundedSatisfied := .mk <| by
@@ -288,7 +288,7 @@ instance BoundedSatisfied.definable : 𝚫ᴬ₁-Relation (BoundedSatisfied : V 
 
 namespace BoundedSatisfied
 
-lemma dom {z e : V} (h : BoundedSatisfied z e) : IsBounded z ∧ IsUFormula ℒₒᵣ z := by
+lemma dom {e z : V} (h : BoundedSatisfied e z) : IsBounded z ∧ IsUFormula ℒₒᵣ z := by
   by_cases hz : IsUFormula ℒₒᵣ z;
   · suffices IsBounded z from ⟨this, hz⟩;
     by_contra hb;
@@ -298,37 +298,37 @@ lemma dom {z e : V} (h : BoundedSatisfied z e) : IsBounded z ∧ IsUFormula ℒ�
   · simp [BoundedSatisfied, boundedSatValue,
       construction.result_prop_not _ hz] at h;
 
-@[simp] lemma verum (e : V) : BoundedSatisfied (^⊤ : V) e := by simp [BoundedSatisfied]
+@[simp] lemma verum (e : V) : BoundedSatisfied e (^⊤ : V) := by simp [BoundedSatisfied]
 
-@[simp] lemma falsum (e : V) : ¬BoundedSatisfied (^⊥ : V) e := by simp [BoundedSatisfied]
+@[simp] lemma falsum (e : V) : ¬BoundedSatisfied e (^⊥ : V) := by simp [BoundedSatisfied]
 
 section
 variable {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
 include ht hu
 
-@[simp] lemma eq_iff : BoundedSatisfied (t ^= u) e ↔ termVal e t = termVal e u := by
+@[simp] lemma eq_iff : BoundedSatisfied e (t ^= u) ↔ termVal e t = termVal e u := by
   simp [BoundedSatisfied, ht, hu];
 
-@[simp] lemma neq_iff : BoundedSatisfied (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
+@[simp] lemma neq_iff : BoundedSatisfied e (t ^≠ u) ↔ termVal e t ≠ termVal e u := by
   simp [BoundedSatisfied, ht, hu];
 
-@[simp] lemma lt_iff : BoundedSatisfied (t ^< u) e ↔ termVal e t < termVal e u := by
+@[simp] lemma lt_iff : BoundedSatisfied e (t ^< u) ↔ termVal e t < termVal e u := by
   simp [BoundedSatisfied, ht, hu];
 
-@[simp] lemma nlt_iff : BoundedSatisfied (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
+@[simp] lemma nlt_iff : BoundedSatisfied e (t ^≮ u) ↔ ¬(termVal e t < termVal e u) := by
   simp [BoundedSatisfied, ht, hu];
 
 end
 
 @[simp] lemma and_iff {p q e : V} :
-    BoundedSatisfied (p ^⋏ q) e ↔ BoundedSatisfied p e ∧ BoundedSatisfied q e := by
+    BoundedSatisfied e (p ^⋏ q) ↔ BoundedSatisfied e p ∧ BoundedSatisfied e q := by
   constructor;
   · intro h; have := h.dom; simp_all [BoundedSatisfied];
   · rintro ⟨h₁, h₂⟩; have := h₁.dom; have := h₂.dom; simp_all [BoundedSatisfied];
 
 @[simp] lemma or_iff {p q e : V} (hdp : IsBounded p) (hfp : IsUFormula ℒₒᵣ p)
     (hdq : IsBounded q) (hfq : IsUFormula ℒₒᵣ q) :
-    BoundedSatisfied (p ^⋎ q) e ↔ BoundedSatisfied p e ∨ BoundedSatisfied q e := by
+    BoundedSatisfied e (p ^⋎ q) ↔ BoundedSatisfied e p ∨ BoundedSatisfied e q := by
   simp [BoundedSatisfied, hdp, hfp, hdq, hfq, or_iff_not_imp_left];
 
 section
@@ -336,13 +336,13 @@ variable {t q e : V} (ht : IsUTerm ℒₒᵣ t)
 include ht
 
 @[simp] lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
-    BoundedSatisfied (qqBall (termBShift ℒₒᵣ t) q) e ↔
-      ∀ x < termVal e t, BoundedSatisfied q (x ∷ e) := by
+    BoundedSatisfied e (qqBall (termBShift ℒₒᵣ t) q) ↔
+      ∀ x < termVal e t, BoundedSatisfied (x ∷ e) q := by
   simp [BoundedSatisfied, ht, hq, hq'];
 
 @[simp] lemma bex_iff :
-    BoundedSatisfied (qqBex (termBShift ℒₒᵣ t) q) e ↔
-      ∃ x < termVal e t, BoundedSatisfied q (x ∷ e) := by
+    BoundedSatisfied e (qqBex (termBShift ℒₒᵣ t) q) ↔
+      ∃ x < termVal e t, BoundedSatisfied (x ∷ e) q := by
   by_cases h : IsBounded q ∧ IsUFormula ℒₒᵣ q;
   · simp [BoundedSatisfied, ht, h.1, h.2];
   · apply iff_of_false;
@@ -357,10 +357,10 @@ end BoundedSatisfied
 
 theorem boundedSatisfied_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : ℬ[<, ℒₒᵣ].Closure φ) (v : Fin k → V) :
-    BoundedSatisfied (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
+    BoundedSatisfied (matrixToVec v) (⌜φ⌝ : V) ↔ V ⊧/v φ := by
   revert hφ v;
   apply Bounding.Closure.arithmetic_induction (ξ := Empty)
-    (P := fun k φ ↦ ∀ v : Fin k → V, BoundedSatisfied (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ);
+    (P := fun k φ ↦ ∀ v : Fin k → V, BoundedSatisfied (matrixToVec v) (⌜φ⌝ : V) ↔ V ⊧/v φ);
   · intro n v; simp [Sentence.quote_verum];
   · intro n v; simp [Sentence.quote_falsum];
   · intro n t u v; simp [termVal_quote, Semiformula.eval_rel];
@@ -379,11 +379,11 @@ theorem boundedSatisfied_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
 
 /-! ## The truth predicate -/
 
-def BoundedTrue (x : V) : Prop := BoundedSatisfied x 0
+def BoundedTrue (x : V) : Prop := BoundedSatisfied 0 x
 
 noncomputable def boundedTrue : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
-  (.mkSigma “x. !boundedSatisfied.sigma x 0”)
-  (.mkPi “x. !boundedSatisfied.pi x 0”)
+  (.mkSigma “x. !boundedSatisfied.sigma 0 x”)
+  (.mkPi “x. !boundedSatisfied.pi 0 x”)
 
 instance BoundedTrue.defined :
     𝚫ᴬ₁-Predicate (BoundedTrue : V → Prop) via boundedTrue := .mk <| by
