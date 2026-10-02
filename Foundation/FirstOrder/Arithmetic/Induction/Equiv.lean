@@ -31,7 +31,7 @@ variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s k : ℕ}
 
 /-- - [HP98, Lemma I.2.9] -/
 lemma prenexDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
-    (hR : Γᴬ-[s].DefinableRel R) : PrenexDefinableRel Γ s R := by
+    (hR : Γᴬ_[s].DefinableRel R) : PrenexDefinableRel Γ s R := by
   rcases s with _ | t;
   · obtain ⟨φ, hφ⟩ := hR;
     exact ⟨φ.val, Bounding.PrenexHierarchy.zero_iff.mpr
@@ -43,7 +43,7 @@ lemma prenexDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺
 /-! ### Successor induction over prenex formulas -/
 
 lemma succ_induction_forall_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
-    (hQ : 𝚺ᴬ-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∀ w, Q x w)
+    (hQ : 𝚺ᴬ_[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∀ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   obtain ⟨f, χ, hχ, hiff⟩ := (prenexDefinableRel_of_models_IBroadSigma (Γ := 𝚺) hQ).exists_eval_iff;
   have hP : ∀ x, P x ↔ (∀¹ (χ ⇜ ![#1, #0])).Eval ![x] f := by
@@ -57,12 +57,12 @@ lemma succ_induction_forall_sigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1
 
 /-- - [HP98, Lemma I.2.12(2)] -/
 private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
-    (hQ : 𝚺ᴬ-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∀ w, Q x w)
+    (hQ : 𝚺ᴬ_[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∀ w, Q x w)
     (nzero : ¬P 0) (nsucc : ∀ x, ¬P x → ¬P (x + 1)) : ∀ x, ¬P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_ss (U := 𝗜𝗡𝗗 𝚷 (s + 1)) inferInstance Set.subset_union_left;
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_ISigmaZero_of_models_InductionOnPrenexHierarchy V 𝚷 (s + 1);
-  have : 𝚺ᴬ-[s].DefinableRel Q := hQ;
+  have : 𝚺ᴬ_[s].DefinableRel Q := hQ;
   by_contra A;
   obtain ⟨a, ha⟩ : ∃ x, P x := by simpa using A;
   have key : ∀ x, x ≤ a → P (a - x) := by
@@ -86,7 +86,7 @@ private lemma neg_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚷 (s + 1)
   exact nzero (by simpa using key a le_rfl);
 
 lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
-    (hQ : 𝚷ᴬ-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
+    (hQ : 𝚷ᴬ_[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   rcases Γ with _ | _;
   · obtain ⟨f, χ, hχ, hiff⟩ :=
@@ -109,22 +109,22 @@ lemma succ_induction_exists_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡�
 
 /-- - [HP98, Lemma I.2.11] -/
 lemma exists_bound_of_definable_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ (s + 1)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s]
-    (hR : 𝚷ᴬ-[s].DefinableRel R) (a : V)
+    (hR : 𝚷ᴬ_[s].DefinableRel R) (a : V)
     (h : ∀ x < a, ∃ u, R x u) : ∃ w, ∀ x < a, ∃ u ≤ w, R x u := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_ss (U := 𝗜𝗡𝗗 Γ (s + 1)) inferInstance Set.subset_union_left;
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_ISigmaZero_of_models_InductionOnPrenexHierarchy V Γ (s + 1);
-  have hbdd : 𝚷ᴬ-[s].DefinableRel fun y w ↦ ∀ x < y, x < a → ∃ u ≤ w, R x u := by
-    have h₁ : 𝚷ᴬ-[s].Definable fun w : Fin 4 → V ↦ R (w 1) (w 0) := hR.retraction ![1, 0];
-    have h₂ : 𝚷ᴬ-[s].Definable fun w : Fin 3 → V ↦ ∃ u ≤ w 2, R (w 0) u :=
+  have hbdd : 𝚷ᴬ_[s].DefinableRel fun y w ↦ ∀ x < y, x < a → ∃ u ≤ w, R x u := by
+    have h₁ : 𝚷ᴬ_[s].Definable fun w : Fin 4 → V ↦ R (w 1) (w 0) := hR.retraction ![1, 0];
+    have h₂ : 𝚷ᴬ_[s].Definable fun w : Fin 3 → V ↦ ∃ u ≤ w 2, R (w 0) u :=
       (Bounding.HierarchySymbol.Definable.arithmetic_bexs' (P := fun v u ↦ R (v 0) u) h₁
         (#2 : ArithmeticSemiterm V 3)).of_iff (by intro w; simp);
-    have hlt : 𝚺ᴬ-[s].Definable fun w : Fin 3 → V ↦ w 0 < a :=
+    have hlt : 𝚺ᴬ_[s].Definable fun w : Fin 3 → V ↦ w 0 < a :=
       Bounding.HierarchySymbol.Definable.of_iff
         (Bounding.HierarchySymbol.Definable.retractiont (n := 3)
-          (inferInstance : 𝚺ᴬ-[s].DefinableRel (LT.lt : V → V → Prop)) ![#0, &a])
+          (inferInstance : 𝚺ᴬ_[s].DefinableRel (LT.lt : V → V → Prop)) ![#0, &a])
         (by intro w; simp);
-    have h₃ : 𝚷ᴬ-[s].Definable fun w : Fin 3 → V ↦ w 0 < a → ∃ u ≤ w 2, R (w 0) u :=
+    have h₃ : 𝚷ᴬ_[s].Definable fun w : Fin 3 → V ↦ w 0 < a → ∃ u ≤ w 2, R (w 0) u :=
       Bounding.HierarchySymbol.Definable.imp hlt h₂
     exact (Bounding.HierarchySymbol.Definable.arithmetic_ball
       (P := fun v x ↦ x < a → ∃ u ≤ v 1, R x u) h₃

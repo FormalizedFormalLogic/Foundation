@@ -55,7 +55,7 @@ lemma not_prenexSatisfied_of_not_isBounded (h : ¬IsBounded p) : ¬PrenexSatisfi
 end
 
 noncomputable def prenexSatisfied' :
-    (Γ : Polarity) → (s : ℕ) → Γᴬ-[s + 1].Semisentence 2
+    (Γ : Polarity) → (s : ℕ) → Γᴬ_[s + 1].Semisentence 2
   | 𝚺, 0 => .mkSigma “e p. ∃ x e', !adjoinDef e' x e ∧ !boundedSatisfied.sigma e' p”
   | 𝚷, 0 => .mkPi “e p. ∀ x e', !adjoinDef e' x e → !boundedSatisfied.pi e' p”
   | 𝚺, s + 1 => .mkSigma
@@ -66,20 +66,20 @@ noncomputable def prenexSatisfied' :
       (by simpa using (prenexSatisfied' 𝚺 s).polarity_prop.accum 𝚷)
 
 noncomputable def prenexSatisfied (Γ : Polarity) :
-    (s : ℕ) → [NeZero s] → Γᴬ-[s].Semisentence 2
+    (s : ℕ) → [NeZero s] → Γᴬ_[s].Semisentence 2
   | 0, h => absurd rfl h.out
   | s + 1, _ => prenexSatisfied' Γ s
 
 mutual
 
 instance PrenexSatisfied.sigma_defined' : (s : ℕ) →
-    𝚺ᴬ-[s + 1]-Relation (PrenexSatisfied 𝚺 (s + 1) : V → V → Prop)
+    𝚺ᴬ_[s + 1]-Relation (PrenexSatisfied 𝚺 (s + 1) : V → V → Prop)
       via prenexSatisfied' 𝚺 s
   | 0 => .mk fun v ↦ by simp [prenexSatisfied']
   | s + 1 => .mk fun v ↦ by simp [prenexSatisfied', (pi_defined' s).df]
 
 instance PrenexSatisfied.pi_defined' : (s : ℕ) →
-    𝚷ᴬ-[s + 1]-Relation (PrenexSatisfied 𝚷 (s + 1) : V → V → Prop)
+    𝚷ᴬ_[s + 1]-Relation (PrenexSatisfied 𝚷 (s + 1) : V → V → Prop)
       via prenexSatisfied' 𝚷 s
   | 0 => .mk fun v ↦ by simp [prenexSatisfied']
   | s + 1 => .mk fun v ↦ by simp [prenexSatisfied', (sigma_defined' s).df]
@@ -87,23 +87,23 @@ instance PrenexSatisfied.pi_defined' : (s : ℕ) →
 end
 
 instance PrenexSatisfied.sigma_defined : (s : ℕ) → [NeZero s] →
-    𝚺ᴬ-[s]-Relation (PrenexSatisfied 𝚺 s : V → V → Prop)
+    𝚺ᴬ_[s]-Relation (PrenexSatisfied 𝚺 s : V → V → Prop)
       via prenexSatisfied 𝚺 s
   | 0, h => absurd rfl h.out
   | s + 1, _ => sigma_defined' s
 
 instance PrenexSatisfied.pi_defined : (s : ℕ) → [NeZero s] →
-    𝚷ᴬ-[s]-Relation (PrenexSatisfied 𝚷 s : V → V → Prop)
+    𝚷ᴬ_[s]-Relation (PrenexSatisfied 𝚷 s : V → V → Prop)
       via prenexSatisfied 𝚷 s
   | 0, h => absurd rfl h.out
   | s + 1, _ => pi_defined' s
 
 instance PrenexSatisfied.sigma_definable (s : ℕ) [NeZero s] :
-    𝚺ᴬ-[s]-Relation (PrenexSatisfied 𝚺 s : V → V → Prop) :=
+    𝚺ᴬ_[s]-Relation (PrenexSatisfied 𝚺 s : V → V → Prop) :=
   (sigma_defined s).to_definable
 
 instance PrenexSatisfied.pi_definable (s : ℕ) [NeZero s] :
-    𝚷ᴬ-[s]-Relation (PrenexSatisfied 𝚷 s : V → V → Prop) :=
+    𝚷ᴬ_[s]-Relation (PrenexSatisfied 𝚷 s : V → V → Prop) :=
   (pi_defined s).to_definable
 
 /-! ## Partial truth -/
@@ -111,7 +111,7 @@ instance PrenexSatisfied.pi_definable (s : ℕ) [NeZero s] :
 def PartialTrue (Γ : Polarity) (s : ℕ) (x : V) : Prop :=
   ∃ θ ≤ x, x = qqToPrenex Γ s θ ∧ PrenexSatisfied Γ s 0 θ
 
-noncomputable def partialTrue' (Γ : Polarity) (s : ℕ) : Γᴬ-[s + 1].Semisentence 1 :=
+noncomputable def partialTrue' (Γ : Polarity) (s : ℕ) : Γᴬ_[s + 1].Semisentence 1 :=
   .mkPolarity
     “x. ∃ θ <⁺ x, !(qqToPrenexDef Γ (s + 1)) x θ ∧ !(prenexSatisfied' Γ s).val 0 θ” Γ
     (by simp)
@@ -122,26 +122,26 @@ private lemma eval_partialTrue' {Γ : Polarity} {s : ℕ} (v : Fin 1 → V) :
   cases Γ <;> simp [PartialTrue, (PrenexSatisfied.sigma_defined' s).df,
     (PrenexSatisfied.pi_defined' s).df]
 
-noncomputable def partialTrue (Γ : Polarity) : (s : ℕ) → [NeZero s] → Γᴬ-[s].Semisentence 1
+noncomputable def partialTrue (Γ : Polarity) : (s : ℕ) → [NeZero s] → Γᴬ_[s].Semisentence 1
   | 0, h => absurd rfl h.out
   | s + 1, _ => partialTrue' Γ s
 
 instance PartialTrue.sigma_defined : (s : ℕ) → [NeZero s] →
-    𝚺ᴬ-[s]-Predicate (PartialTrue 𝚺 s : V → Prop) via partialTrue 𝚺 s
+    𝚺ᴬ_[s]-Predicate (PartialTrue 𝚺 s : V → Prop) via partialTrue 𝚺 s
   | 0, h => absurd rfl h.out
   | _ + 1, _ => .mk fun v ↦ eval_partialTrue' v
 
 instance PartialTrue.pi_defined : (s : ℕ) → [NeZero s] →
-    𝚷ᴬ-[s]-Predicate (PartialTrue 𝚷 s : V → Prop) via partialTrue 𝚷 s
+    𝚷ᴬ_[s]-Predicate (PartialTrue 𝚷 s : V → Prop) via partialTrue 𝚷 s
   | 0, h => absurd rfl h.out
   | _ + 1, _ => .mk fun v ↦ eval_partialTrue' v
 
 instance PartialTrue.sigma_definable (s : ℕ) [NeZero s] :
-    𝚺ᴬ-[s]-Predicate (PartialTrue 𝚺 s : V → Prop) :=
+    𝚺ᴬ_[s]-Predicate (PartialTrue 𝚺 s : V → Prop) :=
   (PartialTrue.sigma_defined s).to_definable
 
 instance PartialTrue.pi_definable (s : ℕ) [NeZero s] :
-    𝚷ᴬ-[s]-Predicate (PartialTrue 𝚷 s : V → Prop) :=
+    𝚷ᴬ_[s]-Predicate (PartialTrue 𝚷 s : V → Prop) :=
   (PartialTrue.pi_defined s).to_definable
 
 @[simp] lemma PartialTrue.zero_iff {Γ : Polarity} {x : V} :

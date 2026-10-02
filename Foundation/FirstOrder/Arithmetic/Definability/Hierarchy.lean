@@ -8,9 +8,9 @@ public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Hierarchy
 
 This file defines the $\Sigma_n / \Pi_n / \Delta_n$ formulas of arithmetic of first-order logic.
 
-- `𝚺ᴬ-[m].Semiformula ξ n` is a `ArithmeticSemiformula ξ n` which is $\Sigma_m$.
-- `𝚷ᴬ-[m].Semiformula ξ n` is a `ArithmeticSemiformula ξ n` which is $\Pi_m$.
-- `𝚫ᴬ-[m].Semiformula ξ n` is a pair of `𝚺ᴬ-[m].Semiformula ξ n` and `𝚷ᴬ-[m].Semiformula ξ n`.
+- `𝚺ᴬ_[m].Semiformula ξ n` is a `ArithmeticSemiformula ξ n` which is $\Sigma_m$.
+- `𝚷ᴬ_[m].Semiformula ξ n` is a `ArithmeticSemiformula ξ n` which is $\Pi_m$.
+- `𝚫ᴬ_[m].Semiformula ξ n` is a pair of `𝚺ᴬ_[m].Semiformula ξ n` and `𝚷ᴬ_[m].Semiformula ξ n`.
 - `ProperOn` : `φ.ProperOn M` iff `φ`'s two element `φ.sigma` and `φ.pi` are equivalent on
   model `M`
 -/
@@ -19,15 +19,15 @@ This file defines the $\Sigma_n / \Pi_n / \Delta_n$ formulas of arithmetic of fi
 
 namespace FFL.FirstOrder.Arithmetic
 
-scoped notation:max Γ:max "ᴬ-[" n "]" =>
+scoped notation:max Γ:max "ᴬ_[" n "]" =>
   @Bounding.HierarchySymbol.mk _ ℬ[<, ℒₒᵣ] Γ n
 
-notation "𝚺ᴬ₀" => (𝚺ᴬ-[0])
-notation "𝚷ᴬ₀" => (𝚷ᴬ-[0])
-notation "𝚫ᴬ₀" => (𝚫ᴬ-[0])
-notation "𝚺ᴬ₁" => (𝚺ᴬ-[1])
-notation "𝚷ᴬ₁" => (𝚷ᴬ-[1])
-notation "𝚫ᴬ₁" => (𝚫ᴬ-[1])
+notation "𝚺ᴬ₀" => (𝚺ᴬ_[0])
+notation "𝚷ᴬ₀" => (𝚷ᴬ_[0])
+notation "𝚫ᴬ₀" => (𝚫ᴬ_[0])
+notation "𝚺ᴬ₁" => (𝚺ᴬ_[1])
+notation "𝚷ᴬ₁" => (𝚷ᴬ_[1])
+notation "𝚫ᴬ₁" => (𝚫ᴬ_[1])
 
 end FFL.FirstOrder.Arithmetic
 
@@ -62,7 +62,7 @@ def arithmetic_bexs (t : ArithmeticSemiterm ξ n) (φ : Γ.Semiformula ξ (n + 1
   val_bexs (R := Operator.LT.lt) (by rfl) t φ
 
 lemma ProvablyProperOn.arithmetic_ofProperOn (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T]
-    {φ : 𝚫ᴬ-[m].Semisentence n}
+    {φ : 𝚫ᴬ_[m].Semisentence n}
     (h : ∀ (M : Type w) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], φ.ProperOn M) :
     φ.ProvablyProperOn T :=
   FirstOrder.Arithmetic.complete.{w} T _

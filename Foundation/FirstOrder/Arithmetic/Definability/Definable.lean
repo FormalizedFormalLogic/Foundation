@@ -113,68 +113,68 @@ lemma arithmetic_bexsCons {P : (Fin (k + 1) → V) → Prop}
   arithmetic_bexs (P := fun v x ↦ P (x :> v)) (h.of_iff fun _ ↦ by simp) t
 
 lemma arithmetic_ball_lt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴬ-[m + 1].DefinableFunction f)
-    (h : Γᴬ-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴬ-[m + 1].Definable fun v ↦ ∀ x < f v, P v x :=
+    (hf : 𝚺ᴬ_[m + 1].DefinableFunction f)
+    (h : Γᴬ_[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ_[m + 1].Definable fun v ↦ ∀ x < f v, P v x :=
   ball_operator (R := Operator.LT.lt) (by rfl) hf h
 
 lemma arithmetic_bexs_lt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴬ-[m + 1].DefinableFunction f)
-    (h : Γᴬ-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴬ-[m + 1].Definable fun v ↦ ∃ x < f v, P v x :=
+    (hf : 𝚺ᴬ_[m + 1].DefinableFunction f)
+    (h : Γᴬ_[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ_[m + 1].Definable fun v ↦ ∃ x < f v, P v x :=
   bexs_operator (R := Operator.LT.lt) (by rfl) hf h
 
 lemma arithmetic_ball_le [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
     {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴬ-[m + 1].DefinableFunction f)
-    (h : Γᴬ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
-    Γᴬ-[m + 1].Definable (fun v ↦ ∀ x ≤ f v, P v x) := by
-  have h₁ : Γᴬ-[m + 1].Definable (fun v ↦ ∀ x < f v + 1, P v x) :=
+    (hf : 𝚺ᴬ_[m + 1].DefinableFunction f)
+    (h : Γᴬ_[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γᴬ_[m + 1].Definable (fun v ↦ ∀ x ≤ f v, P v x) := by
+  have h₁ : Γᴬ_[m + 1].Definable (fun v ↦ ∀ x < f v + 1, P v x) :=
     arithmetic_ball_lt (DefinableFunction₂.comp hf (.const 1)) h
   exact h₁.of_iff fun v ↦ by simp [lt_succ_iff_le]
 
 lemma arithmetic_bexs_le [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
     {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴬ-[m + 1].DefinableFunction f)
-    (h : Γᴬ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
-    Γᴬ-[m + 1].Definable (fun v ↦ ∃ x ≤ f v, P v x) := by
-  have h₁ : Γᴬ-[m + 1].Definable (fun v ↦ ∃ x < f v + 1, P v x) :=
+    (hf : 𝚺ᴬ_[m + 1].DefinableFunction f)
+    (h : Γᴬ_[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γᴬ_[m + 1].Definable (fun v ↦ ∃ x ≤ f v, P v x) := by
+  have h₁ : Γᴬ_[m + 1].Definable (fun v ↦ ∃ x < f v + 1, P v x) :=
     arithmetic_bexs_lt (DefinableFunction₂.comp hf (.const 1)) h
   exact h₁.of_iff fun v ↦ by simp [lt_succ_iff_le]
 
 lemma arithmetic_ball_lt' {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴬ-[m + 1].DefinableFunction f)
-    (h : Γᴬ-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴬ-[m + 1].Definable fun v ↦ ∀ {x}, x < f v → P v x := arithmetic_ball_lt hf h
+    (hf : 𝚺ᴬ_[m + 1].DefinableFunction f)
+    (h : Γᴬ_[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ_[m + 1].Definable fun v ↦ ∀ {x}, x < f v → P v x := arithmetic_ball_lt hf h
 
 lemma arithmetic_ball_le' [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
     {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴬ-[m + 1].DefinableFunction f)
-    (h : Γᴬ-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴬ-[m + 1].Definable fun v ↦ ∀ {x}, x ≤ f v → P v x := arithmetic_ball_le hf h
+    (hf : 𝚺ᴬ_[m + 1].DefinableFunction f)
+    (h : Γᴬ_[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ_[m + 1].Definable fun v ↦ ∀ {x}, x ≤ f v → P v x := arithmetic_ball_le hf h
 
 @[elab_as_elim]
 theorem arithmetic_sigma_succ_induction
-    {motive : (k : ℕ) → (P : (Fin k → V) → Prop) → 𝚺ᴬ-[m + 1].Definable P → Prop}
-    (pi : ∀ {k} {P : (Fin k → V) → Prop} (hP : 𝚷ᴬ-[m].Definable P),
+    {motive : (k : ℕ) → (P : (Fin k → V) → Prop) → 𝚺ᴬ_[m + 1].Definable P → Prop}
+    (pi : ∀ {k} {P : (Fin k → V) → Prop} (hP : 𝚷ᴬ_[m].Definable P),
       motive k P (hP.of_lt (Nat.lt_succ_self m)))
     (and : ∀ {k} {P Q : (Fin k → V) → Prop}
-      (hP : 𝚺ᴬ-[m + 1].Definable P) (hQ : 𝚺ᴬ-[m + 1].Definable Q),
+      (hP : 𝚺ᴬ_[m + 1].Definable P) (hQ : 𝚺ᴬ_[m + 1].Definable Q),
       motive k P hP → motive k Q hQ → motive k (fun v ↦ P v ∧ Q v) (.and hP hQ))
     (or : ∀ {k} {P Q : (Fin k → V) → Prop}
-      (hP : 𝚺ᴬ-[m + 1].Definable P) (hQ : 𝚺ᴬ-[m + 1].Definable Q),
+      (hP : 𝚺ᴬ_[m + 1].Definable P) (hQ : 𝚺ᴬ_[m + 1].Definable Q),
       motive k P hP → motive k Q hQ → motive k (fun v ↦ P v ∨ Q v) (.or hP hQ))
     (ball : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k)
-      (hP : 𝚺ᴬ-[m + 1].Definable P),
+      (hP : 𝚺ᴬ_[m + 1].Definable P),
       motive (k + 1) P hP → motive k (fun v ↦ ∀ x < t.val v id, P (x :> v))
         (arithmetic_ballCons hP t))
     (bexs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : ArithmeticSemiterm V k)
-      (hP : 𝚺ᴬ-[m + 1].Definable P),
+      (hP : 𝚺ᴬ_[m + 1].Definable P),
       motive (k + 1) P hP → motive k (fun v ↦ ∃ x < t.val v id, P (x :> v))
         (arithmetic_bexsCons hP t))
-    (exs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (hP : 𝚺ᴬ-[m + 1].Definable P),
+    (exs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (hP : 𝚺ᴬ_[m + 1].Definable P),
       motive (k + 1) P hP → motive k (fun v ↦ ∃ x, P (x :> v)) (.exsCons hP))
-    (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺ᴬ-[m + 1].Definable P) : motive k P hP := by
+    (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺ᴬ_[m + 1].Definable P) : motive k P hP := by
   apply sigma_succ_induction
     (motive := motive) pi and or ?_ ?_ exs k P hP
   · intro k R hR P t hP ih

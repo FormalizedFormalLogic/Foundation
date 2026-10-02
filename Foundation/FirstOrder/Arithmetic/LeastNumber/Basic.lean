@@ -50,7 +50,7 @@ variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s]
 instance : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s) :=
   models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s›
 
-lemma least_number {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P) {x} (h : P x) :
+lemma least_number {P : V → Prop} (hP : Γᴬ_[s].DefinablePred P) {x} (h : P x) :
     ∃ y, P y ∧ ∀ z < y, ¬P z :=
   LeastNumberScheme.least_number (P := P) (C := ℬ[<, ℒₒᵣ].Hierarchy Γ s) (by
     classical
@@ -63,7 +63,7 @@ lemma least_number {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P) {x} (h : P 
       simp [Semiformula.eval_rewriteMap, hp.df.iff]
   ) h
 
-lemma succ_induction {P : V → Prop} (hP : Γ.altᴬ-[s].DefinablePred P)
+lemma succ_induction {P : V → Prop} (hP : Γ.altᴬ_[s].DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s›;
   have : V↓[ℒₒᵣ] ⊧* 𝗤 := models_of_subtheory this;

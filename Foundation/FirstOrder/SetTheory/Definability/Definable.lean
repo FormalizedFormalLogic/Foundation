@@ -51,39 +51,39 @@ section
 variable {k m : ℕ} {Γ : SigmaPiDelta}
 
 lemma lévy_ball_mem {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴸ-[m + 1].DefinableFunction f)
-    (h : Γᴸ-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴸ-[m + 1].Definable fun v ↦ ∀ x ∈ f v, P v x :=
+    (hf : 𝚺ᴸ_[m + 1].DefinableFunction f)
+    (h : Γᴸ_[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴸ_[m + 1].Definable fun v ↦ ∀ x ∈ f v, P v x :=
   ball_operator (R := Operator.Mem.mem) (by rfl) hf h
 
 lemma lévy_bexs_mem {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴸ-[m + 1].DefinableFunction f)
-    (h : Γᴸ-[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴸ-[m + 1].Definable fun v ↦ ∃ x ∈ f v, P v x :=
+    (hf : 𝚺ᴸ_[m + 1].DefinableFunction f)
+    (h : Γᴸ_[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴸ_[m + 1].Definable fun v ↦ ∃ x ∈ f v, P v x :=
   bexs_operator (R := Operator.Mem.mem) (by rfl) hf h
 
 @[elab_as_elim]
 theorem lévy_sigma_succ_induction
-    {motive : (k : ℕ) → (P : (Fin k → V) → Prop) → 𝚺ᴸ-[m + 1].Definable P → Prop}
-    (pi : ∀ {k} {P : (Fin k → V) → Prop} (hP : 𝚷ᴸ-[m].Definable P),
+    {motive : (k : ℕ) → (P : (Fin k → V) → Prop) → 𝚺ᴸ_[m + 1].Definable P → Prop}
+    (pi : ∀ {k} {P : (Fin k → V) → Prop} (hP : 𝚷ᴸ_[m].Definable P),
       motive k P (hP.of_lt (Nat.lt_succ_self m)))
     (and : ∀ {k} {P Q : (Fin k → V) → Prop}
-      (hP : 𝚺ᴸ-[m + 1].Definable P) (hQ : 𝚺ᴸ-[m + 1].Definable Q),
+      (hP : 𝚺ᴸ_[m + 1].Definable P) (hQ : 𝚺ᴸ_[m + 1].Definable Q),
       motive k P hP → motive k Q hQ → motive k (fun v ↦ P v ∧ Q v) (.and hP hQ))
     (or : ∀ {k} {P Q : (Fin k → V) → Prop}
-      (hP : 𝚺ᴸ-[m + 1].Definable P) (hQ : 𝚺ᴸ-[m + 1].Definable Q),
+      (hP : 𝚺ᴸ_[m + 1].Definable P) (hQ : 𝚺ᴸ_[m + 1].Definable Q),
       motive k P hP → motive k Q hQ → motive k (fun v ↦ P v ∨ Q v) (.or hP hQ))
     (ball : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : SetTheorySemiterm V k)
-      (hP : 𝚺ᴸ-[m + 1].Definable P),
+      (hP : 𝚺ᴸ_[m + 1].Definable P),
       motive (k + 1) P hP → motive k (fun v ↦ ∀ x ∈ t.val v id, P (x :> v))
         (lévy_ballCons hP t))
     (bexs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (t : SetTheorySemiterm V k)
-      (hP : 𝚺ᴸ-[m + 1].Definable P),
+      (hP : 𝚺ᴸ_[m + 1].Definable P),
       motive (k + 1) P hP → motive k (fun v ↦ ∃ x ∈ t.val v id, P (x :> v))
         (lévy_bexsCons hP t))
-    (exs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (hP : 𝚺ᴸ-[m + 1].Definable P),
+    (exs : ∀ {k} {P : (Fin (k + 1) → V) → Prop} (hP : 𝚺ᴸ_[m + 1].Definable P),
       motive (k + 1) P hP → motive k (fun v ↦ ∃ x, P (x :> v)) (.exsCons hP))
-    (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺ᴸ-[m + 1].Definable P) : motive k P hP := by
+    (k : ℕ) (P : (Fin k → V) → Prop) (hP : 𝚺ᴸ_[m + 1].Definable P) : motive k P hP := by
   apply sigma_succ_induction (motive := motive) pi and or ?_ ?_ exs k P hP
   · intro k R hR P t hP ih
     obtain rfl := Set.mem_singleton_iff.mp hR
