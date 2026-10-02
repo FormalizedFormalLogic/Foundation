@@ -47,6 +47,11 @@ variable {Γ : Polarity} {s : ℕ} {e p : V}
     PrenexSatisfied 𝚷 (s + 1) e p ↔ ∀ x, PrenexSatisfied 𝚺 s (x ∷ e) p :=
   Iff.rfl
 
+lemma not_prenexSatisfied_of_not_isBounded (h : ¬IsBounded p) : ¬PrenexSatisfied Γ s e p := by
+  induction s generalizing Γ e with
+  | zero => exact fun h' ↦ h (PrenexSatisfied.zero_iff.mp h').dom.1;
+  | succ s ih => cases Γ <;> simp [ih];
+
 end
 
 noncomputable def prenexSatisfied' :
