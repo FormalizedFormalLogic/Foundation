@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.BoundedSatisfaction
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounded
 public import Foundation.FirstOrder.Arithmetic.Prenex
 import Foundation.Meta.ClProver
 
