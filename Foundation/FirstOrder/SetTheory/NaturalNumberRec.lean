@@ -4,18 +4,15 @@ public import Foundation.FirstOrder.SetTheory.Ordinal
 public import Foundation.FirstOrder.SetTheory.Function
 
 /-!
-# Definable recursion on omega in Zermelo set theory
+# Natural number recursion in Zermelo set theory
 
-The mathematical construction is folklore: finite computations are extended by adjoining one pair.
-The blueprint interface and the extension by the empty set outside omega are specific to this
-formalization, following `Arithmetic/HFS/PRF.lean`.
 -/
 
 @[expose] public section
 
 namespace FFL.FirstOrder.SetTheory
 
-namespace OmegaRec
+namespace NaturalNumberRec
 
 structure Blueprint (k : ℕ) where
   /-- The initial value, with arguments ordered as output followed by parameters. -/
@@ -58,8 +55,8 @@ structure CSeq (v : Fin k → V) (n s : V) : Prop where
   zero : ⟨0, c.zero v⟩ₖ ∈ s
   succ : ∀ i ∈ n, ∀ z, ⟨i, z⟩ₖ ∈ s → ⟨SetTheory.succ i, c.succ v i z⟩ₖ ∈ s
 
-lemma cseq_defined : Defined
-    (fun v ↦ c.CSeq (v ·.succ.succ) (v 1) (v 0)) p.cseqDef := .mk fun v ↦ by
+lemma cseq_defined :
+    Defined (fun v ↦ c.CSeq (v ·.succ.succ) (v 1) (v 0)) p.cseqDef := .mk fun v ↦ by
   suffices h : ∀ v, p.cseqDef.Evalb v ↔
       (v 1 ∈ (ω : V) ∧ IsFunction (v 0) ∧ domain (v 0) = SetTheory.succ (v 1) ∧
         ⟨0, c.zero (v ·.succ.succ)⟩ₖ ∈ v 0 ∧
@@ -96,23 +93,21 @@ lemma initial (v : Fin k → V) : c.CSeq v 0 {⟨0, c.zero v⟩ₖ} :=
     by simp, by simp [zero_def]⟩
 
 lemma successor (h : c.CSeq v n s) (hz : ⟨n, z⟩ₖ ∈ s) :
-    c.CSeq v (SetTheory.succ n) (insert ⟨SetTheory.succ n, c.succ v n z⟩ₖ s) := by
-  have hnew : SetTheory.succ n ∉ domain s := by simp [h.domain_eq]
-  exact {
-    nat := ω_succ_closed h.nat
-    isFunction := IsFunction.insert s _ _ hnew (hf := h.isFunction)
-    domain_eq := by simp [domain_insert, h.domain_eq, SetTheory.succ]
-    zero := by simp [h.zero]
-    succ := by
-      intro i hi y hiy
-      have h₁ : (⟨i, y⟩ₖ : V) ≠ ⟨SetTheory.succ n, c.succ v n z⟩ₖ := by
-        intro h₂
-        exact mem_irrefl (SetTheory.succ n) ((kpair_iff.mp h₂).1 ▸ hi)
-      have h₂ : ⟨i, y⟩ₖ ∈ s := (mem_insert.mp hiy).resolve_left h₁
-      rcases mem_succ_iff.mp hi with rfl | hi
-      · have : y = z := IsFunction.unique (hf := h.isFunction) h₂ hz
-        simp [this]
-      · exact mem_insert.mpr (Or.inr (h.succ i hi y h₂)) }
+    c.CSeq v (SetTheory.succ n) (insert ⟨SetTheory.succ n, c.succ v n z⟩ₖ s) where
+  nat := ω_succ_closed h.nat
+  isFunction := IsFunction.insert s _ _ (by simp [h.domain_eq]) (hf := h.isFunction)
+  domain_eq := by simp [domain_insert, h.domain_eq, SetTheory.succ]
+  zero := by simp [h.zero]
+  succ := by
+    intro i hi y hiy
+    have h₁ : (⟨i, y⟩ₖ : V) ≠ ⟨SetTheory.succ n, c.succ v n z⟩ₖ := by
+      intro h₂
+      exact mem_irrefl (SetTheory.succ n) ((kpair_iff.mp h₂).1 ▸ hi)
+    have h₂ : ⟨i, y⟩ₖ ∈ s := (mem_insert.mp hiy).resolve_left h₁
+    rcases mem_succ_iff.mp hi with rfl | hi
+    · have : y = z := IsFunction.unique (hf := h.isFunction) h₂ hz
+      simp [this]
+    · exact mem_insert.mpr (Or.inr (h.succ i hi y h₂))
 
 private lemma mem_of_succ_pair (h : c.CSeq v n s) (hz : ⟨SetTheory.succ i, z⟩ₖ ∈ s) :
     i ∈ n := by
@@ -122,7 +117,7 @@ private lemma mem_of_succ_pair (h : c.CSeq v n s) (hz : ⟨SetTheory.succ i, z�
   · exact h₁ ▸ mem_succ_self i
   · exact (IsTransitive.nat h.nat).transitive _ h₁ _ (mem_succ_self i)
 
-lemma val_unique (hs : c.CSeq v n s) (ht : c.CSeq v m t)
+lemma value_unique (hs : c.CSeq v n s) (ht : c.CSeq v m t)
     (hi : i ∈ (ω : V)) (hz : ⟨i, z⟩ₖ ∈ s) (hw : ⟨i, w⟩ₖ ∈ t) : z = w := by
   have : IsFunction s := hs.isFunction
   have : IsFunction t := ht.isFunction
@@ -145,19 +140,6 @@ lemma val_unique (hs : c.CSeq v n s) (ht : c.CSeq v m t)
       have h₆ : w = c.succ v i w' := IsFunction.unique hw (ht.succ i h₃ w' hw')
       simp [h₄, h₅, h₆]
   exact h₁ i hi z w hz hw
-
-lemma subset (hs : c.CSeq v n s) (ht : c.CSeq v m t)
-    (h : SetTheory.succ n ⊆ SetTheory.succ m) : s ⊆ t := by
-  have : IsFunction s := hs.isFunction
-  intro q hq
-  obtain ⟨i, z, rfl⟩ := IsFunction.mem_eq_kpair hq
-  have h₁ : i ∈ SetTheory.succ n := hs.domain_eq ▸ mem_domain_of_kpair_mem hq
-  obtain ⟨w, hw⟩ := ht.exists_value (h _ h₁)
-  have : z = w := hs.val_unique ht (hs.index_mem hq) hq hw
-  simpa [this] using hw
-
-lemma unique (hs : c.CSeq v n s) (ht : c.CSeq v n t) : s = t :=
-  subset_antisymm (hs.subset ht (subset_refl _)) (ht.subset hs (subset_refl _))
 
 variable (c v)
 
@@ -182,7 +164,7 @@ lemma cseq_result_existsUnique (n : V) (hn : n ∈ (ω : V)) :
   obtain ⟨z, hz⟩ := hs.exists_value (mem_succ_self n)
   apply ExistsUnique.intro z ⟨s, hs, hz⟩
   rintro w ⟨t, ht, hw⟩
-  exact ht.val_unique hs hn hw hz
+  exact ht.value_unique hs hn hw hz
 
 lemma result_existsUnique (n : V) :
     ∃! z, (∃ s, c.CSeq v n s ∧ ⟨n, z⟩ₖ ∈ s) ∨ (n ∉ (ω : V) ∧ z = ∅) := by
@@ -202,7 +184,7 @@ lemma result_spec {n : V} (hn : n ∈ (ω : V)) :
     ∃ s, c.CSeq v n s ∧ ⟨n, c.result v n⟩ₖ ∈ s := by
   simpa [hn] using (c.result_graph v (c.result v n) n).mp rfl
 
-@[simp] theorem result_of_not_mem {n : V} (hn : n ∉ (ω : V)) : c.result v n = ∅ :=
+theorem result_eq_empty_of_not_mem_omega {n : V} (hn : n ∉ (ω : V)) : c.result v n = ∅ :=
   ((c.result_graph v ∅ n).mpr (Or.inr ⟨hn, rfl⟩)).symm
 
 @[simp] theorem result_zero : c.result v 0 = c.zero v := by
@@ -218,21 +200,12 @@ lemma result_defined :
     DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) p.resultDef := .mk fun v ↦ by
   simp [Blueprint.resultDef, c.result_graph, c.cseq_defined_iff]
 
-@[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
-    p.resultDef.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff v
-
 instance result_definable :
     (ℒₛₑₜ).DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
   c.result_defined.to_definable
 
-instance result_definable_param : ℒₛₑₜ-function₁ (c.result v) := by
-  use (Rew.embSubsts (#0 :> #1 :> fun i : Fin k ↦ &(v i))) ▹ p.resultDef
-  intro w
-  simpa [Semiformula.eval_embSubsts, Matrix.comp_vecCons', Function.comp_def]
-    using c.result_defined.iff (w 0 :> w 1 :> v)
-
 end Construction
 
-end OmegaRec
+end NaturalNumberRec
 
 end FFL.FirstOrder.SetTheory
