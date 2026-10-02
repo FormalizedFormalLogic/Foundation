@@ -74,9 +74,13 @@ abbrev Edges := Std.HashSet Edge
 
 namespace Edges
 
-/-- Outgoing edges of each vertex. -/
+/-- Outgoing edges of each vertex; an equivalence is symmetric, so it leaves both of its ends. -/
 def adjacency (es : Edges) : Std.HashMap String (Array (String × EdgeType)) :=
-  es.fold (init := ∅) fun adj e => adj.insert e.src ((adj.getD e.src #[]).push (e.dst, e.type))
+  let insert (adj : Std.HashMap String (Array (String × EdgeType))) (a b : String) (t : EdgeType) :=
+    adj.insert a ((adj.getD a #[]).push (b, t))
+  es.fold (init := ∅) fun adj e =>
+    let adj := insert adj e.src e.dst e.type
+    if e.type matches .eq then insert adj e.dst e.src .eq else adj
 
 /--
 For every vertex reachable from `src`, the relations witnessed by some path leading to it.
@@ -100,8 +104,16 @@ def relationsFrom (es : Edges) (src : String) : Std.HashMap String (Std.HashSet 
 def isRedundant (es : Edges) (e : Edge) : Bool :=
   (relationsFrom (es.erase e) e.src).getD e.dst ∅ |>.any (EdgeType.entails · e.type)
 
-/-- Transitive reduction: the edges that do not follow from the others. -/
-def reduce (es : Edges) : Edges := es.filter fun e => !isRedundant es e
+/--
+Transitive reduction: the edges that do not follow from the others.
+
+The edges are examined one at a time against those still kept, in lexicographic order. Deciding
+every edge against all the others would discard each member of a cycle of equivalences, which
+follows from the rest of the cycle.
+-/
+def reduce (es : Edges) : Edges :=
+  (es.toArray.qsort (compare · · |>.isLT)).foldl (init := es) fun kept e =>
+    if isRedundant kept e then kept.erase e else kept
 
 /-- The transitive reduction of `es`, as a JSON array in lexicographic order. -/
 def toJson (es : Edges) : Json :=

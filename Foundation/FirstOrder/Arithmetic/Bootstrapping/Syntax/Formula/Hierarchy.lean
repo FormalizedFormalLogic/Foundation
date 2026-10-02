@@ -5,10 +5,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Boun
 /-!
 # Internal arithmetical hierarchy
 
-The internal predicates `IsHierarchy Γ n` on codes of formulas of the (non-strict) bounded
-arithmetical hierarchy, and `IsStrictHierarchy Γ n` on codes of strict prenex formulas: they are
-`𝚫ᴬ₁`-definable and agree with `ℬ[<, ℒₒᵣ].Hierarchy` and `StrictHierarchy` on quoted formulas.
-Both are `IsBounded` at level `0`.
+The internal predicates `IsHierarchy Γ n` and `IsPrenexHierarchy Γ n` on codes of formulas: they
+are `𝚫ᴬ₁`-definable and agree with `ℬ[<, ℒₒᵣ].Hierarchy` and `ℬ[<, ℒₒᵣ].PrenexHierarchy` on
+quoted formulas.
 
 ## References
 
@@ -396,176 +395,52 @@ lemma IsHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsHierarchy Γ n p) :
 
 end isHierarchy
 
-/-! ## Strict prenex classes
+/-! ## Internal prenex classes -/
 
-### Iterated unbounded quantifier of a given polarity -/
+section isPrenexHierarchy
 
-section qqQuants
-
-def qqQuants.blueprint (Γ : Polarity) : PR.Blueprint 1 where
-  zero := .mkSigma “y x. y = x”
-  succ := .mkSigma “y ih n x. !(qqQuantDef Γ) y ih”
-
-noncomputable def qqQuants.construction (Γ : Polarity) :
-    PR.Construction V (qqQuants.blueprint Γ) where
-  zero := fun x ↦ x 0
-  succ := fun _ _ ih ↦ qqQuant Γ ih
-  zero_defined := .mk fun v ↦ by simp [qqQuants.blueprint]
-  succ_defined := .mk fun v ↦ by simp [qqQuants.blueprint, (qqQuant_defined Γ).df]
-
-noncomputable def qqQuants (Γ : Polarity) (p k : V) : V := (qqQuants.construction Γ).result ![p] k
-
-def _root_.FFL.FirstOrder.Arithmetic.qqQuantsDef (Γ : Polarity) : 𝚺ᴬ₁.Semisentence 3 :=
-  (qqQuants.blueprint Γ).resultDef |>.rew (Rew.subst ![#0, #2, #1])
-
-instance qqQuants_defined (Γ : Polarity) :
-    𝚺ᴬ₁-Function₂ (qqQuants Γ : V → V → V) via qqQuantsDef Γ := .mk
-  fun v ↦ by simp [(qqQuants.construction Γ).result_defined_iff, qqQuantsDef]; rfl
-
-instance qqQuants_definable (Γ : Polarity) : 𝚺ᴬ₁-Function₂ (qqQuants Γ : V → V → V) :=
-  (qqQuants_defined Γ).to_definable
-
-instance qqQuants_definable' (Γ Γ' : Polarity) {m : ℕ} :
-    Γ'ᴬ-[m + 1]-Function₂ (qqQuants Γ : V → V → V) :=
-  (qqQuants_definable Γ).of_sigmaOne
-
-variable {Γ : Polarity} {p k : V}
-
-@[simp] lemma qqQuants_zero : qqQuants Γ p 0 = p := by
-  simp [qqQuants, qqQuants.construction];
-
-@[simp] lemma qqQuants_succ : qqQuants Γ p (k + 1) = qqQuant Γ (qqQuants Γ p k) := by
-  simp [qqQuants, qqQuants.construction];
-
-@[simp] lemma le_qqQuants : p ≤ qqQuants Γ p k := by
-  induction k using ISigma1.sigma1_succ_induction
-  · definability;
-  case zero => simp;
-  case succ k ih => simpa using ih.trans (lt_qqQuant Γ _).le;
-
-@[simp] lemma index_le_qqQuants : k ≤ qqQuants Γ p k := by
-  induction k using ISigma1.sigma1_succ_induction
-  · definability;
-  case zero => simp;
-  case succ k ih => simpa [← lt_iff_succ_le] using ih.trans_lt (lt_qqQuant Γ _);
-
-@[simp] lemma isUFormula_qqQuants {L : Language} [L.Encodable] [L.LORDefinable] :
-    IsUFormula L (qqQuants Γ p k) ↔ IsUFormula L p := by
-  induction k using ISigma1.sigma1_succ_induction
-  · definability;
-  case zero => simp;
-  case succ k ih => simpa using ih;
-
-lemma neg_qqQuants (hp : IsUFormula ℒₒᵣ p) :
-    neg ℒₒᵣ (qqQuants Γ p k) = qqQuants Γ.alt (neg ℒₒᵣ p) k := by
-  induction k using ISigma1.sigma1_succ_induction
-  · definability;
-  case zero => simp;
-  case succ k ih => simp [neg_qqQuant (isUFormula_qqQuants.mpr hp), ih];
-
-end qqQuants
-
-/-! ### Internal strict prenex classes -/
-
-section isStrictHierarchy
-
-def IsStrictHierarchy : Polarity → ℕ → V → Prop
+def IsPrenexHierarchy : Polarity → ℕ → V → Prop
   | _, 0 => IsBounded
-  | Γ, n + 1 => fun p ↦ ∃ k q, p = qqQuants Γ q k ∧ IsStrictHierarchy Γ.alt n q
+  | Γ, n + 1 => fun p ↦ ∃ q, p = qqQuant Γ q ∧ IsPrenexHierarchy Γ.alt n q
 
-abbrev IsStrictSigma (n : ℕ) (p : V) : Prop := IsStrictHierarchy 𝚺 n p
-
-abbrev IsStrictPi (n : ℕ) (p : V) : Prop := IsStrictHierarchy 𝚷 n p
-
-noncomputable def isStrictHierarchy : Polarity → ℕ → 𝚫ᴬ₁.Semisentence 1
+noncomputable def isPrenexHierarchy : Polarity → ℕ → 𝚫ᴬ₁.Semisentence 1
   | _, 0 => isBounded
   | Γ, n + 1 => .mkDelta
-      (.mkSigma “p. ∃ k < p + 1, ∃ q < p + 1, !(qqQuantsDef Γ) p q k ∧
-        !(isStrictHierarchy Γ.alt n).sigma q”)
-      (.mkPi “p. ∃ k < p + 1, ∃ q < p + 1, (∀ y, !(qqQuantsDef Γ) y q k → y = p) ∧
-        !(isStrictHierarchy Γ.alt n).pi q”)
+      (.mkSigma “p. ∃ q < p, !(qqQuantDef Γ) p q ∧ !(isPrenexHierarchy Γ.alt n).sigma q”)
+      (.mkPi “p. ∃ q < p, !(qqQuantDef Γ) p q ∧ !(isPrenexHierarchy Γ.alt n).pi q”)
 
-instance IsStrictHierarchy.defined : (Γ : Polarity) → (n : ℕ) →
-    𝚫ᴬ₁-Predicate (IsStrictHierarchy (V := V) Γ n) via isStrictHierarchy Γ n
+instance IsPrenexHierarchy.defined : (Γ : Polarity) → (n : ℕ) →
+    𝚫ᴬ₁-Predicate (IsPrenexHierarchy (V := V) Γ n) via isPrenexHierarchy Γ n
   | _, 0 => IsBounded.defined
   | Γ, n + 1 =>
-    have : 𝚫ᴬ₁-Predicate (IsStrictHierarchy (V := V) Γ.alt n) via isStrictHierarchy Γ.alt n :=
-      IsStrictHierarchy.defined Γ.alt n
+    have : 𝚫ᴬ₁-Predicate (IsPrenexHierarchy (V := V) Γ.alt n) via isPrenexHierarchy Γ.alt n :=
+      IsPrenexHierarchy.defined Γ.alt n
     .mk ⟨fun v ↦ by
-        simp [isStrictHierarchy, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm],
+        simp [isPrenexHierarchy, Bounding.HierarchySymbol.Semiformula.val_sigma],
       fun v ↦ by
-        simp [isStrictHierarchy, IsStrictHierarchy, lt_succ_iff_le];
-        grind [le_qqQuants, index_le_qqQuants]⟩
+        simp [isPrenexHierarchy, IsPrenexHierarchy, (qqQuant_defined Γ).df];
+        grind [lt_qqQuant]⟩
 
-instance IsStrictHierarchy.definable (Γ : Polarity) (n : ℕ) :
-    𝚫ᴬ₁-Predicate (IsStrictHierarchy (V := V) Γ n) :=
-  (IsStrictHierarchy.defined Γ n).to_definable
+instance IsPrenexHierarchy.definable (Γ : Polarity) (n : ℕ) :
+    𝚫ᴬ₁-Predicate (IsPrenexHierarchy (V := V) Γ n) :=
+  (IsPrenexHierarchy.defined Γ n).to_definable
 
 variable {Γ : Polarity} {n : ℕ} {p : V}
 
-lemma IsStrictHierarchy.of_alt (h : IsStrictHierarchy Γ.alt n p) :
-    IsStrictHierarchy Γ (n + 1) p :=
-  ⟨0, p, qqQuants_zero.symm, h⟩
+@[simp] lemma IsPrenexHierarchy.quant_iff :
+    IsPrenexHierarchy Γ (n + 1) (qqQuant Γ p) ↔ IsPrenexHierarchy Γ.alt n p := by
+  simp [IsPrenexHierarchy];
 
-lemma IsStrictHierarchy.quant (h : IsStrictHierarchy Γ (n + 1) p) :
-    IsStrictHierarchy Γ (n + 1) (qqQuant Γ p) := by
-  obtain ⟨k, q, rfl, hq⟩ := h;
-  exact ⟨k + 1, q, qqQuants_succ.symm, hq⟩;
-
-lemma IsStrictHierarchy.of_bounded (h : IsBounded p) : IsStrictHierarchy Γ n p := by
-  induction n generalizing Γ with
-  | zero => exact h;
-  | succ n ih => exact IsStrictHierarchy.of_alt ih;
-
-lemma IsStrictHierarchy.succ (h : IsStrictHierarchy Γ n p) : IsStrictHierarchy Γ (n + 1) p := by
-  induction n generalizing Γ p with
-  | zero => exact IsStrictHierarchy.of_bounded h;
-  | succ n ih =>
-    obtain ⟨k, q, rfl, hq⟩ := h;
-    exact ⟨k, q, rfl, ih hq⟩;
-
-lemma IsStrictHierarchy.mono {m : ℕ} (hmn : m ≤ n) (h : IsStrictHierarchy Γ m p) :
-    IsStrictHierarchy Γ n p := by
-  induction hmn with
-  | refl => exact h;
-  | step _ ih => exact ih.succ;
-
-lemma IsStrictHierarchy.of_quant (h : IsStrictHierarchy Γ (n + 1) (qqQuant Γ p)) :
-    IsStrictHierarchy Γ (n + 1) p := by
-  have H : ∀ {Γ' n} {p : V},
-      IsStrictHierarchy Γ' n (qqQuant Γ p) → IsStrictHierarchy Γ (n + 1) p := by
-    intro Γ' n;
-    induction n generalizing Γ' with
-    | zero =>
-      intro p h;
-      cases Γ;
-      · obtain ⟨_, q, ⟨t, -, rfl⟩, hq, rfl⟩ := IsBounded.of_ex h;
-        exact IsStrictHierarchy.of_alt <| IsBounded.and_iff.mpr ⟨by simp [Arithmetic.qqLT], hq⟩;
-      · obtain ⟨_, q, ⟨t, -, rfl⟩, hq, rfl⟩ := IsBounded.of_all h;
-        exact IsStrictHierarchy.of_alt <| IsBounded.or_iff.mpr ⟨by simp [Arithmetic.qqNLT], hq⟩;
-    | succ n ih =>
-      rintro p ⟨k, q, heq, hq⟩;
-      rcases zero_or_succ k with (rfl | ⟨k, rfl⟩);
-      · obtain rfl : qqQuant Γ p = q := by simpa using heq;
-        exact (ih hq).succ;
-      · obtain ⟨rfl, rfl⟩ : Γ = Γ' ∧ p = qqQuants Γ' q k := by simpa using heq;
-        exact ⟨k, q, rfl, hq.succ⟩;
-  obtain ⟨k, q, heq, hq⟩ := h;
-  rcases zero_or_succ k with (rfl | ⟨k, rfl⟩);
-  · obtain rfl : qqQuant Γ p = q := by simpa using heq;
-    exact H hq;
-  · exact ⟨k, q, by simpa using heq, hq⟩;
-
-lemma IsStrictHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsStrictHierarchy Γ n p) :
-    IsStrictHierarchy Γ.alt n (neg ℒₒᵣ p) := by
+lemma IsPrenexHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy Γ n p) :
+    IsPrenexHierarchy Γ.alt n (neg ℒₒᵣ p) := by
   induction n generalizing Γ p with
   | zero => exact IsBounded.neg hp h;
   | succ n ih =>
-    obtain ⟨k, q, rfl, hq⟩ := h;
-    have hq' : IsUFormula ℒₒᵣ q := isUFormula_qqQuants.mp hp;
-    exact ⟨k, neg ℒₒᵣ q, neg_qqQuants hq', ih hq' hq⟩;
+    obtain ⟨q, rfl, hq⟩ := h;
+    have hq' : IsUFormula ℒₒᵣ q := isUFormula_qqQuant.mp hp;
+    exact ⟨neg ℒₒᵣ q, neg_qqQuant hq', ih hq' hq⟩;
 
-end isStrictHierarchy
+end isPrenexHierarchy
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -664,49 +539,38 @@ theorem isSigma_quote_iff (σ : ArithmeticSemisentence n) :
 theorem isPi_quote_iff (σ : ArithmeticSemisentence n) :
     IsPi s (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 s σ := isHierarchy_quote_iff σ
 
-/-! ### `IsStrictHierarchy` and `StrictHierarchy` -/
+/-! ### `IsPrenexHierarchy` and `ℬ[<, ℒₒᵣ].PrenexHierarchy` -/
 
-private lemma isStrictHierarchy_of_strictHierarchy {ψ : ArithmeticSemiproposition n}
-    (h : StrictHierarchy Γ s ψ) : IsStrictHierarchy Γ s (⌜ψ⌝ : V) := by
-  induction h with
-  | zero hφ => exact (isBounded_quote_iff_s _).mpr hφ;
-  | ofAlt _ ih => exact ih.of_alt;
-  | exs _ ih => simpa [Semiformula.quote_ex] using IsStrictHierarchy.quant (Γ := 𝚺) ih;
-  | all _ ih => simpa [Semiformula.quote_all] using IsStrictHierarchy.quant (Γ := 𝚷) ih;
-
-private lemma strictHierarchy_of_isStrictHierarchy (ψ : ArithmeticSemiproposition n) :
-    IsStrictHierarchy Γ s (⌜ψ⌝ : ℕ) → StrictHierarchy Γ s ψ := by
-  induction s generalizing Γ n ψ with
-  | zero => exact fun h ↦ .zero ((isBounded_quote_iff_s ψ).mp h);
-  | succ s ihs =>
-    rintro ⟨k, q, heq, hq⟩;
-    induction k generalizing n ψ with
-    | zero => exact .ofAlt <| ihs ψ <| by simpa [heq] using hq;
-    | succ k ih =>
-      cases Γ;
-      · induction ψ using Semiformula.rec' with
-        | hexs φ _ => exact .exs <| ih φ <| by simpa using heq;
+lemma isPrenexHierarchy_quote_iff_s (ψ : ArithmeticSemiproposition n) :
+    IsPrenexHierarchy Γ s (⌜ψ⌝ : V) ↔ ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s ψ := by
+  induction s generalizing Γ n with
+  | zero => exact (isBounded_quote_iff_s ψ).trans Bounding.PrenexHierarchy.zero_iff_bounded.symm;
+  | succ s ih =>
+    cases Γ;
+    · constructor;
+      · rintro ⟨q, heq, hq⟩;
+        cases ψ using Semiformula.cases' with
+        | hexs φ =>
+          obtain rfl : ⌜φ⌝ = q := by simpa [Semiformula.quote_ex] using heq;
+          exact ((ih φ).mp hq).exs;
         | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at heq;
-      · induction ψ using Semiformula.rec' with
-        | hall φ _ => exact .all <| ih φ <| by simpa using heq;
+      · intro h;
+        obtain ⟨φ, hφ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp h;
+        exact ⟨⌜φ⌝, by simp [Semiformula.quote_ex], (ih φ).mpr hφ⟩;
+    · constructor;
+      · rintro ⟨q, heq, hq⟩;
+        cases ψ using Semiformula.cases' with
+        | hall φ =>
+          obtain rfl : ⌜φ⌝ = q := by simpa [Semiformula.quote_all] using heq;
+          exact ((ih φ).mp hq).all;
         | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at heq;
+      · intro h;
+        obtain ⟨φ, hφ, rfl⟩ := Bounding.PrenexHierarchy.pi_succ_iff.mp h;
+        exact ⟨⌜φ⌝, by simp [Semiformula.quote_all], (ih φ).mpr hφ⟩;
 
-lemma isStrictHierarchy_quote_iff_s (ψ : ArithmeticSemiproposition n) :
-    IsStrictHierarchy Γ s (⌜ψ⌝ : V) ↔ StrictHierarchy Γ s ψ := by
-  simpa [Semiformula.coe_quote_eq_quote] using
-    (Defined.shigmaOne_absolute V (IsStrictHierarchy.defined Γ s)
-      (IsStrictHierarchy.defined Γ s) ![⌜ψ⌝]).symm.trans
-      ⟨strictHierarchy_of_isStrictHierarchy ψ, isStrictHierarchy_of_strictHierarchy⟩;
-
-theorem isStrictHierarchy_quote_iff (σ : ArithmeticSemisentence n) :
-    IsStrictHierarchy Γ s (⌜σ⌝ : V) ↔ StrictHierarchy Γ s σ := by
-  simp [Sentence.quote_def, isStrictHierarchy_quote_iff_s];
-
-theorem isStrictSigma_quote_iff (σ : ArithmeticSemisentence n) :
-    IsStrictSigma s (⌜σ⌝ : V) ↔ StrictHierarchy 𝚺 s σ := isStrictHierarchy_quote_iff σ
-
-theorem isStrictPi_quote_iff (σ : ArithmeticSemisentence n) :
-    IsStrictPi s (⌜σ⌝ : V) ↔ StrictHierarchy 𝚷 s σ := isStrictHierarchy_quote_iff σ
+theorem isPrenexHierarchy_quote_iff (σ : ArithmeticSemisentence n) :
+    IsPrenexHierarchy Γ s (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s σ := by
+  simp [Sentence.quote_def, isPrenexHierarchy_quote_iff_s];
 
 end quote
 
