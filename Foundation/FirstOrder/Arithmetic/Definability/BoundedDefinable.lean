@@ -252,20 +252,20 @@ lemma arithmetic_bexs_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) 
   exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
 lemma arithmetic_ball_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction f) (h : Γᴬ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴬ-[0].Definable fun v ↦ ∀ x < f v, P v x := arithmetic_ball_blt hf h
+    (hf : DefinableBoundedFunction f) (h : Γᴬ_[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ_[0].Definable fun v ↦ ∀ x < f v, P v x := arithmetic_ball_blt hf h
 
 lemma arithmetic_bexs_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction f) (h : Γᴬ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴬ-[0].Definable fun v ↦ ∃ x < f v, P v x := arithmetic_bexs_blt hf h
+    (hf : DefinableBoundedFunction f) (h : Γᴬ_[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ_[0].Definable fun v ↦ ∃ x < f v, P v x := arithmetic_bexs_blt hf h
 
 lemma arithmetic_ball_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction f) (h : Γᴬ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴬ-[0].Definable fun v ↦ ∀ x ≤ f v, P v x := arithmetic_ball_ble hf h
+    (hf : DefinableBoundedFunction f) (h : Γᴬ_[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ_[0].Definable fun v ↦ ∀ x ≤ f v, P v x := arithmetic_ball_ble hf h
 
 lemma arithmetic_bexs_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : DefinableBoundedFunction f) (h : Γᴬ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴬ-[0].Definable fun v ↦ ∃ x ≤ f v, P v x := arithmetic_bexs_ble hf h
+    (hf : DefinableBoundedFunction f) (h : Γᴬ_[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
+    Γᴬ_[0].Definable fun v ↦ ∃ x ≤ f v, P v x := arithmetic_bexs_ble hf h
 
 lemma arithmetic_bexs_vec_le_boundedFunction {k} {φ : Fin l → (Fin k → V) → V}
     {P : (Fin k → V) → (Fin l → V) → Prop}
@@ -341,33 +341,33 @@ lemma arithmetic_bounded_comp₄ {k} {R : V → V → V → V → Prop}
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma arithmetic_bounded_comp₁_zero {k} {P : V → Prop} {f : (Fin k → V) → V}
-    [hP : Γᴬ-[0].DefinablePred P]
+    [hP : Γᴬ_[0].DefinablePred P]
     (hf : DefinableBoundedFunction f) :
-    Γᴬ-[0].Definable fun v ↦ P (f v) :=
+    Γᴬ_[0].Definable fun v ↦ P (f v) :=
   hP.arithmetic_bounded_substitution (f := ![f]) (by simp [*])
 
 lemma arithmetic_bounded_comp₂_zero {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V}
-    [hR : Γᴬ-[0].DefinableRel R]
+    [hR : Γᴬ_[0].DefinableRel R]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂) :
-    Γᴬ-[0].Definable fun v ↦ R (f₁ v) (f₂ v) :=
+    Γᴬ_[0].Definable fun v ↦ R (f₁ v) (f₂ v) :=
   hR.arithmetic_bounded_substitution (f := ![f₁, f₂])
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma arithmetic_bounded_comp₃_zero {k} {R : V → V → V → Prop}
     {f₁ f₂ f₃ : (Fin k → V) → V}
-    [hR : Γᴬ-[0].DefinableRel₃ R]
+    [hR : Γᴬ_[0].DefinableRel₃ R]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) :
-    Γᴬ-[0].Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
+    Γᴬ_[0].Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
   hR.arithmetic_bounded_substitution (f := ![f₁, f₂, f₃])
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma arithmetic_bounded_comp₄_zero {k} {R : V → V → V → V → Prop}
     {f₁ f₂ f₃ f₄ : (Fin k → V) → V}
-    [hR : Γᴬ-[0].DefinableRel₄ R]
+    [hR : Γᴬ_[0].DefinableRel₄ R]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) (hf₄ : DefinableBoundedFunction f₄) :
-    Γᴬ-[0].Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
+    Γᴬ_[0].Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
   hR.arithmetic_bounded_substitution (f := ![f₁, f₂, f₃, f₄])
     (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 

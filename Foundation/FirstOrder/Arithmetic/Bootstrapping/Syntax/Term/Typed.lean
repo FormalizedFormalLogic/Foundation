@@ -311,7 +311,7 @@ instance fvarVec_definable : 𝚺ᴬ₁-Function₁ (fvarVec : V → V) :=
   fvarVec_defined.to_definable
 
 instance fvarVec_definable' {Γ : Polarity} {m : ℕ} :
-    Γᴬ-[m + 1]-Function₁ (fvarVec : V → V) := fvarVec_definable.of_sigmaOne
+    Γᴬ_[m + 1]-Function₁ (fvarVec : V → V) := fvarVec_definable.of_sigmaOne
 
 @[simp] lemma len_fvarVec (k : V) : len (fvarVec k) = k := by
   induction k using ISigma1.sigma1_succ_induction
@@ -459,7 +459,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
 lemma replace {P : α → isSemiterm} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx
 
 lemma semiterm_induction (Γ) {n : V} {P : Semiterm V ℒₒᵣ n → isSemiterm}
-    (hP : Γᴬ-[1]-Predicate (fun x ↦ (h : IsSemiterm ℒₒᵣ n x) → P ⟨x, h⟩))
+    (hP : Γᴬ_[1]-Predicate (fun x ↦ (h : IsSemiterm ℒₒᵣ n x) → P ⟨x, h⟩))
     (hBvar : ∀ (z : V) (h : z < n), P (bvar ℒₒᵣ z h))
     (hFvar : ∀ x, P (⌜ℒₒᵣ⌝.fvar x))
     (hZero : P ((0 : V) : Semiterm V ℒₒᵣ n))

@@ -39,7 +39,7 @@ def _root_.FFL.FirstOrder.Arithmetic.qqBexDef : 𝚺ᴬ₁.Semisentence 3 := .mk
 instance qqBex_defined : 𝚺ᴬ₁-Function₂ (qqBex : V → V → V) via qqBexDef := .mk fun v ↦ by
   simp [qqBexDef, qqBex, Arithmetic.qqLT_defined.df]
 
-instance qqBex_definable (Γ m) : Γᴬ-[m + 1]-Function₂ (qqBex : V → V → V) :=
+instance qqBex_definable (Γ m) : Γᴬ_[m + 1]-Function₂ (qqBex : V → V → V) :=
   .of_sigmaOne qqBex_defined.to_definable
 
 variable {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q)
@@ -240,7 +240,7 @@ lemma IsBounded.of_qqBex {u p : V} (h : IsBounded (qqBex u p)) : IsBounded p := 
   obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq;
   exact hq';
 
-lemma IsBounded.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+lemma IsBounded.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hverum : P ^⊤) (hfalsum : P ^⊥)
     (hrel : ∀ k r v, P (^rel k r v)) (hnrel : ∀ k r v, P (^nrel k r v))
     (hand : ∀ p q, IsBounded p → IsBounded q → P p → P q → P (p ^⋏ q))

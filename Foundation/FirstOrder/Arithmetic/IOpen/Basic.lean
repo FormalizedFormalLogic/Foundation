@@ -820,7 +820,7 @@ end IOpen
 
 @[elab_as_elim]
 lemma polynomial_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (Γ m) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
-    {P : V → Prop} (hP : Γᴬ-[m]-Predicate P)
+    {P : V → Prop} (hP : Γᴬ_[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory this

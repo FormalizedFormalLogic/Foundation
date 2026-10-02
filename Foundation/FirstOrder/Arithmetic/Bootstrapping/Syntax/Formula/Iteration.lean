@@ -63,7 +63,7 @@ instance qqConj.defined : 𝚺ᴬ₁-Function₁[V] qqConj via qqConjGraph := co
 
 instance qqConj.definable : 𝚺ᴬ₁-Function₁ (qqConj : V → V) := qqConj.defined.to_definable
 
-instance qqConj.definable' : Γᴬ-[m + 1]-Function₁ (qqConj : V → V) := .of_sigmaOne qqConj.definable
+instance qqConj.definable' : Γᴬ_[m + 1]-Function₁ (qqConj : V → V) := .of_sigmaOne qqConj.definable
 
 end
 
@@ -129,7 +129,7 @@ instance qqDisj.defined : 𝚺ᴬ₁-Function₁[V] qqDisj via qqDisjGraph := co
 
 instance qqDisj.definable : 𝚺ᴬ₁-Function₁[V] qqDisj := qqDisj.defined.to_definable
 
-instance qqDisj.definable' : Γᴬ-[m + 1]-Function₁[V] qqDisj := .of_sigmaOne qqDisj.definable
+instance qqDisj.definable' : Γᴬ_[m + 1]-Function₁[V] qqDisj := .of_sigmaOne qqDisj.definable
 
 end
 
@@ -208,7 +208,7 @@ instance disjSeqSubst.defined : 𝚺ᴬ₁-Function₃[V] disjSeqSubst via disjS
 
 instance disjSeqSubst.definable : 𝚺ᴬ₁-Function₃[V] disjSeqSubst := disjSeqSubst.defined.to_definable
 
-instance disjSeqSubst.definable' : Γᴬ-[m + 1]-Function₃[V] disjSeqSubst :=
+instance disjSeqSubst.definable' : Γᴬ_[m + 1]-Function₃[V] disjSeqSubst :=
   .of_sigmaOne disjSeqSubst.definable
 
 end
@@ -279,7 +279,7 @@ instance substItr.defined : 𝚺ᴬ₁-Function₃[V] substItr via substItrGraph
 instance substItr.definable : 𝚺ᴬ₁-Function₃ (substItr : V → V → V → V) :=
   substItr.defined.to_definable
 
-instance substItr.definable' : Γᴬ-[m + 1]-Function₃ (substItr : V → V → V → V) :=
+instance substItr.definable' : Γᴬ_[m + 1]-Function₃ (substItr : V → V → V → V) :=
   .of_sigmaOne substItr.definable
 
 end
@@ -432,7 +432,7 @@ instance qqVerums.defined : 𝚺ᴬ₁-Function₁[V] qqVerums via qqVerumsGraph
 
 instance qqVerums.definable : 𝚺ᴬ₁-Function₁[V] qqVerums := qqVerums.defined.to_definable
 
-instance qqVerums.definable' : Γᴬ-[m + 1]-Function₁[V] qqVerums := .of_sigmaOne qqVerums.definable
+instance qqVerums.definable' : Γᴬ_[m + 1]-Function₁[V] qqVerums := .of_sigmaOne qqVerums.definable
 
 end
 
@@ -478,7 +478,7 @@ instance qqAlls_definable : 𝚺ᴬ₁-Function₂ (qqAlls : V → V → V) :=
   qqAlls_defined.to_definable
 
 instance qqAlls_definable' {Γ : Polarity} {m : ℕ} :
-    Γᴬ-[m + 1]-Function₂ (qqAlls : V → V → V) := qqAlls_definable.of_sigmaOne
+    Γᴬ_[m + 1]-Function₂ (qqAlls : V → V → V) := qqAlls_definable.of_sigmaOne
 
 lemma le_qqAll (p : V) : p ≤ ^∀ p := by
   simp only [qqAll]; exact le_trans (le_pair_right _ _) le_self_add

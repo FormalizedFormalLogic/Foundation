@@ -44,7 +44,7 @@ instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_definable :
 
 /-- instance for definability tactic -/
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_le_definable' :
-    𝚺ᴬ-[0 + 1]-Relation[V] T.ProvabilityComparisonLE := T.provability_comparison_le_definable
+    𝚺ᴬ_[0 + 1]-Relation[V] T.ProvabilityComparisonLE := T.provability_comparison_le_definable
 
 
 noncomputable def _root_.FFL.FirstOrder.Theory.provabilityComparisonLT :
@@ -62,7 +62,7 @@ instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_definable :
 
 /-- instance for definability tactic -/
 instance _root_.FFL.FirstOrder.Theory.provability_comparison_lt_definable' :
-    𝚺ᴬ-[0 + 1]-Relation[V] T.ProvabilityComparisonLT := T.provability_comparison_lt_definable
+    𝚺ᴬ_[0 + 1]-Relation[V] T.ProvabilityComparisonLT := T.provability_comparison_lt_definable
 
 end
 

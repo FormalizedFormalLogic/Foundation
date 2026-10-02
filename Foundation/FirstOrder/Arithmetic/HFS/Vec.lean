@@ -96,7 +96,7 @@ instance mkVec₂_defined : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ ?[x, y]) via
 
 instance mkVec₂_definable : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ ?[x, y]) := mkVec₂_defined.to_definable
 
-instance mkVec₂_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (fun x y : V ↦ ?[x, y]) :=
+instance mkVec₂_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (fun x y : V ↦ ?[x, y]) :=
   mkVec₂_definable.of_sigmaOne
 
 end
@@ -163,7 +163,7 @@ instance graph_defined : 𝚺ᴬ₁-Predicate (Graph : V → Prop) via graphDef 
 
 instance graph_definable : 𝚺ᴬ₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
 
-instance graph_definable' : 𝚺ᴬ-[0 + 1]-Predicate (Graph : V → Prop) := graph_definable
+instance graph_definable' : 𝚺ᴬ_[0 + 1]-Predicate (Graph : V → Prop) := graph_definable
 
 end
 
@@ -258,7 +258,7 @@ lemma adjoin_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
   · simp
   · right; exact ⟨π₁ z, π₂ z, by simp [adjoin]⟩
 
-lemma adjoin_induction (Γ) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+lemma adjoin_induction (Γ) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   ISigma1.order_induction Γ hP (by
     intro v ih
@@ -290,7 +290,7 @@ instance nth_defined : 𝚺ᴬ₁-Function₂ (nth : V → V → V) via nthDef :
 
 instance nth_definable : 𝚺ᴬ₁-Function₂ (nth : V → V → V) := nth_defined.to_definable
 
-instance nth_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (nth : V → V → V) := nth_definable.of_sigmaOne
+instance nth_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (nth : V → V → V) := nth_definable.of_sigmaOne
 
 end
 
@@ -437,7 +437,7 @@ instance graph_definable' (param) : 𝚺ᴬ₁-Predicate (c.Graph param) := by
   simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 1)
     c.graph_definable (#0 :> fun i ↦ &(param i))
 
-instance graph_definable'' (param) : 𝚺ᴬ-[0 + 1]-Predicate (c.Graph param) :=
+instance graph_definable'' (param) : 𝚺ᴬ_[0 + 1]-Predicate (c.Graph param) :=
   c.graph_definable' param
 
 end
@@ -530,7 +530,7 @@ instance result_definable : 𝚺ᴬ₁.DefinableFunction (fun v ↦ c.result (v 
   c.result_defined.to_definable
 
 instance result_definable' (Γ m) :
-    Γᴬ-[m + 1].DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
+    Γᴬ_[m + 1].DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
   c.result_definable.of_sigmaOne
 
 end
@@ -577,7 +577,7 @@ instance len_defined : 𝚺ᴬ₁-Function₁ (len : V → V) via lenDef := adjo
 
 instance len_definable : 𝚺ᴬ₁-Function₁ (len : V → V) := len_defined.to_definable
 
-instance len_definable' (Γ m) : Γᴬ-[m + 1]-Function₁ (len : V → V) := len_definable.of_sigmaOne
+instance len_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (len : V → V) := len_definable.of_sigmaOne
 
 end
 
@@ -713,7 +713,7 @@ instance listMax_defined : 𝚺ᴬ₁-Function₁ (listMax : V → V) via listMa
 
 instance listMax_definable : 𝚺ᴬ₁-Function₁ (listMax : V → V) := listMax_defined.to_definable
 
-instance listMax_definable' (Γ m) : Γᴬ-[m + 1]-Function₁ (listMax : V → V) :=
+instance listMax_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (listMax : V → V) :=
   listMax_definable.of_sigmaOne
 
 end
@@ -803,7 +803,7 @@ instance takeLast_defined : 𝚺ᴬ₁-Function₂ (takeLast : V → V → V) vi
 
 instance takeLast_definable : 𝚺ᴬ₁-Function₂ (takeLast : V → V → V) := takeLast_defined.to_definable
 
-instance takeLast_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (takeLast : V → V → V) :=
+instance takeLast_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (takeLast : V → V → V) :=
   takeLast_definable.of_sigmaOne
 
 end
@@ -889,7 +889,7 @@ instance concat_defined : 𝚺ᴬ₁-Function₂ (concat : V → V → V) via co
 
 instance concat_definable : 𝚺ᴬ₁-Function₂ (concat : V → V → V) := concat_defined.to_definable
 
-instance concat_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (concat : V → V → V) :=
+instance concat_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (concat : V → V → V) :=
   concat_definable.of_sigmaOne
 
 end
@@ -963,7 +963,7 @@ instance memVec_defined : 𝚫ᴬ₁-Relation (MemVec : V → V → Prop) via me
 
 instance memVec_definable : 𝚫ᴬ₁-Relation (MemVec : V → V → Prop) := memVec_defined.to_definable
 
-instance memVec_definable' (Γ m) : Γᴬ-[m + 1]-Relation (MemVec : V → V → Prop) :=
+instance memVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (MemVec : V → V → Prop) :=
   memVec_definable.of_deltaOne
 
 end
@@ -1006,7 +1006,7 @@ instance subsetVec_defined : 𝚫ᴬ₁-Relation (SubsetVec : V → V → Prop) 
 instance subsetVec_definable : 𝚫ᴬ₁-Relation (SubsetVec : V → V → Prop) :=
   subsetVec_defined.to_definable
 
-instance subsetVec_definable' (Γ m) : Γᴬ-[m + 1]-Relation (SubsetVec : V → V → Prop) :=
+instance subsetVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (SubsetVec : V → V → Prop) :=
   subsetVec_definable.of_deltaOne
 
 end
@@ -1051,7 +1051,7 @@ instance repeatVec_defined : 𝚺ᴬ₁-Function₂ (repeatVec : V → V → V) 
 instance repeatVec_definable : 𝚺ᴬ₁-Function₂ (repeatVec : V → V → V) :=
   repeatVec_defined.to_definable
 
-instance repeatVec_definable' (Γ) : Γᴬ-[m + 1]-Function₂ (repeatVec : V → V → V) :=
+instance repeatVec_definable' (Γ) : Γᴬ_[m + 1]-Function₂ (repeatVec : V → V → V) :=
   repeatVec_definable.of_sigmaOne
 
 end
@@ -1119,7 +1119,7 @@ instance vecToSet_defined : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) via vecT
 
 instance vecToSet_definable : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) := vecToSet_defined.to_definable
 
-instance vecToSet_definable' (Γ) : Γᴬ-[m + 1]-Function₁ (vecToSet : V → V) :=
+instance vecToSet_definable' (Γ) : Γᴬ_[m + 1]-Function₁ (vecToSet : V → V) :=
   vecToSet_definable.of_sigmaOne
 
 end
