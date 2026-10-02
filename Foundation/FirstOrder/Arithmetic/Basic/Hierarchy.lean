@@ -128,6 +128,55 @@ end LOR
 
 end FFL.FirstOrder.Bounding.Hierarchy
 
+namespace FFL.FirstOrder.Bounding.Closure
+
+open FFL.FirstOrder.Arithmetic
+
+section
+
+variable {ξ : Type*}
+
+lemma arithmetic_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
+    (hVerum : ∀ n, P n ⊤)
+    (hFalsum : ∀ n, P n ⊥)
+    (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))
+    (hNEQ : ∀ n t₁ t₂, P n (.nrel Language.Eq.eq ![t₁, t₂]))
+    (hLT : ∀ n t₁ t₂, P n (.rel Language.LT.lt ![t₁, t₂]))
+    (hNLT : ∀ n t₁ t₂, P n (.nrel Language.LT.lt ![t₁, t₂]))
+    (hAnd : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ →
+      P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ →
+      P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ →
+      P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBex : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ →
+      P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (n φ) : ℬ[<, ℒₒᵣ].Closure φ → P n φ := by
+  intro h;
+  induction h with
+  | verum n => exact hVerum n;
+  | falsum n => exact hFalsum n;
+  | rel r v =>
+    cases r <;> rw [Matrix.fun_eq_vec_two v];
+    exacts [hEQ _ _ _, hLT _ _ _];
+  | nrel r v =>
+    cases r <;> rw [Matrix.fun_eq_vec_two v];
+    exacts [hNEQ _ _ _, hNLT _ _ _];
+  | and hp hq ihp ihq => exact hAnd _ _ _ hp hq ihp ihq;
+  | or hp hq ihp ihq => exact hOr _ _ _ hp hq ihp ihq;
+  | ball hR ht hp ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR;
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht;
+    exact hBall _ t _ hp ih;
+  | bexs hR ht hp ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR;
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht;
+    exact hBex _ t _ hp ih;
+
+end
+
+end FFL.FirstOrder.Bounding.Closure
+
 namespace FFL.FirstOrder
 
 abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) :=

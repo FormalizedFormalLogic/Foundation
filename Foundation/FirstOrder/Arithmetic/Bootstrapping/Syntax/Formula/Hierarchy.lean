@@ -62,6 +62,38 @@ lemma neg_qqQuant (hp : IsUFormula ℒₒᵣ p) :
 
 end qqQuant
 
+section qqToPrenex
+
+noncomputable def qqToPrenex : Polarity → ℕ → V → V
+  | _, 0, θ => θ
+  | Γ, s + 1, θ => qqQuant Γ (qqToPrenex Γ.alt s θ)
+
+def _root_.FFL.FirstOrder.Arithmetic.qqToPrenexDef : Polarity → ℕ → 𝚺ᴬ₀.Semisentence 2
+  | _, 0 => .mkSigma “y θ. y = θ”
+  | Γ, s + 1 => .mkSigma “y θ. ∃ z < y, !(qqQuantDef Γ) y z ∧ !(qqToPrenexDef Γ.alt s) z θ”
+
+variable {Γ : Polarity} {s : ℕ} {θ θ' : V}
+
+@[simp] lemma qqToPrenex_zero : qqToPrenex Γ 0 θ = θ := rfl
+
+@[simp] lemma qqToPrenex_succ : qqToPrenex Γ (s + 1) θ = qqQuant Γ (qqToPrenex Γ.alt s θ) := rfl
+
+@[simp] lemma qqToPrenex_inj : qqToPrenex Γ s θ = qqToPrenex Γ s θ' ↔ θ = θ' := by
+  induction s generalizing Γ <;> simp [*];
+
+@[simp] lemma le_qqToPrenex : θ ≤ qqToPrenex Γ s θ := by
+  induction s generalizing Γ with
+  | zero => simp;
+  | succ s ih => exact ih.trans (lt_qqQuant _ _).le;
+
+instance qqToPrenex_defined : (Γ : Polarity) → (s : ℕ) →
+    𝚺ᴬ₀-Function₁ (qqToPrenex Γ s : V → V) via qqToPrenexDef Γ s
+  | _, 0 => .mk fun v ↦ by simp [qqToPrenexDef]
+  | Γ, s + 1 => .mk fun v ↦ by
+    simp +contextual [qqToPrenexDef, (qqToPrenex_defined Γ.alt s).df, (qqQuant_defined Γ).df]
+
+end qqToPrenex
+
 /-! ## Internal hierarchy predicate `IsHierarchy` -/
 
 section isHierarchy
@@ -430,6 +462,10 @@ variable {Γ : Polarity} {n : ℕ} {p : V}
 @[simp] lemma IsPrenexHierarchy.quant_iff :
     IsPrenexHierarchy Γ (n + 1) (qqQuant Γ p) ↔ IsPrenexHierarchy Γ.alt n p := by
   simp [IsPrenexHierarchy];
+
+lemma isPrenexHierarchy_iff_exists_qqToPrenex :
+    IsPrenexHierarchy Γ n p ↔ ∃ θ, p = qqToPrenex Γ n θ ∧ IsBounded θ := by
+  induction n generalizing Γ p <;> simp [IsPrenexHierarchy, *];
 
 lemma IsPrenexHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy Γ n p) :
     IsPrenexHierarchy Γ.alt n (neg ℒₒᵣ p) := by

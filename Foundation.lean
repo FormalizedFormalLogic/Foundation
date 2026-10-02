@@ -10,6 +10,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.EquationalTheory
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounded
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.TermVal
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Basic

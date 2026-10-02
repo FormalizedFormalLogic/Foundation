@@ -203,23 +203,37 @@ def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ : FirstOrder.
 @[simp] lemma LOR_rel_ltIndex : (ℒₒᵣ).IsRel 2 (ltIndex : V) := by
   simpa using! codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.LT.lt
 
-lemma func_def_LOR :
+@[simp] lemma zeroIndex_ne_oneIndex : zeroIndex ≠ oneIndex := Encodable.encode_injective.ne nofun
+
+@[simp] lemma addIndex_ne_mulIndex : addIndex ≠ mulIndex := Encodable.encode_injective.ne nofun
+
+@[simp] lemma eqIndex_ne_ltIndex : eqIndex ≠ ltIndex := Encodable.encode_injective.ne nofun
+
+private lemma func_def_LOR :
     (ℒₒᵣ).isFunc =
       .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” := rfl
 
-lemma rel_def_LOR : (ℒₒᵣ).isRel = .mkSigma “k r. (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” := rfl
+private lemma rel_def_LOR : (ℒₒᵣ).isRel = .mkSigma “k r. (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” := rfl
 
-lemma coe_zeroIndex_eq : (zeroIndex : V) = 0 := rfl
+private lemma coe_zeroIndex_eq : (zeroIndex : V) = 0 := rfl
 
-lemma coe_oneIndex_eq : (oneIndex : V) = 1 := by simp [oneIndex]; rfl
+private lemma coe_oneIndex_eq : (oneIndex : V) = 1 := by simp [oneIndex]; rfl
 
-lemma coe_addIndex_eq : (addIndex : V) = 0 := rfl
+private lemma coe_addIndex_eq : (addIndex : V) = 0 := rfl
 
-lemma coe_mulIndex_eq : (mulIndex : V) = 1 := by simp [mulIndex]; rfl
+private lemma coe_mulIndex_eq : (mulIndex : V) = 1 := by simp [mulIndex]; rfl
 
 @[reducible] instance gödelQuoteFuncLOR (k) : GödelQuote ((ℒₒᵣ).Func k) V := gödelQuoteFunc k
 
 @[reducible] instance gödelQuoteRelLOR (k) : GödelQuote ((ℒₒᵣ).Rel k) V := gödelQuoteRel k
+
+lemma quote_func_zero : (⌜(Language.ORing.Func.zero : (ℒₒᵣ).Func 0)⌝ : V) = zeroIndex := rfl
+
+lemma quote_func_one : (⌜(Language.ORing.Func.one : (ℒₒᵣ).Func 0)⌝ : V) = oneIndex := rfl
+
+lemma quote_func_add : (⌜(Language.ORing.Func.add : (ℒₒᵣ).Func 2)⌝ : V) = addIndex := rfl
+
+lemma quote_func_mul : (⌜(Language.ORing.Func.mul : (ℒₒᵣ).Func 2)⌝ : V) = mulIndex := rfl
 
 lemma isFunc_iff_LOR {k f : V} :
     (ℒₒᵣ).IsFunc k f ↔
