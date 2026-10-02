@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounded
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Prenex
 import Foundation.Meta.ClProver
 
@@ -165,10 +166,8 @@ theorem hierarchicalSatisfaction_quote_iff {Γ : Polarity} {s k : ℕ}
 lemma quote_toPrenex : ∀ {Γ : Polarity} {s n : ℕ} (θ : ArithmeticSemisentence (n + s)),
     (⌜θ.toPrenex Γ s⌝ : V) = qqToPrenex Γ s ⌜θ⌝
   | _, 0, _, _ => by simp
-  | 𝚺, s + 1, n, θ => by
-    simp [Polarity.quantItr_succ, quote_toPrenex (Γ := 𝚷), quote_cast (Nat.succ_add n s).symm]
-  | 𝚷, s + 1, n, θ => by
-    simp [Polarity.quantItr_succ, quote_toPrenex (Γ := 𝚺), quote_cast (Nat.succ_add n s).symm]
+  | Γ, s + 1, n, θ => by
+    cases Γ <;> simp [Polarity.quantItr_succ, quote_toPrenex, quote_cast (Nat.succ_add n s).symm]
 
 theorem partialTruth_quote_iff {Γ : Polarity} {s : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty 0) :
     PartialTruth Γ s (⌜φ.val⌝ : V) ↔ V↓[ℒₒᵣ] ⊧ φ.val := by
