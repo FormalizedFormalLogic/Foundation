@@ -138,6 +138,10 @@ instance PartialTruth.pi_definable (s : ℕ) [NeZero s] :
     𝚷ᴬ-[s]-Predicate (PartialTruth 𝚷 s : V → Prop) :=
   (PartialTruth.pi_defined s).to_definable
 
+@[simp] lemma PartialTruth.zero_iff {Γ : Polarity} {x : V} :
+    PartialTruth Γ 0 x ↔ BoundedTruth x := by
+  simp [PartialTruth, BoundedTruth]
+
 /-! ## Agreement with truth in models of `𝗜𝚺₁` -/
 
 private lemma hierarchicalSatisfaction_quote_toPrenex_iff : ∀ {Γ : Polarity} {s k : ℕ}
@@ -204,6 +208,11 @@ lemma _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_partialTruth_iff_of_hier
     ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ 1 Empty 0,
       𝗜𝚺₁ ⊢ σ 🡘 φ.val ∧ 𝗜𝚺₁ ⊢ (partialTruth Γ 1).val/[⌜φ.val⌝] 🡘 σ :=
   Bootstrapping.provable_partialTruth_iff_of_hierarchy 𝗜𝚺₁ h
+
+theorem provable_boundedTruth_iff_of_hierarchy (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T]
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 0 σ) : T ⊢ boundedTruth.val/[⌜σ⌝] 🡘 σ :=
+  Entailment.WeakerThan.pbl <|
+    ISigma1.provable_boundedTruth_iff (Bounding.Hierarchy.zero_iff_bounded.mp h)
 
 end prenex
 
