@@ -492,10 +492,6 @@ lemma termBV_termBShift_le {t : V} (ht : IsUTerm L t) (m : V) :
       have := H i (by rw [len_termBVVec hv]; exact hi)
       rwa [nth_termBVVec hv hi] at this
 
-lemma isSemiterm_of_termBShift {n t : V} (ht : IsUTerm ℒₒᵣ t)
-    (h : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t)) : IsSemiterm ℒₒᵣ n t :=
-  IsSemiterm.def.mpr ⟨ht, (termBV_termBShift_le ht n).mp (IsSemiterm.def.mp h).2⟩
-
 end termBShift
 
 /-

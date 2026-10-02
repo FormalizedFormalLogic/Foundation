@@ -243,10 +243,6 @@ lemma quote_addIndex_eq : (⌜(Language.ORing.Func.add : (ℒₒᵣ).Func 2)⌝ 
 lemma quote_mulIndex_eq : (⌜(Language.ORing.Func.mul : (ℒₒᵣ).Func 2)⌝ : V) = 1 :=
   coe_mulIndex_eq
 
-lemma coe_quote_eq : (⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝ : V) = 0 := coe_eqIndex_eq
-
-lemma coe_quote_lt : (⌜(Language.LT.lt : (ℒₒᵣ).Rel 2)⌝ : V) = 1 := coe_ltIndex_eq
-
 lemma isFunc_iff_LOR {k f : V} :
     (ℒₒᵣ).IsFunc k f ↔
     (k = 0 ∧ f = ⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝) ∨

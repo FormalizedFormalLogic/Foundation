@@ -42,9 +42,6 @@ instance qqBex_defined : 𝚺ᴬ₁-Function₂ (qqBex : V → V → V) via qqBe
 instance qqBex_definable (Γ m) : Γᴬ-[m + 1]-Function₂ (qqBex : V → V → V) :=
   .of_sigmaOne qqBex_defined.to_definable
 
-@[simp] lemma qqBex_inj {u₁ q₁ u₂ q₂ : V} : qqBex u₁ q₁ = qqBex u₂ q₂ ↔ u₁ = u₂ ∧ q₁ = q₂ := by
-  simp [qqBex, Arithmetic.qqLT, qqRel, adjoin_inj];
-
 variable {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q)
 include hu hq
 
@@ -61,54 +58,6 @@ lemma shift_qqBex : shift ℒₒᵣ (qqBex u q) = qqBex (termShift ℒₒᵣ u) 
   simp [qqBex, Arithmetic.qqLT, hu, hq];
 
 end qqBex
-
-section
-
-open Arithmetic (qqLT qqNLT)
-
-variable {n m w t p : V}
-
-lemma isSemiformula_qqBall (ht : IsUTerm ℒₒᵣ t)
-    (h : IsSemiformula ℒₒᵣ n (qqBall (termBShift ℒₒᵣ t) p)) :
-    IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
-  obtain ⟨h₁, h₂⟩ : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
-    simpa [qqBall, qqNLT] using h;
-  exact ⟨isSemiterm_of_termBShift ht h₁, h₂⟩;
-
-lemma isSemiformula_qqBex (ht : IsUTerm ℒₒᵣ t)
-    (h : IsSemiformula ℒₒᵣ n (qqBex (termBShift ℒₒᵣ t) p)) :
-    IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
-  obtain ⟨h₁, h₂⟩ : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
-    simpa [qqBex, qqLT] using h;
-  exact ⟨isSemiterm_of_termBShift ht h₁, h₂⟩;
-
-section
-variable (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t) (hp : IsUFormula ℒₒᵣ p)
-include hw ht hp
-
-lemma substs_qqBall :
-    Bootstrapping.subst ℒₒᵣ w (qqBall (termBShift ℒₒᵣ t) p) =
-      qqBall (termBShift ℒₒᵣ (termSubst ℒₒᵣ w t)) (Bootstrapping.subst ℒₒᵣ (qVec ℒₒᵣ w) p) := by
-  have hbt : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) := ht.isUTerm.termBShift;
-  have hlt : IsUFormula ℒₒᵣ ((qqBvar 0 : V) ^≮ termBShift ℒₒᵣ t) := by simp [qqNLT, hbt];
-  rw [show qqBall (termBShift ℒₒᵣ t) p = ^∀ ((qqBvar 0 ^≮ termBShift ℒₒᵣ t) ^⋎ p) from rfl,
-    substs_all (by simp [hlt, hp]), substs_or hlt hp, Arithmetic.substs_nlt (by simp) hbt,
-    substs_qVec_bShift ht hw];
-  simp [qVec, qqBall];
-
-lemma substs_qqBex :
-    Bootstrapping.subst ℒₒᵣ w (qqBex (termBShift ℒₒᵣ t) p) =
-      qqBex (termBShift ℒₒᵣ (termSubst ℒₒᵣ w t)) (Bootstrapping.subst ℒₒᵣ (qVec ℒₒᵣ w) p) := by
-  have hbt : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) := ht.isUTerm.termBShift;
-  have hlt : IsUFormula ℒₒᵣ ((qqBvar 0 : V) ^< termBShift ℒₒᵣ t) := by simp [qqLT, hbt];
-  rw [show qqBex (termBShift ℒₒᵣ t) p = ^∃ ((qqBvar 0 ^< termBShift ℒₒᵣ t) ^⋏ p) from rfl,
-    substs_ex (by simp [hlt, hp]), substs_and hlt hp, Arithmetic.substs_lt (by simp) hbt,
-    substs_qVec_bShift ht hw];
-  simp [qVec, qqBex];
-
-end
-
-end
 
 /-! ## Internal $\Delta_0$ predicate `IsBounded` -/
 
@@ -342,37 +291,6 @@ lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex];
     simpa [shift_qqBex ht.termBShift hq, ← termBShift_termShift ht.isSemiterm]
       using IsBounded.bex ht.termShift (ih hq);
-
-lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ n p)
-    (h : IsBounded p) : IsBounded (Bootstrapping.subst ℒₒᵣ w p) := by
-  revert n m w;
-  apply IsBounded.induction 𝚷 (P := fun p ↦ ∀ n m w, IsSemitermVec ℒₒᵣ n m w →
-    IsSemiformula ℒₒᵣ n p → IsBounded (Bootstrapping.subst ℒₒᵣ w p)) (by definability)
-    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p h;
-  · simp;
-  · simp;
-  · intro k r v n m w _ hp;
-    obtain ⟨hr, hv⟩ := IsUFormula.rel.mp hp.isUFormula;
-    simp [hr, hv];
-  · intro k r v n m w _ hp;
-    obtain ⟨hr, hv⟩ := IsUFormula.nrel.mp hp.isUFormula;
-    simp [hr, hv];
-  · intro p q _ _ ihp ihq n m w hw hpq;
-    obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq;
-    rw [substs_and hp.isUFormula hq.isUFormula];
-    exact IsBounded.and_iff.mpr ⟨ihp n m w hw hp, ihq n m w hw hq⟩;
-  · intro p q _ _ ihp ihq n m w hw hpq;
-    obtain ⟨hp, hq⟩ := IsSemiformula.or.mp hpq;
-    rw [substs_or hp.isUFormula hq.isUFormula];
-    exact IsBounded.or_iff.mpr ⟨ihp n m w hw hp, ihq n m w hw hq⟩;
-  · intro t q ht _ ih n m w hw hpq;
-    obtain ⟨ht', hq⟩ := isSemiformula_qqBall ht hpq;
-    rw [substs_qqBall hw ht' hq.isUFormula];
-    exact IsBounded.ball (hw.termSubst ht').isUTerm (ih _ _ _ hw.qVec hq);
-  · intro t q ht _ ih n m w hw hpq;
-    obtain ⟨ht', hq⟩ := isSemiformula_qqBex ht hpq;
-    rw [substs_qqBex hw ht' hq.isUFormula];
-    exact IsBounded.bex (hw.termSubst ht').isUTerm (ih _ _ _ hw.qVec hq);
 
 end isBounded
 
