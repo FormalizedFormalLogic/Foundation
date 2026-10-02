@@ -38,8 +38,22 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 private lemma exists_prenex_of_quote_eq_qqToPrenex :
     ∀ {Γ : Polarity} {s k : ℕ} {σ : ArithmeticSemisentence k} {θ : V},
-      (⌜σ⌝ : V) = qqToPrenex Γ s θ → IsBounded θ → ∃ φ : Prenex Γ s Empty k, σ = φ.val := by
-  sorry
+      (⌜σ⌝ : V) = qqToPrenex Γ s θ → IsBounded θ → ∃ φ : Prenex Γ s Empty k, σ = φ.val
+  | _, 0, _, σ, _, h, hb => ⟨⟨⟨σ, (isBounded_quote_iff σ).mp (by rwa [h, qqToPrenex_zero])⟩⟩, rfl⟩
+  | 𝚺, s + 1, k, σ, θ, h, hb => by
+    cases σ using Semiformula.cases' with
+    | hexs ψ =>
+      obtain ⟨φ, rfl⟩ := exists_prenex_of_quote_eq_qqToPrenex (Γ := 𝚷) (by simpa using h) hb;
+      exact ⟨φ.sigma, Prenex.val_sigma.symm⟩;
+    | _ => simp [Sentence.quote_def, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll,
+        qqExs] at h;
+  | 𝚷, s + 1, k, σ, θ, h, hb => by
+    cases σ using Semiformula.cases' with
+    | hall ψ =>
+      obtain ⟨φ, rfl⟩ := exists_prenex_of_quote_eq_qqToPrenex (Γ := 𝚺) (by simpa using h) hb;
+      exact ⟨φ.pi, Prenex.val_pi.symm⟩;
+    | _ => simp [Sentence.quote_def, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll,
+        qqExs] at h;
 
 private lemma eval_sigmaReflectionPremise (x : V) :
     V ⊧/![x] (sigmaReflectionPremise T n).val ↔
