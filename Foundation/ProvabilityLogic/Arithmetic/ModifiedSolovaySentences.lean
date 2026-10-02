@@ -232,7 +232,7 @@ lemma exists_cheapest [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ι : Type*} [Finite ι
   let := Fintype.ofFinite ι
   obtain ⟨i₀, w₀, h₀⟩ := h;
   obtain ⟨w, ⟨i₁, h₁⟩, hw⟩ : ∃ w, (∃ i, P i w) ∧ ∀ v < w, ¬∃ i, P i v :=
-    InductionOnBroadHierarchy.least_number_sigma 𝚺 1
+    InductionOnHierarchy.least_number_sigma 𝚺 1
       (Bounding.HierarchySymbol.Definable.fintype_exs hP)
       ⟨i₀, h₀⟩;
   obtain ⟨j, hj, hmin⟩ := (InvImage.wf o wellFounded_lt).has_min {i | P i w} ⟨i₁, h₁⟩;
@@ -250,7 +250,7 @@ end comparison
 
 variable {κ α : Type*} [Nonempty κ] [DecidableEq α] {A : ProvabilityLogic.Formula α}
   (T : ArithmeticTheory) [T.Δ₁] (M : StrongReflexiveCountermodel κ A) [Fintype M.World]
-  (σ : ArithmeticSentence) (θ : 𝚺ᴬ₀.Semisentence 1)
+  (σ : ArithmeticSentence) (θ : ℬ[<, ℒₒᵣ].Semisentence 1)
 
 section stx
 

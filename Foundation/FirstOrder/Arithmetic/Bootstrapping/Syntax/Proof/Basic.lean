@@ -375,43 +375,39 @@ private lemma phi_iff (C d : V) :
       (∃ s < d, ∃ p < d,
         d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) := by
   constructor
-  · rintro ⟨hs, H⟩
-    refine ⟨hs, ?_⟩
+  · rintro ⟨hs, H⟩;
+    refine ⟨hs, ?_⟩;
     rcases H with (⟨s, p, rfl, h⟩ | ⟨s, rfl, h⟩ | ⟨s, p, q, dp, dq, rfl, h⟩ |
       ⟨s, p, q, dpq, rfl, h⟩ |
       ⟨s, p, dp, rfl, h⟩ | ⟨s, p, t, dp, rfl, h⟩ | ⟨s, d', rfl, h⟩ | ⟨s, d', rfl, h⟩ |
-      ⟨s, p, d₁, d₂, rfl, h⟩ | ⟨s, p, rfl, h⟩)
-    · left; exact ⟨s, by simp, p, by simp, rfl, h⟩
-    · right; left; exact ⟨s, by simp, rfl, h⟩
-    · right; right; left; exact ⟨s, by simp, p, by simp, q, by simp, dp, by simp, dq, by simp,
-        rfl, h⟩
-    · right; right; right; left; exact ⟨s, by simp, p, by simp, q, by simp, dpq, by simp, rfl, h⟩
-    · right; right; right; right; left; exact ⟨s, by simp, p, by simp, dp, by simp, rfl, h⟩
-    · right; right; right; right; right; left; exact ⟨s, by simp, p, by simp, t, by simp,
-        dp, by simp, rfl, h⟩
-    · right; right; right; right; right; right; left; exact ⟨s, by simp, d', by simp, rfl, h⟩
-    · right; right; right; right; right; right; right; left; exact ⟨s, by simp, d', by simp, rfl, h⟩
-    · right; right; right; right; right; right; right; right; left; exact ⟨s, by simp, p, by simp,
-        d₁, by simp, d₂, by simp, rfl, h⟩
-    · right; right; right; right; right; right; right; right; right; exact ⟨s, by simp, p, by simp,
-        rfl, h⟩
-  · rintro ⟨hs, H⟩
-    refine ⟨hs, ?_⟩
+      ⟨s, p, d₁, d₂, rfl, h⟩ | ⟨s, p, rfl, h⟩);
+    · disj 1; exact ⟨s, by simp, p, by simp, rfl, h⟩;
+    · disj 2; exact ⟨s, by simp, rfl, h⟩;
+    · disj 3; exact ⟨s, by simp, p, by simp, q, by simp, dp, by simp, dq, by simp, rfl, h⟩;
+    · disj 4; exact ⟨s, by simp, p, by simp, q, by simp, dpq, by simp, rfl, h⟩;
+    · disj 5; exact ⟨s, by simp, p, by simp, dp, by simp, rfl, h⟩;
+    · disj 6; exact ⟨s, by simp, p, by simp, t, by simp, dp, by simp, rfl, h⟩;
+    · disj 7; exact ⟨s, by simp, d', by simp, rfl, h⟩;
+    · disj 8; exact ⟨s, by simp, d', by simp, rfl, h⟩;
+    · disj 9; exact ⟨s, by simp, p, by simp, d₁, by simp, d₂, by simp, rfl, h⟩;
+    · disj 10; exact ⟨s, by simp, p, by simp, rfl, h⟩;
+  · rintro ⟨hs, H⟩;
+    refine ⟨hs, ?_⟩;
     rcases H with (⟨s, _, p, _, rfl, h⟩ | ⟨s, _, rfl, h⟩ |
       ⟨s, _, p, _, q, _, dp, _, dq, _, rfl, h⟩ |
       ⟨s, _, p, _, q, _, dpq, _, rfl, h⟩ |
       ⟨s, _, p, _, dp, _, rfl, h⟩ | ⟨s, _, p, _, t, _, dp, _, rfl, h⟩ | ⟨s, _, d', _, rfl, h⟩ |
-      ⟨s, _, d', _, rfl, h⟩ | ⟨s, _, p, _, d₁, _, d₂, _, rfl, h⟩ | ⟨s, _, p, _, h⟩)
-    · left; exact ⟨s, p, rfl, h⟩
-    · right; left; exact ⟨s, rfl, h⟩
-    · right; right; left; exact ⟨s, p, q, dp, dq, rfl, h⟩
-    · right; right; right; left; exact ⟨s, p, q, dpq, rfl, h⟩
-    · right; right; right; right; left; exact ⟨s, p, dp, rfl, h⟩
-    · right; right; right; right; right; left; exact ⟨s, p, t, dp, rfl, h⟩
-    · right; right; right; right; right; right; left; exact ⟨s, d', rfl, h⟩
-    · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, h⟩
-    · right; right; right; right; right; right; right; right; left; exact ⟨s, p, d₁, d₂, rfl, h⟩
-    · right; right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
+      ⟨s, _, d', _, rfl, h⟩ | ⟨s, _, p, _, d₁, _, d₂, _, rfl, h⟩ | ⟨s, _, p, _, h⟩);
+    · disj 1; exact ⟨s, p, rfl, h⟩;
+    · disj 2; exact ⟨s, rfl, h⟩;
+    · disj 3; exact ⟨s, p, q, dp, dq, rfl, h⟩;
+    · disj 4; exact ⟨s, p, q, dpq, rfl, h⟩;
+    · disj 5; exact ⟨s, p, dp, rfl, h⟩;
+    · disj 6; exact ⟨s, p, t, dp, rfl, h⟩;
+    · disj 7; exact ⟨s, d', rfl, h⟩;
+    · disj 8; exact ⟨s, d', rfl, h⟩;
+    · disj 9; exact ⟨s, p, d₁, d₂, rfl, h⟩;
+    · disj 10; exact ⟨s, p, h⟩;
 
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “d C.
@@ -486,45 +482,43 @@ def construction : Fixpoint.Construction V (blueprint T) where
   Φ := fun _ ↦ Phi T
   defined := Phi_definable _
   monotone := by
-    rintro C C' hC _ d ⟨hs, H⟩
-    refine ⟨hs, ?_⟩
+    rintro C C' hC _ d ⟨hs, H⟩;
+    refine ⟨hs, ?_⟩;
     rcases H with (h | h | ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC⟩, ⟨hq, hqC⟩⟩ |
       ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ |
       ⟨s, p, dp, rfl, hp, h, hdC⟩ | ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ |
       ⟨s, d', rfl, ss, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C⟩, ⟨h₂, hd₂C⟩⟩ |
-      ⟨s, p, h⟩)
-    · left; exact h
-    · right; left; exact h
-    · right; right; left; exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hC hpC⟩, ⟨hq, hC hqC⟩⟩
-    · right; right; right; left; exact ⟨s, p, q, dpq, rfl, hpq, h, hC hdC⟩
-    · right; right; right; right; left; exact ⟨s, p, dp, rfl, hp, h, hC hdC⟩
-    · right; right; right; right; right; left; exact ⟨s, p, t, dp, rfl, hp, ht, h, hC hdC⟩
-    · right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hC hdC⟩
-    · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hC hdC⟩
-    · right; right; right; right; right; right; right; right; left; exact ⟨s, p, d₁, d₂, rfl,
-        ⟨h₁, hC hd₁C⟩, ⟨h₂, hC hd₂C⟩⟩
-    · right; right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
+      ⟨s, p, h⟩);
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hC hpC⟩, ⟨hq, hC hqC⟩⟩;
+    · disj 4; exact ⟨s, p, q, dpq, rfl, hpq, h, hC hdC⟩;
+    · disj 5; exact ⟨s, p, dp, rfl, hp, h, hC hdC⟩;
+    · disj 6; exact ⟨s, p, t, dp, rfl, hp, ht, h, hC hdC⟩;
+    · disj 7; exact ⟨s, d', rfl, ss, hC hdC⟩;
+    · disj 8; exact ⟨s, d', rfl, ss, hC hdC⟩;
+    · disj 9; exact ⟨s, p, d₁, d₂, rfl, ⟨h₁, hC hd₁C⟩, ⟨h₂, hC hd₂C⟩⟩;
+    · disj 10; exact ⟨s, p, h⟩;
 
 instance : (construction T).StrongFinite V where
   strong_finite := by
-    rintro C _ d ⟨hs, H⟩
-    refine ⟨hs, ?_⟩
+    rintro C _ d ⟨hs, H⟩;
+    refine ⟨hs, ?_⟩;
     rcases H with (h | h | ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC⟩, ⟨hq, hqC⟩⟩ |
       ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ |
       ⟨s, p, dp, rfl, hp, h, hdC⟩ | ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ |
       ⟨s, d', rfl, ss, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C⟩, ⟨h₂, hd₂C⟩⟩ |
-      ⟨s, p, h⟩)
-    · left; exact h
-    · right; left; exact h
-    · right; right; left; exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC, by simp⟩, ⟨hq, hqC, by simp⟩⟩
-    · right; right; right; left; exact ⟨s, p, q, dpq, rfl, hpq, h, hdC, by simp⟩
-    · right; right; right; right; left; exact ⟨s, p, dp, rfl, hp, h, hdC, by simp⟩
-    · right; right; right; right; right; left; exact ⟨s, p, t, dp, rfl, hp, ht, h, hdC, by simp⟩
-    · right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hdC, by simp⟩
-    · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hdC, by simp⟩
-    · right; right; right; right; right; right; right; right; left; exact ⟨s, p, d₁, d₂, rfl,
-        ⟨h₁, hd₁C, by simp⟩, ⟨h₂, hd₂C, by simp⟩⟩
-    · right; right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
+      ⟨s, p, h⟩);
+    · disj 1; exact h;
+    · disj 2; exact h;
+    · disj 3; exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC, by simp⟩, ⟨hq, hqC, by simp⟩⟩;
+    · disj 4; exact ⟨s, p, q, dpq, rfl, hpq, h, hdC, by simp⟩;
+    · disj 5; exact ⟨s, p, dp, rfl, hp, h, hdC, by simp⟩;
+    · disj 6; exact ⟨s, p, t, dp, rfl, hp, ht, h, hdC, by simp⟩;
+    · disj 7; exact ⟨s, d', rfl, ss, hdC, by simp⟩;
+    · disj 8; exact ⟨s, d', rfl, ss, hdC, by simp⟩;
+    · disj 9; exact ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C, by simp⟩, ⟨h₂, hd₂C, by simp⟩⟩;
+    · disj 10; exact ⟨s, p, h⟩;
 
 end Derivation
 
@@ -698,25 +692,25 @@ lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.DerivationOf.isFormulaSet {
 
 lemma axL {s p : V} (hs : IsFormulaSet L s) (h : p ∈ s) (hn : neg L p ∈ s) :
     Derivation T (axL s p) :=
-  Bootstrapping.Derivation.mk ⟨by simpa using hs, Or.inl ⟨s, p, rfl, h, hn⟩⟩
+  Bootstrapping.Derivation.mk ⟨by simpa using hs, by disj 1; exact ⟨s, p, rfl, h, hn⟩⟩
 
 lemma verumIntro {s : V} (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) :
     Derivation T (verumIntro s) :=
-  Bootstrapping.Derivation.mk ⟨by simpa using hs, Or.inr <| Or.inl ⟨s, rfl, h⟩⟩
+  Bootstrapping.Derivation.mk ⟨by simpa using hs, by disj 2; exact ⟨s, rfl, h⟩⟩
 
 lemma andIntro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
     (hdp : DerivationOf T dp (insert p s)) (hdq : DerivationOf T dq (insert q s)) :
     Derivation T (andIntro s p q dp dq) :=
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_andIntro]; intro r hr; exact hdp.isFormulaSet r (by simp [hr]),
-      Or.inr <| Or.inr <| Or.inl ⟨s, p, q, dp, dq, rfl, h, hdp, hdq⟩⟩
+      by disj 3; exact ⟨s, p, q, dp, dq, rfl, h, hdp, hdq⟩⟩
 
 lemma orIntro {s p q dpq : V} (h : p ^⋎ q ∈ s)
     (hdpq : DerivationOf T dpq (insert p (insert q s))) :
     Derivation T (orIntro s p q dpq) :=
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_orIntro]; intro r hr; exact hdpq.isFormulaSet r (by simp [hr]),
-      Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, q, dpq, rfl, h, hdpq⟩⟩
+      by disj 4; exact ⟨s, p, q, dpq, rfl, h, hdpq⟩⟩
 
 lemma allIntro {s p dp : V} (h : ^∀ p ∈ s)
     (hdp : DerivationOf T dp (insert (free L p) (setShift L s))) :
@@ -724,7 +718,7 @@ lemma allIntro {s p dp : V} (h : ^∀ p ∈ s)
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_allIntro]; intro q hq; simpa using
           hdp.isFormulaSet (shift L q) (by simp [shift_mem_setShift hq]),
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, dp, rfl, h, hdp⟩⟩
+      by disj 5; exact ⟨s, p, dp, rfl, h, hdp⟩⟩
 
 lemma exsIntro {s p t dp : V}
     (h : ^∃ p ∈ s) (ht : IsTerm L t)
@@ -732,21 +726,17 @@ lemma exsIntro {s p t dp : V}
     Derivation T (exsIntro s p t dp) :=
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_exsIntro]; intro q hq; exact hdp.isFormulaSet q (by simp [hq]),
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, t, dp, rfl, h, ht, hdp⟩⟩
+      by disj 6; exact ⟨s, p, t, dp, rfl, h, ht, hdp⟩⟩
 
 lemma wkRule {s s' d : V} (hs : IsFormulaSet L s)
     (h : s' ⊆ s) (hd : DerivationOf T d s') : Derivation T (wkRule s d) :=
   Bootstrapping.Derivation.mk
-    ⟨by simpa using hs,
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
-        ⟨s, d, rfl, by simp [hd.1, h], hd.2⟩⟩
+    ⟨by simpa using hs, by disj 7; exact ⟨s, d, rfl, by simp [hd.1, h], hd.2⟩⟩
 
 lemma shiftRule {s d : V}
     (hd : DerivationOf T d s) : Derivation T (shiftRule (setShift L s) d) :=
   Bootstrapping.Derivation.mk
-    ⟨by simp [hd.isFormulaSet],
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
-        ⟨setShift L s, d, rfl, by simp [hd.1], hd.2⟩⟩
+    ⟨by simp [hd.isFormulaSet], by disj 8; exact ⟨setShift L s, d, rfl, by simp [hd.1], hd.2⟩⟩
 
 lemma cutRule {s p d₁ d₂ : V}
     (hd₁ : DerivationOf T d₁ (insert p s))
@@ -754,15 +744,12 @@ lemma cutRule {s p d₁ d₂ : V}
     Derivation T (cutRule s p d₁ d₂) :=
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_cutRule]; intro q hq; exact hd₁.isFormulaSet q (by simp [hq]),
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
-        ⟨s, p, d₁, d₂, rfl, hd₁, hd₂⟩⟩
+      by disj 9; exact ⟨s, p, d₁, d₂, rfl, hd₁, hd₂⟩⟩
 
 lemma axm {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
     Derivation T (axm s p) :=
   Bootstrapping.Derivation.mk
-    ⟨by simpa using hs,
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr
-        ⟨s, p, rfl, hp, hT⟩⟩
+    ⟨by simpa using hs, by disj 10; exact ⟨s, p, rfl, hp, hT⟩⟩
 
 variable {U : Theory L} [U.Δ₁]
 
@@ -903,8 +890,8 @@ lemma disjDistr (ps s : V) (d : Derivable T (vecToSet ps ∪ s)) :
       · intro x
         simp only [mem_cup_iff, mem_vecToSet_iff, takeLast_zero, qqDisj_nil, mem_bitInsert_iff]
         rintro (⟨i, hi, rfl⟩ | hx)
-        · right; left; exact hs' i (by simpa using hi)
-        · right; right; exact hx
+        · disj 2; exact hs' i (by simpa using hi);
+        · disj 3; exact hx;
     case succ k ih =>
       intro s' _ ss hs'
       simp only [takeLast_succ_of_lt (succ_le_iff_lt.mp hk), qqDisj_cons]

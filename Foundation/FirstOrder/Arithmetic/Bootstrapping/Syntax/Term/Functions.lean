@@ -441,6 +441,57 @@ lemma termBShift_termShift {n t : V} (ht : IsSemiterm L n t) :
     rw [nth_termBShiftVec hv.termShiftVec.isUTerm hi, nth_termShiftVec hv.isUTerm hi,
       nth_termShiftVec hv.termBShiftVec.isUTerm hi, nth_termBShiftVec hv.isUTerm hi, ih i hi]
 
+lemma le_termBShift {t : V} (ht : IsUTerm L t) : t ≤ termBShift L t := by
+  apply IsUTerm.induction 𝚺 (P := fun t ↦ t ≤ termBShift L t) ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z
+    rw [termBShift_bvar]
+    simp only [qqBvar]
+    exact add_le_add (pair_le_pair_right (0 : V) le_self_add) (le_refl 1)
+  · intro x; simp
+  · intro k f v hf hv ih
+    rw [termBShift_func hf hv]
+    have hvle : v ≤ termBShiftVec L k v := by
+      apply le_of_nth_le_nth
+      · rw [len_termBShiftVec hv]; exact hv.1.symm
+      · intro i hi
+        rw [← hv.1] at hi
+        rw [nth_termBShiftVec hv hi]
+        exact ih i hi
+    simp only [qqFunc]
+    exact add_le_add
+      (pair_le_pair_right 2 (pair_le_pair_right k (pair_le_pair_right f hvle))) (le_refl 1)
+
+lemma IsUTerm.termBShift {t : V} (ht : IsUTerm L t) : IsUTerm L (termBShift L t) :=
+  (ht.isSemiterm.termBShift).isUTerm
+
+lemma IsUTermVec.termBShiftVec {k v : V} (hv : IsUTermVec L k v) :
+    IsUTermVec L k (termBShiftVec L k v) :=
+  ⟨(len_termBShiftVec hv).symm, fun i hi ↦ by
+    rw [nth_termBShiftVec hv hi]; exact (hv.nth hi).termBShift⟩
+
+lemma termBV_termBShift_le {t : V} (ht : IsUTerm L t) (m : V) :
+    termBV L (termBShift L t) ≤ m + 1 ↔ termBV L t ≤ m := by
+  apply IsUTerm.induction 𝚺 (P := fun t ↦ termBV L (termBShift L t) ≤ m + 1 ↔ termBV L t ≤ m)
+    ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z; simp only [termBShift_bvar, termBV_bvar]; exact add_le_add_iff_right 1
+  · intro x; simp only [termBShift_fvar, termBV_fvar]; exact iff_of_true zero_le zero_le
+  · intro k f v hf hv ih
+    rw [termBShift_func hf hv, termBV_func hf hv.termBShiftVec, termBV_func hf hv,
+      listMaxss_le_iff, listMaxss_le_iff]
+    constructor
+    · intro H i hi
+      rw [len_termBVVec hv] at hi
+      rw [nth_termBVVec hv hi, ← ih i hi]
+      have := H i (by rw [len_termBVVec hv.termBShiftVec]; exact hi)
+      rwa [nth_termBVVec hv.termBShiftVec hi, nth_termBShiftVec hv hi] at this
+    · intro H i hi
+      rw [len_termBVVec hv.termBShiftVec] at hi
+      rw [nth_termBVVec hv.termBShiftVec hi, nth_termBShiftVec hv hi, ih i hi]
+      have := H i (by rw [len_termBVVec hv]; exact hi)
+      rwa [nth_termBVVec hv hi] at this
+
 end termBShift
 
 /-

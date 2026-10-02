@@ -107,7 +107,7 @@ lemma models_boxBot_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n + 1] �
 end
 
 @[simp, grind =]
-lemma ISigma1_height_eq_top : 𝗜𝚺⁺₁.height = ⊤ := height_eq_top_of_sigma1_sound 𝗜𝚺⁺₁
+lemma ISigma1_height_eq_top : 𝗜𝚺₁.height = ⊤ := height_eq_top_of_sigma1_sound 𝗜𝚺₁
 
 @[simp, grind =]
 lemma Peano_height_eq_top : 𝗣𝗔.height = ⊤ := height_eq_top_of_sigma1_sound 𝗣𝗔

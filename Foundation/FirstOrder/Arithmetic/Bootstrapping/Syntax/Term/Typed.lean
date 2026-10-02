@@ -279,6 +279,72 @@ end Semiterm
 
 end typed_isfvfree
 
+/-! ## Internal free-variable vector `fvarVec` -/
+
+section fvarVec
+
+def fvarVec.blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. y = 0”
+  succ := .mkSigma “y ih n. ∃ f, !qqFvarDef f n ∧ !concatDef y ih f”
+
+noncomputable def fvarVec.construction : PR.Construction V fvarVec.blueprint where
+  zero := fun _ ↦ 0
+  succ := fun _ n ih ↦ concat ih (^&n)
+  zero_defined := .mk fun v ↦ by simp [blueprint]
+  succ_defined := .mk fun v ↦ by simp [blueprint]
+
+/-- `fvarVec k = ⟨^&0, …, ^&(k-1)⟩`. -/
+noncomputable def fvarVec (k : V) : V := fvarVec.construction.result ![] k
+
+@[simp] lemma fvarVec_zero : fvarVec (0 : V) = 0 := by simp [fvarVec, fvarVec.construction]
+
+@[simp] lemma fvarVec_succ (k : V) : fvarVec (k + 1) = concat (fvarVec k) (^&k) := by
+  simp [fvarVec, fvarVec.construction]
+
+def _root_.FFL.FirstOrder.Arithmetic.fvarVecDef : 𝚺ᴬ₁.Semisentence 2 :=
+  fvarVec.blueprint.resultDef
+
+instance fvarVec_defined : 𝚺ᴬ₁-Function₁ (fvarVec : V → V) via fvarVecDef := .mk
+  fun v ↦ by simp [fvarVec.construction.result_defined_iff, fvarVecDef]; rfl
+
+instance fvarVec_definable : 𝚺ᴬ₁-Function₁ (fvarVec : V → V) :=
+  fvarVec_defined.to_definable
+
+instance fvarVec_definable' {Γ : Polarity} {m : ℕ} :
+    Γᴬ-[m + 1]-Function₁ (fvarVec : V → V) := fvarVec_definable.of_sigmaOne
+
+@[simp] lemma len_fvarVec (k : V) : len (fvarVec k) = k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih => simp [ih]
+
+lemma nth_fvarVec (k : V) : ∀ i < k, (fvarVec k).[i] = ^&i := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih =>
+    intro i hi
+    rcases (lt_succ_iff_le.mp hi).lt_or_eq with hlt | rfl
+    · rw [fvarVec_succ, concat_nth_lt _ _ (by simpa using hlt)]; exact ih i hlt
+    · rw [fvarVec_succ, concat_nth_len' _ _ (by simp)]
+
+lemma fvarVec_val_eq (m : ℕ) :
+    fvarVec ((m : ℕ) : V)
+      = SemitermVec.val
+          (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) := by
+  apply nth_ext (by simp)
+  intro i hi
+  rw [len_fvarVec] at hi
+  obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat hi
+  have hj : j < m := by exact_mod_cast hi
+  rw [nth_fvarVec _ _ hi, show ((j : ℕ) : V) = ((⟨j, hj⟩ : Fin m) : ℕ) from rfl,
+    SemitermVec.val_nth_eq
+      (fun i : Fin m ↦ (Semiterm.fvar (↑(i : ℕ)) : Bootstrapping.Semiterm V ℒₒᵣ 0)) ⟨j, hj⟩]
+  simp
+
+end fvarVec
+
 namespace Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace

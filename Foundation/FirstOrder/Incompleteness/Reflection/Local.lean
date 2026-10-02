@@ -37,8 +37,6 @@ lemma strictlyWeakerThan_localReflection [𝗜𝚺₁ ⪯ T] [Consistent T] :
 
 theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] :
     T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1] T ≊ T ∪ T.Con := by
-  have : 𝗜𝚺₁ ⪯ T ∪ T.Con :=
-    (inferInstance : 𝗜𝚺₁ ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left);
   apply Equiv.antisymm;
   constructor;
   · apply WeakerThan.ofAxm!;
@@ -112,17 +110,17 @@ end Sigma1Sound
 section
 variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
 
-lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
-    {S : ArithmeticTheory} (hTS : T ⪯ S) (h : S ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ n] T) :
+lemma provable_localReflectionOn_hierarchy_of_prenexHierarchy [𝗜𝚺n ⪯ T]
+    {S : ArithmeticTheory} (hTS : T ⪯ S) (h : S ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n] T) :
     S ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ n] T := by
   have : 𝗜𝚺₁ ⪯ S := (inferInstance : 𝗜𝚺₁ ⪯ T).trans hTS;
   have : 𝗕𝚺 n ⪯ T := by
     rcases n with _ | m;
-    · exact (CollectionOnHierarchy_weakerThan_of_le (Nat.zero_le 1)).trans
+    · exact (CollectionOnPrenexHierarchy_weakerThan_of_le (Nat.zero_le 1)).trans
         (BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺₁ ⪯ T));
     · exact BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺 (m + 1) ⪯ T);
   rintro φ ⟨σ, hσ, rfl⟩;
-  obtain ⟨σ', hσ', e⟩ := exists_strictHierarchy_of_hierarchy (Γ := Γ) T hσ;
+  obtain ⟨σ', hσ', e⟩ := exists_prenexHierarchy_of_hierarchy (Γ := Γ) T hσ;
   have he : T ⊢ σ 🡘 σ' := by simpa using e;
   have hinst : S ⊢ T.standardProvability.refl σ' :=
     h ((Provability.mem_localReflectionOn_iff _).mpr ⟨σ', hσ', rfl⟩);
@@ -132,23 +130,23 @@ lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
   cl_prover [hinst, hext, he'];
 
 theorem inconsistent_of_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
-    (hπ : ℬ[<, ℒₒᵣ].Hierarchy Γ n π) (h : insert π T ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T) :
+    (hπ : ℬ[<, ℒₒᵣ].Hierarchy Γ n π) (h : insert π T ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy Γ.alt n] T) :
     Inconsistent (insert π T) :=
   T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
     (fun _ hσ ↦ by simpa using hσ) hπ
-    (provable_localReflectionOn_hierarchy_of_strictHierarchy
+    (provable_localReflectionOn_hierarchy_of_prenexHierarchy
       (WeakerThan.ofSubset (Set.subset_insert _ _)) h)
 
 theorem not_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
     (hπ : ℬ[<, ℒₒᵣ].Hierarchy Γ n π) [Consistent (insert π T)] :
-    ¬insert π T ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T :=
+    ¬insert π T ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy Γ.alt n] T :=
   fun h ↦ (inconsistent_of_provable_localReflectionOn_insert hπ h).not_con
     inferInstance
 
 theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n ⪯ T]
     {U U' : ArithmeticTheory} (e : U ≊ U') (hU' : U'.Finite)
     (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].Hierarchy Γ n σ)
-    (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T) : Inconsistent (T ∪ U) := by
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy Γ.alt n] T) : Inconsistent (T ∪ U) := by
   classical
   have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right e T;
   have hmem : ∀ σ, σ ∈ hU'.toFinset.toList ↔ σ ∈ U' := by simp;
@@ -168,5 +166,33 @@ theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n �
     fun hσ ↦ (e.le.trans hle).pbl (h hσ)).of_ge (hge.trans e.symm.le);
 
 end
+
+section Iterate
+
+variable {U : ArithmeticTheory}
+
+lemma hierarchy_iterate_standardProvability_bot (n : ℕ) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (T.standardProvability^[n] ⊥) := by
+  rcases n with _ | n <;> simp [Function.iterate_succ_apply', standardProvability_def]
+
+lemma provable_neg_iterate_standardProvability_bot (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
+    ∀ n, U ⊢ ∼T.standardProvability^[n] ⊥
+  | 0 => by simp
+  | n + 1 => by
+    rw [Function.iterate_succ_apply'];
+    cl_prover [hU ⟨_, hierarchy_iterate_standardProvability_bot n, rfl⟩,
+      provable_neg_iterate_standardProvability_bot hU n];
+
+variable [U.Δ₁]
+
+lemma provable_iterate_standardProvability_bot_imp
+    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
+    (hU : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) (n : ℕ) :
+    𝗜𝚺₁ ⊢ T.standardProvability^[n + 1] ⊥ 🡒 U.standardProvability ⊥ := by
+  rw [Function.iterate_succ_apply'];
+  exact C_trans (hTU _) <| U.standardProvability.D2 ⨀
+    U.standardProvability.D1 (by cl_prover [provable_neg_iterate_standardProvability_bot hU n]);
+
+end Iterate
 
 end FFL.FirstOrder.Arithmetic
