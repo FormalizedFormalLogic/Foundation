@@ -395,6 +395,45 @@ theorem quote_eq (σ : Semisentence L n) :
 @[simp] lemma quote_isSemiformul₁ (φ : Semisentence L 1) : IsSemiformula L 1 (⌜φ⌝ : V) := by
   simp [quote_def]
 
+@[simp] lemma quote_isUFormula (φ : Semisentence L n) : IsUFormula L (⌜φ⌝ : V) :=
+  (quote_isSemiformula φ).isUFormula
+
+lemma quote_verum : (⌜(⊤ : Semisentence L n)⌝ : V) = ^⊤ := rfl
+
+lemma quote_falsum : (⌜(⊥ : Semisentence L n)⌝ : V) = ^⊥ := rfl
+
+@[simp] lemma quote_and (φ ψ : Semisentence L n) : (⌜φ ⋏ ψ⌝ : V) = ⌜φ⌝ ^⋏ ⌜ψ⌝ := rfl
+
+@[simp] lemma quote_or (φ ψ : Semisentence L n) : (⌜φ ⋎ ψ⌝ : V) = ⌜φ⌝ ^⋎ ⌜ψ⌝ := rfl
+
+@[simp] lemma quote_all (φ : Semisentence L (n + 1)) : (⌜∀¹ φ⌝ : V) = ^∀ ⌜φ⌝ := by
+  simp [quote_def]
+
+@[simp] lemma quote_ex (φ : Semisentence L (n + 1)) : (⌜∃¹ φ⌝ : V) = ^∃ ⌜φ⌝ := by
+  simp [quote_def]
+
+section
+
+variable (t u : ClosedSemiterm ℒₒᵣ n)
+
+@[simp] lemma quote_equals :
+    (⌜(Semiformula.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence n)⌝ : V) = ⌜t⌝ ^= ⌜u⌝ :=
+  rfl
+
+@[simp] lemma quote_notEquals :
+    (⌜(Semiformula.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence n)⌝ : V) = ⌜t⌝ ^≠ ⌜u⌝ :=
+  rfl
+
+@[simp] lemma quote_lessThan :
+    (⌜(Semiformula.rel Language.LT.lt ![t, u] : ArithmeticSemisentence n)⌝ : V) = ⌜t⌝ ^< ⌜u⌝ :=
+  rfl
+
+@[simp] lemma quote_notLessThan :
+    (⌜(Semiformula.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence n)⌝ : V) = ⌜t⌝ ^≮ ⌜u⌝ :=
+  rfl
+
+end
+
 lemma quote_eq_encode (σ : Semisentence L n) : (⌜σ⌝ : V) = ↑(encode σ) := by
   simp [quote_def, Semiformula.quote_eq_encode]
 
@@ -590,6 +629,21 @@ lemma quote_ball {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticS
   simp [Semiformula.quote_nrel, Arithmetic.qqNLT, Arithmetic.ltIndex, Semiterm.quote_def,
     Matrix.vecHead, Matrix.vecTail, Matrix.cons_val_zero, Matrix.cons_val_one]
   rfl
+
+lemma quote_ball_sentence {n : ℕ} (t : ClosedSemiterm ℒₒᵣ n)
+    (φ : ArithmeticSemisentence (n + 1)) :
+    (⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence n)⌝ : V)
+      = qqBall (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
+  simp [Semiformula.ball_eq, Semiformula.imp_eq, Semiformula.Operator.lt_def, qqBall]
+
+section
+
+variable {a b : ℕ} (h : a = b) {θ : ArithmeticSemisentence a}
+
+lemma quote_cast : (⌜cast (congrArg ArithmeticSemisentence h) θ⌝ : V) = ⌜θ⌝ := by
+  subst h; rfl
+
+end
 
 lemma termBShift_quote {n : ℕ} (s : SyntacticSemiterm ℒₒᵣ n) :
     (⌜Rew.bShift s⌝ : ℕ) = termBShift ℒₒᵣ (⌜s⌝ : ℕ) := by

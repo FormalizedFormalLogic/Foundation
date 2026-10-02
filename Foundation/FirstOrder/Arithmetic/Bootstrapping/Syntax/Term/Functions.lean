@@ -782,6 +782,10 @@ set_option backward.isDefEq.respectTransparency false in
 lemma coe_one_eq : (𝟏 : V) = (^func 0 ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ 0) := by
   simp [Arithmetic.one, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
 
+lemma qqZero_eq_qqFunc : (𝟎 : V) = ^func 0 (zeroIndex : V) 0 := coe_zero_eq
+
+lemma qqOne_eq_qqFunc : (𝟏 : V) = ^func 0 (oneIndex : V) 0 := coe_one_eq
+
 namespace Numeral
 
 def blueprint : PR.Blueprint 0 where
