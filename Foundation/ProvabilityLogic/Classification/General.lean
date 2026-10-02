@@ -3,7 +3,7 @@ module
 public import Foundation.ProvabilityLogic.Classification.AD
 public import Foundation.ProvabilityLogic.Classification.DS
 public import Foundation.FirstOrder.Incompleteness.Reflection.IteratedConsistency
-public import Foundation.FirstOrder.Incompleteness.Reflection.Unboundedness
+public import Foundation.FirstOrder.Incompleteness.Reflection.SigmaReflection
 
 /-!
 # Classification of provability logics
@@ -264,6 +264,33 @@ lemma provabilityLogic_turingOmega_eq_A_of_sigma1Sound [T.SoundOnHierarchy 𝚺 
 
 end
 
+section
+
+variable {n : ℕ} [NeZero n] [𝗜𝚺₁ ⪯ T] [𝗕𝚺n ⪯ T]
+
+theorem provabilityLogic_add_localReflectionOn_Sigma_eq_D :
+    letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
+    Consistent T' → T.provabilityLogicRelativeTo T' (α := α) = 𝐃 := by
+  sorry
+
+lemma provabilityLogic_add_localReflectionOn_Sigma_equiv_D :
+    letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
+    Consistent T' → T.provabilityLogicRelativeTo T' (α := α) ≊ 𝐃 :=
+  fun hC ↦ Logic.equiv_of_eq <| provabilityLogic_add_localReflectionOn_Sigma_eq_D hC
+
+lemma provabilityLogic_add_localReflectionOn_Sigma_eq_D_of_sigma1Sound
+    [T.SoundOnHierarchy 𝚺 1] :
+    T.provabilityLogicRelativeTo (T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T) (α := α) = 𝐃 := by
+  sorry
+
+end
+
+/-- - [AB05, Example 60] -/
+theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D [𝗜𝚺₁ ⪯ T] :
+    letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T;
+    Consistent T' → T.provabilityLogicRelativeTo T' (α := α) = 𝐃 := by
+  sorry
+
 lemma provabilityLogic_turingOmega_equiv_A_ISigma1 :
     𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ Set.range 𝗜𝚺₁.standardProvability.conItr) (α := α) ≊ 𝐀 :=
   Logic.equiv_of_eq provabilityLogic_turingOmega_eq_A_of_sigma1Sound
@@ -271,6 +298,18 @@ lemma provabilityLogic_turingOmega_equiv_A_ISigma1 :
 lemma provabilityLogic_turingOmega_equiv_A_peano :
     𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ Set.range 𝗣𝗔.standardProvability.conItr) (α := α) ≊ 𝐀 :=
   Logic.equiv_of_eq provabilityLogic_turingOmega_eq_A_of_sigma1Sound
+
+lemma provabilityLogic_add_localReflectionOn_Sigma1_equiv_D_ISigma1 :
+    𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗜𝚺₁) (α := α) ≊ 𝐃 := by
+  sorry
+
+lemma provabilityLogic_add_localReflectionOn_Sigma_equiv_D_peano {n : ℕ} [NeZero n] :
+    𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] 𝗣𝗔) (α := α) ≊ 𝐃 := by
+  sorry
+
+lemma provabilityLogic_add_localReflectionOn_Sigma1_equiv_D_peano :
+    𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗣𝗔) (α := α) ≊ 𝐃 :=
+  provabilityLogic_add_localReflectionOn_Sigma_equiv_D_peano
 
 end ProvabilityLogic
 
