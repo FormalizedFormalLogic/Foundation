@@ -133,20 +133,6 @@ include ht hu
 
 end
 
-lemma termVal_not_uterm (h : ¬IsUTerm ℒₒᵣ t) : termVal e t = 0 :=
-  construction.result_prop_not ℒₒᵣ ![e] h
-
-lemma termVal_termSubst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t) :
-    termVal e (termSubst ℒₒᵣ w t) = termVal (termValVec e n w) t := by
-  apply IsSemiterm.induction 𝚺 (by definability) ?_ ?_ ?_ t ht;
-  · intro z hz;
-    simp [hw.isUTerm, hz];
-  · simp;
-  · intro k f v hf hv ih;
-    rw [termSubst_func hf hv.isUTerm];
-    exact termVal_func_congr hf (hw.termSubstVec hv).isUTerm hv.isUTerm fun i hi ↦ by
-      rw [nth_termSubstVec hv.isUTerm hi, ih i hi];
-
 lemma termVal_termBShift (ht : IsUTerm ℒₒᵣ t) (x e : V) :
     termVal (x ∷ e) (termBShift ℒₒᵣ t) = termVal e t := by
   apply IsUTerm.induction 𝚺 (by definability) ?_ ?_ ?_ t ht;
@@ -156,21 +142,6 @@ lemma termVal_termBShift (ht : IsUTerm ℒₒᵣ t) (x e : V) :
     rw [termBShift_func hf hv];
     exact termVal_func_congr hf hv.isSemitermVec.termBShiftVec.isUTerm hv fun i hi ↦ by
       rw [nth_termBShiftVec hv hi, ih i hi];
-
-lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
-    termValVec (x ∷ e) (n + 1) (qVec ℒₒᵣ w) = x ∷ termValVec e n w := by
-  have hq : IsUTermVec ℒₒᵣ (n + 1) (qVec ℒₒᵣ w) := hw.qVec.isUTerm;
-  apply nth_ext' (n + 1) (by simp [hq]) (by simp [len_termValVec hw.isUTerm]);
-  intro i hi;
-  rw [nth_termValVec hq hi];
-  rcases zero_or_succ i with rfl | ⟨j, rfl⟩;
-  · simp [qVec];
-  · have hj : j < n := by simpa using hi;
-    have hnth : (qVec ℒₒᵣ w).[j + 1] = termBShift ℒₒᵣ w.[j] := by
-      rw [qVec, hw.lh];
-      simp [nth_termBShiftVec hw.isUTerm hj];
-    rw [hnth, termVal_termBShift (hw.isUTerm.nth hj) x e];
-    simp [nth_termValVec hw.isUTerm hj];
 
 lemma termVal_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (v : Fin k → V) :
     termVal (matrixToVec v) ⌜t⌝ = t.valb v := by
