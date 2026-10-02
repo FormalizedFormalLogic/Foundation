@@ -132,7 +132,7 @@ private noncomputable def sigmaReflectionBody : ArithmeticSemisentence 2 :=
 
 variable (T n) in
 private lemma exists_prenex_sigmaReflectionBody :
-    ∃ φ : Prenex 𝚺 n Empty 2, 𝗕𝚺 n ⊢ ∀¹* (sigmaReflectionBody T n 🡘 φ.val) :=
+    ∃ φ : Prenex 𝚺 n Empty 2, 𝗕𝚺n ⊢ ∀¹* (sigmaReflectionBody T n 🡘 φ.val) :=
   exists_prenex_of_hierarchy (𝗕𝚺 n) <| by simp [sigmaReflectionBody, (partialTruth 𝚺 n).sigma_prop]
 
 private lemma eval_prenex_congr {V : Type*} [ORingStructure V] :
@@ -191,8 +191,13 @@ private noncomputable def sigmaReflectionTheory : ArithmeticTheory :=
 variable [𝗜𝚺₁ ⪯ T] [𝗕𝚺n ⪯ T]
 
 private lemma provable_sigmaReflectionFormulaPrenex_iff (m : ℕ) :
-    T ⊢ (sigmaReflectionFormulaPrenex T n).val/[↑m] 🡘 (sigmaReflectionFormula T n)/[↑m] := by
-  sorry
+    T ⊢ (sigmaReflectionFormulaPrenex T n).val/[↑m] 🡘 (sigmaReflectionFormula T n)/[↑m] :=
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := n);
+  complete T _ fun (V : Type) _ _ ↦ by
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* T);
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺n := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* T);
+    simpa [models_iff, numeral_eq_natCast, -Prenex.val_piInv] using
+      eval_sigmaReflectionFormulaPrenex (T := T) (n := n) (m : V)
 
 private lemma localReflectionOn_Sigma_equiv_union_range :
     T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T ≊
