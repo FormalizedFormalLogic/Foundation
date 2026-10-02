@@ -782,17 +782,9 @@ set_option backward.isDefEq.respectTransparency false in
 lemma coe_one_eq : (𝟏 : V) = (^func 0 ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ 0) := by
   simp [Arithmetic.one, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
 
-lemma qqZero_eq_qqFunc : (𝟎 : V) = ^func (0 : V) (0 : V) (0 : V) := by
-  rw [coe_zero_eq, show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq];
+lemma qqZero_eq_qqFunc : (𝟎 : V) = ^func 0 (zeroIndex : V) 0 := coe_zero_eq
 
-lemma qqOne_eq_qqFunc : (𝟏 : V) = ^func (0 : V) (1 : V) (0 : V) := by
-  rw [coe_one_eq, show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq];
-
-lemma qqAdd_eq_qqFunc (a b : V) : (a ^+ b : V) = ^func (2 : V) (0 : V) (?[a, b] : V) := by
-  rw [qqAdd, coe_addIndex_eq];
-
-lemma qqMul_eq_qqFunc (a b : V) : (a ^* b : V) = ^func (2 : V) (1 : V) (?[a, b] : V) := by
-  rw [qqMul, coe_mulIndex_eq];
+lemma qqOne_eq_qqFunc : (𝟏 : V) = ^func 0 (oneIndex : V) 0 := coe_one_eq
 
 namespace Numeral
 
