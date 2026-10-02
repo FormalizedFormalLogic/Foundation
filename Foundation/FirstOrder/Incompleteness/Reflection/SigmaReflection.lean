@@ -157,7 +157,34 @@ private noncomputable def sigmaReflectionFormulaPrenex : Prenex 𝚷 (n + 1) Emp
 
 private lemma le_quote_sigmaReflectionFormulaPrenex (m : ℕ) :
     m ≤ (⌜((sigmaReflectionFormulaPrenex T n).val/[↑m] : ArithmeticSentence)⌝ : ℕ) := by
-  sorry
+  have hb : ∀ k (h : k < 1 + k),
+      (Rew.subst ![(↑m : ArithmeticSemiterm Empty 0)]).qpow k #⟨k, h⟩ =
+        (↑m : ArithmeticSemiterm Empty (0 + k)) := by
+    intro k;
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      exact fun _ ↦ (Rew.q_bvar_succ
+        ((Rew.subst ![(↑m : ArithmeticSemiterm Empty 0)]).qpow k) ⟨k, by omega⟩).trans <|
+          (congrArg Rew.bShift (ih (by omega))).trans (by simp)
+  set R : Prenex 𝚷 (n + 1) Empty 0 := (sigmaReflectionFormulaPrenex T n).rew (Rew.subst ![↑m])
+    with hR;
+  have e : ((sigmaReflectionFormulaPrenex T n).val/[↑m] : ArithmeticSentence) = R.val :=
+    (Prenex.val_rew _ _).symm;
+  have h₁ : m < (⌜R.matrix.val⌝ : ℕ) := by
+    simp only [hR, sigmaReflectionFormulaPrenex, Prenex.rew, Bounding.Semiformula.val_rew,
+      LogicalConnective.HomClass.map_or, LogicalConnective.HomClass.map_neg, Sentence.quote_or];
+    apply lt_trans' (lt_or_left _ _);
+    simp only [Semiformula.Operator.eq_def, Semiformula.rew_rel_eq_comp, Matrix.comp₂, hb,
+      Semiformula.neg_rel, Sentence.quote_notEquals];
+    apply lt_of_le_of_lt ?_ (Arithmetic.lt_qqNEQ_left (V := ℕ) _ _);
+    simp only [Semiterm.empty_quote_eq, Semiterm.empty_typed_quote_numeral_eq_numeral,
+      natCast_nat, Bootstrapping.Arithmetic.val_numeral];
+    exact (Arithmetic.le_numeral_self (V := ℕ) m).elim (·.le) (·.le);
+  rw [e, Prenex.val, quote_toPrenex];
+  rcases le_qqToPrenex (V := ℕ) (Γ := 𝚷) (s := n + 1) (θ := ⌜R.matrix.val⌝) with e | e;
+  · exact e ▸ h₁.le;
+  · exact (h₁.trans e).le;
 
 private lemma eval_sigmaReflectionFormulaPrenex {V : Type*} [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺n] (x : V) :
