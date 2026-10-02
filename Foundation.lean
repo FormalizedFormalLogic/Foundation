@@ -253,6 +253,7 @@ public import Foundation.Syntax.Predicate.Term
 public import Foundation.Vorspiel.AdjunctiveSet
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
+public import Foundation.Vorspiel.Computability.Primrec
 public import Foundation.Vorspiel.ENat
 public import Foundation.Vorspiel.Empty
 public import Foundation.Vorspiel.ExistsUnique
@@ -285,3 +286,5 @@ public import Foundation.Vorspiel.Set.Basic
 public import Foundation.Vorspiel.Small
 public import Foundation.Vorspiel.String
 public import Foundation.Vorspiel.Tactic.Disj
+public import Foundation.Vorspiel.Tactic.Primrec
+public import Foundation.Vorspiel.Tactic.Primrec.Init
