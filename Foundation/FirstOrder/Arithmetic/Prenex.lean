@@ -498,7 +498,7 @@ theorem exists_prenexHierarchy_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 
 end
 
 lemma PrenexDefinable.of_definable {V : Type*} [ORingStructure V] {Γ Γ' : Polarity} {s k : ℕ}
-    [V↓[ℒₒᵣ] ⊧* 𝗕 Γ' s] {P : (Fin k → V) → Prop} (hP : Γᴬ-[s].Definable P) :
+    [V↓[ℒₒᵣ] ⊧* 𝗕 Γ' s] {P : (Fin k → V) → Prop} (hP : Γᴬ_[s].Definable P) :
     PrenexDefinable Γ s P := by
   obtain ⟨φ, hφ⟩ := hP;
   obtain ⟨θ, hθ⟩ := Bounding.Prenex.models_exists_prenex (Γ' := Γ') φ.polarity_prop;

@@ -195,7 +195,7 @@ instance negativeSuccessor_definable :
 
 /-- Instance for the definability tactic. -/
 instance negativeSuccessor_definable' :
-    𝚺ᴬ-[0 + 1]-Relation (NegativeSuccessor T : V → V → Prop) :=
+    𝚺ᴬ_[0 + 1]-Relation (NegativeSuccessor T : V → V → Prop) :=
   (negativeSuccessor_defined T).to_definable
 
 end model

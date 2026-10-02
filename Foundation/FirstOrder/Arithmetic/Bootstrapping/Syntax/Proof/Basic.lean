@@ -37,7 +37,7 @@ instance defined : 𝚫ᴬ₁-Predicate[V] IsFormulaSet L via isFormulaSet L := 
 
 instance definable : 𝚫ᴬ₁-Predicate[V] IsFormulaSet L := defined.to_definable
 
-instance definable' {Γ : Polarity} {m : ℕ} : Γᴬ-[m + 1]-Predicate[V] IsFormulaSet L :=
+instance definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Predicate[V] IsFormulaSet L :=
   .of_deltaOne definable
 
 end
@@ -576,7 +576,7 @@ instance Derivation.defined : 𝚫ᴬ₁-Predicate[V] Derivation T via derivatio
 
 instance Derivation.definable : 𝚫ᴬ₁-Predicate[V] Derivation T := Derivation.defined.to_definable
 
-instance Derivation.definable' {Γ : Polarity} {m : ℕ} : Γᴬ-[m + 1]-Predicate[V] Derivation T :=
+instance Derivation.definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Predicate[V] Derivation T :=
   Derivation.definable.of_deltaOne
 
 instance DerivationOf.defined : 𝚫ᴬ₁-Relation[V] DerivationOf T via derivationOf T := .mk
@@ -586,7 +586,7 @@ instance DerivationOf.defined : 𝚫ᴬ₁-Relation[V] DerivationOf T via deriva
 instance DerivationOf.definable : 𝚫ᴬ₁-Relation[V] DerivationOf T :=
   DerivationOf.defined.to_definable
 
-instance DerivationOf.definable' {Γ : Polarity} {m : ℕ} : Γᴬ-[m + 1]-Relation[V] DerivationOf T :=
+instance DerivationOf.definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Relation[V] DerivationOf T :=
   DerivationOf.definable.of_deltaOne
 
 instance Derivable.defined : 𝚺ᴬ₁-Predicate[V] Derivable T via derivable T :=
@@ -595,14 +595,14 @@ instance Derivable.defined : 𝚺ᴬ₁-Predicate[V] Derivable T via derivable T
 instance Derivable.definable : 𝚺ᴬ₁-Predicate[V] Derivable T := Derivable.defined.to_definable
 
 /-- instance for definability tactic -/
-instance Derivable.definable' : 𝚺ᴬ-[0 + 1]-Predicate[V] Derivable T := Derivable.definable
+instance Derivable.definable' : 𝚺ᴬ_[0 + 1]-Predicate[V] Derivable T := Derivable.definable
 
 instance Proof.defined : 𝚫ᴬ₁-Relation[V] Proof T via proof T := .mk
   ⟨by intro v; simp [proof], by intro v; simp [Proof, proof, singleton_eq_insert, emptyset_def]⟩
 
 instance Proof.definable : 𝚫ᴬ₁-Relation[V] Proof T := Proof.defined.to_definable
 
-instance Proof.definable' {Γ : Polarity} {m : ℕ} : Γᴬ-[m + 1]-Relation[V] Proof T :=
+instance Proof.definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Relation[V] Proof T :=
   Proof.definable.of_deltaOne
 
 instance Provable.defined : 𝚺ᴬ₁-Predicate[V] Provable T via provable T :=
@@ -611,7 +611,7 @@ instance Provable.defined : 𝚺ᴬ₁-Predicate[V] Provable T via provable T :=
 instance Provable.definable : 𝚺ᴬ₁-Predicate[V] Provable T := Provable.defined.to_definable
 
 /-- instance for definability tactic -/
-instance Provable.definable' : 𝚺ᴬ-[0 + 1]-Predicate[V] Provable T := Provable.definable
+instance Provable.definable' : 𝚺ᴬ_[0 + 1]-Predicate[V] Provable T := Provable.definable
 
 end
 
@@ -639,7 +639,7 @@ lemma case_iff {d : V} :
 
 alias ⟨case, _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Derivation.mk⟩ := case_iff
 
-lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     {d} (hd : Derivation T d)
     (hAxL : ∀ s, IsFormulaSet L s → ∀ p ∈ s, neg L p ∈ s → P (axL s p))
     (hVerumIntro : ∀ s, IsFormulaSet L s → ^⊤ ∈ s → P (verumIntro s))

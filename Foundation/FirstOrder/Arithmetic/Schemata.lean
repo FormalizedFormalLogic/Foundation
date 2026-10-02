@@ -520,7 +520,7 @@ instance : V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hie
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   models_of_subtheory this
 
-lemma succ_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
+lemma succ_induction {P : V → Prop} (hP : Γᴬ_[s].DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
@@ -531,7 +531,7 @@ lemma succ_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
       by intro x; simp [Semiformula.eval_rewriteMap, hp.df.iff]⟩)
     zero succ
 
-lemma order_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
+lemma order_induction {P : V → Prop} (hP : Γᴬ_[s].DefinablePred P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
@@ -540,7 +540,7 @@ lemma order_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
   intro x; induction x using succ_induction
   · exact Γ
   · exact s
-  · suffices Γᴬ-[s].DefinablePred fun x ↦ ∀ y < x, P y by exact this
+  · suffices Γᴬ_[s].DefinablePred fun x ↦ ∀ y < x, P y by exact this
     exact HierarchySymbol.Definable.arithmetic_ball_blt
       (by simp) (hP.retraction ![0])
   case zero => simp
@@ -551,7 +551,7 @@ lemma order_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
     · exact ind y IH
   case inst => infer_instance
 
-private lemma neg_succ_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
+private lemma neg_succ_induction {P : V → Prop} (hP : Γᴬ_[s].DefinablePred P)
     (nzero : ¬P 0) (nsucc : ∀ x, ¬P x → ¬P (x + 1)) : ∀ x, ¬P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
@@ -562,7 +562,7 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γᴬ-[s].DefinablePred 
     intro x; induction x using succ_induction
     · exact Γ
     · exact s
-    · suffices Γᴬ-[s].DefinablePred fun x ↦ x ≤ a → P (a - x) by exact this
+    · suffices Γᴬ_[s].DefinablePred fun x ↦ x ≤ a → P (a - x) by exact this
       apply HierarchySymbol.Definable.imp
       · apply HierarchySymbol.Definable.arithmetic_bounded_comp₂
           (by definability) (by definability)
@@ -606,7 +606,7 @@ instance models_alt : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ.alt s := by
   simp only [InductionOnHierarchy, Semantics.ModelsSet.union_iff]
   constructor <;> infer_instance
 
-lemma least_number {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
+lemma least_number {P : V → Prop} (hP : Γᴬ_[s].DefinablePred P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := inferInstance
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory this
@@ -617,7 +617,7 @@ lemma least_number {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
     induction z using succ_induction
     · exact Γ.alt
     · exact s
-    · suffices Γ.altᴬ-[s].DefinablePred fun z ↦ ∀ w < z, ¬P w by exact this
+    · suffices Γ.altᴬ_[s].DefinablePred fun z ↦ ∀ w < z, ¬P w by exact this
       apply HierarchySymbol.Definable.arithmetic_ball_blt (by definability)
       apply HierarchySymbol.Definable.not
       apply HierarchySymbol.Definable.arithmetic_bounded_comp₁
@@ -639,7 +639,7 @@ section
 
 variable (Γ : SigmaPiDelta) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ 𝚺 s]
 
-lemma succ_induction_sigma {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
+lemma succ_induction_sigma {P : V → Prop} (hP : Γᴬ_[s].DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   match Γ with
   | 𝚺 => succ_induction 𝚺 s hP zero succ
@@ -648,7 +648,7 @@ lemma succ_induction_sigma {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
     succ_induction 𝚷 s hP zero succ
   | 𝚫 => succ_induction 𝚺 s hP.of_delta zero succ
 
-lemma order_induction_sigma {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
+lemma order_induction_sigma {P : V → Prop} (hP : Γᴬ_[s].DefinablePred P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   match Γ with
   | 𝚺 => order_induction 𝚺 s hP ind
@@ -657,7 +657,7 @@ lemma order_induction_sigma {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
     order_induction 𝚷 s hP ind
   | 𝚫 => order_induction 𝚺 s hP.of_delta ind
 
-lemma least_number_sigma {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P)
+lemma least_number_sigma {P : V → Prop} (hP : Γᴬ_[s].DefinablePred P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
   match Γ with
   | 𝚺 => least_number 𝚺 s hP h
@@ -734,12 +734,12 @@ lemma ISigma0.least_number [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {P : V → Prop}
   InductionOnHierarchy.least_number 𝚺 0 hP h
 
 @[elab_as_elim] lemma ISigma1.succ_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] (Γ)
-    {P : V → Prop} (hP : Γᴬ-[1].DefinablePred P)
+    {P : V → Prop} (hP : Γᴬ_[1].DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   InductionOnHierarchy.succ_induction_sigma Γ 1 hP zero succ
 
 @[elab_as_elim] lemma ISigma1.order_induction [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] (Γ)
-    {P : V → Prop} (hP : Γᴬ-[1].DefinablePred P)
+    {P : V → Prop} (hP : Γᴬ_[1].DefinablePred P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   InductionOnHierarchy.order_induction_sigma Γ 1 hP ind
 

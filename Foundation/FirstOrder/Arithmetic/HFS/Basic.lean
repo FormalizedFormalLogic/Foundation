@@ -554,7 +554,7 @@ lemma domain_restr_of_subset_domain {f s : V} (h : s ⊆ domain f) : domain (f �
 
 end restriction
 
-theorem insert_induction {Γ} {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+theorem insert_induction {Γ} {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
   InductionOnHierarchy.order_induction_sigma Γ 1 hP <| by
     intro s IH

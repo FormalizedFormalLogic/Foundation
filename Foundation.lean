@@ -125,6 +125,8 @@ public import Foundation.FirstOrder.SetTheory.Basic.Axioms
 public import Foundation.FirstOrder.SetTheory.Basic.Hierarchy
 public import Foundation.FirstOrder.SetTheory.Basic.Misc
 public import Foundation.FirstOrder.SetTheory.Basic.Model
+public import Foundation.FirstOrder.SetTheory.Definability.Definable
+public import Foundation.FirstOrder.SetTheory.Definability.Hierarchy
 public import Foundation.FirstOrder.SetTheory.Function
 public import Foundation.FirstOrder.SetTheory.LoewenheimSkolem
 public import Foundation.FirstOrder.SetTheory.Ordinal

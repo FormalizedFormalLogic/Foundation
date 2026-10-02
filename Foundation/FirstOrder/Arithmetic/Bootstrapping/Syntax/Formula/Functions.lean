@@ -68,7 +68,7 @@ instance neg.defined : 𝚺ᴬ₁-Function₁ neg (V := V) L via negGraph L  := 
 
 instance neg.definable : 𝚺ᴬ₁-Function₁ neg (V := V) L := neg.defined.to_definable
 
-instance neg.definable' (Γ m) : Γᴬ-[m + 1]-Function₁ neg (V := V) L := .of_sigmaOne neg.definable
+instance neg.definable' (Γ m) : Γᴬ_[m + 1]-Function₁ neg (V := V) L := .of_sigmaOne neg.definable
 
 end
 
@@ -197,7 +197,7 @@ instance imp.defined : 𝚺ᴬ₁-Function₂ imp (V := V) L via impGraph L :=
 
 instance imp.definable : 𝚺ᴬ₁-Function₂ imp (V := V) L := imp.defined.to_definable
 
-instance imp.definable' (Γ m) : Γᴬ-[m + 1]-Function₂ imp (V := V) L := imp.definable.of_sigmaOne
+instance imp.definable' (Γ m) : Γᴬ_[m + 1]-Function₂ imp (V := V) L := imp.definable.of_sigmaOne
 
 end
 
@@ -226,7 +226,7 @@ instance iff.defined : 𝚺ᴬ₁-Function₂ iff (V := V) L via iffGraph L :=
 
 instance iff.definable : 𝚺ᴬ₁-Function₂ iff (V := V) L := iff.defined.to_definable
 
-instance iff_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
+instance iff_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
 
 end
 
@@ -289,7 +289,7 @@ instance shift.defined : 𝚺ᴬ₁-Function₁[V] shift L via shiftGraph L := .
 
 instance shift.definable : 𝚺ᴬ₁-Function₁[V] shift L := shift.defined.to_definable
 
-instance shift.definable' (Γ m) : Γᴬ-[m + 1]-Function₁[V] shift L := shift.definable.of_sigmaOne
+instance shift.definable' (Γ m) : Γᴬ_[m + 1]-Function₁[V] shift L := shift.definable.of_sigmaOne
 
 end
 
@@ -454,7 +454,7 @@ instance subst.defined : 𝚺ᴬ₁-Function₂[V] subst L via substsGraph L :=
 
 instance subst.definable : 𝚺ᴬ₁-Function₂[V] subst L := subst.defined.to_definable
 
-instance subst.definable' (Γ m) : Γᴬ-[m + 1]-Function₂[V] subst L := subst.definable.of_sigmaOne
+instance subst.definable' (Γ m) : Γᴬ_[m + 1]-Function₂[V] subst L := subst.definable.of_sigmaOne
 
 attribute [irreducible] substsGraph
 
@@ -810,7 +810,7 @@ instance substs1.defined : 𝚺ᴬ₁-Function₂[V] substs1 L via substs1Graph 
 
 instance substs1.definable : 𝚺ᴬ₁-Function₂[V] substs1 L := substs1.defined.to_definable
 
-instance substs1.definable' (Γ m) : Γᴬ-[m + 1]-Function₂[V] substs1 L :=
+instance substs1.definable' (Γ m) : Γᴬ_[m + 1]-Function₂[V] substs1 L :=
   substs1.definable.of_sigmaOne
 
 end
@@ -841,7 +841,7 @@ instance free.defined : 𝚺ᴬ₁-Function₁[V] free L via freeGraph L :=
 
 instance free.definable : 𝚺ᴬ₁-Function₁[V] free L := free.defined.to_definable
 
-instance free.definable' (Γ m) : Γᴬ-[m + 1]-Function₁[V] free L := free.definable.of_sigmaOne
+instance free.definable' (Γ m) : Γᴬ_[m + 1]-Function₁[V] free L := free.definable.of_sigmaOne
 
 end
 
@@ -922,7 +922,7 @@ instance formulaComplexity.defined :
 instance formulaComplexity.definable : 𝚺ᴬ₁-Function₁[V] formulaComplexity L :=
   formulaComplexity.defined.to_definable
 
-instance formulaComplexity.definable' (Γ m) : Γᴬ-[m + 1]-Function₁[V] formulaComplexity L :=
+instance formulaComplexity.definable' (Γ m) : Γᴬ_[m + 1]-Function₁[V] formulaComplexity L :=
   .of_sigmaOne formulaComplexity.definable
 
 end
@@ -1328,13 +1328,13 @@ instance qqLT_defined : 𝚺ᴬ₁-Function₂ (qqLT : V → V → V) via qqLTDe
 instance qqNLT_defined : 𝚺ᴬ₁-Function₂ (qqNLT : V → V → V) via qqNLTDef :=
   .mk fun v ↦ by simp [qqNLTDef, numeral_eq_natCast, qqNLT]
 
-instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqEQ : V → V → V) := .of_sigmaOne qqEQ_defined.to_definable
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqEQ : V → V → V) := .of_sigmaOne qqEQ_defined.to_definable
 
-instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqNEQ : V → V → V) := .of_sigmaOne qqNEQ_defined.to_definable
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqNEQ : V → V → V) := .of_sigmaOne qqNEQ_defined.to_definable
 
-instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqLT : V → V → V) := .of_sigmaOne qqLT_defined.to_definable
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqLT : V → V → V) := .of_sigmaOne qqLT_defined.to_definable
 
-instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne qqNLT_defined.to_definable
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne qqNLT_defined.to_definable
 
 lemma neg_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^= u) = t ^≠ u := by
   simp only [qqEQ, qqNEQ]
@@ -1380,7 +1380,7 @@ instance qqBall_defined :
     𝚺ᴬ₁-Function₂ (qqBall : V → V → V) via Arithmetic.qqBallDef := .mk fun v ↦ by
   simp [Arithmetic.qqBallDef, qqBall, (Arithmetic.qqNLT_defined (V := V)).df]
 
-instance qqBall_definable (Γ m) : Γᴬ-[m + 1]-Function₂ (qqBall : V → V → V) :=
+instance qqBall_definable (Γ m) : Γᴬ_[m + 1]-Function₂ (qqBall : V → V → V) :=
   .of_sigmaOne qqBall_defined.to_definable
 
 end qqBall

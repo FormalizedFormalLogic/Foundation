@@ -27,11 +27,6 @@ lemma substNumeral_app_quote (σ π : ArithmeticSemisentence 1) :
   simp [substNumeral, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.emb_subst_eq_subst_coe₁]
 
-lemma substNumeral_app_natCast (σ : ArithmeticSemisentence 1) (n : ℕ) :
-    substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[↑n] : ArithmeticSentence)⌝ := by
-  simp [substNumeral, Sentence.quote_def, Semiformula.quote_def,
-    Rewriting.emb_subst_eq_subst_coe₁];
-
 noncomputable def substNumerals (φ : V) (v : Fin k → V) : V :=
   subst ℒₒᵣ (matrixToVec (fun i ↦ numeral (v i))) φ
 
@@ -176,8 +171,9 @@ lemma substNumeralItr_quote (σ : ArithmeticSemisentence 1) (π : ArithmeticSent
   | zero => simp;
   | succ k ih =>
     rw [Nat.cast_succ, substNumeralItr_succ, ih, Function.iterate_succ_apply'];
-    simpa [Sentence.coe_quote_eq_quote] using substNumeral_app_natCast (V := V) σ
-      ⌜(fun π : ArithmeticSentence ↦ (σ/[⌜π⌝] : ArithmeticSentence))^[k] π⌝
+    simpa [substNumeral, substNumerals, Sentence.coe_quote_eq_quote, Matrix.fun_eq_vec_one]
+      using substNumerals_app_quote (V := V) σ
+        ![⌜(fun π : ArithmeticSentence ↦ (σ/[⌜π⌝] : ArithmeticSentence))^[k] π⌝]
 
 end substNumeralItr
 
@@ -342,7 +338,8 @@ noncomputable abbrev numeralInstances
   ch := numeralInstancesCh φ
   mem_iff ψ := by
     have h (n : ℕ) : substNumeral (⌜φ⌝ : ℕ) n = ⌜(φ/[↑n] : ArithmeticSentence)⌝ := by
-      simpa using substNumeral_app_natCast (V := ℕ) φ n;
+      simpa [substNumeral, substNumerals, Matrix.fun_eq_vec_one]
+        using substNumerals_app_quote (V := ℕ) φ ![n];
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, numeralInstancesCh, Fin.Fin1.eq_one,
       Fin.isValue, Sentence.coe_quote, val_mkDelta, val_mkSigma, eval_bexsLTSucc',
       Semiterm.val_bvar, Matrix.cons_val_fin_one, Semiformula.eval_substs, Matrix.comp₃,

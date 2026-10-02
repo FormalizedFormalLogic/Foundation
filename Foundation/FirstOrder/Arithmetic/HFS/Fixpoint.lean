@@ -142,7 +142,7 @@ instance limSeq_definable :
   𝚺ᴬ₁.DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.termSet_defined.to_definable
 
 @[simp, definability] instance limSeq_definable' {Γ : Polarity} {m : ℕ} :
-    Γᴬ-[m + 1].DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) :=
+    Γᴬ_[m + 1].DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) :=
   c.limSeq_definable.of_sigmaOne
 
 lemma mem_limSeq_succ_iff {x s : V} :
@@ -274,7 +274,7 @@ lemma fixpoint_definedΔ₁ [c.StrongFinite] :
 
 end
 
-theorem induction [c.StrongFinite] {Γ : Polarity} {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+theorem induction [c.StrongFinite] {Γ : Polarity} {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
   apply InductionOnHierarchy.order_induction_sigma (Γ := Γ) (s := 1)

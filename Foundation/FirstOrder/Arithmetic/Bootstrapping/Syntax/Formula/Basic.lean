@@ -298,7 +298,7 @@ instance defined : 𝚫ᴬ₁-Predicate IsUFormula (V := V) L via isUFormula L :
 
 instance definable : 𝚫ᴬ₁-Predicate IsUFormula (V := V) L := IsUFormula.defined.to_definable
 
-instance definable' (Γ m) : Γᴬ-[m + 1]-Predicate IsUFormula (V := V) L :=
+instance definable' (Γ m) : Γᴬ_[m + 1]-Predicate IsUFormula (V := V) L :=
   IsUFormula.definable.of_deltaOne
 
 end
@@ -418,7 +418,7 @@ lemma pos {p : V} (h : IsUFormula L p) : 0 < p := by
     Semiformula L n (^∃ p) ↔ Semiformula L (n + 1) p := by simp [IsSemiformula]
 -/
 
-lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hrel : ∀ k r v, L.IsRel k r → IsUTermVec L k v → P (^rel k r v))
     (hnrel : ∀ k r v, L.IsRel k r → IsUTermVec L k v → P (^nrel k r v))
     (hverum : P ^⊤)
@@ -465,7 +465,7 @@ lemma ISigma1.pi1_succ_induction {P : V → Prop} (hP : 𝚷ᴬ₁-Predicate P)
   induction1 𝚷 hP hrel hnrel hverum hfalsum hand hor hall hexs
 
 /-
-lemma IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γᴬ-[1]-Relation P)
+lemma IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γᴬ_[1]-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^rel n k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
@@ -841,7 +841,7 @@ lemma graph_defined : 𝚺ᴬ₁-Relation₃ c.Graph L via β.graph L := .mk fun
 @[simp] lemma eval_graphDef (v : Fin 3 → V) :
     (β.graph L).val.Evalb v ↔ c.Graph L (v 0) (v 1) (v 2) := (graph_defined β c).iff
 
-instance graph_definable : 𝚺ᴬ-[0 + 1]-Relation₃ c.Graph L := c.graph_defined.to_definable
+instance graph_definable : 𝚺ᴬ_[0 + 1]-Relation₃ c.Graph L := c.graph_defined.to_definable
 
 variable {β}
 
@@ -1154,7 +1154,7 @@ section
 lemma result_defined : 𝚺ᴬ₁-Function₂ c.result L via β.result L := .mk fun v ↦ by
   simp [Blueprint.result, result, c.eval_graphDef]
 
-instance result_definable : 𝚺ᴬ-[0 + 1]-Function₂ c.result L := c.result_defined.to_definable
+instance result_definable : 𝚺ᴬ_[0 + 1]-Function₂ c.result L := c.result_defined.to_definable
 
 end
 
@@ -1279,7 +1279,7 @@ instance bv.defined : 𝚺ᴬ₁-Function₁ bv (V := V) L via bvGraph L := .mk 
 
 instance bv.definable : 𝚺ᴬ₁-Function₁ bv (V := V) L := bv.defined.to_definable
 
-instance bv.definable' : Γᴬ-[m + 1]-Function₁ bv (V := V) L := bv.definable.of_sigmaOne
+instance bv.definable' : Γᴬ_[m + 1]-Function₁ bv (V := V) L := bv.definable.of_sigmaOne
 
 end
 
@@ -1342,7 +1342,7 @@ instance IsSemiformula.defined : 𝚫ᴬ₁-Relation IsSemiformula (V := V) L vi
 instance IsSemiformula.definable : 𝚫ᴬ₁-Relation IsSemiformula (V := V) L :=
   IsSemiformula.defined.to_definable
 
-instance IsSemiformula.definable' : Γᴬ-[m + 1]-Relation IsSemiformula (V := V) L :=
+instance IsSemiformula.definable' : Γᴬ_[m + 1]-Relation IsSemiformula (V := V) L :=
   IsSemiformula.definable.of_deltaOne
 
 end
@@ -1547,7 +1547,7 @@ lemma IsSemiformula.pi1_structural_induction {P : V → V → Prop} (hP : 𝚷�
     have : IsSemiformula L (n + 1) p := by simpa using h
     apply hexs _ _ this (ihp _ this)
 
-lemma IsSemiformula.induction1 (Γ) {P : V → V → Prop} (hP : Γᴬ-[1]-Relation P)
+lemma IsSemiformula.induction1 (Γ) {P : V → V → Prop} (hP : Γᴬ_[1]-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
     (hverum : ∀ n, P n ^⊤)
