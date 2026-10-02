@@ -3,15 +3,10 @@ module
 public import Foundation.FirstOrder.Incompleteness.Reflection.Unboundedness
 
 /-!
-# Local $\Sigma_1$ reflection as the numeral instances of one formula
+# A prenex $\Pi_2$ axiomatization of local $\Sigma_1$ reflection
 
-`sigma1ReflectionFormula T` is
-$\theta(x) :\equiv (\mathrm{Sent}(x) \wedge \Sigma_1(x) \wedge \mathrm{Pr}_T(x)) \to
-\mathrm{Tr}_{\Sigma_1}(x)$, where $\Sigma_1(x)$ recognizes the codes of prenex $\Sigma_1$ formulas
-with a $\Delta_0$ matrix and $\mathrm{Tr}_{\Sigma_1}$ is the partial truth predicate for them. Its
-numeral instances axiomatize local $\Sigma_1$ reflection over `T`. A prenex $\Pi_2$ form of it gives
-a $\Delta_1$-presented set of prenex $\Pi_2$ sentences, `sigma1ReflectionTheory T`, with the same
-property.
+The extension of `T` by local $\Sigma_1$ reflection is equivalent to an extension of `T` by a
+$\Delta_1$-definable set of prenex $\Pi_2$ sentences.
 
 ## References
 
@@ -28,11 +23,11 @@ open FFL.Entailment Bootstrapping
 
 variable (T : ArithmeticTheory) [T.Δ₁]
 
-noncomputable def sigma1ReflectionPremise : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
+private noncomputable def sigma1ReflectionPremise : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “x. !(isSemiformula ℒₒᵣ).sigma 0 x ∧ !(shiftGraph ℒₒᵣ) x x ∧
     (∃ θ <⁺ x, !(qqToPrenexDef 𝚺 1) x θ ∧ !isBounded.sigma θ) ∧ !(provable T) x”
 
-noncomputable def sigma1ReflectionFormula : ArithmeticSemisentence 1 :=
+private noncomputable def sigma1ReflectionFormula : ArithmeticSemisentence 1 :=
   (sigma1ReflectionPremise T).val 🡒 (partialTruth 𝚺 1).val
 
 variable {T}
@@ -41,20 +36,20 @@ section
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-lemma eval_sigma1ReflectionPremise (x : V) :
+private lemma eval_sigma1ReflectionPremise (x : V) :
     V ⊧/![x] (sigma1ReflectionPremise T).val ↔
       IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧ (∃ θ ≤ x, x = ^∃ θ ∧ IsBounded θ) ∧
         Provable T x := by
   simp [sigma1ReflectionPremise, eq_comm];
 
-lemma eval_sigma1ReflectionFormula (x : V) :
+private lemma eval_sigma1ReflectionFormula (x : V) :
     V ⊧/![x] (sigma1ReflectionFormula T) ↔
       (IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧ (∃ θ ≤ x, x = ^∃ θ ∧ IsBounded θ) ∧
         Provable T x → PartialTruth 𝚺 1 x) := by
   simp [sigma1ReflectionFormula, eval_sigma1ReflectionPremise,
     (PartialTruth.sigma_defined (V := V) 1).df];
 
-lemma exists_prenex_eq_quote {m : ℕ} (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V))
+private lemma exists_prenex_eq_quote {m : ℕ} (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V))
     (hshift : shift ℒₒᵣ (m : V) = m) (hpre : ∃ θ ≤ (m : V), (m : V) = ^∃ θ ∧ IsBounded θ) :
     ∃ φ : Prenex 𝚺 1 Empty 0, m = ⌜φ.val⌝ := by
   obtain ⟨F, hF⟩ :=
@@ -81,7 +76,7 @@ lemma exists_prenex_eq_quote {m : ℕ} (hsemi : IsSemiformula ℒₒᵣ (0 : V) 
 
 end
 
-lemma provable_sigma1ReflectionFormula_of_not_code {n : ℕ}
+private lemma provable_sigma1ReflectionFormula_of_not_code {n : ℕ}
     (h : ∀ φ : Prenex 𝚺 1 Empty 0, n ≠ ⌜φ.val⌝) :
     𝗜𝚺₁ ⊢ (sigma1ReflectionFormula T)/[↑n] :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
@@ -92,7 +87,7 @@ lemma provable_sigma1ReflectionFormula_of_not_code {n : ℕ}
       exact absurd hφ (h φ);
     simpa [models_iff, numeral_eq_natCast] using hV
 
-lemma provable_sigma1ReflectionFormula_iff (φ : Prenex 𝚺 1 Empty 0) :
+private lemma provable_sigma1ReflectionFormula_iff (φ : Prenex 𝚺 1 Empty 0) :
     𝗜𝚺₁ ⊢ (sigma1ReflectionFormula T)/[↑(⌜φ.val⌝ : ℕ)] 🡘
       (T.standardProvability φ.val 🡒 φ.val) :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
@@ -107,36 +102,36 @@ lemma provable_sigma1ReflectionFormula_iff (φ : Prenex 𝚺 1 Empty 0) :
       -Prenex.val_sigmaInv] using h
 
 variable (T) in
-lemma exists_matrix_sigma1ReflectionPremise :
+private lemma exists_matrix_sigma1ReflectionPremise :
     ∃ θ : ℬ[<, ℒₒᵣ].Semisentence 2, 𝗜𝚺₁ ⊢ ∀¹* ((sigma1ReflectionPremise T).val 🡘 ∃¹ θ.val) :=
   ISigma1.exists_matrix_provable (by simp)
 
-lemma exists_matrix_sigma1ReflectionConclusion :
+private lemma exists_matrix_sigma1ReflectionConclusion :
     ∃ θ : ℬ[<, ℒₒᵣ].Semisentence 2, 𝗜𝚺₁ ⊢ ∀¹* ((partialTruth 𝚺 1).val 🡘 ∃¹ θ.val) :=
   ISigma1.exists_matrix_provable (partialTruth 𝚺 1).sigma_prop
 
 variable (T) in
-noncomputable def sigma1ReflectionPremiseMatrix : ℬ[<, ℒₒᵣ].Semisentence 2 :=
+private noncomputable def sigma1ReflectionPremiseMatrix : ℬ[<, ℒₒᵣ].Semisentence 2 :=
   (exists_matrix_sigma1ReflectionPremise T).choose
 
-noncomputable def sigma1ReflectionConclusionMatrix : ℬ[<, ℒₒᵣ].Semisentence 2 :=
+private noncomputable def sigma1ReflectionConclusionMatrix : ℬ[<, ℒₒᵣ].Semisentence 2 :=
   exists_matrix_sigma1ReflectionConclusion.choose
 
 -- The vacuous disjunct `x ≠ x` makes the free variable occur in every numeral instance.
 variable (T) in
-noncomputable def sigma1ReflectionFormulaPrenex : Prenex 𝚷 2 Empty 1 :=
+private noncomputable def sigma1ReflectionFormulaPrenex : Prenex 𝚷 2 Empty 1 :=
   ⟨⟨“w u x. x ≠ x ∨ ¬!(sigma1ReflectionPremiseMatrix T).val u x ∨
       !sigma1ReflectionConclusionMatrix.val w x”,
     by simp [(sigma1ReflectionPremiseMatrix T).bounded.rew,
       sigma1ReflectionConclusionMatrix.bounded.rew, Semiformula.Operator.eq_def]⟩⟩
 
-lemma val_sigma1ReflectionFormulaPrenex :
+private lemma val_sigma1ReflectionFormulaPrenex :
     (sigma1ReflectionFormulaPrenex T).val =
       “x. ∀ u, ∃ w, x ≠ x ∨ ¬!(sigma1ReflectionPremiseMatrix T).val u x ∨
         !sigma1ReflectionConclusionMatrix.val w x” :=
   rfl
 
-lemma le_quote_sigma1ReflectionFormulaPrenex (n : ℕ) :
+private lemma le_quote_sigma1ReflectionFormulaPrenex (n : ℕ) :
     n ≤ (⌜((sigma1ReflectionFormulaPrenex T).val/[↑n] : ArithmeticSentence)⌝ : ℕ) := by
   simp only [val_sigma1ReflectionFormulaPrenex, Rewriting.app_all, Rewriting.app_exs,
     LogicalConnective.HomClass.map_or, LogicalConnective.HomClass.map_neg, Rew.hom_finitary2,
@@ -159,7 +154,7 @@ section
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-lemma eval_sigma1ReflectionFormulaPrenex (x : V) :
+private lemma eval_sigma1ReflectionFormulaPrenex (x : V) :
     V ⊧/![x] (sigma1ReflectionFormulaPrenex T).val ↔ V ⊧/![x] (sigma1ReflectionFormula T) := by
   have hA := models_of_provable (M := V) inferInstance
     (exists_matrix_sigma1ReflectionPremise T).choose_spec;
@@ -172,22 +167,19 @@ lemma eval_sigma1ReflectionFormulaPrenex (x : V) :
 
 end
 
-lemma provable_sigma1ReflectionFormulaPrenex_iff (n : ℕ) :
+private lemma provable_sigma1ReflectionFormulaPrenex_iff (n : ℕ) :
     𝗜𝚺₁ ⊢ (sigma1ReflectionFormulaPrenex T).val/[↑n] 🡘 (sigma1ReflectionFormula T)/[↑n] :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff, numeral_eq_natCast, -Prenex.val_piInv] using
       eval_sigma1ReflectionFormulaPrenex (T := T) (n : V)
 
 variable (T) in
-noncomputable def sigma1ReflectionTheory : ArithmeticTheory :=
+private noncomputable def sigma1ReflectionTheory : ArithmeticTheory :=
   Set.range fun n : ℕ ↦ ((sigma1ReflectionFormulaPrenex T).val/[↑n] : ArithmeticSentence)
-
-noncomputable instance : (sigma1ReflectionTheory T).Δ₁ :=
-  Theory.Δ₁.numeralInstances _ le_quote_sigma1ReflectionFormulaPrenex
 
 variable [𝗜𝚺₁ ⪯ T]
 
-theorem localReflectionOn_Sigma1_equiv_union_range :
+private lemma localReflectionOn_Sigma1_equiv_union_range :
     T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T ≊
       T ∪ Set.range fun n : ℕ ↦ ((sigma1ReflectionFormula T)/[↑n] : ArithmeticSentence) := by
   set R := Set.range fun n : ℕ ↦ ((sigma1ReflectionFormula T)/[↑n] : ArithmeticSentence);
@@ -224,7 +216,7 @@ theorem localReflectionOn_Sigma1_equiv_union_range :
       · exact hRfn.pbl <|
           provable_sigma1ReflectionFormula_of_not_code fun φ e ↦ hn ⟨φ, e⟩;
 
-theorem localReflectionOn_Sigma1_equiv_union_sigma1ReflectionTheory :
+private lemma localReflectionOn_Sigma1_equiv_union_sigma1ReflectionTheory :
     T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T ≊ T ∪ sigma1ReflectionTheory T := by
   apply localReflectionOn_Sigma1_equiv_union_range.trans;
   have hR : 𝗜𝚺₁ ⪯ T ∪ Set.range fun n : ℕ ↦
@@ -253,7 +245,8 @@ theorem localReflectionOn_Sigma1_equiv_union_sigma1ReflectionTheory :
 theorem exists_prenex_axiomatization_localReflectionOn_Sigma1 :
     ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, ∃ φ : Prenex 𝚷 2 Empty 0, φ.val = σ) ∧
       T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T ≊ T ∪ U := by
-  use sigma1ReflectionTheory T, inferInstance;
+  use sigma1ReflectionTheory T,
+    Theory.Δ₁.numeralInstances _ le_quote_sigma1ReflectionFormulaPrenex;
   and_intros;
   · rintro _ ⟨n, rfl⟩;
     exact ⟨(sigma1ReflectionFormulaPrenex T).rew (Rew.subst ![↑n]), Prenex.val_rew _ _⟩;
