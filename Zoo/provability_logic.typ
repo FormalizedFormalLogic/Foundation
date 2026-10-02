@@ -7,7 +7,7 @@
 #let PA = $Theory("PA")$
 #let TA = $Theory("TA")$
 #let ISigma1 = $Theory(I)Sigma_1$
-#let TCon(T) = $#T + {"Con"_(#T)^n : n in omega}$
+#let TCon(T) = $#T + upright("Con")_(#T)^omega$
 
 // Keys are the logics as pretty-printed by `lake exe zoo_provability_logic`; a logic with no entry
 // here is drawn under its pretty-printed name.
