@@ -100,35 +100,21 @@ instance HierarchicalSatisfaction.pi_definable (s : ℕ) [NeZero s] :
     𝚷ᴬ-[s]-Relation (HierarchicalSatisfaction 𝚷 s : V → V → Prop) :=
   (pi_defined s).to_definable
 
-noncomputable def hierarchicalSatisfactionDef (Γ : Polarity) : ℕ → ArithmeticSemisentence 2
-  | 0 => boundedSatisfaction.val
-  | s + 1 => (hierarchicalSatisfaction Γ (s + 1)).val
-
-lemma eval_hierarchicalSatisfactionDef {Γ : Polarity} {s : ℕ} (p e : V) :
-    V ⊧/![p, e] (hierarchicalSatisfactionDef Γ s) ↔ HierarchicalSatisfaction Γ s p e := by
-  rcases s with _ | s;
-  · simp [hierarchicalSatisfactionDef];
-  · cases Γ;
-    · simpa [hierarchicalSatisfactionDef] using
-        (HierarchicalSatisfaction.sigma_defined (s + 1)).df ![p, e];
-    · simpa [hierarchicalSatisfactionDef] using
-        (HierarchicalSatisfaction.pi_defined (s + 1)).df ![p, e];
-
 /-! ## Partial truth -/
 
 def PartialTruth (Γ : Polarity) (s : ℕ) (x : V) : Prop :=
   ∃ θ ≤ x, x = qqToPrenex Γ s θ ∧ HierarchicalSatisfaction Γ s θ 0
 
-noncomputable def partialTruthDef (Γ : Polarity) (s : ℕ) : ArithmeticSemisentence 1 :=
-  “x. ∃ θ <⁺ x, !(qqToPrenexDef Γ s) x θ ∧ !(hierarchicalSatisfactionDef Γ s) θ 0”
-
-lemma eval_partialTruthDef {Γ : Polarity} {s : ℕ} (v : Fin 1 → V) :
-    V ⊧/v (partialTruthDef Γ s) ↔ PartialTruth Γ s (v 0) := by
-  simp [partialTruthDef, PartialTruth, eval_hierarchicalSatisfactionDef];
-
 noncomputable def partialTruth' (Γ : Polarity) (s : ℕ) : Γᴬ-[s + 1].Semisentence 1 :=
-  .mkPolarity (partialTruthDef Γ (s + 1)) Γ (by
-    simp [partialTruthDef, hierarchicalSatisfactionDef, hierarchicalSatisfaction])
+  .mkPolarity
+    “x. ∃ θ <⁺ x, !(qqToPrenexDef Γ (s + 1)) x θ ∧ !(hierarchicalSatisfaction' Γ s).val θ 0” Γ
+    (by simp)
+
+private lemma eval_partialTruth' {Γ : Polarity} {s : ℕ} (v : Fin 1 → V) :
+    V ⊧/v (partialTruth' Γ s).val ↔ PartialTruth Γ (s + 1) (v 0) := by
+  simp only [partialTruth', HierarchySymbol.Semiformula.val_mkPolarity];
+  cases Γ <;> simp [PartialTruth, (HierarchicalSatisfaction.sigma_defined' s).df,
+    (HierarchicalSatisfaction.pi_defined' s).df]
 
 noncomputable def partialTruth (Γ : Polarity) : (s : ℕ) → [NeZero s] → Γᴬ-[s].Semisentence 1
   | 0, h => absurd rfl h.out
@@ -137,12 +123,12 @@ noncomputable def partialTruth (Γ : Polarity) : (s : ℕ) → [NeZero s] → Γ
 instance PartialTruth.sigma_defined : (s : ℕ) → [NeZero s] →
     𝚺ᴬ-[s]-Predicate (PartialTruth 𝚺 s : V → Prop) via partialTruth 𝚺 s
   | 0, h => absurd rfl h.out
-  | _ + 1, _ => .mk fun v ↦ eval_partialTruthDef v
+  | _ + 1, _ => .mk fun v ↦ eval_partialTruth' v
 
 instance PartialTruth.pi_defined : (s : ℕ) → [NeZero s] →
     𝚷ᴬ-[s]-Predicate (PartialTruth 𝚷 s : V → Prop) via partialTruth 𝚷 s
   | 0, h => absurd rfl h.out
-  | _ + 1, _ => .mk fun v ↦ eval_partialTruthDef v
+  | _ + 1, _ => .mk fun v ↦ eval_partialTruth' v
 
 instance PartialTruth.sigma_definable (s : ℕ) [NeZero s] :
     𝚺ᴬ-[s]-Predicate (PartialTruth 𝚺 s : V → Prop) :=
@@ -187,35 +173,36 @@ theorem partialTruth_quote_iff {Γ : Polarity} {s : ℕ} (φ : ℬ[<, ℒₒᵣ]
   simpa [PartialTruth, Bounding.Prenex.val, quote_toPrenex, models_iff] using h
 
 theorem _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_partialTruth_iff {Γ : Polarity} {s : ℕ}
-    (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty 0) :
-    𝗜𝚺₁ ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 φ.val :=
+    [NeZero s] (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty 0) :
+    𝗜𝚺₁ ⊢ (partialTruth Γ s).val/[⌜φ.val⌝] 🡘 φ.val :=
   Arithmetic.complete.{0} _ _ fun _ _ _ ↦ by
-    simpa [models_iff, eval_partialTruthDef] using partialTruth_quote_iff φ
+    cases Γ <;> simpa [models_iff, (PartialTruth.sigma_defined s).df,
+      (PartialTruth.pi_defined s).df] using partialTruth_quote_iff φ
 
 section prenex
 
-variable {Γ : Polarity} {s : ℕ} {σ : ArithmeticSentence}
+variable {Γ : Polarity} {s : ℕ} [NeZero s] {σ : ArithmeticSentence}
 
 theorem provable_partialTruth_iff_of_hierarchy (T : ArithmeticTheory) [𝗕𝚺s ⪯ T] [𝗜𝚺₁ ⪯ T]
     (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
     ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty 0,
-      T ⊢ σ 🡘 φ.val ∧ T ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 σ := by
+      T ⊢ σ 🡘 φ.val ∧ T ⊢ (partialTruth Γ s).val/[⌜φ.val⌝] 🡘 σ := by
   obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T h;
   have h₁ : T ⊢ σ 🡘 φ.val := hφ;
-  have h₂ : T ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 φ.val :=
+  have h₂ : T ⊢ (partialTruth Γ s).val/[⌜φ.val⌝] 🡘 φ.val :=
     Entailment.WeakerThan.pbl (ISigma1.provable_partialTruth_iff φ);
   exact ⟨φ, h₁, by cl_prover [h₁, h₂]⟩
 
 lemma _root_.FFL.FirstOrder.Arithmetic.Peano.provable_partialTruth_iff_of_hierarchy
     (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
     ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty 0,
-      𝗣𝗔 ⊢ σ 🡘 φ.val ∧ 𝗣𝗔 ⊢ (partialTruthDef Γ s)/[⌜φ.val⌝] 🡘 σ :=
+      𝗣𝗔 ⊢ σ 🡘 φ.val ∧ 𝗣𝗔 ⊢ (partialTruth Γ s).val/[⌜φ.val⌝] 🡘 σ :=
   Bootstrapping.provable_partialTruth_iff_of_hierarchy 𝗣𝗔 h
 
 lemma _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_partialTruth_iff_of_hierarchy
     (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 1 σ) :
     ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ 1 Empty 0,
-      𝗜𝚺₁ ⊢ σ 🡘 φ.val ∧ 𝗜𝚺₁ ⊢ (partialTruthDef Γ 1)/[⌜φ.val⌝] 🡘 σ :=
+      𝗜𝚺₁ ⊢ σ 🡘 φ.val ∧ 𝗜𝚺₁ ⊢ (partialTruth Γ 1).val/[⌜φ.val⌝] 🡘 σ :=
   Bootstrapping.provable_partialTruth_iff_of_hierarchy 𝗜𝚺₁ h
 
 end prenex
