@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Disquo
 
 `𝗣𝗔⁻` together with the finite theory `tarski`, a single instance of the $\Sigma_{n + 1}$
 induction scheme and a single instance of the $\Sigma_{n + 1}$ collection scheme, both stated with
-the partial satisfaction `hierarchicalSatisfaction 𝚺 (n + 1)`, is a finite theory equivalent to
+the partial satisfaction `prenexSatisfied 𝚺 (n + 1)`, is a finite theory equivalent to
 `𝗜𝚺 (n + 1)`; hence `𝗜𝚺 n` is finitely axiomatizable for `n ≥ 1`.
 
 ## References
@@ -27,21 +27,21 @@ namespace ISigma
 variable {n : ℕ}
 
 noncomputable def indFormula (n : ℕ) : ArithmeticSemiformula ℕ 1 :=
-  “x. ∃ ev, !adjoinDef.val ev x &1 ∧ !(hierarchicalSatisfaction' 𝚺 n).val &0 ev”
+  “x. ∃ ev, !adjoinDef.val ev x &1 ∧ !(prenexSatisfied' 𝚺 n).val ev &0”
 
 @[simp]
 lemma hierarchy_indFormula : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (indFormula n) := by
-  simp [indFormula, (hierarchicalSatisfaction' 𝚺 n).sigma_prop]
+  simp [indFormula, (prenexSatisfied' 𝚺 n).sigma_prop]
 
 noncomputable def indSentence (n : ℕ) : ArithmeticSentence := .univCl (succInd (indFormula n))
 
 noncomputable def collFormula (n : ℕ) : ArithmeticSemiformula ℕ 2 :=
   “x y. ∃ ev₀, !adjoinDef.val ev₀ x &1 ∧
-    ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(hierarchicalSatisfaction' 𝚺 n).val &0 ev”
+    ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(prenexSatisfied' 𝚺 n).val ev &0”
 
 @[simp]
 lemma hierarchy_collFormula : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (collFormula n) := by
-  simp [collFormula, (hierarchicalSatisfaction' 𝚺 n).sigma_prop]
+  simp [collFormula, (prenexSatisfied' 𝚺 n).sigma_prop]
 
 noncomputable def collSentence (n : ℕ) : ArithmeticSentence :=
   .univCl (collectionAxiom (collFormula n))
@@ -79,14 +79,14 @@ variable {M : Type*} [ORingStructure M]
 @[simp]
 lemma eval_indFormula (x : M) (g : ℕ → M) :
     (indFormula n).Eval ![x] g ↔
-      ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.HierarchicalSatisfaction 𝚺 (n + 1) (g 0) ev := by
-  simp [indFormula, Reading.Adjoin, Reading.HierarchicalSatisfaction]
+      ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.PrenexSatisfied 𝚺 (n + 1) ev (g 0) := by
+  simp [indFormula, Reading.Adjoin, Reading.PrenexSatisfied]
 
 @[simp]
 lemma eval_collFormula (x y : M) (g : ℕ → M) :
     (collFormula n).Eval ![x, y] g ↔ ∃ ev₀, Reading.Adjoin ev₀ x (g 1) ∧
-        ∃ ev, Reading.Adjoin ev y ev₀ ∧ Reading.HierarchicalSatisfaction 𝚺 (n + 1) (g 0) ev := by
-  simp [collFormula, Reading.Adjoin, Reading.HierarchicalSatisfaction]
+        ∃ ev, Reading.Adjoin ev y ev₀ ∧ Reading.PrenexSatisfied 𝚺 (n + 1) ev (g 0) := by
+  simp [collFormula, Reading.Adjoin, Reading.PrenexSatisfied]
 
 private lemma models_succInd_iff (φ : ArithmeticSemiformula ℕ 1) :
     M↓[ℒₒᵣ] ⊧ .univCl (succInd φ) ↔ ∀ f : ℕ → M, φ.Eval ![0] f →
@@ -131,7 +131,7 @@ private lemma exists_assignment_eval_indFormula (φ : ℬ[<, ℒₒᵣ].Prenex �
   have hψ : M ⊧/(x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x] f :=
     (φ.val_rew _).symm ▸ Semiformula.eval_toSemisentence_one φ.val x f;
   have H {ev : M} (hadj : Adjoin ev x e₀) :=
-    (hierarchicalSatisfaction_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
+    (prenexSatisfied_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
       (codes_cons hM he₀ hadj)).trans hψ;
   apply (eval_indFormula x _).trans;
   constructor;
@@ -153,7 +153,7 @@ private lemma exists_assignment_eval_collFormula (φ : ℬ[<, ℒₒᵣ].Prenex 
   have hψ : M ⊧/(y :> x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x, y] f :=
     (φ.val_rew _).symm ▸ Semiformula.eval_toSemisentence_two φ.val x y f;
   have H {ev₀ ev : M} (hadj₀ : Adjoin ev₀ x e₀) (hadj : Adjoin ev y ev₀) :=
-    (hierarchicalSatisfaction_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
+    (prenexSatisfied_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
       (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).trans hψ;
   apply (eval_collFormula x y _).trans;
   constructor;
