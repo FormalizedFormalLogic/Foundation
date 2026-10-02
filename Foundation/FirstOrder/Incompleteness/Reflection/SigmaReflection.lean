@@ -135,6 +135,18 @@ private lemma exists_prenex_sigmaReflectionBody :
     ∃ φ : Prenex 𝚺 n Empty 2, 𝗕𝚺 n ⊢ ∀¹* (sigmaReflectionBody T n 🡘 φ.val) :=
   exists_prenex_of_hierarchy (𝗕𝚺 n) <| by simp [sigmaReflectionBody, (partialTruth 𝚺 n).sigma_prop]
 
+private lemma eval_prenex_congr {V : Type*} [ORingStructure V] :
+    ∀ {Γ : Polarity} {s k : ℕ} {φ ψ : Prenex Γ s Empty k},
+      (∀ e : Fin (k + s) → V, V ⊧/e φ.matrix.val ↔ V ⊧/e ψ.matrix.val) →
+        ∀ e : Fin k → V, V ⊧/e φ.val ↔ V ⊧/e ψ.val
+  | _, 0, _, _, _, h, e => h e
+  | 𝚺, s + 1, _, φ, ψ, h, e => by
+    rw [Prenex.models_sigmaInv φ, Prenex.models_sigmaInv ψ];
+    exact exists_congr fun x ↦ eval_prenex_congr (fun e ↦ by simp [Prenex.sigmaInv, h]) (x :> e)
+  | 𝚷, s + 1, _, φ, ψ, h, e => by
+    rw [Prenex.models_piInv φ, Prenex.models_piInv ψ];
+    exact forall_congr' fun x ↦ eval_prenex_congr (fun e ↦ by simp [Prenex.piInv, h]) (x :> e)
+
 -- The vacuous disjunct `x ≠ x` makes the free variable occur in every numeral instance.
 variable (T n) in
 private noncomputable def sigmaReflectionFormulaPrenex : Prenex 𝚷 (n + 1) Empty 1 :=
@@ -148,16 +160,35 @@ private lemma le_quote_sigmaReflectionFormulaPrenex (m : ℕ) :
   sorry
 
 private lemma eval_sigmaReflectionFormulaPrenex {V : Type*} [ORingStructure V]
-    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 n] (x : V) :
+    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺n] (x : V) :
     V ⊧/![x] (sigmaReflectionFormulaPrenex T n).val ↔
       V ⊧/![x] (sigmaReflectionFormula T n) := by
-  sorry
+  set Q := (exists_prenex_sigmaReflectionBody T n).choose;
+  have hA : ∀ e : Fin 1 → V, V ⊧/e (sigmaReflectionPremise T n).val ↔
+      ∃ u, V ⊧/(u :> e) (sigmaReflectionPremiseMatrix T n).val := by
+    have h := models_of_provable (M := V) inferInstance
+      (exists_matrix_sigmaReflectionPremise T n).choose_spec;
+    simp only [models_iff, Semiformula.eval_allClosure, LogicalConnective.HomClass.map_iff,
+      Semiformula.eval_ex, LogicalConnective.Prop.iff_eq] at h;
+    exact h;
+  have hQ : ∀ e : Fin 2 → V, V ⊧/e (sigmaReflectionBody T n) ↔ V ⊧/e Q.val := by
+    have h := models_of_provable (M := V) inferInstance
+      (exists_prenex_sigmaReflectionBody T n).choose_spec;
+    simp only [models_iff, Semiformula.eval_allClosure, LogicalConnective.HomClass.map_iff,
+      LogicalConnective.Prop.iff_eq] at h;
+    exact h;
+  calc
+    _ ↔ V ⊧/![x] Q.pi.val := eval_prenex_congr (fun e ↦ by simp [sigmaReflectionFormulaPrenex, Q]) _
+    _ ↔ ∀ u, V ⊧/![u, x] Q.val := by simp [-Prenex.val_piInv]
+    _ ↔ ∀ u, V ⊧/![u, x] (sigmaReflectionBody T n) := forall_congr' fun u ↦ (hQ _).symm
+    _ ↔ _ := by
+      simp [sigmaReflectionBody, sigmaReflectionFormula, hA, imp_iff_not_or, forall_or_right]
 
 variable (T n) in
 private noncomputable def sigmaReflectionTheory : ArithmeticTheory :=
   Set.range fun m : ℕ ↦ ((sigmaReflectionFormulaPrenex T n).val/[↑m] : ArithmeticSentence)
 
-variable [𝗜𝚺₁ ⪯ T] [𝗕𝚺 n ⪯ T]
+variable [𝗜𝚺₁ ⪯ T] [𝗕𝚺n ⪯ T]
 
 private lemma provable_sigmaReflectionFormulaPrenex_iff (m : ℕ) :
     T ⊢ (sigmaReflectionFormulaPrenex T n).val/[↑m] 🡘 (sigmaReflectionFormula T n)/[↑m] := by
