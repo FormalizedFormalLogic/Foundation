@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.HierarchicalSatisfaction
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 
 /-!
@@ -97,7 +97,7 @@ private lemma quote_imply_eq_imp (σ ψ : ArithmeticSentence) :
   simp [Sentence.quote_eq];
 
 private lemma partialTruth_natCast_of_mem_Δ₁Class (hU : V↓[ℒₒᵣ] ⊧* U)
-    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) {m : ℕ}
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) {m : ℕ}
     (hmem : (m : V) ∈ U.Δ₁Class) (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V)) :
     PartialTruth Γ (n + 1) (m : V) := by
   obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi;
@@ -157,7 +157,7 @@ private lemma truncatedTruthSentence_imp_iff_fixedpoint_imp {ψ : ArithmeticSent
   exact ⟨C_trans (K_left e), C_trans (K_right e)⟩;
 
 private lemma provable_union_of_truncatedTruthSentence_imp_pi
-    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ) {ψ : ArithmeticSentence}
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) σ) {ψ : ArithmeticSentence}
     (hψ : ψ ∈ Y) (h : T ⊢ truncatedTruthSentence T U Y n 𝚷 🡒 ψ) : T ∪ U ⊢ ψ := by
   obtain ⟨d⟩ := truncatedTruthSentence_imp_iff_fixedpoint_imp.mp h;
   have hθ : T ∪ U ⊢ truncatedTruthSentence T U Y n 𝚷 := by
@@ -178,7 +178,7 @@ private lemma provable_union_of_truncatedTruthSentence_imp_pi
   exact (WeakerThan.ofSubset Set.subset_union_left).pbl h ⨀ hθ;
 
 private lemma provable_union_of_truncatedTruthSentence_imp_sigma
-    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚺 (n + 1) Empty 0, φ.val = σ) {ψ : ArithmeticSentence}
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 (n + 1) σ) {ψ : ArithmeticSentence}
     (hψ : ψ ∈ Y) (h : T ⊢ truncatedTruthSentence T U Y n 𝚺 🡒 ψ) : T ∪ U ⊢ ψ := by
   obtain ⟨d⟩ := truncatedTruthSentence_imp_iff_fixedpoint_imp.mp h;
   have hθ : T ∪ U ⊢ truncatedTruthSentence T U Y n 𝚺 := by
@@ -200,7 +200,7 @@ private lemma provable_union_of_truncatedTruthSentence_imp_sigma
   exact (WeakerThan.ofSubset Set.subset_union_left).pbl h ⨀ hθ;
 
 private lemma provable_union_of_truncatedTruthSentence_imp
-    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) {ψ : ArithmeticSentence}
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) {ψ : ArithmeticSentence}
     (hψ : ψ ∈ Y) (h : T ⊢ truncatedTruthSentence T U Y n Γ 🡒 ψ) : T ∪ U ⊢ ψ := by
   cases Γ with
   | sigma => exact provable_union_of_truncatedTruthSentence_imp_sigma hΓ hψ h;
@@ -219,7 +219,7 @@ private lemma not_proof_natCast_fixedpoint_imp
     provable_of_standard_proof (V := V) (by rwa [quote_imply_eq_imp]);
 
 private lemma truncatedTruthSentence_imp_of_mem_pi
-    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ)
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n 𝚷 🡒 ψ) {σ : ArithmeticSentence}
     (hσ : σ ∈ U) : 𝗜𝚺₁ ⊢ truncatedTruthSentence T U Y n 𝚷 🡒 σ := by
   obtain ⟨φ, rfl⟩ := hΓ σ hσ;
@@ -236,7 +236,7 @@ private lemma truncatedTruthSentence_imp_of_mem_pi
   exact not_proof_natCast_fixedpoint_imp hY hzY;
 
 private lemma truncatedTruthSentence_imp_of_mem_sigma
-    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex 𝚺 (n + 1) Empty 0, φ.val = σ)
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 (n + 1) σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n 𝚺 🡒 ψ) {σ : ArithmeticSentence}
     (hσ : σ ∈ U) : 𝗜𝚺₁ ⊢ truncatedTruthSentence T U Y n 𝚺 🡒 σ := by
   obtain ⟨φ, rfl⟩ := hΓ σ hσ;
@@ -254,7 +254,7 @@ private lemma truncatedTruthSentence_imp_of_mem_sigma
   exact (partialTruth_quote_iff φ).mp (hall _ hlt (Δ₁Class.mem_iff.mpr hσ) (by simp));
 
 private lemma truncatedTruthSentence_imp_of_mem
-    (hΓ : ∀ σ ∈ U, ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ)
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ)
     (hY : ∀ ψ ∈ Y, T ⊬ truncatedTruthSentence T U Y n Γ 🡒 ψ) {σ : ArithmeticSentence}
     (hσ : σ ∈ U) : 𝗜𝚺₁ ⊢ truncatedTruthSentence T U Y n Γ 🡒 σ := by
   cases Γ with
@@ -267,7 +267,7 @@ variable {U U' Y : ArithmeticTheory} [U'.Δ₁] [Y.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- - [Lin97, Theorem 4.3] -/
 theorem exists_sentence_weakerThan_of_unprovable
-    (hΓ : ∀ σ ∈ U', ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) (e : T ∪ U ≊ T ∪ U')
+    (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
     (hY : ∀ ψ ∈ Y, T ∪ U ⊬ ψ) :
     ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ ∀ ψ ∈ Y, insert θ T ⊬ ψ := by
@@ -288,7 +288,7 @@ theorem exists_sentence_weakerThan_of_unprovable
     simpa [Set.cons_eq] using deduction_iff.not.mpr (hY' ψ hψ);
 
 theorem inconsistent_of_provable_localReflectionOn_union
-    (hΓ : ∀ σ ∈ U', ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) (e : T ∪ U ≊ T ∪ U')
+    (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
     (h : T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
   by_contra! hC;
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_unprovable (Y := {⊥}) hΓ e <| by
@@ -299,7 +299,7 @@ theorem inconsistent_of_provable_localReflectionOn_union
     (fun _ hσ ↦ by simpa using hσ) hθ fun hσ ↦ hle.pbl (h hσ);
 
 theorem not_provable_localReflectionOn_union
-    (hΓ : ∀ σ ∈ U', ∃ φ : Prenex Γ (n + 1) Empty 0, φ.val = σ) (e : T ∪ U ≊ T ∪ U')
+    (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
     (hC : Consistent (T ∪ U)) :
     ¬T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ.alt (n + 1)] T :=
   fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ e h).not_con hC
