@@ -37,9 +37,6 @@ noncomputable def boundTerm (p : V) : V := (π₂ (π₂ (π₂ (π₁ (π₂ (p
 @[simp] lemma boundTerm_bex (u q : V) : boundTerm ((^#0 ^< u) ^⋏ q) = u := by
   simp [boundTerm, qqAnd, Arithmetic.qqLT, qqRel];
 
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-lemma numeral_eqIndex : (ORingStructure.numeral Arithmetic.eqIndex : V) = 0 := rfl
-
 noncomputable def blueprint : UformulaRec1.Blueprint where
   rel := .mkSigma “y e k r v. ∃ t, !nthDef t v 0 ∧ ∃ u, !nthDef u v 1 ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧
@@ -83,12 +80,12 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   rel e _ r v := if r = Arithmetic.eqIndex ∧ termVal e v.[0] = termVal e v.[1] ∨
     r ≠ Arithmetic.eqIndex ∧ termVal e v.[0] < termVal e v.[1] then 1 else 0
   rel_defined := .mk fun v ↦ by
-    simp [blueprint, (termVal.defined (V := V)).df, numeral_eqIndex];
+    simp [blueprint, (termVal.defined (V := V)).df, numeral_eq_natCast];
     grind;
   nrel e _ r v := if r = Arithmetic.eqIndex ∧ termVal e v.[0] = termVal e v.[1] ∨
     r ≠ Arithmetic.eqIndex ∧ termVal e v.[0] < termVal e v.[1] then 0 else 1
   nrel_defined := .mk fun v ↦ by
-    simp [blueprint, (termVal.defined (V := V)).df, numeral_eqIndex];
+    simp [blueprint, (termVal.defined (V := V)).df, numeral_eq_natCast];
     grind;
   verum _ := 1
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -167,12 +164,14 @@ open Classical in
 open Classical in
 @[simp] lemma boundedSatValue_lt :
     boundedSatValue e (t ^< u) = if termVal e t < termVal e u then 1 else 0 := by
-  simp [boundedSatValue, construction, Arithmetic.qqLT, ht, hu];
+  simp [boundedSatValue, construction, Arithmetic.qqLT, ht, hu,
+    Arithmetic.eqIndex_ne_ltIndex.symm];
 
 open Classical in
 @[simp] lemma boundedSatValue_nlt :
     boundedSatValue e (t ^≮ u) = if termVal e t < termVal e u then 0 else 1 := by
-  simp [boundedSatValue, construction, Arithmetic.qqNLT, ht, hu];
+  simp [boundedSatValue, construction, Arithmetic.qqNLT, ht, hu,
+    Arithmetic.eqIndex_ne_ltIndex.symm];
 
 end
 
