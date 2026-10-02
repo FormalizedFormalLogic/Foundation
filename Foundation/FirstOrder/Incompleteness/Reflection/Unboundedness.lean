@@ -6,11 +6,8 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 /-!
 # Unboundedness of local reflection
 
-Let `X` be a $\Delta_1$-definable set of prenex `Γ (n + 1)` sentences and `Y` a
-$\Delta_1$-definable set of sentences none of which is provable in `T + X`. Then a single
-`Γ (n + 1)` sentence implies `X` over `T` without making any member of `Y` provable. With
-`Y = {⊥}`, the local reflection schema of `T` on `Γ.alt (n + 1)` sentences is not provable in any
-consistent extension of `T` by `X`.
+No consistent extension of `T` by a $\Delta_1$-definable set of prenex `Γ (n + 1)` sentences
+proves the local reflection of `T` on `Γ.alt (n + 1)` sentences.
 
 ## References
 
