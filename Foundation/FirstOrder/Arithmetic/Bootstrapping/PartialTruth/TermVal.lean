@@ -19,8 +19,9 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-open Arithmetic (isFunc_LOR_iff qqZero_eq_qqFunc qqOne_eq_qqFunc qqAdd_eq_qqFunc qqMul_eq_qqFunc
-  quote_zeroIndex_eq quote_oneIndex_eq quote_addIndex_eq quote_mulIndex_eq)
+open Arithmetic (zeroIndex oneIndex addIndex mulIndex zeroIndex_ne_oneIndex addIndex_ne_mulIndex
+  quote_func_zero quote_func_one quote_func_add quote_func_mul qqAdd qqMul qqZero_eq_qqFunc
+  qqOne_eq_qqFunc)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -33,26 +34,28 @@ def blueprint : Language.TermRec.Blueprint 1 where
   fvar := .mkSigma “y x w. y = 0”
   func := .mkSigma
     “y k f v v' w.
-      (k = 0 ∧ f = 0 → y = 0) ∧
-      (k = 0 ∧ f = 1 → y = 1) ∧
-      (k = 2 ∧ f = 0 → ∃ a, !nthDef a v' 0 ∧ ∃ b, !nthDef b v' 1 ∧ y = a + b) ∧
-      (k = 2 ∧ f = 1 → ∃ a, !nthDef a v' 0 ∧ ∃ b, !nthDef b v' 1 ∧ y = a * b) ∧
-      (¬(k = 0 ∧ f = 0) → ¬(k = 0 ∧ f = 1) → ¬(k = 2 ∧ f = 0) → ¬(k = 2 ∧ f = 1) → y = 0)”
+      (k = 0 ∧ f = ↑zeroIndex → y = 0) ∧
+      (k = 0 ∧ f = ↑oneIndex → y = 1) ∧
+      (k = 2 ∧ f = ↑addIndex → ∃ a, !nthDef a v' 0 ∧ ∃ b, !nthDef b v' 1 ∧ y = a + b) ∧
+      (k = 2 ∧ f = ↑mulIndex → ∃ a, !nthDef a v' 0 ∧ ∃ b, !nthDef b v' 1 ∧ y = a * b) ∧
+      (¬(k = 0 ∧ f = ↑zeroIndex) → ¬(k = 0 ∧ f = ↑oneIndex) → ¬(k = 2 ∧ f = ↑addIndex) →
+        ¬(k = 2 ∧ f = ↑mulIndex) → y = 0)”
 
 noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (param z)        := (param 0).[z]
   fvar (_     _)        := 0
   func (_     k f _ v') :=
-    if k = 0 ∧ f = 0 then 0
-    else if k = 0 ∧ f = 1 then 1
-    else if k = 2 ∧ f = 0 then v'.[0] + v'.[1]
-    else if k = 2 ∧ f = 1 then v'.[0] * v'.[1]
+    if k = 0 ∧ f = zeroIndex then 0
+    else if k = 0 ∧ f = oneIndex then 1
+    else if k = 2 ∧ f = addIndex then v'.[0] + v'.[1]
+    else if k = 2 ∧ f = mulIndex then v'.[0] * v'.[1]
     else 0
   bvar_defined := .mk fun v ↦ by simp [blueprint]
   fvar_defined := .mk fun v ↦ by simp [blueprint]
   func_defined := .mk fun v ↦ by
     simp only [blueprint];
-    split_ifs with h1 h2 h3 h4 <;> simp_all;
+    split_ifs <;> simp_all [numeral_eq_natCast, zeroIndex_ne_oneIndex.symm,
+      addIndex_ne_mulIndex.symm];
     tauto;
 
 end TermVal
@@ -110,12 +113,12 @@ lemma termVal_func_congr {e' v' : V} (hkf : (ℒₒᵣ).IsFunc k f) (hv : IsUTer
   simp [termVal_func hkf hv, termVal_func hkf hv', this, construction];
 
 @[simp] lemma termVal_zero (e : V) : termVal e (𝟎 : V) = 0 := by
-  rw [qqZero_eq_qqFunc, termVal_func (isFunc_LOR_iff.mpr (by simp)) (by simp)];
+  rw [qqZero_eq_qqFunc, termVal_func (by simp) (by simp)];
   simp [construction];
 
 @[simp] lemma termVal_one (e : V) : termVal e (𝟏 : V) = 1 := by
-  rw [qqOne_eq_qqFunc, termVal_func (isFunc_LOR_iff.mpr (by simp)) (by simp)];
-  simp [construction];
+  rw [qqOne_eq_qqFunc, termVal_func (by simp) (by simp)];
+  simp [construction, zeroIndex_ne_oneIndex.symm];
 
 section
 variable (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
@@ -123,13 +126,13 @@ include ht hu
 
 @[simp] lemma termVal_add : termVal e (t ^+ u) = termVal e t + termVal e u := by
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩;
-  rw [qqAdd_eq_qqFunc, termVal_func (isFunc_LOR_iff.mpr (by simp)) hv];
+  rw [qqAdd, termVal_func (by simp) hv];
   simp [construction, hv];
 
 @[simp] lemma termVal_mul : termVal e (t ^* u) = termVal e t * termVal e u := by
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩;
-  rw [qqMul_eq_qqFunc, termVal_func (isFunc_LOR_iff.mpr (by simp)) hv];
-  simp [construction, hv];
+  rw [qqMul, termVal_func (by simp) hv];
+  simp [construction, hv, addIndex_ne_mulIndex.symm];
 
 end
 
@@ -151,24 +154,22 @@ lemma termVal_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (v : Fin k → V)
   | @func k' f w ih =>
     match k', f, w, ih with
     | 0, .zero, w, _ =>
-      simp [Semiterm.empty_quote_eq, Semiterm.valb, quote_zeroIndex_eq, ← qqZero_eq_qqFunc];
+      simp [Semiterm.empty_quote_eq, Semiterm.valb, quote_func_zero, ← qqZero_eq_qqFunc];
       rfl;
     | 0, .one, w, _ =>
-      simp [Semiterm.empty_quote_eq, Semiterm.valb, quote_oneIndex_eq, ← qqOne_eq_qqFunc];
+      simp [Semiterm.empty_quote_eq, Semiterm.valb, quote_func_one, ← qqOne_eq_qqFunc];
       rfl;
     | 2, .add, w, ih =>
       have heq : (⌜(FirstOrder.Semiterm.func .add w : ClosedSemiterm ℒₒᵣ k)⌝ : V) =
           ⌜w 0⌝ ^+ ⌜w 1⌝ := by
-        simp [Semiterm.empty_quote_eq, Arithmetic.qqAdd, quote_addIndex_eq,
-          Arithmetic.coe_addIndex_eq, Matrix.vecHead, Matrix.vecTail];
+        simp [Semiterm.empty_quote_eq, qqAdd, quote_func_add, Matrix.vecHead, Matrix.vecTail];
       rw [heq, termVal_add (by simp [Semiterm.empty_quote_eq]) (by simp [Semiterm.empty_quote_eq]),
         ih 0, ih 1];
       rfl;
     | 2, .mul, w, ih =>
       have heq : (⌜(FirstOrder.Semiterm.func .mul w : ClosedSemiterm ℒₒᵣ k)⌝ : V) =
           ⌜w 0⌝ ^* ⌜w 1⌝ := by
-        simp [Semiterm.empty_quote_eq, Arithmetic.qqMul, quote_mulIndex_eq,
-          Arithmetic.coe_mulIndex_eq, Matrix.vecHead, Matrix.vecTail];
+        simp [Semiterm.empty_quote_eq, qqMul, quote_func_mul, Matrix.vecHead, Matrix.vecTail];
       rw [heq, termVal_mul (by simp [Semiterm.empty_quote_eq]) (by simp [Semiterm.empty_quote_eq]),
         ih 0, ih 1];
       rfl;
