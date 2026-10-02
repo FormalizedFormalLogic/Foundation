@@ -277,7 +277,7 @@ theorem provabilityLogic_add_localReflectionOn_Sigma_eq_D :
     WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left);
   have hR : T' ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T := fun hσ ↦
     by_axm <| Set.mem_union_right _ <| T.standardProvability.localReflectionOn_mono
-      (fun _ h ↦ h.mono (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))) hσ;
+      (fun _ h ↦ h.mono NeZero.one_le) hσ;
   have hD := D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1 (α := α) hR;
   apply Logic.weakerThan_antisymm;
   · by_contra! h;
