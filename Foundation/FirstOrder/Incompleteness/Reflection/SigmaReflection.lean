@@ -235,7 +235,26 @@ private lemma localReflectionOn_Sigma_equiv_union_range :
 
 private lemma localReflectionOn_Sigma_equiv_union_sigmaReflectionTheory :
     T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T ≊ T ∪ sigmaReflectionTheory T n := by
-  sorry
+  apply localReflectionOn_Sigma_equiv_union_range.trans;
+  apply Equiv.antisymm;
+  constructor;
+  · apply WeakerThan.ofAxm!;
+    rintro φ (hφ | ⟨m, rfl⟩);
+    · exact by_axm <| Set.mem_union_left _ hφ;
+    · have h₁ : T ∪ sigmaReflectionTheory T n ⊢ (sigmaReflectionFormulaPrenex T n).val/[↑m] :=
+        by_axm <| Set.mem_union_right _ ⟨m, rfl⟩;
+      have h₂ := (WeakerThan.ofSubset (𝓢 := T) (𝓣 := T ∪ sigmaReflectionTheory T n)
+        Set.subset_union_left).pbl (provable_sigmaReflectionFormulaPrenex_iff (T := T) (n := n) m);
+      cl_prover [h₁, h₂];
+  · apply WeakerThan.ofAxm!;
+    rintro φ (hφ | ⟨m, rfl⟩);
+    · exact by_axm <| Set.mem_union_left _ hφ;
+    · set R := Set.range fun m : ℕ ↦ ((sigmaReflectionFormula T n)/[↑m] : ArithmeticSentence);
+      have h₁ : T ∪ R ⊢ (sigmaReflectionFormula T n)/[↑m] :=
+        by_axm <| Set.mem_union_right _ ⟨m, rfl⟩;
+      have h₂ := (WeakerThan.ofSubset (𝓢 := T) (𝓣 := T ∪ R) Set.subset_union_left).pbl
+        (provable_sigmaReflectionFormulaPrenex_iff (T := T) (n := n) m);
+      cl_prover [h₁, h₂];
 
 theorem exists_prenex_axiomatization_localReflectionOn_Sigma :
     ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, ∃ φ : Prenex 𝚷 (n + 1) Empty 0, φ.val = σ) ∧
