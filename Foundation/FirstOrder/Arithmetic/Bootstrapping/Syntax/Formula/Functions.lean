@@ -1287,12 +1287,10 @@ notation:78 x:78 " ^≮ " y:79 => qqNLT x y
   simpa using! nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqLT_left (x y : V) : x < x ^< y := by
-  simpa [qqLT] using!
-    nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+  simpa using! nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqLT_right (x y : V) : y < x ^< y := by
-  simpa [qqLT] using!
-    nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+  simpa using! nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqNEQ_left (x y : V) : x < x ^≠ y := by
   simpa using! nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
@@ -1301,12 +1299,10 @@ notation:78 x:78 " ^≮ " y:79 => qqNLT x y
   simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqNLT_left (x y : V) : x < x ^≮ y := by
-  simpa [qqNLT] using!
-    nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+  simpa using! nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp] lemma lt_qqNLT_right (x y : V) : y < x ^≮ y := by
-  simpa [qqNLT] using!
-    nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+  simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 def _root_.FFL.FirstOrder.Arithmetic.qqEQDef : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑eqIndex v”
