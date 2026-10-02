@@ -25,7 +25,7 @@ variable (T : ArithmeticTheory) [T.Δ₁] (n : ℕ)
 
 private noncomputable def sigmaReflectionPremise : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “x. !(isSemiformula ℒₒᵣ).sigma 0 x ∧ !(shiftGraph ℒₒᵣ) x x ∧
-    (∃ θ <⁺ x, !(qqToPrenexDef 𝚺 n) x θ ∧ !isBounded.sigma θ) ∧ !(provable T) x”
+    !(isPrenexHierarchy 𝚺 n).sigma x ∧ !(provable T) x”
 
 variable {T n}
 
@@ -33,34 +33,13 @@ section
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-private lemma exists_prenex_of_quote_eq_qqToPrenex :
-    ∀ {Γ : Polarity} {s k : ℕ} {σ : ArithmeticSemisentence k} {θ : V},
-      (⌜σ⌝ : V) = qqToPrenex Γ s θ → IsBounded θ → ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty k, σ = φ.val
-  | _, 0, _, σ, _, h, hb => ⟨⟨⟨σ, (isBounded_quote_iff σ).mp (by rwa [h, qqToPrenex_zero])⟩⟩, rfl⟩
-  | 𝚺, s + 1, k, σ, θ, h, hb => by
-    cases σ using Semiformula.cases' with
-    | hexs ψ =>
-      obtain ⟨φ, rfl⟩ := exists_prenex_of_quote_eq_qqToPrenex (Γ := 𝚷) (by simpa using h) hb;
-      exact ⟨φ.sigma, Bounding.Prenex.val_sigma.symm⟩;
-    | _ => simp [Sentence.quote_def, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll,
-        qqExs] at h;
-  | 𝚷, s + 1, k, σ, θ, h, hb => by
-    cases σ using Semiformula.cases' with
-    | hall ψ =>
-      obtain ⟨φ, rfl⟩ := exists_prenex_of_quote_eq_qqToPrenex (Γ := 𝚺) (by simpa using h) hb;
-      exact ⟨φ.pi, Bounding.Prenex.val_pi.symm⟩;
-    | _ => simp [Sentence.quote_def, qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll,
-        qqExs] at h;
-
 private lemma eval_sigmaReflectionPremise (x : V) :
     V ⊧/![x] (sigmaReflectionPremise T n).val ↔
-      IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧
-        (∃ θ ≤ x, x = qqToPrenex 𝚺 n θ ∧ IsBounded θ) ∧ Provable T x := by
+      IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧ IsPrenexHierarchy 𝚺 n x ∧ Provable T x := by
   simp [sigmaReflectionPremise, eq_comm];
 
 private lemma exists_prenex_eq_quote {m : ℕ} (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V))
-    (hshift : shift ℒₒᵣ (m : V) = m)
-    (hpre : ∃ θ ≤ (m : V), (m : V) = qqToPrenex 𝚺 n θ ∧ IsBounded θ) :
+    (hshift : shift ℒₒᵣ (m : V) = m) (hpre : IsPrenexHierarchy 𝚺 n (m : V)) :
     ∃ φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n Empty 0, m = ⌜φ.val⌝ := by
   obtain ⟨F, hF⟩ :=
     IsSemiformula.sound (L := ℒₒᵣ) (isSemiformula_natCast_iff (V := V) |>.mpr hsemi);
@@ -75,9 +54,8 @@ private lemma exists_prenex_eq_quote {m : ℕ} (hsemi : IsSemiformula ℒₒᵣ 
   obtain ⟨σ, rfl⟩ : ∃ σ : ArithmeticSentence, ⌜σ⌝ = m :=
     ⟨F.toEmpty (Semiformula.freeVariables_eq_empty_of_shift_eq hF'),
       by simp [Sentence.quote_def, hF]⟩;
-  obtain ⟨θ, -, hθ, hb⟩ := hpre;
-  rw [Sentence.coe_quote_eq_quote] at hθ;
-  obtain ⟨φ, rfl⟩ := exists_prenex_of_quote_eq_qqToPrenex hθ hb;
+  rw [Sentence.coe_quote_eq_quote] at hpre;
+  obtain ⟨φ, rfl⟩ := (isPrenexHierarchy_quote_iff σ).mp hpre;
   exact ⟨φ, rfl⟩;
 
 end
@@ -116,7 +94,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 private lemma eval_sigmaReflectionFormula (x : V) :
     V ⊧/![x] (sigmaReflectionFormula T n) ↔
       (IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧
-        (∃ θ ≤ x, x = qqToPrenex 𝚺 n θ ∧ IsBounded θ) ∧ Provable T x → PartialTruth 𝚺 n x) := by
+        IsPrenexHierarchy 𝚺 n x ∧ Provable T x → PartialTruth 𝚺 n x) := by
   simp [sigmaReflectionFormula, eval_sigmaReflectionPremise,
     (PartialTruth.sigma_defined (V := V) n).df];
 
@@ -137,11 +115,8 @@ private lemma provable_sigmaReflectionFormula_iff (φ : ℬ[<, ℒₒᵣ].Prenex
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     have h : V ⊧/![(⌜φ.val⌝ : V)] (sigmaReflectionFormula T n) ↔
         (Provable T (⌜φ.val⌝ : V) → V↓[ℒₒᵣ] ⊧ φ.val) := by
-      have hq : (⌜φ.val⌝ : V) = qqToPrenex 𝚺 n ⌜φ.matrix.val⌝ := quote_toPrenex φ.matrix.val;
-      have hpre : ∃ θ ≤ (⌜φ.val⌝ : V), (⌜φ.val⌝ : V) = qqToPrenex 𝚺 n θ ∧ IsBounded θ :=
-        ⟨⌜φ.matrix.val⌝, hq ▸ le_qqToPrenex, hq, (isBounded_quote_iff _).mpr φ.matrix.bounded⟩;
       rw [eval_sigmaReflectionFormula, ← partialTruth_quote_iff φ];
-      simp only [Sentence.quote_isSemiformula₀, Sentence.shift_quote, hpre, true_and];
+      simp [isPrenexHierarchy_quote_iff];
     simpa [models_iff, Arithmetic.standardProvability_def, numeral_eq_natCast] using h
 
 variable (T n) in
