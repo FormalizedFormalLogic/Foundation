@@ -277,7 +277,7 @@ end
 theorem induction [c.StrongFinite] {Γ : Polarity} {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
-  apply InductionOnBroadHierarchy.order_induction_sigma (Γ := Γ) (s := 1)
+  apply InductionOnHierarchy.order_induction_sigma (Γ := Γ) (s := 1)
     (P := fun x ↦ c.Fixpoint v x → P x)
   · apply Bounding.HierarchySymbol.Definable.imp
       (Bounding.HierarchySymbol.DefinablePred.comp
