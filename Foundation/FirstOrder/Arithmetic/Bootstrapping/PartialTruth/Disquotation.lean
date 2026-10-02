@@ -1,13 +1,13 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.HierarchicalSatisfaction
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
 # The Tarski conditions and disquotation over `𝗣𝗔⁻`
 
 The finite theory `tarski` of Tarski conditions for $\Delta_0$ satisfaction, provable in `𝗜𝚺₁`.
-In a model of `𝗣𝗔⁻ ∪ tarski`, `hierarchicalSatisfactionDef Γ s` holds of the code of a prenex
-formula with a $\Delta_0$ matrix exactly when the formula holds.
+In a model of `𝗣𝗔⁻ ∪ tarski`, the partial satisfaction `Reading.HierarchicalSatisfaction Γ s` holds
+of the code of a prenex formula with a $\Delta_0$ matrix exactly when the formula holds.
 
 ## References
 
@@ -294,8 +294,9 @@ variable {V : Type*} [ORingStructure V]
 
 def BoundedSatisfaction (z e : V) : Prop := V ⊧/![z, e] boundedSatisfaction.val
 
-def HierarchicalSatisfaction (Γ : Polarity) (s : ℕ) (z e : V) : Prop :=
-  V ⊧/![z, e] (hierarchicalSatisfactionDef Γ s)
+def HierarchicalSatisfaction : Polarity → ℕ → V → V → Prop
+  | _, 0 => BoundedSatisfaction
+  | Γ, s + 1 => fun z e ↦ V ⊧/![z, e] (hierarchicalSatisfaction' Γ s).val
 
 def Bounded (z : V) : Prop := V ⊧/![z] isBounded.val
 
@@ -316,8 +317,8 @@ end Reading
 lemma read_hierarchicalSatisfaction_sigma_succ {V : Type*} [ORingStructure V] (s : ℕ) (p e : V) :
     Reading.HierarchicalSatisfaction 𝚺 (s + 1) p e ↔
       ∃ x e', Reading.Adjoin e' x e ∧ Reading.HierarchicalSatisfaction 𝚷 s p e' := by
-  cases s <;> simp [Reading.HierarchicalSatisfaction, Reading.Adjoin, hierarchicalSatisfactionDef,
-    hierarchicalSatisfaction, hierarchicalSatisfaction', HierarchySymbol.Semiformula.val_sigma];
+  cases s <;> simp [Reading.HierarchicalSatisfaction, Reading.BoundedSatisfaction, Reading.Adjoin,
+    hierarchicalSatisfaction', HierarchySymbol.Semiformula.val_sigma];
 
 section readings
 
@@ -428,8 +429,8 @@ lemma read_hierarchicalSatisfaction_pi_succ (s : ℕ) (p e : M) :
     Reading.HierarchicalSatisfaction 𝚷 (s + 1) p e ↔
       ∀ x e', Adjoin e' x e → Reading.HierarchicalSatisfaction 𝚺 s p e' := by
   have h := models_of_mem hM Tarski.boundedSatisfactionProper;
-  cases s <;> simp_all [Tarski.boundedSatisfactionProper, hierarchicalSatisfactionDef,
-    hierarchicalSatisfaction, hierarchicalSatisfaction', HierarchySymbol.Semiformula.val_sigma];
+  cases s <;> simp_all [Tarski.boundedSatisfactionProper, hierarchicalSatisfaction',
+    HierarchySymbol.Semiformula.val_sigma];
 
 end readings
 
