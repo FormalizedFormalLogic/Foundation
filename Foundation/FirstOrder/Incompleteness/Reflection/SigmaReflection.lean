@@ -133,8 +133,7 @@ private noncomputable def sigmaReflectionBody : ArithmeticSemisentence 2 :=
 variable (T n) in
 private lemma exists_prenex_sigmaReflectionBody :
     ∃ φ : Prenex 𝚺 n Empty 2, 𝗕𝚺 n ⊢ ∀¹* (sigmaReflectionBody T n 🡘 φ.val) :=
-  exists_prenex_of_hierarchy (𝗕𝚺 n) <| by
-    sorry
+  exists_prenex_of_hierarchy (𝗕𝚺 n) <| by simp [sigmaReflectionBody, (partialTruth 𝚺 n).sigma_prop]
 
 -- The vacuous disjunct `x ≠ x` makes the free variable occur in every numeral instance.
 variable (T n) in
