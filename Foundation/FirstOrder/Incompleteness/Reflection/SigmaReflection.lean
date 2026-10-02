@@ -140,7 +140,8 @@ variable (T n) in
 private noncomputable def sigmaReflectionFormulaPrenex : Prenex 𝚷 (n + 1) Empty 1 :=
   ⟨⟨“!!(#⟨n + 1, by omega⟩) ≠ !!(#⟨n + 1, by omega⟩)” ⋎
       (exists_prenex_sigmaReflectionBody T n).choose.pi.matrix.val,
-    by sorry⟩⟩
+    by simp [(exists_prenex_sigmaReflectionBody T n).choose.pi.matrix.bounded,
+      Semiformula.Operator.eq_def]⟩⟩
 
 private lemma le_quote_sigmaReflectionFormulaPrenex (m : ℕ) :
     m ≤ (⌜((sigmaReflectionFormulaPrenex T n).val/[↑m] : ArithmeticSentence)⌝ : ℕ) := by
