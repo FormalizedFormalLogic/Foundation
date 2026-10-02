@@ -59,31 +59,62 @@ private lemma eval_sigmaReflectionPremise (x : V) :
     V ⊧/![x] (sigmaReflectionPremise T n).val ↔
       IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧
         (∃ θ ≤ x, x = qqToPrenex 𝚺 n θ ∧ IsBounded θ) ∧ Provable T x := by
-  sorry
+  simp [sigmaReflectionPremise, eq_comm];
 
 private lemma eval_sigmaReflectionFormula (x : V) :
     V ⊧/![x] (sigmaReflectionFormula T n) ↔
       (IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧
         (∃ θ ≤ x, x = qqToPrenex 𝚺 n θ ∧ IsBounded θ) ∧ Provable T x → PartialTruth 𝚺 n x) := by
-  sorry
+  simp [sigmaReflectionFormula, eval_sigmaReflectionPremise,
+    (PartialTruth.sigma_defined (V := V) n).df];
 
 private lemma exists_prenex_eq_quote {m : ℕ} (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V))
     (hshift : shift ℒₒᵣ (m : V) = m)
     (hpre : ∃ θ ≤ (m : V), (m : V) = qqToPrenex 𝚺 n θ ∧ IsBounded θ) :
     ∃ φ : Prenex 𝚺 n Empty 0, m = ⌜φ.val⌝ := by
-  sorry
+  obtain ⟨F, hF⟩ :=
+    IsSemiformula.sound (L := ℒₒᵣ) (isSemiformula_natCast_iff (V := V) |>.mpr hsemi);
+  have hshiftN : shift ℒₒᵣ m = m := by
+    have h := DefinedFunction.shigmaOne_absolute_func V
+      (shift.defined (L := ℒₒᵣ) (V := ℕ)) (shift.defined (L := ℒₒᵣ) (V := V)) ![m];
+    simp only [Matrix.cons_val_zero, Function.comp_apply] at h;
+    exact_mod_cast h.trans hshift;
+  have hF' : Rewriting.shift F = F := by
+    apply (Semiformula.quote_inj_iff (V := ℕ)).mp;
+    rw [Semiformula.quote_shift, hF, hshiftN];
+  obtain ⟨σ, rfl⟩ : ∃ σ : ArithmeticSentence, ⌜σ⌝ = m :=
+    ⟨F.toEmpty (Semiformula.freeVariables_eq_empty_of_shift_eq hF'),
+      by simp [Sentence.quote_def, hF]⟩;
+  obtain ⟨θ, -, hθ, hb⟩ := hpre;
+  rw [Sentence.coe_quote_eq_quote] at hθ;
+  obtain ⟨φ, rfl⟩ := exists_prenex_of_quote_eq_qqToPrenex hθ hb;
+  exact ⟨φ, rfl⟩;
 
 end
 
 private lemma provable_sigmaReflectionFormula_of_not_code {m : ℕ}
     (h : ∀ φ : Prenex 𝚺 n Empty 0, m ≠ ⌜φ.val⌝) :
-    𝗜𝚺₁ ⊢ (sigmaReflectionFormula T n)/[↑m] := by
-  sorry
+    𝗜𝚺₁ ⊢ (sigmaReflectionFormula T n)/[↑m] :=
+  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    have hV : V ⊧/![(m : V)] (sigmaReflectionFormula T n) := by
+      rw [eval_sigmaReflectionFormula];
+      rintro ⟨hsemi, hshift, hpre, -⟩;
+      obtain ⟨φ, hφ⟩ := exists_prenex_eq_quote hsemi hshift hpre;
+      exact absurd hφ (h φ);
+    simpa [models_iff, numeral_eq_natCast] using hV
 
 private lemma provable_sigmaReflectionFormula_iff (φ : Prenex 𝚺 n Empty 0) :
     𝗜𝚺₁ ⊢ (sigmaReflectionFormula T n)/[↑(⌜φ.val⌝ : ℕ)] 🡘
-      (T.standardProvability φ.val 🡒 φ.val) := by
-  sorry
+      (T.standardProvability φ.val 🡒 φ.val) :=
+  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    have h : V ⊧/![(⌜φ.val⌝ : V)] (sigmaReflectionFormula T n) ↔
+        (Provable T (⌜φ.val⌝ : V) → V↓[ℒₒᵣ] ⊧ φ.val) := by
+      have hq : (⌜φ.val⌝ : V) = qqToPrenex 𝚺 n ⌜φ.matrix.val⌝ := quote_toPrenex φ.matrix.val;
+      have hpre : ∃ θ ≤ (⌜φ.val⌝ : V), (⌜φ.val⌝ : V) = qqToPrenex 𝚺 n θ ∧ IsBounded θ :=
+        ⟨⌜φ.matrix.val⌝, hq ▸ le_qqToPrenex, hq, (isBounded_quote_iff _).mpr φ.matrix.bounded⟩;
+      rw [eval_sigmaReflectionFormula, ← partialTruth_quote_iff φ];
+      simp only [Sentence.quote_isSemiformula₀, Sentence.shift_quote, hpre, true_and];
+    simpa [models_iff, Arithmetic.standardProvability_def, numeral_eq_natCast] using h
 
 variable (T n) in
 private lemma exists_matrix_sigmaReflectionPremise :
