@@ -221,23 +221,20 @@ section
 variable [𝗜𝚺₁ ⪯ T]
 
 lemma trace_provabilityLogic_turingOmega_eq_univ :
-    (T.provabilityLogicRelativeTo (T ∪ Set.range T.standardProvability.conItr) (α := α)).trace =
-      .univ := by
+    (T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α)).trace = .univ := by
   apply Set.eq_univ_of_forall;
   intro n;
   apply mem_trace_provabilityLogic_iff.mpr;
   intro f;
-  have h : T ∪ Set.range T.standardProvability.conItr ⊢ T.standardProvability.conItr (n + 1) :=
+  have h : T ∪ T.Conω ⊢ T.standardProvability.conItr (n + 1) :=
     by_axm <| Set.mem_union_right _ ⟨n + 1, rfl⟩;
   simp only [alpha, standardInterpret, interpret, interpret_boxItr, Function.iterate_succ_apply',
     ProvabilityAbstraction.Provability.conItr] at h ⊢;
   cl_prover [h];
 
 /-- - [AB05, Example 59] -/
-theorem provabilityLogic_turingOmega_eq_A :
-    letI Tω := T ∪ Set.range T.standardProvability.conItr;
-    Consistent Tω → T.provabilityLogicRelativeTo Tω (α := α) = 𝐀 := by
-  intro hC;
+theorem provabilityLogic_turingOmega_eq_A (hC : Consistent (T ∪ T.Conω)) :
+    T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α) = 𝐀 := by
   have hT := trace_provabilityLogic_turingOmega_eq_univ (T := T) (α := α);
   apply Logic.weakerThan_antisymm;
   · by_contra! h;
@@ -247,13 +244,12 @@ theorem provabilityLogic_turingOmega_eq_A :
       provable_localReflectionOn_sigma1_of_mem_of_not_A hT hAL hAA).not_con hC;
   · exact A_weakerThan_provabilityLogic hT;
 
-lemma provabilityLogic_turingOmega_equiv_A :
-    letI Tω := T ∪ Set.range T.standardProvability.conItr;
-    Consistent Tω → T.provabilityLogicRelativeTo Tω (α := α) ≊ 𝐀 :=
-  fun hC ↦ Logic.equiv_of_eq <| provabilityLogic_turingOmega_eq_A hC
+lemma provabilityLogic_turingOmega_equiv_A (hC : Consistent (T ∪ T.Conω)) :
+    T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α) ≊ 𝐀 :=
+  Logic.equiv_of_eq <| provabilityLogic_turingOmega_eq_A hC
 
 lemma provabilityLogic_turingOmega_eq_A_of_sigma1Sound [T.SoundOnHierarchy 𝚺 1] :
-    T.provabilityLogicRelativeTo (T ∪ Set.range T.standardProvability.conItr) (α := α) = 𝐀 := by
+    T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α) = 𝐀 := by
   apply provabilityLogic_turingOmega_eq_A;
   apply Consistent.of_le (inferInstance : Consistent (T ∪ 𝗥𝗳𝗻[Set.univ] T));
   apply WeakerThan.ofAxm!;
@@ -312,11 +308,11 @@ theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D [𝗜𝚺₁ ⪯ T] :
   provabilityLogic_add_localReflectionOn_Sigma_eq_D
 
 lemma provabilityLogic_turingOmega_equiv_A_ISigma1 :
-    𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ Set.range 𝗜𝚺₁.standardProvability.conItr) (α := α) ≊ 𝐀 :=
+    𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗜𝚺₁.Conω) (α := α) ≊ 𝐀 :=
   Logic.equiv_of_eq provabilityLogic_turingOmega_eq_A_of_sigma1Sound
 
 lemma provabilityLogic_turingOmega_equiv_A_peano :
-    𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ Set.range 𝗣𝗔.standardProvability.conItr) (α := α) ≊ 𝐀 :=
+    𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗣𝗔.Conω) (α := α) ≊ 𝐀 :=
   Logic.equiv_of_eq provabilityLogic_turingOmega_eq_A_of_sigma1Sound
 
 lemma provabilityLogic_add_localReflectionOn_Sigma1_equiv_D_ISigma1 :

@@ -6,8 +6,9 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 /-!
 # A prenex $\Pi_1$ axiomatization of $T_\omega$
 
-The extension $T_\omega$ of `T` by all iterated consistency statements $\neg\Box_T^n\bot$ is
-equivalent to an extension of `T` by a $\Delta_1$-definable set of prenex $\Pi_1$ sentences.
+`T.Conω` is the set of all iterated consistency statements $\neg\Box_T^n\bot$. The extension
+$T_\omega$ = `T ∪ T.Conω` is equivalent to an extension of `T` by a $\Delta_1$-definable set of
+prenex $\Pi_1$ sentences.
 
 ## References
 
@@ -23,6 +24,9 @@ namespace FFL.FirstOrder.Arithmetic
 open FFL.Entailment Bootstrapping Bootstrapping.Arithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁]
+
+abbrev _root_.FFL.FirstOrder.Theory.Conω : ArithmeticTheory :=
+  Set.range T.standardProvability.conItr
 
 private noncomputable def notProvableIterateBot : 𝚷ᴬ₁.Semisentence 1 := .mkPi
   “x. ∀ y, !substNumeralItrDef y !!(⌜(provable T).val⌝) !!(⌜(⊥ : ArithmeticSentence)⌝) x →
@@ -57,7 +61,7 @@ private noncomputable def notProvableIterateBotMatrix : ℬ[<, ℒₒᵣ].Semise
 
 -- The vacuous disjunct `x ≠ x` makes the free variable occur in every numeral instance.
 variable (T) in
-private noncomputable def notProvableIterateBotPrenex : Prenex 𝚷 1 Empty 1 :=
+private noncomputable def notProvableIterateBotPrenex : ℬ[<, ℒₒᵣ].Prenex 𝚷 1 Empty 1 :=
   ⟨⟨“y x. x ≠ x ∨ !(notProvableIterateBotMatrix T).val y x”,
     by simp [(notProvableIterateBotMatrix T).bounded.rew, Semiformula.Operator.eq_def]⟩⟩
 
@@ -105,7 +109,7 @@ private lemma provable_notProvableIterateBotPrenex_iff (n : ℕ) :
       rw [eval_notProvableIterateBotPrenex, eval_notProvableIterateBot,
         substNumeralItr_provable_bot];
     simpa [models_iff, ProvabilityAbstraction.Provability.conItr, Function.iterate_succ_apply',
-      Arithmetic.standardProvability_def, numeral_eq_natCast, -Prenex.val_piInv] using h
+      Arithmetic.standardProvability_def, numeral_eq_natCast, -Bounding.Prenex.val_piInv] using h
 
 variable (T) in
 private noncomputable def notProvableIterateBotTheory : ArithmeticTheory :=
@@ -114,7 +118,7 @@ private noncomputable def notProvableIterateBotTheory : ArithmeticTheory :=
 variable [𝗜𝚺₁ ⪯ T]
 
 private lemma turingOmega_equiv_union_notProvableIterateBotTheory :
-    T ∪ Set.range T.standardProvability.conItr ≊ T ∪ notProvableIterateBotTheory T := by
+    T ∪ T.Conω ≊ T ∪ notProvableIterateBotTheory T := by
   apply Equiv.antisymm;
   constructor;
   · apply WeakerThan.ofAxm!;
@@ -127,19 +131,19 @@ private lemma turingOmega_equiv_union_notProvableIterateBotTheory :
   · apply WeakerThan.ofAxm!;
     rintro σ (hσ | ⟨n, rfl⟩);
     · exact by_axm <| Set.mem_union_left _ hσ;
-    · have h₁ : T ∪ Set.range T.standardProvability.conItr ⊢
-          T.standardProvability.conItr (n + 1) :=
+    · have h₁ : T ∪ T.Conω ⊢ T.standardProvability.conItr (n + 1) :=
         by_axm <| Set.mem_union_right _ ⟨n + 1, rfl⟩;
       exact (K_right <| WeakerThan.pbl <| provable_notProvableIterateBotPrenex_iff n) ⨀ h₁;
 
 theorem exists_prenex_axiomatization_turingOmega :
-    ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, ∃ φ : Prenex 𝚷 1 Empty 0, φ.val = σ) ∧
-      T ∪ Set.range T.standardProvability.conItr ≊ T ∪ U := by
+    ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 1 σ) ∧
+      T ∪ T.Conω ≊ T ∪ U := by
   use notProvableIterateBotTheory T,
     Theory.Δ₁.numeralInstances _ le_quote_notProvableIterateBotPrenex;
   and_intros;
   · rintro _ ⟨n, rfl⟩;
-    exact ⟨(notProvableIterateBotPrenex T).rew (Rew.subst ![↑n]), Prenex.val_rew _ _⟩;
+    exact ⟨(notProvableIterateBotPrenex T).rew (Rew.subst ![↑n]),
+      (Bounding.Prenex.val_rew _ _).symm⟩;
   · exact turingOmega_equiv_union_notProvableIterateBotTheory;
 
 end FFL.FirstOrder.Arithmetic

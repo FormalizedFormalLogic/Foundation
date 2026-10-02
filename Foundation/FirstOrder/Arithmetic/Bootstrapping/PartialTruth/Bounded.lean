@@ -4,11 +4,11 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Boun
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.TermVal
 
 /-!
-# Satisfaction for $\Delta_0$ formulas
+# Satisfaction and truth for $\Delta_0$ formulas
 
 `boundedSatValue e z` is the truth value of the coded formula `z` under the assignment `e`: `1`
 (true) or `0` (false) if `z` is $\Delta_0$, and `2` otherwise. `BoundedSatisfaction z e` says that
-this value is `1`.
+this value is `1`, and `BoundedTruth` is the truth predicate for the codes of $\Delta_0$ sentences.
 
 ## References
 
@@ -494,5 +494,33 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
   · intro n t φ hφ ihφ v;
     rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (by simp), termVal_quote];
     simp [← ihφ, Function.comp_def];
+
+/-! ## The truth predicate -/
+
+def BoundedTruth (x : V) : Prop := BoundedSatisfaction x 0
+
+noncomputable def boundedTruth : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
+  (.mkSigma “x. !boundedSatisfaction.sigma x 0”)
+  (.mkPi “x. !boundedSatisfaction.pi x 0”)
+
+instance BoundedTruth.defined :
+    𝚫ᴬ₁-Predicate (BoundedTruth : V → Prop) via boundedTruth := .mk <| by
+  constructor;
+  · intro v; simp [boundedTruth, BoundedSatisfaction.defined.proper.iff'];
+  · intro v; simp [boundedTruth, BoundedTruth];
+
+instance BoundedTruth.definable : 𝚫ᴬ₁-Predicate (BoundedTruth : V → Prop) :=
+  BoundedTruth.defined.to_definable
+
+theorem boundedTruth_quote_iff {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Closure σ) :
+    BoundedTruth (⌜σ⌝ : V) ↔ V↓[ℒₒᵣ] ⊧ σ := by
+  simpa [BoundedTruth, matrixToVec_nil, models_iff] using
+    boundedSatisfaction_quote_iff (V := V) hσ ![]
+
+theorem _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_boundedTruth_iff
+    {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Closure σ) :
+    𝗜𝚺₁ ⊢ boundedTruth.val/[⌜σ⌝] 🡘 σ :=
+  Arithmetic.complete.{0} _ _ fun _ _ _ ↦ by
+    simpa [models_iff, BoundedTruth.defined.df] using boundedTruth_quote_iff hσ
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

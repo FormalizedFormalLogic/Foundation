@@ -4,15 +4,14 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Basic.Misc
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D2
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.EquationalTheory
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.BoundedSatisfaction
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.HierarchicalSatisfaction
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounded
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.TermVal
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
@@ -39,7 +38,8 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
-public import Foundation.FirstOrder.Arithmetic.Definability.StrictDefinable
+public import Foundation.FirstOrder.Arithmetic.Definability.PrenexDefinable
+public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Examples
 public import Foundation.FirstOrder.Arithmetic.Exponential
 public import Foundation.FirstOrder.Arithmetic.Exponential.Bit
