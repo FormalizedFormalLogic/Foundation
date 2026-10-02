@@ -255,19 +255,27 @@ lemma result_eq_of_mem {f y} (α : V) (hf : IsAttempt (c.map v) f) (hmemf : ⟨�
   exact hf.1.IsFunction.unique hempty (IsAttempt.empty hf (hlhf ▸ mem_succ_self ∅))
 
 lemma result_succ (α : V) [hα : IsOrdinal α] :
-    c.result v (SetTheory.succ α) = c.map v (repl (fun β ↦ ⟨β, c.result v β⟩ₖ) sorry α) := by
+    c.result v (SetTheory.succ α) = c.map v (repl (fun β ↦ ⟨β, c.result v β⟩ₖ) sorry (succ α)) := by
   classical
   let αo : Ordinal V := IsOrdinal.toOrdinal α
-  suffices
-      ∀ p, (∃ β ∈ (α : V), p = c.result v β) ↔
-      ∃ x ∈ (α : V), p = ⟨x, if IsOrdinal x then c.result v x else ∅⟩ₖ by
-    simp only [result, IsOrdinal.succ, forall_const, not_true_eq_false, IsEmpty.forall_iff,
-      and_true]
-    ext p
-    #check result_spec_of_isOrdinal
-    exact this p
-    sorry
-  sorry
+  obtain ⟨f, hf, hlhf, hmemf⟩ := c.result_spec_of_isOrdinal v (succ α)
+  rw [(IsAttempt.spec hf (succ α) (by aesop) _).mp hmemf]
+  refine (?_ : f ↾ (succ α) = repl (fun β ↦ ⟨β, c.result v β⟩ₖ) sorry (succ α)) ▸ rfl
+  ext p
+  rw [mem_restrict_iff, repl_spec]
+  refine ⟨fun ⟨hmem, x, hx, y, _⟩ ↦ ?_, fun ⟨x, hx, _⟩ ↦ ?_⟩
+  · subst p
+    exact ⟨x, hx, c.result_eq_of_mem v x hf hmem ▸ rfl⟩
+  · subst p
+    have : IsOrdinal x := IsOrdinal.of_mem hx
+    let xo : Ordinal V := IsOrdinal.toOrdinal x
+    have hle : xo.succ ≤ αo.succ.succ :=
+      Ordinal.le_def.mpr (Ordinal.succ_val xo ▸ (Ordinal.subset_succ_iff.mpr
+        (mem_succ_iff.mpr (.inr hx))))
+    obtain ⟨f', hf', hlhf', hmemf'⟩ := c.result_spec_of_isOrdinal v xo
+    have heq : f ↾ (succ x) = f' :=
+      IsAttempt.isAttempt_restrict_eq_of_le (α := αo.succ.succ) (β := xo.succ) hle hf hf' hlhf hlhf'
+    exact ⟨(heq ▸ SetTheory.restrict_subset f (succ x)) _ hmemf', ⟨x, hx, c.result v x, rfl⟩⟩
 
 lemma result_succ_of_isAttempt {f} (α : V) [hα : IsOrdinal α]
     (hf : IsAttempt (c.map v) f) (hlhf : lh f = succ α) :
