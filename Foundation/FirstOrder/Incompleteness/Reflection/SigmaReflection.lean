@@ -202,7 +202,36 @@ private lemma provable_sigmaReflectionFormulaPrenex_iff (m : ℕ) :
 private lemma localReflectionOn_Sigma_equiv_union_range :
     T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T ≊
       T ∪ Set.range fun m : ℕ ↦ ((sigmaReflectionFormula T n)/[↑m] : ArithmeticSentence) := by
-  sorry
+  set R := Set.range fun m : ℕ ↦ ((sigmaReflectionFormula T n)/[↑m] : ArithmeticSentence);
+  have hR : T ⪯ T ∪ R := WeakerThan.ofSubset Set.subset_union_left;
+  have hR' : 𝗜𝚺₁ ⪯ T ∪ R := WeakerThan.trans inferInstance hR;
+  have hRfn : 𝗜𝚺₁ ⪯ T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T :=
+    WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left);
+  apply Equiv.antisymm;
+  constructor;
+  · apply WeakerThan.ofAxm!;
+    rintro φ (hφ | ⟨σ, hσ, rfl⟩);
+    · exact by_axm <| Set.mem_union_left _ hφ;
+    · obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T hσ;
+      have he : T ⊢ σ 🡘 φ.val := by simpa using hφ;
+      have h₁ : T ∪ R ⊢ (sigmaReflectionFormula T n)/[↑(⌜φ.val⌝ : ℕ)] :=
+        by_axm <| Set.mem_union_right _ ⟨⌜φ.val⌝, rfl⟩;
+      have h₂ := hR'.pbl (provable_sigmaReflectionFormula_iff (T := T) φ);
+      have h₃ : T ∪ R ⊢ T.standardProvability σ 🡘 T.standardProvability φ.val :=
+        hR'.pbl <| T.standardProvability.ext he;
+      have h₄ : T ∪ R ⊢ σ 🡘 φ.val := hR.pbl he;
+      cl_prover [h₁, h₂, h₃, h₄];
+  · apply WeakerThan.ofAxm!;
+    rintro φ (hφ | ⟨m, rfl⟩);
+    · exact by_axm <| Set.mem_union_left _ hφ;
+    · by_cases hm : ∃ φ : Prenex 𝚺 n Empty 0, m = ⌜φ.val⌝;
+      · obtain ⟨φ, rfl⟩ := hm;
+        have h₁ : T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T ⊢ T.standardProvability φ.val 🡒 φ.val :=
+          by_axm <| Set.mem_union_right _ ⟨φ.val, Prenex.val_hierarchy, rfl⟩;
+        have h₂ := hRfn.pbl (provable_sigmaReflectionFormula_iff (T := T) φ);
+        cl_prover [h₁, h₂];
+      · exact hRfn.pbl <|
+          provable_sigmaReflectionFormula_of_not_code fun φ e ↦ hm ⟨φ, e⟩;
 
 private lemma localReflectionOn_Sigma_equiv_union_sigmaReflectionTheory :
     T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T ≊ T ∪ sigmaReflectionTheory T n := by
