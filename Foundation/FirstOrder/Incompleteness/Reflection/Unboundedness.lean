@@ -31,11 +31,11 @@ private noncomputable def truncatedTruthFormula : Polarity → ArithmeticSemisen
   | 𝚷 => “v. ∀ y, ((!U.Δ₁ch.sigma.val y ∧ !(isSemiformula ℒₒᵣ).sigma.val 0 y ∧
         ∀ z < y, ∀ u < y, (!Y.Δ₁ch.pi.val z →
           ∃ w, !(impGraph ℒₒᵣ).val w v z ∧ ¬!(proof T).pi.val u w))
-      → !(prenexTrue 𝚷 (n + 1)).val y)”
+      → !(partialTrue 𝚷 (n + 1)).val y)”
   | 𝚺 => “v. ∃ y, ((∃ z < y, ∃ u < y, !Y.Δ₁ch.sigma.val z ∧
         ∃ w, !(impGraph ℒₒᵣ).val w v z ∧ !(proof T).sigma.val u w) ∧
       ∀ z < y, ((!U.Δ₁ch.pi.val z ∧ !(isSemiformula ℒₒᵣ).pi.val 0 z)
-        → !(prenexTrue 𝚺 (n + 1)).val z))”
+        → !(partialTrue 𝚺 (n + 1)).val z))”
 
 private noncomputable def truncatedTruthSentence (Γ : Polarity) : ArithmeticSentence :=
   (truncatedTruthFormula T U Y n Γ)/[⌜fixedpoint (truncatedTruthFormula T U Y n Γ)⌝]
@@ -53,7 +53,7 @@ private lemma hierarchy_truncatedTruthSentence (Γ : Polarity) :
       (impGraph ℒₒᵣ).sigma_prop.mono h,
       (proof T).sigma.sigma_prop.mono h,
       U.Δ₁ch.pi.pi_prop.mono h, (isSemiformula ℒₒᵣ).pi.pi_prop.mono h
-    ] using (prenexTrue 𝚺 (n + 1)).sigma_prop;
+    ] using (partialTrue 𝚺 (n + 1)).sigma_prop;
   | pi =>
     simpa [
       truncatedTruthFormula, U.Δ₁ch.sigma.sigma_prop.mono h,
@@ -61,7 +61,7 @@ private lemma hierarchy_truncatedTruthSentence (Γ : Polarity) :
       Y.Δ₁ch.pi.pi_prop.mono h,
       (impGraph ℒₒᵣ).sigma_prop.mono h,
       (proof T).pi.pi_prop.mono h
-    ] using (prenexTrue 𝚷 (n + 1)).pi_prop;
+    ] using (partialTrue 𝚷 (n + 1)).pi_prop;
 
 end truncatedTruth
 
@@ -96,20 +96,20 @@ private lemma quote_imply_eq_imp (σ ψ : ArithmeticSentence) :
     (⌜σ 🡒 ψ⌝ : V) = imp ℒₒᵣ ⌜σ⌝ ⌜ψ⌝ := by
   simp [Sentence.quote_eq];
 
-private lemma prenexTrue_natCast_of_mem_Δ₁Class (hU : V↓[ℒₒᵣ] ⊧* U)
+private lemma partialTrue_natCast_of_mem_Δ₁Class (hU : V↓[ℒₒᵣ] ⊧* U)
     (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) {m : ℕ}
     (hmem : (m : V) ∈ U.Δ₁Class) (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V)) :
-    PrenexTrue Γ (n + 1) (m : V) := by
+    PartialTrue Γ (n + 1) (m : V) := by
   obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi;
   obtain ⟨φ, rfl⟩ := hΓ σ hσ;
-  exact hmσ ▸ (prenexTrue_quote_iff φ).mpr (hU.models_set hσ);
+  exact hmσ ▸ (partialTrue_quote_iff φ).mpr (hU.models_set hσ);
 
 private lemma models_truncatedTruthSentence_pi_iff :
     V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚷 ↔
       ∀ y ∈ U.Δ₁Class, IsSemiformula ℒₒᵣ (0 : V) y →
         (∀ z < y, ∀ u < y, z ∈ Y.Δ₁Class →
           ¬Proof T u (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚷)⌝ z)) →
-          PrenexTrue 𝚷 (n + 1) y := by
+          PartialTrue 𝚷 (n + 1) y := by
   have h : V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚷 ↔
       V ⊧/![(⌜fixedpoint (truncatedTruthFormula T U Y n 𝚷)⌝ : V)]
         (truncatedTruthFormula T U Y n 𝚷) := by
@@ -123,13 +123,13 @@ private lemma models_truncatedTruthSentence_pi_iff :
     (imp.defined (L := ℒₒᵣ) (V := V)).df,
     (Proof.defined (T := T) (V := V)).proper.iff',
     (Proof.defined (T := T) (V := V)).df,
-    (PrenexTrue.pi_defined (V := V) (n + 1)).df];
+    (PartialTrue.pi_defined (V := V) (n + 1)).df];
 
 private lemma models_truncatedTruthSentence_sigma_iff :
     V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚺 ↔
       ∃ y : V, (∃ z < y, ∃ u < y, z ∈ Y.Δ₁Class ∧
           Proof T u (imp ℒₒᵣ ⌜fixedpoint (truncatedTruthFormula T U Y n 𝚺)⌝ z)) ∧
-        ∀ z < y, z ∈ U.Δ₁Class → IsSemiformula ℒₒᵣ (0 : V) z → PrenexTrue 𝚺 (n + 1) z := by
+        ∀ z < y, z ∈ U.Δ₁Class → IsSemiformula ℒₒᵣ (0 : V) z → PartialTrue 𝚺 (n + 1) z := by
   have h : V↓[ℒₒᵣ] ⊧ truncatedTruthSentence T U Y n 𝚺 ↔
       V ⊧/![(⌜fixedpoint (truncatedTruthFormula T U Y n 𝚺)⌝ : V)]
         (truncatedTruthFormula T U Y n 𝚺) := by
@@ -143,7 +143,7 @@ private lemma models_truncatedTruthSentence_sigma_iff :
     (IsSemiformula.defined (L := ℒₒᵣ) (V := V)).df,
     (imp.defined (L := ℒₒᵣ) (V := V)).df,
     (Proof.defined (T := T) (V := V)).df,
-    (PrenexTrue.sigma_defined (V := V) (n + 1)).df];
+    (PartialTrue.sigma_defined (V := V) (n + 1)).df];
 
 end
 
@@ -174,7 +174,7 @@ private lemma provable_union_of_truncatedTruthSentence_imp_pi
       hlt _ (lt_of_le_of_lt (by rw [← Sentence.coe_quote_eq_quote]; simp) hy) _
         (lt_of_le_of_lt (by simp) hy) (by simpa using hψ) hp;
     obtain ⟨m, rfl⟩ := eq_nat_of_le_nat hle;
-    exact prenexTrue_natCast_of_mem_Δ₁Class hU hΓ hmem hsemi;
+    exact partialTrue_natCast_of_mem_Δ₁Class hU hΓ hmem hsemi;
   exact (WeakerThan.ofSubset Set.subset_union_left).pbl h ⨀ hθ;
 
 private lemma provable_union_of_truncatedTruthSentence_imp_sigma
@@ -196,7 +196,7 @@ private lemma provable_union_of_truncatedTruthSentence_imp_sigma
         by push_cast; simp, by simpa using hψ, hp⟩;
     · intro z hz hmem hsemi;
       obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz;
-      exact prenexTrue_natCast_of_mem_Δ₁Class hU hΓ hmem hsemi;
+      exact partialTrue_natCast_of_mem_Δ₁Class hU hΓ hmem hsemi;
   exact (WeakerThan.ofSubset Set.subset_union_left).pbl h ⨀ hθ;
 
 private lemma provable_union_of_truncatedTruthSentence_imp
@@ -227,7 +227,7 @@ private lemma truncatedTruthSentence_imp_of_mem_pi
   intro M _ _;
   apply Semantics.Imp.models_imply.mpr;
   intro hθ;
-  apply (prenexTrue_quote_iff φ).mp;
+  apply (partialTrue_quote_iff φ).mp;
   apply models_truncatedTruthSentence_pi_iff.mp hθ _ (Δ₁Class.mem_iff.mpr hσ) (by simp);
   intro z hz u hu hzY;
   rw [← Sentence.coe_quote_eq_quote] at hz hu;
@@ -251,7 +251,7 @@ private lemma truncatedTruthSentence_imp_of_mem_sigma
     obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat (lt_of_lt_of_le hzy hle);
     obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat (lt_of_lt_of_le huy hle);
     exact not_proof_natCast_fixedpoint_imp hY hzY hpu;
-  exact (prenexTrue_quote_iff φ).mp (hall _ hlt (Δ₁Class.mem_iff.mpr hσ) (by simp));
+  exact (partialTrue_quote_iff φ).mp (hall _ hlt (Δ₁Class.mem_iff.mpr hσ) (by simp));
 
 private lemma truncatedTruthSentence_imp_of_mem
     (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ)
