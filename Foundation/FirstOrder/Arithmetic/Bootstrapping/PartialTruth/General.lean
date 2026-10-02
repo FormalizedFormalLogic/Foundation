@@ -192,25 +192,18 @@ section prenex
 variable {Γ : Polarity} {s : ℕ} [NeZero s] {σ : ArithmeticSentence}
 
 theorem provable_prenexTrue_iff_of_hierarchy (T : ArithmeticTheory) [𝗕𝚺s ⪯ T] [𝗜𝚺₁ ⪯ T]
-    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
-    ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty 0,
-      T ⊢ σ 🡘 φ.val ∧ T ⊢ (prenexTrue Γ s).val/[⌜φ.val⌝] 🡘 σ := by
-  obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T h;
-  have h₁ : T ⊢ σ 🡘 φ.val := hφ;
-  have h₂ : T ⊢ (prenexTrue Γ s).val/[⌜φ.val⌝] 🡘 φ.val :=
-    Entailment.WeakerThan.pbl (ISigma1.provable_prenexTrue_iff φ);
-  exact ⟨φ, h₁, by cl_prover [h₁, h₂]⟩
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) : T ⊢ (prenexTrue Γ s).val/[⌜h.prenex.val⌝] 🡘 σ := by
+  have h₁ : T ⊢ σ 🡘 h.prenex.val := h.provable_prenex T;
+  have h₂ : T ⊢ (prenexTrue Γ s).val/[⌜h.prenex.val⌝] 🡘 h.prenex.val :=
+    Entailment.WeakerThan.pbl (ISigma1.provable_prenexTrue_iff h.prenex);
+  cl_prover [h₁, h₂]
 
 lemma _root_.FFL.FirstOrder.Arithmetic.Peano.provable_prenexTrue_iff_of_hierarchy
-    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
-    ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty 0,
-      𝗣𝗔 ⊢ σ 🡘 φ.val ∧ 𝗣𝗔 ⊢ (prenexTrue Γ s).val/[⌜φ.val⌝] 🡘 σ :=
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) : 𝗣𝗔 ⊢ (prenexTrue Γ s).val/[⌜h.prenex.val⌝] 🡘 σ :=
   Bootstrapping.provable_prenexTrue_iff_of_hierarchy 𝗣𝗔 h
 
 lemma _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_prenexTrue_iff_of_hierarchy
-    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 1 σ) :
-    ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ 1 Empty 0,
-      𝗜𝚺₁ ⊢ σ 🡘 φ.val ∧ 𝗜𝚺₁ ⊢ (prenexTrue Γ 1).val/[⌜φ.val⌝] 🡘 σ :=
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 1 σ) : 𝗜𝚺₁ ⊢ (prenexTrue Γ 1).val/[⌜h.prenex.val⌝] 🡘 σ :=
   Bootstrapping.provable_prenexTrue_iff_of_hierarchy 𝗜𝚺₁ h
 
 theorem provable_boundedTrue_iff_of_hierarchy (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T]

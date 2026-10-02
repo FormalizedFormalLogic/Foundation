@@ -455,6 +455,26 @@ theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSem
 
 end Bounding.Prenex
 
+namespace Bounding.Hierarchy
+
+open Arithmetic
+
+variable {Γ : Polarity} {s n : ℕ}
+
+noncomputable def prenex {ξ : Type*} {φ : ArithmeticSemiformula ξ n}
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n :=
+  (Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) h).choose
+
+lemma provable_prenex (T : ArithmeticTheory) [𝗕𝚺s ⪯ T] {φ : ArithmeticSemisentence n}
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) : T ⊢ ∀¹* (φ 🡘 h.prenex.val) := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := s);
+  apply provable_iff_of_models_iff.{0};
+  intro V _ _ e;
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* T);
+  exact (Prenex.models_exists_prenex (Γ' := 𝚺) h).choose_spec V e Empty.elim;
+
+end Bounding.Hierarchy
+
 namespace Arithmetic
 
 section
@@ -463,14 +483,7 @@ variable {Γ : Polarity} {s : ℕ} (T : ArithmeticTheory) [𝗕𝚺s ⪯ T]
          {n : ℕ} {φ : ArithmeticSemisentence n}
 
 theorem exists_prenex_of_hierarchy (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
-  ∃ φ' : ℬ[<, ℒₒᵣ].Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 φ'.val) := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := s);
-  obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex (Γ' := 𝚺) h;
-  use φ';
-  apply provable_iff_of_models_iff.{0};
-  intro V _ _ e;
-  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 s := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* T);
-  exact hφ' V e Empty.elim;
+  ∃ φ' : ℬ[<, ℒₒᵣ].Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 φ'.val) := ⟨_, h.provable_prenex T⟩
 
 theorem exists_matrix_provable (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
   ∃ φ₀ : ℬ[<, ℒₒᵣ].Semisentence (n + s), T ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
