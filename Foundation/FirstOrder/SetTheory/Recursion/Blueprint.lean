@@ -260,7 +260,7 @@ lemma result_succ (α : V) [hα : IsOrdinal α] :
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   obtain ⟨f, hf, hlhf, hmemf⟩ := c.result_spec_of_isOrdinal v (succ α)
   rw [(IsAttempt.spec hf (succ α) (by aesop) _).mp hmemf]
-  refine (?_ : f ↾ (succ α) = repl (fun β ↦ ⟨β, c.result v β⟩ₖ) sorry (succ α)) ▸ rfl
+  refine (?_ : f ↾ (succ α) = _) ▸ rfl
   ext p
   rw [mem_restrict_iff, repl_spec]
   refine ⟨fun ⟨hmem, x, hx, y, _⟩ ↦ ?_, fun ⟨x, hx, _⟩ ↦ ?_⟩
