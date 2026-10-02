@@ -88,15 +88,15 @@ variable [NeZero n]
 
 variable (T n) in
 private noncomputable def sigmaReflectionFormula : ArithmeticSemisentence 1 :=
-  (sigmaReflectionPremise T n).val 🡒 (prenexTrue 𝚺 n).val
+  (sigmaReflectionPremise T n).val 🡒 (partialTrue 𝚺 n).val
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 private lemma eval_sigmaReflectionFormula (x : V) :
     V ⊧/![x] (sigmaReflectionFormula T n) ↔
       (IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧
-        IsPrenexHierarchy 𝚺 n x ∧ Provable T x → PrenexTrue 𝚺 n x) := by
+        IsPrenexHierarchy 𝚺 n x ∧ Provable T x → PartialTrue 𝚺 n x) := by
   simp [sigmaReflectionFormula, eval_sigmaReflectionPremise,
-    (PrenexTrue.sigma_defined (V := V) n).df];
+    (PartialTrue.sigma_defined (V := V) n).df];
 
 private lemma provable_sigmaReflectionFormula_of_not_code {m : ℕ}
     (h : ∀ φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n Empty 0, m ≠ ⌜φ.val⌝) :
@@ -115,18 +115,18 @@ private lemma provable_sigmaReflectionFormula_iff (φ : ℬ[<, ℒₒᵣ].Prenex
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     have h : V ⊧/![(⌜φ.val⌝ : V)] (sigmaReflectionFormula T n) ↔
         (Provable T (⌜φ.val⌝ : V) → V↓[ℒₒᵣ] ⊧ φ.val) := by
-      rw [eval_sigmaReflectionFormula, ← prenexTrue_quote_iff φ];
+      rw [eval_sigmaReflectionFormula, ← partialTrue_quote_iff φ];
       simp [isPrenexHierarchy_quote_iff];
     simpa [models_iff, Arithmetic.standardProvability_def, numeral_eq_natCast] using h
 
 variable (T n) in
 private noncomputable def sigmaReflectionBody : ArithmeticSemisentence 2 :=
-  “u x. ¬!(sigmaReflectionPremiseMatrix T n).val u x ∨ !(prenexTrue 𝚺 n).val x”
+  “u x. ¬!(sigmaReflectionPremiseMatrix T n).val u x ∨ !(partialTrue 𝚺 n).val x”
 
 variable (T n) in
 private lemma hierarchy_sigmaReflectionBody :
     ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n (sigmaReflectionBody T n) := by
-  simp [sigmaReflectionBody, (prenexTrue 𝚺 n).sigma_prop]
+  simp [sigmaReflectionBody, (partialTrue 𝚺 n).sigma_prop]
 
 -- The vacuous disjunct `x ≠ x` makes the free variable occur in every numeral instance.
 variable (T n) in
@@ -220,8 +220,8 @@ private lemma localReflectionOn_Sigma_equiv_union_sigmaReflectionTheory :
   · apply WeakerThan.ofAxm!;
     rintro φ (hφ | ⟨σ, hσ, rfl⟩);
     · exact by_axm <| Set.mem_union_left _ hφ;
-    · obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T hσ;
-      have he : T ⊢ σ 🡘 φ.val := by simpa using hφ;
+    · set φ := Bounding.Hierarchy.prenex hσ;
+      have he : T ⊢ σ 🡘 φ.val := by simpa using Bounding.Hierarchy.provable_prenex T hσ;
       have h₁ : T ∪ U ⊢ (sigmaReflectionFormulaPrenex T n).val/[↑(⌜φ.val⌝ : ℕ)] :=
         by_axm <| Set.mem_union_right _ ⟨⌜φ.val⌝, rfl⟩;
       have h₂ := hU.pbl (provable_sigmaReflectionFormulaPrenex_iff (T := T) (n := n) ⌜φ.val⌝);
