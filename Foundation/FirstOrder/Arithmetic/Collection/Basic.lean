@@ -61,25 +61,25 @@ lemma CollectionScheme.models_of_collection
   intro e a;
   exact H (Bounding.definableRel_of_hierarchy hφ e) a;
 
-namespace CollectionOnHierarchy
+namespace CollectionOnPrenexHierarchy
 
 variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗕 Γ s]
 
-instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (StrictHierarchy Γ s) :=
+instance models_CollectionScheme : V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) :=
   models_of_subtheory ‹_›
 
-lemma collection (hR : StrictDefinableRel Γ s R) (a : V)
+lemma collection (hR : PrenexDefinableRel Γ s R) (a : V)
     (h : ∀ x < a, ∃ y, R x y) : ∃ b, ∀ x < a, ∃ y < b, R x y := by
   obtain ⟨e, φ, hφ, hiff⟩ := hR.exists_eval_iff;
   apply CollectionScheme.collection ⟨e, φ, hφ, fun x y ↦ by simpa using hiff ![x, y]⟩ a h;
 
-end CollectionOnHierarchy
+end CollectionOnPrenexHierarchy
 
 section standardModel
 
 /-! ### The standard model -/
 
-instance models_CollectionOnHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗕 Γ s := by
+instance models_CollectionOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗕 Γ s := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
   · infer_instance;
@@ -110,7 +110,7 @@ lemma IBroadSigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(s + 1)] {R : V �
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_IBroadSigma (s := s + 1);
   have key : ∀ y : V, ∃ b, ∀ x < y, x < a → ∃ u < b, R x u := by
-    apply InductionOnBroadHierarchy.succ_induction_sigma 𝚺 (s + 1)
+    apply InductionOnHierarchy.succ_induction_sigma 𝚺 (s + 1)
       (P := fun y ↦ ∃ b, ∀ x < y, x < a → ∃ u < b, R x u)
       (hP := by definability);
     · use 0;
@@ -148,7 +148,8 @@ theorem BSigma_weakerThan_IBroadSigma : 𝗕𝚺 (s + 1) ⪯ 𝗜𝚺⁺ (s + 1)
 
 @[instance]
 theorem BSigma_weakerThan_IBroadSigma_succ : 𝗕𝚺 s ⪯ 𝗜𝚺⁺ (s + 1) :=
-  WeakerThan.trans (CollectionOnHierarchy_weakerThan_of_le (by omega)) BSigma_weakerThan_IBroadSigma
+  WeakerThan.trans (CollectionOnPrenexHierarchy_weakerThan_of_le (by omega))
+    BSigma_weakerThan_IBroadSigma
 
 @[instance]
 theorem BSigma_weakerThan_Peano : 𝗕𝚺 s ⪯ 𝗣𝗔 :=

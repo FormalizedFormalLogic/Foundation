@@ -1,15 +1,14 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Bounded
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.FamilyRec
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.TermVal
 
 /-!
-# Satisfaction for $\Delta_0$ formulas
+# Satisfaction and truth for $\Delta_0$ formulas
 
 `boundedSatValue e z` is the truth value of the coded formula `z` under the assignment `e`: `1`
 (true) or `0` (false) if `z` is $\Delta_0$, and `2` otherwise. `BoundedSatisfaction z e` says that
-this value is `1`.
+this value is `1`, and `BoundedTruth` is the truth predicate for the codes of $\Delta_0$ sentences.
 
 ## References
 
@@ -41,7 +40,7 @@ noncomputable def boundTerm (p : V) : V := (π₂ (π₂ (π₂ (π₁ (π₂ (p
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 lemma numeral_eqIndex : (ORingStructure.numeral Arithmetic.eqIndex : V) = 0 := rfl
 
-noncomputable def blueprint : UformulaFamilyRec.Blueprint where
+noncomputable def blueprint : UformulaRec1.Blueprint where
   rel := .mkSigma “y e k r v. ∃ t, !nthDef t v 0 ∧ ∃ u, !nthDef u v 1 ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧
     ((r = ↑Arithmetic.eqIndex ∧ a = b ∨ r ≠ ↑Arithmetic.eqIndex ∧ a < b) ∧ y = 1 ∨
@@ -80,7 +79,7 @@ noncomputable def blueprint : UformulaFamilyRec.Blueprint where
   exsChanges := .mkSigma “e' e i. !adjoinDef e' i e”
 
 open Classical in
-noncomputable def construction : UformulaFamilyRec.Construction V blueprint where
+noncomputable def construction : UformulaRec1.Construction V blueprint where
   rel e _ r v := if r = Arithmetic.eqIndex ∧ termVal e v.[0] = termVal e v.[1] ∨
     r ≠ Arithmetic.eqIndex ∧ termVal e v.[0] < termVal e v.[1] then 1 else 0
   rel_defined := .mk fun v ↦ by
@@ -114,6 +113,7 @@ noncomputable def construction : UformulaFamilyRec.Construction V blueprint wher
   allSize_defined := .mk fun v ↦ by simp [blueprint, boundTerm, (termVal.defined (V := V)).df]
   allChanges e i := i ∷ e
   allChanges_defined := .mk fun v ↦ by simp [blueprint]
+  allChanges_monotone h := adjoin_le_adjoin h le_rfl
   exs _ p ys := if IsBounded (^∃ p) then (if ∃ i < len ys, ys.[i] = 1 then 1 else 0) else 2
   exs_defined := .mk fun v ↦ by
     simp [blueprint, HierarchySymbol.Semiformula.val_sigma, IsBounded.defined.df,
@@ -122,8 +122,7 @@ noncomputable def construction : UformulaFamilyRec.Construction V blueprint wher
   exsSize e p := termVal (0 ∷ e) (boundTerm p)
   exsSize_defined := .mk fun v ↦ by simp [blueprint, boundTerm, (termVal.defined (V := V)).df]
   exsChanges e i := i ∷ e
-  exsChanges_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_monotone h := adjoin_le_adjoin h le_rfl
+  exChanges_defined := .mk fun v ↦ by simp [blueprint]
   exsChanges_monotone h := adjoin_le_adjoin h le_rfl
 
 end BoundedSatValue
@@ -185,13 +184,13 @@ open Classical in
 @[simp] lemma boundedSatValue_and :
     boundedSatValue e (p ^⋏ q) = if IsBounded p ∧ IsBounded q then
       (if boundedSatValue e p = 1 ∧ boundedSatValue e q = 1 then 1 else 0) else 2 := by
-  rw [boundedSatValue, UformulaFamilyRec.Construction.result_and hp hq]; rfl;
+  rw [boundedSatValue, construction.result_and hp hq]; rfl;
 
 open Classical in
 @[simp] lemma boundedSatValue_or :
     boundedSatValue e (p ^⋎ q) = if IsBounded p ∧ IsBounded q then
       (if boundedSatValue e p = 1 ∨ boundedSatValue e q = 1 then 1 else 0) else 2 := by
-  rw [boundedSatValue, UformulaFamilyRec.Construction.result_or hp hq]; rfl;
+  rw [boundedSatValue, construction.result_or hp hq]; rfl;
 
 end
 
@@ -200,10 +199,12 @@ lemma boundedSatValue_all (hp : IsUFormula ℒₒᵣ p) :
     boundedSatValue e (^∀ p) = if IsBounded (^∀ p) then
       (if ∀ x < termVal (0 ∷ e) (boundTerm p), boundedSatValue (x ∷ e) p = 1 then 1 else 0)
       else 2 := by
-  obtain ⟨ys, ⟨hl, hys⟩, h⟩ := construction.result_all (param := e) hp;
+  obtain ⟨ys, ⟨hl, hys⟩, h⟩ :=
+    construction.graph_all_inv (construction.result_prop e (by simpa using hp));
   have H : (∀ i < len ys, ys.[i] = 1) ↔
       ∀ x < termVal (0 ∷ e) (boundTerm p), boundedSatValue (x ∷ e) p = 1 := by
-    rw [hl]; exact forall₂_congr fun i hi ↦ by rw [hys i hi]; rfl;
+    rw [hl];
+    exact forall₂_congr fun i hi ↦ by rw [← construction.result_eq_of_graph (hys i hi)]; rfl;
   rw [boundedSatValue, h];
   exact if_congr Iff.rfl (if_congr H rfl rfl) rfl;
 
@@ -212,10 +213,13 @@ lemma boundedSatValue_exs (hp : IsUFormula ℒₒᵣ p) :
     boundedSatValue e (^∃ p) = if IsBounded (^∃ p) then
       (if ∃ x < termVal (0 ∷ e) (boundTerm p), boundedSatValue (x ∷ e) p = 1 then 1 else 0)
       else 2 := by
-  obtain ⟨ys, ⟨hl, hys⟩, h⟩ := construction.result_exs (param := e) hp;
+  obtain ⟨ys, ⟨hl, hys⟩, h⟩ :=
+    construction.graph_ex_inv (construction.result_prop e (by simpa using hp));
   have H : (∃ i < len ys, ys.[i] = 1) ↔
       ∃ x < termVal (0 ∷ e) (boundTerm p), boundedSatValue (x ∷ e) p = 1 := by
-    rw [hl]; exact exists_congr fun i ↦ and_congr_right fun hi ↦ by rw [hys i hi]; rfl;
+    rw [hl];
+    exact exists_congr fun i ↦ and_congr_right fun hi ↦ by
+      rw [← construction.result_eq_of_graph (hys i hi)]; rfl;
   rw [boundedSatValue, h];
   exact if_congr Iff.rfl (if_congr H rfl rfl) rfl;
 
@@ -292,7 +296,7 @@ lemma dom {z e : V} (h : BoundedSatisfaction z e) : IsBounded z ∧ IsUFormula �
       ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
       simp_all [BoundedSatisfaction, boundedSatValue_all, boundedSatValue_exs, ite_eq_iff];
   · simp [BoundedSatisfaction, boundedSatValue,
-      UformulaFamilyRec.Construction.result_prop_not _ hz] at h;
+      construction.result_prop_not _ hz] at h;
 
 @[simp] lemma verum (e : V) : BoundedSatisfaction (^⊤ : V) e := by simp [BoundedSatisfaction]
 
@@ -490,5 +494,33 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
   · intro n t φ hφ ihφ v;
     rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (by simp), termVal_quote];
     simp [← ihφ, Function.comp_def];
+
+/-! ## The truth predicate -/
+
+def BoundedTruth (x : V) : Prop := BoundedSatisfaction x 0
+
+noncomputable def boundedTruth : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
+  (.mkSigma “x. !boundedSatisfaction.sigma x 0”)
+  (.mkPi “x. !boundedSatisfaction.pi x 0”)
+
+instance BoundedTruth.defined :
+    𝚫ᴬ₁-Predicate (BoundedTruth : V → Prop) via boundedTruth := .mk <| by
+  constructor;
+  · intro v; simp [boundedTruth, BoundedSatisfaction.defined.proper.iff'];
+  · intro v; simp [boundedTruth, BoundedTruth];
+
+instance BoundedTruth.definable : 𝚫ᴬ₁-Predicate (BoundedTruth : V → Prop) :=
+  BoundedTruth.defined.to_definable
+
+theorem boundedTruth_quote_iff {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Closure σ) :
+    BoundedTruth (⌜σ⌝ : V) ↔ V↓[ℒₒᵣ] ⊧ σ := by
+  simpa [BoundedTruth, matrixToVec_nil, models_iff] using
+    boundedSatisfaction_quote_iff (V := V) hσ ![]
+
+theorem _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_boundedTruth_iff
+    {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Closure σ) :
+    𝗜𝚺₁ ⊢ boundedTruth.val/[⌜σ⌝] 🡘 σ :=
+  Arithmetic.complete.{0} _ _ fun _ _ _ ↦ by
+    simpa [models_iff, BoundedTruth.defined.df] using boundedTruth_quote_iff hσ
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
