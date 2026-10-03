@@ -20,6 +20,12 @@ namespace FFL.ProvabilityLogic
 
 open Entailment FirstOrder FirstOrder.ProvabilityAbstraction
 
+/-- By arithmetical soundness, since `𝗣𝗔` has height `⊤`. -/
+lemma Logic.GL.unprovable_boxItr_bot {α : Type*} (n : ℕ) : (𝐆𝐋 : Logic α) ⊬ □^[n]⊥ := fun h ↦ by
+  have := GL.arithmetical_soundness (f := ⟨fun _ ↦ ⊥⟩) (𝔅 := 𝗣𝗔.standardProvability) h
+  simp only [Formula.interpret, Formula.interpret_boxItr] at this
+  simpa using Provability.height_le_of_boxBot (WeakerThan.pbl this : 𝗣𝗔 ⊢ _)
+
 namespace Logic.GLPlusBoxBot
 
 section
@@ -63,6 +69,12 @@ theorem eq_provabilityLogic : GLPlusBoxBot T.height = T.provabilityLogic (α := 
 
 lemma equiv_provabilityLogic : GLPlusBoxBot T.height ≊ T.provabilityLogic (α := α) :=
   equiv_iff.mpr eq_provabilityLogic
+
+instance (n : ℕ) : (𝐆𝐋 : Logic α) ⪯ GLPlusBoxBot n :=
+  weakerThan_iff.mpr fun _ h ↦ iff_provable_GL.mpr (C_of_conseq h)
+
+instance (n : ℕ) : (𝐆𝐋 : Logic α) ⪱ GLPlusBoxBot n :=
+  .of_unprovable_provable (GL.unprovable_boxItr_bot n) (iff_provable_GL.mpr C_id)
 
 end Logic.GLPlusBoxBot
 
