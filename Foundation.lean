@@ -133,6 +133,8 @@ public import Foundation.FirstOrder.SetTheory.NaturalNumberRec
 public import Foundation.FirstOrder.SetTheory.Ordinal
 public import Foundation.FirstOrder.SetTheory.Rayo
 public import Foundation.FirstOrder.SetTheory.Recursion
+public import Foundation.FirstOrder.SetTheory.Recursion.Blueprint
+public import Foundation.FirstOrder.SetTheory.Recursion.Seq
 public import Foundation.FirstOrder.SetTheory.TransitiveModel
 public import Foundation.FirstOrder.SetTheory.Universe
 public import Foundation.FirstOrder.SetTheory.Z

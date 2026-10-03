@@ -7,6 +7,10 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 # Fixpoint Construction
 
+This is a version of the Knaster-Tarski theorem on fixpoints for $\mathsf I\Sigma_1$.
+
+This is described in theorems 2.15 – 2.16 of [NS26].
+
 -/
 
 namespace FFL.FirstOrder.Arithmetic
@@ -55,6 +59,7 @@ end Blueprint
 variable (V)
 
 structure Construction {k : ℕ} (φ : Blueprint k) where
+  /-- `c.Φ v Y x` states that `x ∈ Φ(Y)`. -/
   Φ : (Fin k → V) → Set V → V → Prop
   defined : 𝚫ᴬ₁.Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
   monotone {C C' : Set V} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
@@ -196,6 +201,7 @@ lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
 
 variable (v)
 
+/-- `c.Fixpoint v x` states that `x ∈ Φ_Fix` (for a specific witness `Φ_Fix`). -/
 def Fixpoint (x : V) : Prop := ∃ s, x ∈ c.limSeq v s
 
 variable {v}
