@@ -38,14 +38,15 @@ private lemma eval_sigmaReflectionPremise (x : V) :
       IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧ IsPrenexHierarchy 𝚺 n x ∧ Provable T x := by
   simp [sigmaReflectionPremise, eq_comm];
 
-private lemma exists_prenex_eq_quote {m : ℕ} (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V))
-    (hshift : shift ℒₒᵣ (m : V) = m) (hpre : IsPrenexHierarchy 𝚺 n (m : V)) :
+private lemma exists_prenex_eq_quote {m : ℕ}
+    (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V))
+    (hshift : shift ℒₒᵣ (m : V) = m)
+    (hpre : IsPrenexHierarchy 𝚺 n (m : V)) :
     ∃ φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n Empty 0, m = ⌜φ.val⌝ := by
-  obtain ⟨F, hF⟩ :=
-    IsSemiformula.sound (L := ℒₒᵣ) (isSemiformula_natCast_iff (V := V) |>.mpr hsemi);
+  obtain ⟨F, hF⟩ := IsSemiformula.sound <| isSemiformula_natCast_iff.mpr hsemi;
   have hshiftN : shift ℒₒᵣ m = m := by
     have h := DefinedFunction.shigmaOne_absolute_func V
-      (shift.defined (L := ℒₒᵣ) (V := ℕ)) (shift.defined (L := ℒₒᵣ) (V := V)) ![m];
+      shift.defined (shift.defined (L := ℒₒᵣ) (V := V)) ![m];
     simp only [Matrix.cons_val_zero, Function.comp_apply] at h;
     exact_mod_cast h.trans hshift;
   have hF' : Rewriting.shift F = F := by
@@ -179,16 +180,18 @@ private lemma eval_sigmaReflectionFormulaPrenex {V : Type*} [ORingStructure V]
     simp only [models_iff, Semiformula.eval_allClosure, LogicalConnective.HomClass.map_iff,
       Semiformula.eval_ex, LogicalConnective.Prop.iff_eq] at h;
     exact h;
-  have hQ : ∀ e : Fin 2 → V, V ⊧/e (sigmaReflectionBody T n) ↔ V ⊧/e Q.val := by
-    have h := models_of_provable (M := V) inferInstance
-      ((hierarchy_sigmaReflectionBody T n).provable_prenex (𝗕𝚺 n));
-    simp only [models_iff, Semiformula.eval_allClosure, LogicalConnective.HomClass.map_iff,
-      LogicalConnective.Prop.iff_eq] at h;
-    exact h;
   calc
     _ ↔ V ⊧/![x] Q.pi.val := eval_prenex_congr (fun e ↦ by simp [sigmaReflectionFormulaPrenex, Q]) _
     _ ↔ ∀ u, V ⊧/![u, x] Q.val := by simp [-Bounding.Prenex.val_piInv]
-    _ ↔ ∀ u, V ⊧/![u, x] (sigmaReflectionBody T n) := forall_congr' fun u ↦ (hQ _).symm
+    _ ↔ ∀ u, V ⊧/![u, x] (sigmaReflectionBody T n) := by
+      apply forall_congr';
+      intro u;
+      symm;
+      have h := models_of_provable (M := V) inferInstance
+        ((hierarchy_sigmaReflectionBody T n).provable_prenex (𝗕𝚺 n));
+      simp only [models_iff, Semiformula.eval_allClosure, LogicalConnective.HomClass.map_iff,
+        LogicalConnective.Prop.iff_eq] at h;
+      apply h;
     _ ↔ _ := by
       simp [sigmaReflectionBody, sigmaReflectionFormula, hA, imp_iff_not_or, forall_or_right]
 
@@ -200,8 +203,7 @@ variable [𝗜𝚺₁ ⪯ T] [𝗕𝚺n ⪯ T]
 
 private lemma provable_sigmaReflectionFormulaPrenex_iff (m : ℕ) :
     T ⊢ (sigmaReflectionFormulaPrenex T n).val/[↑m] 🡘 (sigmaReflectionFormula T n)/[↑m] :=
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := n);
-  complete T _ fun (V : Type) _ _ ↦ by
+  complete.{0} T _ fun V _ _ ↦ by
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* T);
     have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺n := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* T);
     simpa [models_iff, numeral_eq_natCast, -Bounding.Prenex.val_piInv] using
@@ -211,9 +213,9 @@ private lemma localReflectionOn_Sigma_equiv_union_sigmaReflectionTheory :
     T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T ≊ T ∪ sigmaReflectionTheory T n := by
   set U := sigmaReflectionTheory T n;
   set R := 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
-  have hU : T ⪯ T ∪ U := WeakerThan.ofSubset Set.subset_union_left;
+  have hU  : T ⪯ T ∪ U := WeakerThan.ofSubset Set.subset_union_left;
   have hU' : 𝗜𝚺₁ ⪯ T ∪ U := WeakerThan.trans inferInstance hU;
-  have hR : T ⪯ T ∪ R := WeakerThan.ofSubset Set.subset_union_left;
+  have hR  : T ⪯ T ∪ R := WeakerThan.ofSubset Set.subset_union_left;
   have hR' : 𝗜𝚺₁ ⪯ T ∪ R := WeakerThan.trans inferInstance hR;
   apply Equiv.antisymm;
   constructor;
@@ -247,12 +249,13 @@ private lemma localReflectionOn_Sigma_equiv_union_sigmaReflectionTheory :
 theorem exists_prenex_axiomatization_localReflectionOn_Sigma :
     ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) σ) ∧
       T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T ≊ T ∪ U := by
-  use sigmaReflectionTheory T n,
-    Theory.Δ₁.numeralInstances _ le_quote_sigmaReflectionFormulaPrenex;
+  use sigmaReflectionTheory T n, Theory.Δ₁.numeralInstances _ le_quote_sigmaReflectionFormulaPrenex;
   and_intros;
   · rintro _ ⟨m, rfl⟩;
-    exact ⟨(sigmaReflectionFormulaPrenex T n).rew (Rew.subst ![↑m]),
-      (Bounding.Prenex.val_rew _ _).symm⟩;
+    exact ⟨
+      (sigmaReflectionFormulaPrenex T n).rew (Rew.subst ![↑m]),
+      (Bounding.Prenex.val_rew _ _).symm
+    ⟩;
   · exact localReflectionOn_Sigma_equiv_union_sigmaReflectionTheory;
 
 end FFL.FirstOrder.Arithmetic

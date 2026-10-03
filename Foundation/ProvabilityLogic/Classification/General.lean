@@ -267,12 +267,13 @@ variable {n : ℕ} [NeZero n] [𝗜𝚺₁ ⪯ T] [𝗕𝚺n ⪯ T]
 theorem provabilityLogic_add_localReflectionOn_Sigma_eq_D :
     letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
     Consistent T' → T.provabilityLogicRelativeTo T' (α := α) = 𝐃 := by
-  intro hC;
   set T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
-  have : 𝗜𝚺₁ ⪯ T' :=
-    WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left);
-  have hR : T' ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T := fun hσ ↦
-    by_axm <| Set.mem_union_right _ <| T.standardProvability.localReflectionOn_mono
+  intro hC;
+  have hR : T' ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T := by
+    intro _ hσ;
+    exact by_axm
+      <| Set.mem_union_right _
+      <| T.standardProvability.localReflectionOn_mono
       (fun _ h ↦ h.mono NeZero.one_le) hσ;
   have hD := D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1 (α := α) hR;
   apply Logic.weakerThan_antisymm;
