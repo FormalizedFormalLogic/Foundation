@@ -164,7 +164,6 @@ namespace Semiformula
 
 variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add] {ξ : Type*} {n : ℕ}
 
-/-- aaa -/
 def ballLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
   φ.ballLT ‘!!t + 1’
 
