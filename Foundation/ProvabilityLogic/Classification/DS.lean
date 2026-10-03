@@ -154,13 +154,19 @@ lemma A_weakerThan_provabilityLogic_of_trace
     simpa using (lift_mem_provabilityLogic_iff (A := alpha i)).mp <| by
       simpa using alpha_mem_provabilityLogic_of_mem_trace (h ▸ Set.mem_univ i)
 
-/-- - [Bek90, Theorem 1]
-- [AB05, Lemma 57]
+/-- - [Bek90, Theorem 1, Assertion 1]
+- [AB05, Lemma 56, Lemma 57]
 -/
-theorem provable_reflection_of_not_D (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
-    (hA : A ∈ T.provabilityLogicRelativeTo U) (hAD : 𝐃 ⊬ A) :
-    U ⊢ T.standardProvability σ 🡒 σ := by
+theorem S_weakerThan_provabilityLogic
+    (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
+    (h : 𝐃 ⪱ T.provabilityLogicRelativeTo U (α := α)) :
+    𝐒 ⪯ T.provabilityLogicRelativeTo U (α := α) := by
   classical
+  obtain ⟨-, A, hAD, hA⟩ := strictlyWeakerThan_iff.mp h;
+  apply sumQuasiNormal_weakerThan_provabilityLogic;
+  rintro _ ⟨C, rfl⟩ f₀;
+  change U ⊢ T.standardProvability (f₀ T C) 🡒 f₀ T C
+  generalize f₀ T C = σ
   have h₁ : (𝐀 +ᴸ {A⟦fun a ↦ #(some a)⟧}) ⊆ T.provabilityLogicRelativeTo U := by
     intro C hC;
     induction hC with
@@ -190,18 +196,6 @@ theorem provable_reflection_of_not_D (hT : (T.provabilityLogicRelativeTo U (α :
   have h₅ : U ⊢ ∼f T (B ⋏ lift (⩕ i ∈ Finset.range n, alpha i)) := WeakerThan.pbl hf;
   simp only [standardInterpret, interpret, e] at h₄ h₅;
   cl_prover [h₃, h₄, h₅];
-
-/-- - [Bek90, Assertion 1]
-- [AB05, Lemma 56, Lemma 57]
--/
-theorem S_weakerThan_provabilityLogic
-    (hT : (T.provabilityLogicRelativeTo U (α := α)).trace = .univ)
-    (h : 𝐃 ⪱ T.provabilityLogicRelativeTo U (α := α)) :
-    𝐒 ⪯ T.provabilityLogicRelativeTo U (α := α) := by
-  obtain ⟨-, A, hAD, hA⟩ := strictlyWeakerThan_iff.mp h;
-  apply sumQuasiNormal_weakerThan_provabilityLogic;
-  rintro _ ⟨C, rfl⟩ _;
-  exact provable_reflection_of_not_D hT hA hAD;
 
 /-- - [AB05, Corollary 58] -/
 theorem not_D_strictlyWeakerThan_provabilityLogic_strictlyWeakerThan_S
