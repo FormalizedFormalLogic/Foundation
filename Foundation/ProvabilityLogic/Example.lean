@@ -18,19 +18,12 @@ variable {α : Type*} {n : ℕ}
 
 namespace Logic.GL
 
-theorem eq_provabilityLogic_peano : 𝐆𝐋 = 𝗣𝗔.provabilityLogic (α := α) :=
-  eq_provabilityLogic
-
 theorem equiv_provabilityLogic_peano : 𝐆𝐋 ≊ 𝗣𝗔.provabilityLogic (α := α) :=
   equiv_provabilityLogic
 
 end Logic.GL
 
 namespace Logic.S
-
-theorem eq_provabilityLogicRelativeTo_peano_TA :
-    𝐒 = 𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
-  eq_provabilityLogicRelativeTo_TA
 
 theorem equiv_provabilityLogicRelativeTo_peano_TA :
     𝐒 ≊ 𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
