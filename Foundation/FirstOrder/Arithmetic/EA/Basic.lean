@@ -21,6 +21,7 @@ namespace FFL.FirstOrder.Arithmetic
 
 def expAxiom : ArithmeticSentence := “∀ x, ∃ y, !exponentialDef x y”
 
+/-- `𝗜𝚺₀` plus `∀ x, ∃ y, y = 2^x`. -/
 abbrev ElementaryArithmetic : ArithmeticTheory := 𝗜𝚺₀ ∪ {expAxiom}
 
 notation "𝗘𝗔" => ElementaryArithmetic
