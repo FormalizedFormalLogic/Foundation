@@ -11,6 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounded
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Disquotation
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.TermVal
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
@@ -59,6 +60,7 @@ public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
+public import Foundation.FirstOrder.Arithmetic.Induction.FiniteAxiomatization
 public import Foundation.FirstOrder.Arithmetic.LE
 public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic

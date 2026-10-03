@@ -533,6 +533,21 @@ def toEmpty' [DecidableEq ξ] {n : ℕ} (φ : Semiformula L ξ n) : Semisentence
 
 end univCl
 
+section toSemisentence
+
+variable {k : ℕ}
+
+noncomputable def paramSubst [NeZero k] (φ : Semiformula L ℕ k)
+    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Rew L ℕ k Empty (φ.fvSup + k) :=
+  haveI : NeZero (φ.fvSup + k) := ⟨by have := Nat.pos_of_ne_zero (NeZero.ne k); omega⟩
+  Rew.bind b fun x ↦ if h : x < φ.fvSup then #⟨x + k, by omega⟩ else #0
+
+noncomputable def toSemisentence [NeZero k] (φ : Semiformula L ℕ k)
+    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Semisentence L (φ.fvSup + k) :=
+  paramSubst φ b ▹ φ
+
+end toSemisentence
+
 section lMap
 
 variable {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}

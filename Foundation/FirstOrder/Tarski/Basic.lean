@@ -501,6 +501,42 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
 
 end rew
 
+section toSemisentence
+
+variable {M : Type*} [Tarski.Structure L M] {k : ℕ}
+
+lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
+    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) {v : Fin (φ.fvSup + k) → M} {w : Fin k → M}
+    {f : ℕ → M} (hb : ∀ i, Semiterm.val v Empty.elim (b i) = w i)
+    (hv : ∀ y : Fin φ.fvSup, v ⟨y + k, by omega⟩ = f y) :
+    M ⊧/v (φ.toSemisentence b) ↔ φ.Eval w f := by
+  rw [toSemisentence, Semiformula.eval_rew];
+  have hbv : (Semiterm.val v Empty.elim ∘ φ.paramSubst b ∘ Semiterm.bvar) = w := funext hb;
+  rw [hbv];
+  apply Semiformula.eval_iff_of_funEqOn φ;
+  intro y hy;
+  have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy;
+  simp [paramSubst, hlt, hv ⟨y, hlt⟩];
+
+lemma eval_toSemisentence_one (φ : Semiformula L ℕ 1) (x : M) (f : ℕ → M) :
+    M ⊧/(x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#0]) ↔ φ.Eval ![x] f :=
+  eval_toSemisentence ![#0]
+    (fun i ↦ by induction i using Fin.cases with | zero => simp | succ i => exact i.elim0)
+    (fun _ ↦ by simp)
+
+lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M) (f : ℕ → M) :
+    M ⊧/(y :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) ↔ φ.Eval ![x, y] f :=
+  eval_toSemisentence ![#1, #0]
+    (fun i ↦ by
+      induction i using Fin.cases with
+      | zero => simp
+      | succ i => induction i using Fin.cases with
+        | zero => simp
+        | succ i => exact i.elim0)
+    (fun _ ↦ by simp)
+
+end toSemisentence
+
 end Semiformula
 
 namespace Tarski.Structure
