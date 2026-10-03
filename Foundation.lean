@@ -92,6 +92,7 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflec
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refutability
 public import Foundation.FirstOrder.Incompleteness.Reflection.IteratedConsistency
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
+public import Foundation.FirstOrder.Incompleteness.Reflection.SigmaReflection
 public import Foundation.FirstOrder.Incompleteness.Reflection.Unboundedness
 public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
@@ -208,6 +209,7 @@ public import Foundation.ProvabilityLogic.D.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.D.NotCIP
+public import Foundation.ProvabilityLogic.Example
 public import Foundation.ProvabilityLogic.Formula
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 public import Foundation.ProvabilityLogic.GL.Basic
