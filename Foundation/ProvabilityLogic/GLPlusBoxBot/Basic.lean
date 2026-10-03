@@ -1,6 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.GL.Basic
+public import Foundation.ProvabilityLogic.Kripke.FiniteLineModel
 public import Mathlib.Data.ENat.Basic
 
 /-!
@@ -26,6 +27,9 @@ def Logic.GLPlusBoxBot {α : Type*} : ℕ∞ → Logic α
   | .some n => 𝐆𝐋 +ᴸ {□^[n]⊥}
   | .none => 𝐆𝐋
 
+lemma Logic.GL.unprovable_boxItr_bot {α : Type*} (n : ℕ) : (𝐆𝐋 : Logic α) ⊬ □^[n]⊥ := fun h ↦ by
+  simpa using forces_boxItr_bot_iff.mp <| GL.sound (finiteLineModel n α) h (Fin.last n)
+
 namespace Logic.GLPlusBoxBot
 
 variable {α : Type*} {A : Formula α} {n : ℕ}
@@ -46,6 +50,12 @@ lemma iff_provable_GL : GLPlusBoxBot n ⊢ A ↔ 𝐆𝐋 ⊢ □^[n]⊥ 🡒 A 
       exact fun M _ x hx ↦ forces_subst.mp <| ih (M.subst _) x <| by
         simpa [forces_subst] using hx;
   · exact fun h ↦ .mdp (.mem₁ h) (.mem₂ rfl);
+
+instance : (𝐆𝐋 : Logic α) ⪯ GLPlusBoxBot n :=
+  weakerThan_iff.mpr fun _ h ↦ iff_provable_GL.mpr (C_of_conseq h)
+
+instance : (𝐆𝐋 : Logic α) ⪱ GLPlusBoxBot n :=
+  .of_unprovable_provable (GL.unprovable_boxItr_bot n) (iff_provable_GL.mpr C_id)
 
 end Logic.GLPlusBoxBot
 
