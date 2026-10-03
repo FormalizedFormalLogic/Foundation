@@ -16,40 +16,35 @@ open FirstOrder FirstOrder.Arithmetic
 
 variable {α : Type*} {n : ℕ}
 
-namespace Logic.GL
+set_option hygiene false in
+local notation "𝐏𝐋(" T ")" => ArithmeticTheory.provabilityLogic T (α := α)
 
-theorem equiv_provabilityLogic_peano : 𝐆𝐋 ≊ 𝗣𝗔.provabilityLogic (α := α) :=
-  equiv_provabilityLogic
+set_option hygiene false in
+local notation "𝐏𝐋(" T ", " U ")" => ArithmeticTheory.provabilityLogicRelativeTo T U (α := α)
 
-end Logic.GL
+theorem provabilityLogic_equiv_GL_peano : 𝐏𝐋(𝗣𝗔) ≊ 𝐆𝐋 :=
+  Logic.equiv_of_eq Logic.GL.eq_provabilityLogic.symm
 
-namespace Logic.S
+theorem provabilityLogic_TA_equiv_S_peano : 𝐏𝐋(𝗣𝗔, 𝗧𝗔) ≊ 𝐒 :=
+  Logic.equiv_of_eq Logic.S.eq_provabilityLogicRelativeTo_TA.symm
 
-theorem equiv_provabilityLogicRelativeTo_peano_TA :
-    𝐒 ≊ 𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔 (α := α) :=
-  equiv_provabilityLogicRelativeTo_TA
-
-end Logic.S
-
-theorem provabilityLogic_turingOmega_equiv_A_ISigma1 :
-    𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗜𝚺₁.Conω) (α := α) ≊ 𝐀 :=
+theorem provabilityLogic_turingOmega_equiv_A_ISigma1 : 𝐏𝐋(𝗜𝚺₁, 𝗜𝚺₁ ∪ 𝗜𝚺₁.Conω) ≊ 𝐀 :=
   Logic.equiv_of_eq provabilityLogic_turingOmega_eq_A_of_sigma1Sound
 
-theorem provabilityLogic_turingOmega_equiv_A_peano :
-    𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗣𝗔.Conω) (α := α) ≊ 𝐀 :=
+theorem provabilityLogic_turingOmega_equiv_A_peano : 𝐏𝐋(𝗣𝗔, 𝗣𝗔 ∪ 𝗣𝗔.Conω) ≊ 𝐀 :=
   Logic.equiv_of_eq provabilityLogic_turingOmega_eq_A_of_sigma1Sound
 
 theorem provabilityLogic_add_localReflectionOn_Sigma1_equiv_D_ISigma1 :
-    𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗜𝚺₁) (α := α) ≊ 𝐃 :=
+    𝐏𝐋(𝗜𝚺₁, 𝗜𝚺₁ ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗜𝚺₁) ≊ 𝐃 :=
   Logic.equiv_of_eq provabilityLogic_add_localReflectionOn_Sigma_eq_D_of_sigma1Sound
 
 theorem provabilityLogic_add_localReflectionOn_Sigma_equiv_D_peano [NeZero n] :
-    𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] 𝗣𝗔) (α := α) ≊ 𝐃 :=
+    𝐏𝐋(𝗣𝗔, 𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] 𝗣𝗔) ≊ 𝐃 :=
   have : 𝗕𝚺n ⪯ 𝗣𝗔 := BSigma_weakerThan_ISigma_succ.trans inferInstance;
   Logic.equiv_of_eq provabilityLogic_add_localReflectionOn_Sigma_eq_D_of_sigma1Sound
 
 theorem provabilityLogic_add_localReflectionOn_Sigma1_equiv_D_peano :
-    𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗣𝗔) (α := α) ≊ 𝐃 :=
+    𝐏𝐋(𝗣𝗔, 𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗣𝗔) ≊ 𝐃 :=
   provabilityLogic_add_localReflectionOn_Sigma_equiv_D_peano
 
 end FFL.ProvabilityLogic
