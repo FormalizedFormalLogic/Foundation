@@ -69,7 +69,7 @@ instance termSubst.defined : 𝚺ᴬ₁-Function₂ termSubst (V := V) L via ter
 
 instance termSubst.definable : 𝚺ᴬ₁-Function₂ termSubst (V := V) L := termSubst.defined.to_definable
 
-instance termSubst.definable' (Γ k) : Γᴬ-[k + 1]-Function₂ termSubst (V := V) L :=
+instance termSubst.definable' (Γ k) : Γᴬ_[k + 1]-Function₂ termSubst (V := V) L :=
   termSubst.definable.of_sigmaOne
 
 instance termSubstVec.defined : 𝚺ᴬ₁-Function₃ termSubstVec (V := V) L via termSubstVecGraph L :=
@@ -80,7 +80,7 @@ instance termSubstVec.defined : 𝚺ᴬ₁-Function₃ termSubstVec (V := V) L v
 instance termSubstVec.definable : 𝚺ᴬ₁-Function₃ termSubstVec (V := V) L :=
   termSubstVec.defined.to_definable
 
-instance termSubstVec.definable' (Γ i) : Γᴬ-[i + 1]-Function₃ termSubstVec (V := V) L :=
+instance termSubstVec.definable' (Γ i) : Γᴬ_[i + 1]-Function₃ termSubstVec (V := V) L :=
   termSubstVec.definable.of_sigmaOne
 
 end
@@ -224,7 +224,7 @@ instance termShift.defined : 𝚺ᴬ₁-Function₁ termShift (V := V) L via ter
 
 instance termShift.definable : 𝚺ᴬ₁-Function₁ termShift (V := V) L := termShift.defined.to_definable
 
-instance termShift.definable' (Γ i) : Γᴬ-[i + 1]-Function₁ termShift (V := V) L :=
+instance termShift.definable' (Γ i) : Γᴬ_[i + 1]-Function₁ termShift (V := V) L :=
   termShift.definable.of_sigmaOne
 
 instance termShiftVec.defined : 𝚺ᴬ₁-Function₂ termShiftVec (V := V) L via termShiftVecGraph L :=
@@ -234,7 +234,7 @@ instance termShiftVec.defined : 𝚺ᴬ₁-Function₂ termShiftVec (V := V) L v
 instance termShiftVec.definable : 𝚺ᴬ₁-Function₂ termShiftVec (V := V) L :=
   termShiftVec.defined.to_definable
 
-instance termShiftVec.definable' (Γ i) : Γᴬ-[i + 1]-Function₂ termShiftVec (V := V) L :=
+instance termShiftVec.definable' (Γ i) : Γᴬ_[i + 1]-Function₂ termShiftVec (V := V) L :=
   termShiftVec.definable.of_sigmaOne
 
 end
@@ -366,7 +366,7 @@ instance termBShift.defined : 𝚺ᴬ₁-Function₁ termBShift (V := V) L via t
 instance termBShift.definable : 𝚺ᴬ₁-Function₁ termBShift (V := V) L :=
   termBShift.defined.to_definable
 
-instance termBShift.definable' (Γ i) : Γᴬ-[i + 1]-Function₁ termBShift (V := V) L :=
+instance termBShift.definable' (Γ i) : Γᴬ_[i + 1]-Function₁ termBShift (V := V) L :=
   termBShift.definable.of_sigmaOne
 
 instance termBShiftVec.defined : 𝚺ᴬ₁-Function₂ termBShiftVec (V := V) L via termBShiftVecGraph L :=
@@ -375,7 +375,7 @@ instance termBShiftVec.defined : 𝚺ᴬ₁-Function₂ termBShiftVec (V := V) L
 instance termBShiftVec.definable : 𝚺ᴬ₁-Function₂ termBShiftVec (V := V) L :=
   termBShiftVec.defined.to_definable
 
-instance termBShiftVec.definable' (Γ i) : Γᴬ-[i + 1]-Function₂ termBShiftVec (V := V) L :=
+instance termBShiftVec.definable' (Γ i) : Γᴬ_[i + 1]-Function₂ termBShiftVec (V := V) L :=
   termBShiftVec.definable.of_sigmaOne
 
 end
@@ -569,7 +569,7 @@ instance qVec.defined : 𝚺ᴬ₁-Function₁[V] qVec L via qVecGraph L :=
 
 instance qVec.definable : 𝚺ᴬ₁-Function₁[V] qVec L := qVec.defined.to_definable
 
-instance qVec.definable' (Γ m) : Γᴬ-[m + 1]-Function₁[V] qVec L := qVec.definable.of_sigmaOne
+instance qVec.definable' (Γ m) : Γᴬ_[m + 1]-Function₁[V] qVec L := qVec.definable.of_sigmaOne
 
 end
 
@@ -746,9 +746,9 @@ instance qqAdd_defined : 𝚺ᴬ₁-Function₂ (qqAdd : V → V → V) via qqAd
 instance qqMul_defined : 𝚺ᴬ₁-Function₂ (qqMul : V → V → V) via qqMulGraph := .mk fun v ↦ by
   simp [qqMulGraph, numeral_eq_natCast, qqMul]
 
-instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqAdd : V → V → V) := .of_sigmaOne qqAdd_defined.to_definable
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqAdd : V → V → V) := .of_sigmaOne qqAdd_defined.to_definable
 
-instance (Γ m) : Γᴬ-[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_defined.to_definable
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_defined.to_definable
 
 end
 
@@ -812,7 +812,7 @@ def numeralAuxGraph : 𝚺ᴬ₁.Semisentence 2 := blueprint.resultDef
 instance numeralAux.defined : 𝚺ᴬ₁-Function₁ (numeralAux : V → V) via numeralAuxGraph := .mk
   fun v ↦ by simp [construction.result_defined_iff, numeralAuxGraph]; rfl
 
-instance numeralAux.definable : 𝚺ᴬ-[0 + 1]-Function₁ (numeralAux : V → V) :=
+instance numeralAux.definable : 𝚺ᴬ_[0 + 1]-Function₁ (numeralAux : V → V) :=
   numeralAux.defined.to_definable
 
 end
@@ -873,7 +873,7 @@ instance numeral_defined : 𝚺ᴬ₁-Function₁ (numeral : V → V) via numera
 
 instance numeral_definable : 𝚺ᴬ₁-Function₁ (numeral : V → V) := numeral_defined.to_definable
 
-instance numeral_definable' (Γ m) : Γᴬ-[m + 1]-Function₁ (numeral : V → V) :=
+instance numeral_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (numeral : V → V) :=
   .of_sigmaOne numeral_definable
 
 end

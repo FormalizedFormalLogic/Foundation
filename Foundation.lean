@@ -92,7 +92,9 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Finite
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflection
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Refutability
+public import Foundation.FirstOrder.Incompleteness.Reflection.IteratedConsistency
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
+public import Foundation.FirstOrder.Incompleteness.Reflection.Unboundedness
 public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 public import Foundation.FirstOrder.Incompleteness.RestrictedProvability
 public import Foundation.FirstOrder.Incompleteness.RosserProvability
@@ -124,8 +126,11 @@ public import Foundation.FirstOrder.SetTheory.Basic.Axioms
 public import Foundation.FirstOrder.SetTheory.Basic.Hierarchy
 public import Foundation.FirstOrder.SetTheory.Basic.Misc
 public import Foundation.FirstOrder.SetTheory.Basic.Model
+public import Foundation.FirstOrder.SetTheory.Definability.Definable
+public import Foundation.FirstOrder.SetTheory.Definability.Hierarchy
 public import Foundation.FirstOrder.SetTheory.Function
 public import Foundation.FirstOrder.SetTheory.LoewenheimSkolem
+public import Foundation.FirstOrder.SetTheory.NaturalNumberRec
 public import Foundation.FirstOrder.SetTheory.Ordinal
 public import Foundation.FirstOrder.SetTheory.Rayo
 public import Foundation.FirstOrder.SetTheory.Recursion

@@ -52,7 +52,7 @@ lemma collection {R : V → V → Prop}
 end CollectionScheme
 
 lemma CollectionScheme.models_of_collection
-  (H : ∀ {R : V → V → Prop}, Γᴬ-[s].DefinableRel R →
+  (H : ∀ {R : V → V → Prop}, Γᴬ_[s].DefinableRel R →
       ∀ a, (∀ x < a, ∃ y, R x y) → ∃ b, ∀ x < a, ∃ y < b, R x y) :
   V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s) := by
   apply Semantics.ModelsSet.setOf_iff.mpr;
@@ -106,7 +106,7 @@ section BSigma_ISigma
 variable {s : ℕ}
 
 lemma IBroadSigma.collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(s + 1)] {R : V → V → Prop}
-    (hR : 𝚺ᴬ-[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
+    (hR : 𝚺ᴬ_[s + 1].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_IBroadSigma (s := s + 1);
   have key : ∀ y : V, ∃ b, ∀ x < y, x < a → ∃ u < b, R x u := by

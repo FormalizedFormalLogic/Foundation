@@ -36,6 +36,8 @@ lemma strictlyWeakerThan_iff : L₁ ⪱ L₂ ↔ L₁ ⊂ L₂ :=
 
 lemma equiv_iff : L₁ ≊ L₂ ↔ L₁ = L₂ := ⟨fun h ↦ h.eq, fun h ↦ ⟨congrArg theory h⟩⟩
 
+alias ⟨eq_of_equiv, equiv_of_eq⟩ := equiv_iff
+
 lemma weakerThan_antisymm (h₁ : L₁ ⪯ L₂) (h₂ : L₂ ⪯ L₁) : L₁ = L₂ :=
   subset_antisymm h₁.subset h₂.subset
 

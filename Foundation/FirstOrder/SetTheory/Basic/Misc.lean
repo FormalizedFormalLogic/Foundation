@@ -246,7 +246,7 @@ lemma consequence_of_models (T : SetTheory) [𝗘𝗤 _ ⪯ T] (φ : SetTheorySe
   rcases standardStructure_unique M s
   exact H M
 
-lemma provable_of_models (T : SetTheory) [𝗘𝗤 _ ⪯ T] (φ : SetTheorySentence)
+lemma complete (T : SetTheory) [𝗘𝗤 _ ⪯ T] (φ : SetTheorySentence)
     (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M↓[ℒₛₑₜ] ⊧* T], M↓[ℒₛₑₜ] ⊧ φ) :
     T ⊢ φ := Theory.Proof.complete <| consequence_of_models _ _ H
 

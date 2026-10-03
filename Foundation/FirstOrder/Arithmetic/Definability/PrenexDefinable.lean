@@ -48,7 +48,7 @@ lemma of_iff {P Q : (Fin k → V) → Prop} (h : PrenexDefinable Γ s Q) (H : �
   rwa [show P = Q from by funext v; simp [H]];
 
 lemma definable {P : (Fin k → V) → Prop} (h : PrenexDefinable Γ s P) :
-    Γᴬ-[s].Definable P := by
+    Γᴬ_[s].Definable P := by
   obtain ⟨φ, hs, hφ⟩ := h;
   exact .mkPolarity φ hs.hierarchy fun v ↦ (hφ v).symm;
 

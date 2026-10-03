@@ -241,7 +241,7 @@ lemma IsHierarchy.succ_iff :
 
 alias ⟨IsHierarchy.succ_case, IsHierarchy.succ_mk⟩ := IsHierarchy.succ_iff
 
-lemma IsHierarchy.succ_induction (Γ' : Polarity) {P : V → Prop} (hP : Γ'ᴬ-[1]-Predicate P)
+lemma IsHierarchy.succ_induction (Γ' : Polarity) {P : V → Prop} (hP : Γ'ᴬ_[1]-Predicate P)
     (hbase : ∀ p, IsHierarchy Γ.alt n p → P p)
     (hand : ∀ p q, IsHierarchy Γ (n + 1) p → IsHierarchy Γ (n + 1) q → P p → P q →
       P (p ^⋏ q))

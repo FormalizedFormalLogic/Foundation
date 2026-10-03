@@ -328,7 +328,7 @@ lemma Seq.cases_iff {s : V} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = s' 
 alias ⟨Seq.cases, _⟩ := Seq.cases_iff
 
 @[elab_as_elim]
-theorem seq_induction (Γ) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+theorem seq_induction (Γ) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
   (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (s ⁀' x)) :
     ∀ {s : V}, Seq s → P s := by
   intro s sseq
@@ -383,7 +383,7 @@ instance mkSeq₂_defined : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ !⟦x, y⟧)
 
 instance mkSeq₂_definable : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂_defined.to_definable
 
-instance mkSeq₂_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) :=
+instance mkSeq₂_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) :=
   mkSeq₂_definable.of_sigmaOne
 
 end
