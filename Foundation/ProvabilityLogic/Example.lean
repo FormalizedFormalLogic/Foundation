@@ -2,6 +2,7 @@ module
 
 public import Foundation.ProvabilityLogic.Classification.General
 public import Foundation.ProvabilityLogic.GL.Arithmetic
+public import Foundation.ProvabilityLogic.GLPlusBoxBot.Arithmetic
 public import Foundation.ProvabilityLogic.S.Arithmetic
 
 /-!
@@ -24,6 +25,14 @@ local notation "PL(" T ", " U ")" => ArithmeticTheory.provabilityLogicRelativeTo
 
 theorem provabilityLogic_equiv_GL_peano : PL(𝗣𝗔) ≊ 𝐆𝐋 :=
   Logic.equiv_of_eq Logic.GL.eq_provabilityLogic.symm
+
+instance : (𝐆𝐋 : Logic α) ⪱ Logic.GLPlusBoxBot 1 :=
+  inferInstanceAs (𝐆𝐋 ⪱ Logic.GLPlusBoxBot (1 : ℕ))
+
+theorem provabilityLogic_add_incon_equiv_GLPlusBoxBot_one_peano :
+    PL(𝗣𝗔 ∪ 𝗣𝗔.Incon) ≊ Logic.GLPlusBoxBot 1 := by
+  simpa [height_union_incon_eq_one] using
+    (Logic.GLPlusBoxBot.equiv_provabilityLogic (T := 𝗣𝗔 ∪ 𝗣𝗔.Incon)).symm
 
 theorem provabilityLogic_TA_equiv_S_peano : PL(𝗣𝗔, 𝗧𝗔) ≊ 𝐒 :=
   Logic.equiv_of_eq Logic.S.eq_provabilityLogicRelativeTo_TA.symm

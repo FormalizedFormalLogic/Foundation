@@ -104,6 +104,29 @@ lemma models_boxBot_iff : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability^[n + 1] �
   simpa [Function.iterate_succ_apply', models_standardProvability_iff] using
     Provability.height_le_iff_boxBot.symm;
 
+open _root_.FFL.Entailment in
+/-- `T + ¬Con(T)` proves its own inconsistency, so its height is `1`. -/
+lemma height_union_incon_eq_one [Consistent T] : (T ∪ T.Incon).height = 1 := by
+  have hle : (T ∪ T.Incon).height ≤ 1 := by
+    apply Provability.height_le_of_boxBot (n := 1)
+    have h₁ : T ∪ T.Incon ⊢ T.standardProvability ⊥ :=
+      of_NN (by_axm (by simp) : T ∪ T.Incon ⊢ ∼T.consistent.val)
+    have h₂ : T ∪ T.Incon ⊢ T.standardProvability ⊥ 🡒 (T ∪ T.Incon).standardProvability ⊥ :=
+      WeakerThan.pbl <| provable_standardProvability_imp_of_Δ₁Class_subset
+        (fun _ _ _ _ hp ↦ Theory.Δ₁Class.mem_union.mpr (.inl hp)) ⊥
+    exact h₂ ⨀ h₁
+  have hne : (T ∪ T.Incon).height ≠ 0 := fun h ↦ consistent_unprovable T <| by
+    have : T ∪ T.Incon ⊢ ⊥ := Provability.height_le_iff_boxBot (n := 0) |>.mp h.le
+    refine provable_iff_inconsistent_adjoin.mpr <| inconsistent_iff_provable_bot.mpr ?_
+    simp only [Set.union_singleton] at this
+    exact this
+  cases hn : (T ∪ T.Incon).height using ENat.recTopCoe with
+  | top => simp [hn] at hle
+  | coe m =>
+    have : m ≤ 1 := ENat.natCast_le_natCast.mp (hn ▸ hle)
+    have : m ≠ 0 := fun h ↦ hne (by rw [hn, h, ENat.natCast_zero])
+    rw [show m = 1 by omega, ENat.natCast_one]
+
 end
 
 @[simp, grind =]
