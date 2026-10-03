@@ -308,7 +308,8 @@ attribute [irreducible] Blueprint.result_dfn
   exact hf.1.IsFunction.unique hempty (IsAttempt.empty hf (hlhf ▸ mem_succ_self ∅))
 
 lemma result_succ (α : V) [hα : IsOrdinal α] :
-    c.result v (SetTheory.succ α) = c.map v (repl (fun β ↦ ⟨β, c.result v β⟩ₖ) (by definability) (succ α)) := by
+    c.result v (SetTheory.succ α) = c.map v
+      (repl (fun β ↦ ⟨β, c.result v β⟩ₖ) (by definability) (succ α)) := by
   classical
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   obtain ⟨f, hf, hlhf, hmemf⟩ := c.result_spec_of_isOrdinal v (succ α)
