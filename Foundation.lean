@@ -201,6 +201,7 @@ public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Arithmetic.StrongInterpret
 public import Foundation.ProvabilityLogic.Classification.AD
 public import Foundation.ProvabilityLogic.Classification.DS
+public import Foundation.ProvabilityLogic.Classification.Example
 public import Foundation.ProvabilityLogic.Classification.General
 public import Foundation.ProvabilityLogic.Classification.Letterless
 public import Foundation.ProvabilityLogic.Classification.Truth
