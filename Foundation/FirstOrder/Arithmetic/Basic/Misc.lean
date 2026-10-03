@@ -164,6 +164,7 @@ namespace Semiformula
 
 variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add] {ξ : Type*} {n : ℕ}
 
+/-- aaa -/
 def ballLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
   φ.ballLT ‘!!t + 1’
 
@@ -189,8 +190,10 @@ namespace BinderNotation
 
 open Lean PrettyPrinter Delaborator SubExpr
 
+/-- `∀ x <⁺ t, φ` states that `∀ x < t + 1, φ`. -/
 syntax:max "∀ " ident " <⁺ " first_order_term ", " first_order_formula:0 : first_order_formula
 
+/-- `∃ x <⁺ t, φ` states that `∃ x < t + 1, φ`. -/
 syntax:max "∃ " ident " <⁺ " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules
