@@ -201,7 +201,6 @@ public import Foundation.ProvabilityLogic.Arithmetic.SolovaySentences
 public import Foundation.ProvabilityLogic.Arithmetic.StrongInterpret
 public import Foundation.ProvabilityLogic.Classification.AD
 public import Foundation.ProvabilityLogic.Classification.DS
-public import Foundation.ProvabilityLogic.Classification.Example
 public import Foundation.ProvabilityLogic.Classification.General
 public import Foundation.ProvabilityLogic.Classification.Letterless
 public import Foundation.ProvabilityLogic.Classification.Truth
@@ -209,6 +208,7 @@ public import Foundation.ProvabilityLogic.D.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Basic
 public import Foundation.ProvabilityLogic.D.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.D.NotCIP
+public import Foundation.ProvabilityLogic.Example
 public import Foundation.ProvabilityLogic.Formula
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 public import Foundation.ProvabilityLogic.GL.Basic
