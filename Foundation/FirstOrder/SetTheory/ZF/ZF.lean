@@ -1,6 +1,7 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Z
+public import Foundation.FirstOrder.SetTheory.Z.Z
+public import Foundation.FirstOrder.SetTheory.ZF.Model
 
 @[expose] public section
 
@@ -24,7 +25,7 @@ lemma replacement_exists_eval (φ : SetTheorySemiformula V 2) (X : V)
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
   have whole := by
     simpa [models_iff, Semiformula.eval_univCl, Axiom.replacementSchema]
-      using Theory.models V 𝗭𝗙 (ZermeloFraenkel.axiom_of_replacement ψ)
+      using Theory.models V 𝗥𝗘𝗣𝗟 (Replacement.replacement ψ)
   have cond : ∀ x, ∃! y : V, ψ.Eval ![x, y] f := by
     simpa [ψ, f, Semiformula.eval_rewriteMap]
   simpa [ψ, f, Semiformula.eval_rewriteMap, Matrix.constant_eq_singleton] using whole f cond X

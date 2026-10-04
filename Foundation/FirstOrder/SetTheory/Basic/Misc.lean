@@ -134,6 +134,26 @@ attribute [instance] Tarski.Structure.Set.mk
 
 namespace SetTheory
 
+/- ### Auxiliary formulas -/
+
+def isSubsetOf : SetTheorySemisentence 2 := “x y. ∀ z ∈ x, z ∈ y”
+
+syntax:45 first_order_term:45 " ⊆ " first_order_term:0 : first_order_formula
+
+open Lean Elab PrettyPrinter Delaborator SubExpr in
+macro_rules
+  | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term ⊆ $u:first_order_term ]) =>
+    `(⤫formula($type)[
+        $binders* | $fbinders* | !isSubsetOf $t:first_order_term $u:first_order_term ])
+
+def isEmpty : SetTheorySemisentence 1 := “x. ∀ y, y ∉ x”
+
+def isNonempty : SetTheorySemisentence 1 := “x. ∃ y, y ∈ x”
+
+def isSucc : SetTheorySemisentence 2 := “y x. ∀ z, z ∈ y ↔ z = x ∨ z ∈ x”
+
+/- ### Results on semantic entailment -/
+
 private lemma consequence_of_aux (T : SetTheory) [𝗘𝗤 _ ⪯ T] (φ : SetTheorySentence)
     (H : ∀ (M : Type w)
            [SetStructure M]
