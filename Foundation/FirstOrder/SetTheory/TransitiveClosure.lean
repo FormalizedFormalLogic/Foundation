@@ -52,6 +52,8 @@ noncomputable def transClosure : V := ⋃ˢ auxConstruction.result ![x] ω
 
 /-! ## Lemmas about iterated unions -/
 
+variable {x}
+
 /-- If `y` includes `x` and is transitive, then each iterated union of `x`
 is a subset of `y`. -/
 lemma itersUnion_subset_of_isTransitive {n y : V} (hxy : x ⊆ y) (hy : IsTransitive y)
@@ -67,16 +69,7 @@ lemma itersUnion_subset_of_isTransitive {n y : V} (hxy : x ⊆ y) (hy : IsTransi
   · obtain ⟨w, hw, hzw⟩ := mem_sUnion_iff.mp (itersUnion.result_succ ![x] hnω ▸ hz)
     exact hy.transitive w (ih w hw) z hzw
 
-lemma itersUnion_somethingidk {n : V} (hnω : n ∈ (ω : V)) :
-    itersUnion.result ![x] n ⊆ itersUnion.result ![{x}] (succ n) := by
-  intro z hz
-  rw [itersUnion.result_succ _ hnω]
-  rw [sUnion_singleton_eq x]
-  sorry
-
 /-! ## Lemmas about transitive closure -/
-
-variable {x}
 
 @[simp]
 lemma transClosure_spec {y : V} : y ∈ transClosure x ↔
