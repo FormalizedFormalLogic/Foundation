@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.SetTheory.Basic.Model
 public import Foundation.Vorspiel.ExistsUnique
 
 /-!
-# BasicSetTheory set theory
+# BST set theory
 
 reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth" [Sch14]
 -/
