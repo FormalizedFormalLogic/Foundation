@@ -274,7 +274,7 @@ lemma trace_provabilityLogic_add_con_self_eq :
         T.standardProvability (T.standardProvability^[n] ⊥) 🡒 T.standardProvability^[n] ⊥ := by
       have := h ⟨fun _ ↦ ⊥⟩;
       rw [Set.union_singleton] at this;
-      have := deduction this;
+      replace := deduction this;
       simp only [alpha, standardInterpret, interpret, interpret_boxItr,
         Function.iterate_succ_apply'] at this;
       exact this;
@@ -283,10 +283,11 @@ lemma trace_provabilityLogic_add_con_self_eq :
         simp only [alpha, standardInterpret, interpret, interpret_boxItr,
           Function.iterate_succ_apply'];
         cl_prover [h₁];
-    by_contra hn;
     have h₃ : ∀ i, n ≤ i := by
       simpa using Set.eq_univ_iff_forall.mp (Logic.GL.mem_iff_spectrum_eq_univ.mp h₂) n;
-    exact hn <| Nat.le_zero.mp <| h₃ 0;
+    contrapose! h₃;
+    use 0;
+    omega;
   · rintro rfl f;
     have h : T ∪ T.Con ⊢ ∼T.standardProvability ⊥ := by_axm <| Set.mem_union_right _ rfl;
     simp only [alpha, standardInterpret, interpret, interpret_boxItr];
