@@ -27,6 +27,7 @@
       "𝗣𝗔.provabilityLogic": PL(PA, PA),
       "𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔": PL(PA, TA),
       "(𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon 𝗣𝗔).provabilityLogic": PL(TIncon(PA), TIncon(PA)),
+      "𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon 𝗣𝗔)": PL(PA, TIncon(PA)),
       "𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗜𝚺₁)": PL(ISigma1, TRfnSigma1(ISigma1)),
       "𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗣𝗔)": PL(PA, TRfnSigma1(PA)),
       "𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Conω 𝗜𝚺₁)": PL(ISigma1, TCon(ISigma1)),
