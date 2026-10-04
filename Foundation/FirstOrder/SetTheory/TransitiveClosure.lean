@@ -69,6 +69,23 @@ lemma itersUnion_subset_of_isTransitive {n y : V} (hxy : x ⊆ y) (hy : IsTransi
   · obtain ⟨w, hw, hzw⟩ := mem_sUnion_iff.mp (itersUnion.result_succ ![x] hnω ▸ hz)
     exact hy.transitive w (ih w hw) z hzw
 
+/- Unfortunately this can't currently be stated for `NaturalNumberRec.Blueprint.result`s in
+general, since there is not a succinct way to start the construction at a different
+set like `⋃ˢ n` here. -/
+lemma itersUnion_succ_eq {n : V} (hnω : n ∈ (ω : V)) :
+    itersUnion.result ![x] (succ n) = itersUnion.result ![⋃ˢ x] n := by
+  refine naturalNumber_induction
+    (fun n ↦ itersUnion.result ![x] (succ n) = itersUnion.result ![⋃ˢ x] n) ?_ (by simp; rfl)
+      (fun n hnω ih ↦ ?_) n hnω
+  · have : ℒₛₑₜ-function₁ itersUnion.result ![x] := by
+      refine ⟨⟨itersUnionBlueprint.resultDef.emb/[#0, #1, &x], ?_⟩⟩
+      intro v
+      simp [itersUnion.result_defined (V := V).iff ![v 0, v 1, x]]
+      simp [Matrix.vec_single_eq_const]
+    sorry
+  · rw [itersUnion.result_succ _ (ω_succ_closed hnω), ih, itersUnion.result_succ _ hnω]
+    rfl
+
 /-! ## Lemmas about transitive closure -/
 
 @[simp]
@@ -120,12 +137,20 @@ lemma transClosure_monotonic {y : V} (hxy : x ⊆ y) : transClosure x ⊆ transC
 lemma transClosure_empty : transClosure (∅ : V) = ∅ :=
   transClosure_eq_self_iff.mpr inferInstance
 
-lemma transClosure_singleton : transClosure {x} = x ∪ transClosure x := by
+lemma transClosure_singleton : transClosure {x} = {x} ∪ transClosure x := by
+  have hstep {n : V} (hnω : n ∈ (ω : V)) :
+      itersUnion.result ![{x}] (succ n) = itersUnion.result ![x] n :=
+    itersUnion_succ_eq (x := {x}) hnω ▸ (sUnion_singleton_eq x).symm ▸ rfl
   ext z
   constructor <;> intro hz
   · obtain ⟨n, hnω, hzn⟩ := transClosure_spec.mp hz
+    rw [mem_union_iff, transClosure_spec]
     by_cases hn : n = 0
     · simp only [hn, itersUnion.result_zero] at hzn
+      exact .inl hzn
+    · have hpred : ∃ n', succ n' = n := by sorry
+      obtain ⟨n', hn'⟩ := hpred
+      refine .inr ⟨n', ?_⟩
       sorry
   · rcases mem_union_iff.mp hz with (hzx | hztc)
     · sorry
