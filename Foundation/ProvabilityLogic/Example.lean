@@ -34,6 +34,22 @@ theorem provabilityLogic_add_incon_equiv_GLPlusBoxBot_one_peano :
   simpa [height_union_incon_eq_one] using
     (Logic.GLPlusBoxBot.equiv_provabilityLogic (T := 𝗣𝗔 ∪ 𝗣𝗔.Incon)).symm
 
+instance : (𝐆𝐋 : Logic α) ⪱ 𝐆𝐋α {0} :=
+  .of_unprovable_provable (φ := Formula.alpha 0)
+    (fun h ↦ by
+      have := (Logic.GL.lift_mem_iff (A := Formula.alpha 0) (α := α)).mp <|
+        by simpa using Logic.provable_iff_mem.mp h;
+      simp [Set.eq_univ_iff_forall] at this)
+    (.mem₂ ⟨0, rfl, rfl⟩)
+
+instance : (𝐆𝐋α {0} : Logic α) ⪱ 𝐀 :=
+  have := Logic.GLAlpha.mono (α := α) (Set.subset_univ {0});
+  .of_unprovable_provable (φ := Formula.alpha 1)
+    (fun h ↦ by simpa using (Logic.GLAlpha.mem_iff.mp h).2) (.mem₂ ⟨1, trivial, rfl⟩)
+
+theorem provabilityLogic_add_con_equiv_GLAlpha_zero_peano : PL(𝗣𝗔, 𝗣𝗔 ∪ 𝗣𝗔.Con) ≊ 𝐆𝐋α {0} :=
+  Logic.equiv_of_eq provabilityLogic_add_con_self_eq_GLAlpha
+
 theorem provabilityLogic_TA_equiv_S_peano : PL(𝗣𝗔, 𝗧𝗔) ≊ 𝐒 :=
   Logic.equiv_of_eq Logic.S.eq_provabilityLogicRelativeTo_TA.symm
 

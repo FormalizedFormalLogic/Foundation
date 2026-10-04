@@ -9,6 +9,7 @@
 #let ISigma1 = $Theory(I)Sigma_1$
 #let Rfn(G, T) = $upright("Rfn")_(#T)(#G)$
 #let TCon(T) = $#T + upright("Con")_(#T)^omega$
+#let TConOne(T) = $#T + upright("Con")_(#T)$
 #let TIncon(T) = $#T + not upright("Con")_(#T)$
 #let TRfnSigma1(T) = $#T + Rfn(Sigma_1, #T)$
 
@@ -24,8 +25,10 @@
       "𝐒": Logic("S"),
       "𝐆𝐫𝐳": Logic("Grz"),
       "FFL.ProvabilityLogic.Logic.GLPlusBoxBot 1": $Logic("GL") + square bot$,
+      "𝐆𝐋α {0}": $Logic("GL") + not square bot$,
       "𝗣𝗔.provabilityLogic": PL(PA, PA),
       "𝗣𝗔.provabilityLogicRelativeTo 𝗧𝗔": PL(PA, TA),
+      "𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔)": PL(PA, TConOne(PA)),
       "(𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon 𝗣𝗔).provabilityLogic": PL(TIncon(PA), TIncon(PA)),
       "𝗜𝚺₁.provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗜𝚺₁)": PL(ISigma1, TRfnSigma1(ISigma1)),
       "𝗣𝗔.provabilityLogicRelativeTo (𝗣𝗔 ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] 𝗣𝗔)": PL(PA, TRfnSigma1(PA)),
