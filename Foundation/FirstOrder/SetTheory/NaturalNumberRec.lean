@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.SetTheory.Ordinal
-public import Foundation.FirstOrder.SetTheory.Function
+public import Foundation.FirstOrder.SetTheory.FunctionSet
 
 /-!
 # Natural number recursion in Zermelo set theory
