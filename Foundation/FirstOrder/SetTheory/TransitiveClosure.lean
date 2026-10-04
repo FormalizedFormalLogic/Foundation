@@ -35,8 +35,6 @@ noncomputable def itersUnion : NaturalNumberRec.Construction V itersUnionBluepri
     exact sUnion.defined.eval_iff ![v 0, v 1]⟩
 }
 
-#check itersUnion.result ![x]
-
 /-! ## Collecting iterated unions with replacement -/
 
 def auxBlueprint : Repl.Blueprint 1 := {
@@ -50,52 +48,95 @@ noncomputable def auxConstruction : Repl.Construction V auxBlueprint := {
 }
 
 /-- The transitive closure of a set `x`. -/
-noncomputable def transitiveClosure : V := ⋃ˢ auxConstruction.result ![x] ω
+noncomputable def transClosure : V := ⋃ˢ auxConstruction.result ![x] ω
 
-#check auxConstruction.mem_result (v := ![x]) (X := ω)
+/-! ## Lemmas about iterated unions -/
+
+/-- If `y` includes `x` and is transitive, then each iterated union of `x`
+is a subset of `y`. -/
+lemma itersUnion_subset_of_isTransitive {n y : V} (hxy : x ⊆ y) (hy : IsTransitive y)
+    (hnω : n ∈ (ω : V)) : itersUnion.result ![x] n ⊆ y := by
+  refine naturalNumber_induction (fun n ↦ itersUnion.result ![x] n ⊆ y) ?_
+    (itersUnion.result_zero ![x] ▸ hxy) (fun n hnω ih z hz ↦ ?_) n hnω
+  · have : ℒₛₑₜ-function₁ itersUnion.result ![x] := by
+      refine ⟨⟨itersUnionBlueprint.resultDef.emb/[#0, #1, &x], ?_⟩⟩
+      intro v
+      simp [itersUnion.result_defined (V := V).iff ![v 0, v 1, x]]
+      simp [Matrix.vec_single_eq_const]
+    definability
+  · obtain ⟨w, hw, hzw⟩ := mem_sUnion_iff.mp (itersUnion.result_succ ![x] hnω ▸ hz)
+    exact hy.transitive w (ih w hw) z hzw
+
+lemma itersUnion_somethingidk {n : V} (hnω : n ∈ (ω : V)) :
+    itersUnion.result ![x] n ⊆ itersUnion.result ![{x}] (succ n) := by
+  intro z hz
+  rw [itersUnion.result_succ _ hnω]
+  rw [sUnion_singleton_eq x]
+  sorry
 
 /-! ## Lemmas about transitive closure -/
 
 variable {x}
 
 @[simp]
-lemma mem_transitiveClosure_iff {y : V} : y ∈ transitiveClosure x ↔
+lemma transClosure_spec {y : V} : y ∈ transClosure x ↔
     ∃ n ∈ (ω : V), y ∈ itersUnion.result ![x] n := by
-  refine ⟨fun h ↦ ?_, fun ⟨n, hn, hyn⟩ ↦ mem_sUnion_iff.mpr
-    ⟨itersUnion.result ![x] n, ⟨auxConstruction.mem_result.mpr ⟨n, hn, rfl⟩, hyn⟩⟩⟩
+  refine ⟨fun h ↦ ?_, fun ⟨n, hnω, hyn⟩ ↦ mem_sUnion_iff.mpr
+    ⟨itersUnion.result ![x] n, ⟨auxConstruction.mem_result.mpr ⟨n, hnω, rfl⟩, hyn⟩⟩⟩
   obtain ⟨z, hz⟩ := mem_sUnion_iff.mp h
   aesop
 
+lemma self_subset_transClosure : x ⊆ transClosure x := by
+  intro z hz
+  apply transClosure_spec.mpr
+  refine ⟨0, zero_mem_ω, itersUnion.result_zero ![x] ▸ hz⟩
+
 /-- The transitive closure is transitive. -/
-instance isTransitive_transitiveClosure : IsTransitive (transitiveClosure x) where
+instance isTransitive_transClosure : IsTransitive (transClosure x) where
   transitive := by
     intro y h
-    obtain ⟨n, hn, hyn⟩ := mem_transitiveClosure_iff.mp h
+    obtain ⟨n, hnω, hyn⟩ := transClosure_spec.mp h
     intro z hzy
     have hzn : z ∈ itersUnion.result ![x] (succ n) :=
-      itersUnion.result_succ ![x] hn ▸ mem_sUnion_iff.mpr ⟨y, ⟨hyn, hzy⟩⟩
-    exact mem_transitiveClosure_iff.mpr ⟨succ n, ω_succ_closed hn, hzn⟩
-
-lemma itersUnion_subset_of_isTransitive {n y : V} (hxy : x ⊆ y) (hy : IsTransitive y) (hn : n ∈ (ω : V)) :
-    itersUnion.result ![x] n ⊆ y := by
-  refine naturalNumber_induction (fun n ↦ itersUnion.result ![x] n ⊆ y) ?_
-    (itersUnion.result_zero ![x] ▸ hxy) (fun n hn ih z hz ↦ ?_) n hn
-  · have : ℒₛₑₜ-function₁ itersUnion.result ![x] := by
-      unfold Language.DefinableFunction₁
-      -- unfold Language.DefinableFunction
-      #check itersUnion.result_definable
-      sorry
-    definability
-  · obtain ⟨w, hw, hzw⟩ := mem_sUnion_iff.mp (itersUnion.result_succ ![x] hn ▸ hz)
-    exact hy.transitive w (ih w hw) z hzw
+      itersUnion.result_succ ![x] hnω ▸ mem_sUnion_iff.mpr ⟨y, ⟨hyn, hzy⟩⟩
+    exact transClosure_spec.mpr ⟨succ n, ω_succ_closed hnω, hzn⟩
 
 /-- The transitive closure of `x` is the `⊆`-minimal transitive set containing `x`. -/
-theorem eq_transitiveClosure_of_subset_subset {y : V} (hxy : x ⊆ y) (hytc : y ⊆ transitiveClosure x)
-    (hy : IsTransitive y) : y = transitiveClosure x := by
-  suffices transitiveClosure x ⊆ y from subset_antisymm hytc this
+lemma eq_transClosure_of_subset_subset {y : V} (hxy : x ⊆ y) (hytc : y ⊆ transClosure x)
+    (hy : IsTransitive y) : y = transClosure x := by
+  suffices transClosure x ⊆ y from subset_antisymm hytc this
   intro z hz
-  obtain ⟨n, hn, hzn⟩ := mem_transitiveClosure_iff.mp hz
-  exact itersUnion_subset_of_isTransitive hn hxy hy z hzn
+  obtain ⟨n, hnω, hzn⟩ := transClosure_spec.mp hz
+  exact itersUnion_subset_of_isTransitive hxy hy hnω z hzn
+
+@[simp]
+lemma transClosure_eq_self_iff : transClosure x = x ↔ IsTransitive x := by
+  refine ⟨fun h ↦ h ▸ isTransitive_transClosure,
+    fun h ↦ Eq.symm <| eq_transClosure_of_subset_subset (y := x) (subset_refl x)
+      self_subset_transClosure h⟩
+
+lemma transClosure_monotonic {y : V} (hxy : x ⊆ y) : transClosure x ⊆ transClosure y := by
+  intro z hz
+  obtain ⟨n, hnω, hzn⟩ := transClosure_spec.mp hz
+  have hxtc : x ⊆ transClosure y := subset_trans hxy self_subset_transClosure
+  exact itersUnion_subset_of_isTransitive hxtc isTransitive_transClosure hnω z hzn
+
+/-! ### Examples of transitive closures -/
+
+@[simp]
+lemma transClosure_empty : transClosure (∅ : V) = ∅ :=
+  transClosure_eq_self_iff.mpr inferInstance
+
+lemma transClosure_singleton : transClosure {x} = x ∪ transClosure x := by
+  ext z
+  constructor <;> intro hz
+  · obtain ⟨n, hnω, hzn⟩ := transClosure_spec.mp hz
+    by_cases hn : n = 0
+    · simp only [hn, itersUnion.result_zero] at hzn
+      sorry
+  · rcases mem_union_iff.mp hz with (hzx | hztc)
+    · sorry
+    · sorry
 
 end TransitiveClosure
 
