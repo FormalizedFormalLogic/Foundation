@@ -80,12 +80,12 @@ lemma mem_transClosure_iff {y : V} : y ∈ transClosure x ↔
 def transClosure.dfn : SetTheorySemisentence 2 :=
   f“y x. ∀ z, z ∈ y ↔ ∃ n, (n ∈ !isω ∧ z ∈ !itersUnionBlueprint.resultDef n x)”
 
-lemma transClosure.defined : ℒₛₑₜ-function₁[V] transClosure via transClosure.dfn := by
+instance transClosure.defined : ℒₛₑₜ-function₁[V] transClosure via transClosure.dfn := by
   refine ⟨fun v ↦ ?_⟩
   simp [dfn, itersUnion.result_defined.iff, mem_ext_iff (x := v 0)]
   simp [Matrix.vec_single_eq_const]
 
-lemma transClosure.definable : ℒₛₑₜ-function₁[V] transClosure := transClosure.defined.to_definable
+instance transClosure.definable : ℒₛₑₜ-function₁[V] transClosure := transClosure.defined.to_definable
 
 lemma self_subset_transClosure : x ⊆ transClosure x := by
   intro z hz
