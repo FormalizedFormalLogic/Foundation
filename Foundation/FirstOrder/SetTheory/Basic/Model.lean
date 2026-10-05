@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Basic.Axioms
+public import Foundation.FirstOrder.SetTheory.Basic.Misc
 public import Foundation.FirstOrder.Tarski.Definability
 
 @[expose] public section
@@ -77,22 +77,6 @@ lemma val_isSucc_iff {v : Fin 2 → V} :
   simp [isSucc]
 
 section
-
-variable [Nonempty V]
-
-instance [V↓[ℒₛₑₜ] ⊧* 𝗭] [V↓[ℒₛₑₜ] ⊧* 𝗔𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗭𝗖 := inferInstance
-
-instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙] [V↓[ℒₛₑₜ] ⊧* 𝗔𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖 := inferInstance
-
-instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙] : V↓[ℒₛₑₜ] ⊧* 𝗭 := models_of_subtheory (inferInstance : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙)
-
-instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙 := models_of_subtheory (inferInstance : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖)
-
-instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗭 := models_of_subtheory (inferInstance : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖)
-
-instance [V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖] : V↓[ℒₛₑₜ] ⊧* 𝗔𝗖 := models_of_subtheory (inferInstance : V↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖)
-
-instance : V↓[ℒₛₑₜ] ⊧* (𝗘𝗤 _ : SetTheory) := Tarski.Structure.Eq.models_eqAxiom' ℒₛₑₜ V
 
 end
 

@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Z
+public import Foundation.FirstOrder.SetTheory.Z.Z
 public import Foundation.FirstOrder.SetTheory.Universe
 
 /-!

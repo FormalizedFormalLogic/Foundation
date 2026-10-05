@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Function
+public import Foundation.FirstOrder.SetTheory.FunctionSet
 public import Foundation.FirstOrder.SetTheory.Ordinal
 
 @[expose] public section
