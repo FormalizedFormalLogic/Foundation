@@ -31,7 +31,6 @@ noncomputable def itersUnion : NaturalNumberRec.Construction V itersUnionBluepri
   succ := fun _ _ z ↦ ⋃ˢ z
   zero_defined := ⟨fun v ↦ by aesop⟩
   succ_defined := ⟨fun v ↦ by
-    simp only [Nat.reduceAdd, Fin.isValue, Fin.succ_zero_eq_one]
     exact sUnion.defined.eval_iff ![v 0, v 1]⟩
 }
 
