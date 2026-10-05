@@ -85,7 +85,8 @@ instance transClosure.defined : ℒₛₑₜ-function₁[V] transClosure via tra
   simp [dfn, itersUnion.result_defined.iff, mem_ext_iff (x := v 0)]
   simp [Matrix.vec_single_eq_const]
 
-instance transClosure.definable : ℒₛₑₜ-function₁[V] transClosure := transClosure.defined.to_definable
+instance transClosure.definable : ℒₛₑₜ-function₁[V] transClosure :=
+  transClosure.defined.to_definable
 
 lemma self_subset_transClosure : x ⊆ transClosure x := by
   intro z hz
