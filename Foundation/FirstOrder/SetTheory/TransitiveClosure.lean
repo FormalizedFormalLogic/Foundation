@@ -30,8 +30,7 @@ noncomputable def itersUnion : NaturalNumberRec.Construction V itersUnionBluepri
   zero := fun v ↦ v 0
   succ := fun _ _ z ↦ ⋃ˢ z
   zero_defined := ⟨fun v ↦ by aesop⟩
-  succ_defined := ⟨fun v ↦ by
-    exact sUnion.defined.eval_iff ![v 0, v 1]⟩
+  succ_defined := ⟨fun v ↦ sUnion.defined.eval_iff ![v 0, v 1]⟩
 }
 
 /-! ## Collecting iterated unions with replacement -/
