@@ -72,34 +72,44 @@ lemma itersUnion_subset_of_isTransitive {n y : V} (hxy : x ⊆ y) (hy : IsTransi
 /-! ## Lemmas about transitive closure -/
 
 @[simp]
-lemma transClosure_spec {y : V} : y ∈ transClosure x ↔
+lemma mem_transClosure_iff {y : V} : y ∈ transClosure x ↔
     ∃ n ∈ (ω : V), y ∈ itersUnion.result ![x] n := by
   refine ⟨fun h ↦ ?_, fun ⟨n, hnω, hyn⟩ ↦ mem_sUnion_iff.mpr
     ⟨itersUnion.result ![x] n, ⟨auxConstruction.mem_result.mpr ⟨n, hnω, rfl⟩, hyn⟩⟩⟩
   obtain ⟨z, hz⟩ := mem_sUnion_iff.mp h
   aesop
 
+def transClosure.dfn : SetTheorySemisentence 2 :=
+  f“y x. ∀ z, z ∈ y ↔ ∃ n, (n ∈ !isω ∧ z ∈ !itersUnionBlueprint.resultDef n x)”
+
+lemma transClosure.defined : ℒₛₑₜ-function₁[V] transClosure via transClosure.dfn := by
+  refine ⟨fun v ↦ ?_⟩
+  simp [dfn, itersUnion.result_defined.iff, mem_ext_iff (x := v 0)]
+  simp [Matrix.vec_single_eq_const]
+
+lemma transClosure.definable : ℒₛₑₜ-function₁[V] transClosure := transClosure.defined.to_definable
+
 lemma self_subset_transClosure : x ⊆ transClosure x := by
   intro z hz
-  apply transClosure_spec.mpr
+  apply mem_transClosure_iff.mpr
   refine ⟨0, zero_mem_ω, itersUnion.result_zero ![x] ▸ hz⟩
 
 /-- The transitive closure is transitive. -/
 instance isTransitive_transClosure : IsTransitive (transClosure x) where
   transitive := by
     intro y h
-    obtain ⟨n, hnω, hyn⟩ := transClosure_spec.mp h
+    obtain ⟨n, hnω, hyn⟩ := mem_transClosure_iff.mp h
     intro z hzy
     have hzn : z ∈ itersUnion.result ![x] (succ n) :=
       itersUnion.result_succ ![x] hnω ▸ mem_sUnion_iff.mpr ⟨y, ⟨hyn, hzy⟩⟩
-    exact transClosure_spec.mpr ⟨succ n, ω_succ_closed hnω, hzn⟩
+    exact mem_transClosure_iff.mpr ⟨succ n, ω_succ_closed hnω, hzn⟩
 
 /-- The transitive closure of `x` is the `⊆`-minimal transitive set containing `x`. -/
 lemma eq_transClosure_of_subset_subset {y : V} (hxy : x ⊆ y) (hytc : y ⊆ transClosure x)
     (hy : IsTransitive y) : y = transClosure x := by
   suffices transClosure x ⊆ y from subset_antisymm hytc this
   intro z hz
-  obtain ⟨n, hnω, hzn⟩ := transClosure_spec.mp hz
+  obtain ⟨n, hnω, hzn⟩ := mem_transClosure_iff.mp hz
   exact itersUnion_subset_of_isTransitive hxy hy hnω z hzn
 
 @[simp]
@@ -110,7 +120,7 @@ lemma transClosure_eq_self_iff : transClosure x = x ↔ IsTransitive x := by
 
 lemma transClosure_monotonic {y : V} (hxy : x ⊆ y) : transClosure x ⊆ transClosure y := by
   intro z hz
-  obtain ⟨n, hnω, hzn⟩ := transClosure_spec.mp hz
+  obtain ⟨n, hnω, hzn⟩ := mem_transClosure_iff.mp hz
   have hxtc : x ⊆ transClosure y := subset_trans hxy self_subset_transClosure
   exact itersUnion_subset_of_isTransitive hxtc isTransitive_transClosure hnω z hzn
 
