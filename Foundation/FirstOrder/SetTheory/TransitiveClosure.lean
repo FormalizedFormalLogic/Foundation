@@ -28,8 +28,8 @@ def itersUnionBlueprint : NaturalNumberRec.Blueprint 1 := {
 /-- Iterates `⋃ˢ`. -/
 noncomputable def itersUnion : NaturalNumberRec.Construction V itersUnionBlueprint := {
   zero := fun v ↦ v 0
-  zero_defined := ⟨fun v ↦ by aesop⟩
   succ := fun _ _ z ↦ ⋃ˢ z
+  zero_defined := ⟨fun v ↦ by aesop⟩
   succ_defined := ⟨fun v ↦ by
     simp only [Nat.reduceAdd, Fin.isValue, Fin.succ_zero_eq_one]
     exact sUnion.defined.eval_iff ![v 0, v 1]⟩
