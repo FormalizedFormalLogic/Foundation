@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.ZF
+public import Foundation.FirstOrder.SetTheory.ZF.ZF
 public import Foundation.FirstOrder.SetTheory.NaturalNumberRec
 
 /-!
