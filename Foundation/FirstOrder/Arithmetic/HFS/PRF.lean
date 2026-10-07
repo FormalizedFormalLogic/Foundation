@@ -7,6 +7,8 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 
 # Primitive Recursive Functions in $\mathsf{I} \Sigma_1$
 
+This contains a wrapper `Blueprint` for constructing functions by primitive recursion.
+
 -/
 
 namespace FFL.FirstOrder.Arithmetic
@@ -18,7 +20,10 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 namespace PR
 
 structure Blueprint (k : ℕ) where
+  /-- `p.zero.Evalb (z :> v)` states that `z` is the value at `0`. Equivalently, `z = c.zero v`. -/
   zero : 𝚺ᴬ₁.Semisentence (k + 1)
+  /-- `p.succ.Evalb (u :> z :> i :> v)` states that `u` is the value at `i + 1`, where
+  `z` is the value at `i`. Equivalently, `u = c.succ v i z`. -/
   succ : 𝚺ᴬ₁.Semisentence (k + 3)
 
 def Blueprint.cseqDef {k : ℕ} (p : Blueprint k) : 𝚺ᴬ₁.Semisentence (k + 1) := .mkSigma
@@ -38,7 +43,9 @@ def Blueprint.resultDeltaDef {k : ℕ} (p : Blueprint k) : 𝚫ᴬ₁.Semisenten
 variable (V)
 
 structure Construction {k : ℕ} (p : Blueprint k) where
+  /-- `c.zero v` is the value at `0`. -/
   zero : (Fin k → V) → V
+  /-- `c.succ v i z` is the value at `i + 1`, where `z` is the value at `i`. -/
   succ : (Fin k → V) → V → V → V
   zero_defined : 𝚺ᴬ₁.DefinedFunction zero p.zero
   succ_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ

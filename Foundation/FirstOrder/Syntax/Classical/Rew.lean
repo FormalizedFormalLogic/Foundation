@@ -360,6 +360,17 @@ lemma fvar?_rew [DecidableEq ξ₁] [DecidableEq ξ₂]
   · simp at hi
   · exact IsEmpty.elim inferInstance z
 
+lemma freeVariables_eq_empty_of_shift_eq {φ : Semiformula L ℕ n} (h : Rewriting.shift φ = φ) :
+    φ.freeVariables = ∅ := by
+  classical
+  by_contra hne;
+  have hex : ∃ x, φ.FVar? x := Finset.nonempty_iff_ne_empty.mpr hne;
+  have hx : (Rewriting.shift φ).FVar? (Nat.find hex) := by rw [h]; exact Nat.find_spec hex;
+  rcases fvar?_rew hx with ⟨i, hi⟩ | ⟨z, hz, hzx⟩;
+  · simp at hi;
+  · simp at hzx;
+    exact Nat.find_min hex (by omega) hz;
+
 lemma rew_eq_of_funEqOn [DecidableEq ξ₁] {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁}
   (hb : ∀ x, ω₁ #x = ω₂ #x)
   (hf : Function.funEqOn φ.FVar? (ω₁ ∘ Semiterm.fvar) (ω₂ ∘ Semiterm.fvar)) :

@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Z
+public import Foundation.FirstOrder.SetTheory.Z.Z
 
 @[expose] public section
 /-!
@@ -113,7 +113,7 @@ lemma range_inter_subset {R₁ R₂ : V} : range (R₁ ∩ R₂) ⊆ range R₁ 
 
 end range
 
-/-! ### Functions -/
+/-! ### Function sets -/
 
 noncomputable def function (Y X : V) : V := {f ∈ ℘ (X ×ˢ Y) ; ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f}
 
@@ -477,6 +477,8 @@ instance restrict.defined : ℒₛₑₜ-function₂[V] restrict via restrict.df
   ⟨fun v ↦ by simp [dfn, restrict]⟩
 
 instance restrict.definable : ℒₛₑₜ-function₂[V] restrict := restrict.defined.to_definable
+
+@[simp] lemma restrict_empty_eq {R : V} : R ↾ ∅ = ∅ := by simp [restrict, empty_prod]
 
 @[simp] lemma domain_restrict_eq (R A : V) : domain (R ↾ A) = domain R ∩ A := by
   ext z

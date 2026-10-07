@@ -298,7 +298,7 @@ instance defined : 𝚫ᴬ₁-Predicate IsUFormula (V := V) L via isUFormula L :
 
 instance definable : 𝚫ᴬ₁-Predicate IsUFormula (V := V) L := IsUFormula.defined.to_definable
 
-instance definable' (Γ m) : Γᴬ-[m + 1]-Predicate IsUFormula (V := V) L :=
+instance definable' (Γ m) : Γᴬ_[m + 1]-Predicate IsUFormula (V := V) L :=
   IsUFormula.definable.of_deltaOne
 
 end
@@ -418,7 +418,7 @@ lemma pos {p : V} (h : IsUFormula L p) : 0 < p := by
     Semiformula L n (^∃ p) ↔ Semiformula L (n + 1) p := by simp [IsSemiformula]
 -/
 
-lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hrel : ∀ k r v, L.IsRel k r → IsUTermVec L k v → P (^rel k r v))
     (hnrel : ∀ k r v, L.IsRel k r → IsUTermVec L k v → P (^nrel k r v))
     (hverum : P ^⊤)
@@ -465,7 +465,7 @@ lemma ISigma1.pi1_succ_induction {P : V → Prop} (hP : 𝚷ᴬ₁-Predicate P)
   induction1 𝚷 hP hrel hnrel hverum hfalsum hand hor hall hexs
 
 /-
-lemma IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γᴬ-[1]-Relation P)
+lemma IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γᴬ_[1]-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^rel n k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
@@ -536,8 +536,10 @@ structure Blueprint where
   or : 𝚺ᴬ₁.Semisentence 6
   all : 𝚺ᴬ₁.Semisentence 4
   exs : 𝚺ᴬ₁.Semisentence 4
-  allChanges : 𝚺ᴬ₁.Semisentence 2
-  exsChanges : 𝚺ᴬ₁.Semisentence 2
+  allChanges : 𝚺ᴬ₁.Semisentence 3 := .mkSigma “param' param i. param' = param”
+  exsChanges : 𝚺ᴬ₁.Semisentence 3 := .mkSigma “param' param i. param' = param”
+  allSize : 𝚺ᴬ₁.Semisentence 3 := .mkSigma “n param p. n = 1”
+  exsSize : 𝚺ᴬ₁.Semisentence 3 := .mkSigma “n param p. n = 1”
 
 namespace Blueprint
 
@@ -555,12 +557,14 @@ noncomputable def blueprint (β : Blueprint) : Fixpoint.Blueprint 0 := ⟨.mkDel
         ∨
     (∃ p₁ < p, ∃ p₂ < p, ∃ y₁ < C, ∃ y₂ < C,
       :⟪param, p₁, y₁⟫:∈ C ∧ :⟪param, p₂, y₂⟫:∈ C ∧ !qqOrDef p p₁ p₂ ∧ !β.or y param p₁ p₂ y₁ y₂) ∨
-    (∃ p₁ < p, ∃ y₁ < C,
-      (∃ param', !β.allChanges param' param ∧ :⟪param', p₁, y₁⟫:∈ C) ∧ !qqAllDef p p₁ ∧ !β.all y
-        param p₁ y₁) ∨
-    (∃ p₁ < p, ∃ y₁ < C,
-      (∃ param', !β.exsChanges param' param ∧ :⟪param', p₁, y₁⟫:∈ C) ∧ !qqExsDef p p₁ ∧ !β.exs y
-        param p₁ y₁))
+    (∃ p₁ < p, ∃ n, !β.allSize n param p₁ ∧ ∃ rv, !repeatVecDef rv C n ∧ ∃ ys <⁺ rv,
+      (!lenDef n ys ∧ ∀ i < n, ∃ yi, !nthDef yi ys i ∧
+        ∃ param', !β.allChanges param' param i ∧ :⟪param', p₁, yi⟫:∈ C) ∧
+      !qqAllDef p p₁ ∧ !β.all y param p₁ ys) ∨
+    (∃ p₁ < p, ∃ n, !β.exsSize n param p₁ ∧ ∃ rv, !repeatVecDef rv C n ∧ ∃ ys <⁺ rv,
+      (!lenDef n ys ∧ ∀ i < n, ∃ yi, !nthDef yi ys i ∧
+        ∃ param', !β.exsChanges param' param i ∧ :⟪param', p₁, yi⟫:∈ C) ∧
+      !qqExsDef p p₁ ∧ !β.exs y param p₁ ys))
   ”)
   (.mkPi “pr C.
     ∃ param <⁺ pr, ∃ p <⁺ pr, ∃ y <⁺ pr, !pair₃Def pr param p y ∧ !(isUFormula L).pi p ∧
@@ -574,12 +578,14 @@ noncomputable def blueprint (β : Blueprint) : Fixpoint.Blueprint 0 := ⟨.mkDel
     (∃ p₁ < p, ∃ p₂ < p, ∃ y₁ < C, ∃ y₂ < C,
       :⟪param, p₁, y₁⟫:∈ C ∧ :⟪param, p₂, y₂⟫:∈ C ∧ !qqOrDef p p₁ p₂ ∧ !β.or.graphDelta.pi.val y
         param p₁ p₂ y₁ y₂) ∨
-    (∃ p₁ < p, ∃ y₁ < C,
-      (∀ param', !β.allChanges param' param → :⟪param', p₁, y₁⟫:∈ C) ∧ !qqAllDef p p₁ ∧
-        !β.all.graphDelta.pi.val y param p₁ y₁) ∨
-    (∃ p₁ < p, ∃ y₁ < C,
-      (∀ param', !β.exsChanges param' param → :⟪param', p₁, y₁⟫:∈ C) ∧ !qqExsDef p p₁ ∧
-        !β.exs.graphDelta.pi.val y param p₁ y₁))
+    (∃ p₁ < p, ∀ n, !β.allSize n param p₁ → ∀ rv, !repeatVecDef rv C n → ∃ ys <⁺ rv,
+      ((∀ l, !lenDef l ys → n = l) ∧ ∀ i < n, ∀ yi, !nthDef yi ys i →
+        ∀ param', !β.allChanges param' param i → :⟪param', p₁, yi⟫:∈ C) ∧
+      !qqAllDef p p₁ ∧ !β.all.graphDelta.pi.val y param p₁ ys) ∨
+    (∃ p₁ < p, ∀ n, !β.exsSize n param p₁ → ∀ rv, !repeatVecDef rv C n → ∃ ys <⁺ rv,
+      ((∀ l, !lenDef l ys → n = l) ∧ ∀ i < n, ∀ yi, !nthDef yi ys i →
+        ∀ param', !β.exsChanges param' param i → :⟪param', p₁, yi⟫:∈ C) ∧
+      !qqExsDef p p₁ ∧ !β.exs.graphDelta.pi.val y param p₁ ys))
   ”)⟩
 
 /-- Note: `noncomputable` attribute to prohibit compilation of a large term. This is necessary for
@@ -594,6 +600,15 @@ noncomputable def result : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
 
 end Blueprint
 
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
+lemma one_defined : 𝚺ᴬ₁-Function₂ (fun _ _ ↦ 1 : V → V → V) via .mkSigma “n param p. n = 1” :=
+  .mk fun v ↦ by simp
+
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
+lemma param_defined :
+    𝚺ᴬ₁-Function₂ (fun param _ ↦ param : V → V → V) via .mkSigma “param' param i. param' = param” :=
+  .mk fun v ↦ by simp
+
 variable (V)
 
 structure Construction (φ : Blueprint) where
@@ -603,10 +618,12 @@ structure Construction (φ : Blueprint) where
   falsum (param : V) : V
   and (param p₁ p₂ y₁ y₂ : V) : V
   or (param p₁ p₂ y₁ y₂ : V) : V
-  all (param p₁ y₁ : V) : V
-  exs (param p₁ y₁ : V) : V
-  allChanges (param : V) : V
-  exsChanges (param : V) : V
+  all (param p₁ ys : V) : V
+  exs (param p₁ ys : V) : V
+  allChanges (param i : V) : V := param
+  exsChanges (param i : V) : V := param
+  allSize (param p₁ : V) : V := 1
+  exsSize (param p₁ : V) : V := 1
   rel_defined : 𝚺ᴬ₁-Function₄ rel via φ.rel
   nrel_defined : 𝚺ᴬ₁-Function₄ nrel via φ.nrel
   verum_defined : 𝚺ᴬ₁-Function₁ verum via φ.verum
@@ -615,8 +632,18 @@ structure Construction (φ : Blueprint) where
   or_defined : 𝚺ᴬ₁-Function₅ or via φ.or
   all_defined : 𝚺ᴬ₁-Function₃ all via φ.all
   exs_defined : 𝚺ᴬ₁-Function₃ exs via φ.exs
-  allChanges_defined : 𝚺ᴬ₁-Function₁ allChanges via φ.allChanges
-  exChanges_defined  : 𝚺ᴬ₁-Function₁ exsChanges via φ.exsChanges
+  allChanges_defined : 𝚺ᴬ₁-Function₂ allChanges via φ.allChanges := by
+    exact FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.param_defined
+  exChanges_defined  : 𝚺ᴬ₁-Function₂ exsChanges via φ.exsChanges := by
+    exact FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.param_defined
+  allSize_defined : 𝚺ᴬ₁-Function₂ allSize via φ.allSize := by
+    exact FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.one_defined
+  exsSize_defined : 𝚺ᴬ₁-Function₂ exsSize via φ.exsSize := by
+    exact FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.one_defined
+  allChanges_monotone {param i j : V} : i ≤ j → allChanges param i ≤ allChanges param j := by
+    intros; exact le_rfl
+  exsChanges_monotone {param i j : V} : i ≤ j → exsChanges param i ≤ exsChanges param j := by
+    intros; exact le_rfl
 
 variable {V}
 
@@ -635,8 +662,12 @@ def Phi (C : Set V) (pr : V) : Prop :=
     y₁ y₂) ∨
   (∃ p₁ p₂ y₁ y₂, ⟪param, p₁, y₁⟫ ∈ C ∧ ⟪param, p₂, y₂⟫ ∈ C ∧ p = p₁ ^⋎ p₂ ∧ y = c.or  param p₁ p₂
     y₁ y₂) ∨
-  (∃ p₁ y₁, ⟪c.allChanges param, p₁, y₁⟫ ∈ C ∧ p = ^∀ p₁ ∧ y = c.all param p₁ y₁) ∨
-  (∃ p₁ y₁, ⟪c.exsChanges param, p₁, y₁⟫ ∈ C ∧ p = ^∃ p₁ ∧ y = c.exs  param p₁ y₁) )
+  (∃ p₁ ys, (len ys = c.allSize param p₁ ∧
+      ∀ i < c.allSize param p₁, ⟪c.allChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
+    p = ^∀ p₁ ∧ y = c.all param p₁ ys) ∨
+  (∃ p₁ ys, (len ys = c.exsSize param p₁ ∧
+      ∀ i < c.exsSize param p₁, ⟪c.exsChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
+    p = ^∃ p₁ ∧ y = c.exs  param p₁ ys) )
 
 private lemma phi_iff (C pr : V) :
     c.Phi L {x | x ∈ C} pr ↔
@@ -649,10 +680,17 @@ private lemma phi_iff (C pr : V) :
       ⟪param, p₁, y₁⟫ ∈ C ∧ ⟪param, p₂, y₂⟫ ∈ C ∧ p = p₁ ^⋏ p₂ ∧ y = c.and param p₁ p₂ y₁ y₂) ∨
     (∃ p₁ < p, ∃ p₂ < p, ∃ y₁ < C, ∃ y₂ < C,
       ⟪param, p₁, y₁⟫ ∈ C ∧ ⟪param, p₂, y₂⟫ ∈ C ∧ p = p₁ ^⋎ p₂ ∧ y = c.or param p₁ p₂ y₁ y₂) ∨
-    (∃ p₁ < p, ∃ y₁ < C,
-      ⟪c.allChanges param, p₁, y₁⟫ ∈ C ∧ p = ^∀ p₁ ∧ y = c.all param p₁ y₁) ∨
-    (∃ p₁ < p, ∃ y₁ < C,
-      ⟪c.exsChanges param, p₁, y₁⟫ ∈ C ∧ p = ^∃ p₁ ∧ y = c.exs param p₁ y₁)) := by
+    (∃ p₁ < p, ∃ ys ≤ repeatVec C (c.allSize param p₁), (c.allSize param p₁ = len ys ∧
+        ∀ i < c.allSize param p₁, ⟪c.allChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
+      p = ^∀ p₁ ∧ y = c.all param p₁ ys) ∨
+    (∃ p₁ < p, ∃ ys ≤ repeatVec C (c.exsSize param p₁), (c.exsSize param p₁ = len ys ∧
+        ∀ i < c.exsSize param p₁, ⟪c.exsChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
+      p = ^∃ p₁ ∧ y = c.exs param p₁ ys)) := by
+  have hrv {g : V → V} {p₁ ys n : V} (hl : len ys = n) (hys : ∀ i < n, ⟪g i, p₁, ys.[i]⟫ ∈ C) :
+      ys ≤ repeatVec C n := by
+    subst hl
+    exact len_repeatVec_of_nth_le fun i hi ↦ le_of_lt <|
+      lt_of_le_of_lt ((le_pair_right _ _).trans (le_pair_right _ _)) (lt_of_mem (hys i hi))
   constructor
   · rintro ⟨param, p, y, rfl, hp, H⟩
     refine ⟨param, by simp,
@@ -660,7 +698,7 @@ private lemma phi_iff (C pr : V) :
       y, le_trans (le_pair_right p y) (le_pair_right _ _), rfl, hp, ?_⟩
     rcases H with (⟨k, r, v, rfl, rfl⟩ | ⟨k, r, v, rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
       ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ |
-      ⟨p₁, y₁, h₁, rfl, rfl⟩ | ⟨p₁, y₁, h₁, rfl, rfl⟩)
+      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)
     · disj 1; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩;
     · disj 2; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩;
     · disj 3; exact ⟨rfl, rfl⟩;
@@ -673,23 +711,23 @@ private lemma phi_iff (C pr : V) :
         y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), y₂, lt_of_le_of_lt (by simp)
           (lt_of_mem_rng h₂),
         h₁, h₂, rfl, rfl⟩;
-    · disj 7; exact ⟨p₁, by simp, y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), h₁, rfl, rfl⟩;
-    · disj 8; exact ⟨p₁, by simp, y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), h₁, rfl, rfl⟩;
+    · disj 7; exact ⟨p₁, by simp, ys, hrv hl hys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
+    · disj 8; exact ⟨p₁, by simp, ys, hrv hl hys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
   · rintro ⟨param, _, p, _, y, _, rfl, hp, H⟩
     refine ⟨param, p, y, rfl, hp, ?_⟩
     rcases H with (⟨k, _, r, _, v, _, rfl, rfl⟩ | ⟨k, _, r, _, v, _, rfl, rfl⟩ |
       ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
       ⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ |
       ⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ |
-      ⟨p₁, _, y₁, _, h₁, rfl, rfl⟩ | ⟨p₁, _, y₁, _, h₁, rfl, rfl⟩)
+      ⟨p₁, _, ys, _, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, _, ys, _, ⟨hl, hys⟩, rfl, rfl⟩)
     · disj 1; exact ⟨k, r, v, rfl, rfl⟩;
     · disj 2; exact ⟨k, r, v, rfl, rfl⟩;
     · disj 3; exact ⟨rfl, rfl⟩;
     · disj 4; exact ⟨rfl, rfl⟩;
     · disj 5; exact ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩;
     · disj 6; exact ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩;
-    · disj 7; exact ⟨p₁, y₁, h₁, rfl, rfl⟩;
-    · disj 8; exact ⟨p₁, y₁, h₁, rfl, rfl⟩;
+    · disj 7; exact ⟨p₁, ys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
+    · disj 8; exact ⟨p₁, ys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
 
 def construction : Fixpoint.Construction V (β.blueprint L) where
   Φ := fun _ ↦ c.Phi L
@@ -705,6 +743,7 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
         c.or_defined.iff, c.or_defined.graph_delta.proper.iff',
         c.all_defined.iff, c.all_defined.graph_delta.proper.iff',
         c.exs_defined.iff, c.exs_defined.graph_delta.proper.iff',
+        c.allSize_defined.iff, c.exsSize_defined.iff,
         c.allChanges_defined.iff,
         c.exChanges_defined.iff]
     · intro v
@@ -718,6 +757,8 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
         c.or_defined.iff,
         c.all_defined.iff,
         c.exs_defined.iff,
+        c.allSize_defined.iff,
+        c.exsSize_defined.iff,
         c.allChanges_defined.iff,
         c.exChanges_defined.iff] using c.phi_iff L _ _
   monotone := by
@@ -725,21 +766,24 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
     rintro C C' hC _ _ ⟨param, p, y, rfl, hp, H⟩
     refine ⟨param, p, y, rfl, hp, ?_⟩
     rcases H with (h | h | h | h | ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ |
-      ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, r₁, h₁, rfl, rfl⟩ | ⟨p₁, r₁, h₁, rfl, rfl⟩)
+      ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ |
+      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)
     · disj 1; exact h;
     · disj 2; exact h;
     · disj 3; exact h;
     · disj 4; exact h;
     · disj 5; exact ⟨p₁, p₂, r₁, r₂, hC h₁, hC h₂, rfl, rfl⟩;
     · disj 6; exact ⟨p₁, p₂, r₁, r₂, hC h₁, hC h₂, rfl, rfl⟩;
-    · disj 7; exact ⟨p₁, r₁, hC h₁, rfl, rfl⟩;
-    · disj 8; exact ⟨p₁, r₁, hC h₁, rfl, rfl⟩;
+    · disj 7; exact ⟨p₁, ys, ⟨hl, fun i hi ↦ hC (hys i hi)⟩, rfl, rfl⟩;
+    · disj 8; exact ⟨p₁, ys, ⟨hl, fun i hi ↦ hC (hys i hi)⟩, rfl, rfl⟩;
 
 instance : (c.construction L).Finite where
   finite {C _ pr h} := by
+    have hlt {a b p₁ ys i : V} (h : a ≤ b) : ⟪a, p₁, ys.[i]⟫ < ⟪b, p₁, ys⟫ + 1 :=
+      lt_succ_iff_le.mpr <| pair_le_pair h <| pair_le_pair le_rfl (by simp)
     rcases h with ⟨param, p, y, rfl, hp, (h | h | h | h |
-      ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, y₁, h₁, rfl,
-        rfl⟩ | ⟨p₁, y₁, h₁, rfl, rfl⟩)⟩
+      ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)⟩
     · exact ⟨0, param, _, _, rfl, hp, by disj 1; exact h⟩
     · exact ⟨0, param, _, _, rfl, hp, by disj 2; exact h⟩
     · exact ⟨0, param, _, _, rfl, hp, by disj 3; exact h⟩
@@ -752,12 +796,12 @@ instance : (c.construction L).Finite where
         disj 6;
         exact ⟨p₁, p₂, y₁, y₂, by simp [h₁, lt_succ_iff_le], by simp [h₂, lt_succ_iff_le], rfl,
           rfl⟩⟩
-    · exact ⟨⟪c.allChanges param, p₁, y₁⟫ + 1, param, _, _, rfl, hp, by
+    · exact ⟨⟪c.allChanges param (c.allSize param p₁), p₁, ys⟫ + 1, param, _, _, rfl, hp, by
         disj 7;
-        exact ⟨p₁, y₁, by simp [h₁], rfl, rfl⟩⟩
-    · exact ⟨⟪c.exsChanges param, p₁, y₁⟫ + 1, param, _, _, rfl, hp, by
+        exact ⟨p₁, ys, ⟨hl, fun i hi ↦ ⟨hys i hi, hlt (c.allChanges_monotone hi.le)⟩⟩, rfl, rfl⟩⟩
+    · exact ⟨⟪c.exsChanges param (c.exsSize param p₁), p₁, ys⟫ + 1, param, _, _, rfl, hp, by
         disj 8;
-        exact ⟨p₁, y₁, by simp [h₁], rfl, rfl⟩⟩
+        exact ⟨p₁, ys, ⟨hl, fun i hi ↦ ⟨hys i hi, hlt (c.exsChanges_monotone hi.le)⟩⟩, rfl, rfl⟩⟩
 
 def Graph (param : V) (x y : V) : Prop := (c.construction L).Fixpoint ![] ⟪param, x, y⟫
 
@@ -776,8 +820,12 @@ lemma Graph.case_iff {p y : V} :
       p₁ p₂ y₁ y₂) ∨
     (∃ p₁ p₂ y₁ y₂, c.Graph L param p₁ y₁ ∧ c.Graph L param p₂ y₂ ∧ p = p₁ ^⋎ p₂ ∧ y = c.or param
       p₁ p₂ y₁ y₂) ∨
-    (∃ p₁ y₁, c.Graph L (c.allChanges param) p₁ y₁ ∧ p = ^∀ p₁ ∧ y = c.all param p₁ y₁) ∨
-    (∃ p₁ y₁, c.Graph L (c.exsChanges param) p₁ y₁ ∧ p = ^∃ p₁ ∧ y = c.exs param p₁ y₁) ) :=
+    (∃ p₁ ys, (len ys = c.allSize param p₁ ∧
+        ∀ i < c.allSize param p₁, c.Graph L (c.allChanges param i) p₁ ys.[i]) ∧
+      p = ^∀ p₁ ∧ y = c.all param p₁ ys) ∨
+    (∃ p₁ ys, (len ys = c.exsSize param p₁ ∧
+        ∀ i < c.exsSize param p₁, c.Graph L (c.exsChanges param i) p₁ ys.[i]) ∧
+      p = ^∃ p₁ ∧ y = c.exs param p₁ ys) ) :=
   Iff.trans (c.construction L).case (by
     constructor
     · rintro ⟨param, p', y', e, H⟩;
@@ -793,7 +841,7 @@ lemma graph_defined : 𝚺ᴬ₁-Relation₃ c.Graph L via β.graph L := .mk fun
 @[simp] lemma eval_graphDef (v : Fin 3 → V) :
     (β.graph L).val.Evalb v ↔ c.Graph L (v 0) (v 1) (v 2) := (graph_defined β c).iff
 
-instance graph_definable : 𝚺ᴬ-[0 + 1]-Relation₃ c.Graph L := c.graph_defined.to_definable
+instance graph_definable : 𝚺ᴬ_[0 + 1]-Relation₃ c.Graph L := c.graph_defined.to_definable
 
 variable {β}
 
@@ -922,12 +970,14 @@ lemma graph_or_inv {p₁ p₂ r : V} :
   · simp [qqOr, qqAll] at H
   · simp [qqOr, qqExs] at H
 
-lemma graph_all {p₁ r₁ : V} (hp₁ : IsUFormula L p₁) (h₁ : c.Graph L (c.allChanges param) p₁ r₁) :
-    c.Graph L param (^∀ p₁) (c.all param p₁ r₁) :=
-  (Graph.case_iff).mpr ⟨by simp [hp₁], by disj 7; exact ⟨p₁, r₁, h₁, rfl, rfl⟩⟩
+lemma graph_all {p₁ ys : V} (hp₁ : IsUFormula L p₁) (hl : len ys = c.allSize param p₁)
+    (h₁ : ∀ i < c.allSize param p₁, c.Graph L (c.allChanges param i) p₁ ys.[i]) :
+    c.Graph L param (^∀ p₁) (c.all param p₁ ys) :=
+  (Graph.case_iff).mpr ⟨by simp [hp₁], by disj 7; exact ⟨p₁, ys, ⟨hl, h₁⟩, rfl, rfl⟩⟩
 
 lemma graph_all_inv {p₁ r : V} :
-    c.Graph L param (^∀ p₁) r → ∃ r₁, c.Graph L (c.allChanges param) p₁ r₁ ∧ r = c.all param p₁ r₁
+    c.Graph L param (^∀ p₁) r → ∃ ys, (len ys = c.allSize param p₁ ∧
+      ∀ i < c.allSize param p₁, c.Graph L (c.allChanges param i) p₁ ys.[i]) ∧ r = c.all param p₁ ys
       := by
   intro h
   rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨H, _⟩ | ⟨H, _⟩ |
@@ -942,12 +992,14 @@ lemma graph_all_inv {p₁ r : V} :
     exact ⟨_, by assumption, rfl⟩
   · simp [qqAll, qqExs] at H
 
-lemma graph_ex {p₁ r₁ : V} (hp₁ : IsUFormula L p₁) (h₁ : c.Graph L (c.exsChanges param) p₁ r₁) :
-    c.Graph L param (^∃ p₁) (c.exs param p₁ r₁) :=
-  (Graph.case_iff).mpr ⟨by simp [hp₁], by disj 8; exact ⟨p₁, r₁, h₁, rfl, rfl⟩⟩
+lemma graph_ex {p₁ ys : V} (hp₁ : IsUFormula L p₁) (hl : len ys = c.exsSize param p₁)
+    (h₁ : ∀ i < c.exsSize param p₁, c.Graph L (c.exsChanges param i) p₁ ys.[i]) :
+    c.Graph L param (^∃ p₁) (c.exs param p₁ ys) :=
+  (Graph.case_iff).mpr ⟨by simp [hp₁], by disj 8; exact ⟨p₁, ys, ⟨hl, h₁⟩, rfl, rfl⟩⟩
 
 lemma graph_ex_inv {p₁ r : V} :
-    c.Graph L param (^∃ p₁) r → ∃ r₁, c.Graph L (c.exsChanges param) p₁ r₁ ∧ r = c.exs param p₁ r₁
+    c.Graph L param (^∃ p₁) r → ∃ ys, (len ys = c.exsSize param p₁ ∧
+      ∀ i < c.exsSize param p₁, c.Graph L (c.exsChanges param i) p₁ ys.[i]) ∧ r = c.exs param p₁ ys
       := by
   intro h
   rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨H, _⟩ | ⟨H, _⟩ |
@@ -965,10 +1017,13 @@ lemma graph_ex_inv {p₁ r : V} :
 variable (param)
 
 lemma graph_exists {p : V} : IsUFormula L p → ∃ y, c.Graph L param p y := by
-  have : 𝚺ᴬ₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
-  have : 𝚺ᴬ₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
-  let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exsChanges
-    param))
+  have : 𝚺ᴬ₁-Function₂ c.allChanges := c.allChanges_defined.to_definable
+  have : 𝚺ᴬ₁-Function₂ c.exsChanges := c.exChanges_defined.to_definable
+  have : 𝚺ᴬ₁-Function₂ c.allSize := c.allSize_defined.to_definable
+  have : 𝚺ᴬ₁-Function₂ c.exsSize := c.exsSize_defined.to_definable
+  let f : V → V → V := fun p param ↦ Max.max param (Max.max
+    (c.allChanges param (c.allSize param (π₂ (p - 1))))
+    (c.exsChanges param (c.exsSize param (π₂ (p - 1)))))
   have hf : 𝚺ᴬ₁-Function₂ f := by definability
   apply bounded_all_sigma1_order_induction hf ?_ ?_ p param
   · definability
@@ -988,10 +1043,16 @@ lemma graph_exists {p : V} : IsUFormula L p → ∃ y, c.Graph L param p y := by
   · rcases ih p₁ (by simp) param (by simp [f]) hp₁ with ⟨y₁, h₁⟩
     rcases ih p₂ (by simp) param (by simp [f]) hp₂ with ⟨y₂, h₂⟩
     exact ⟨c.or param p₁ p₂ y₁ y₂, c.graph_or hp₁ hp₂ h₁ h₂⟩
-  · rcases ih p₁ (by simp) (c.allChanges param) (by simp [f]) hp₁ with ⟨y₁, h₁⟩
-    exact ⟨c.all param p₁ y₁, c.graph_all hp₁ h₁⟩
-  · rcases ih p₁ (by simp) (c.exsChanges param) (by simp [f]) hp₁ with ⟨y₁, h₁⟩
-    exact ⟨c.exs param p₁ y₁, c.graph_ex hp₁ h₁⟩
+  · obtain ⟨ys, hl, hys⟩ : ∃ ys, len ys = c.allSize param p₁ ∧
+        ∀ i < c.allSize param p₁, c.Graph L (c.allChanges param i) p₁ ys.[i] :=
+      sigmaOne_skolem_vec (by definability) fun i hi ↦
+        ih p₁ (by simp) _ (by simp [f, qqAll, c.allChanges_monotone hi.le]) hp₁
+    exact ⟨c.all param p₁ ys, c.graph_all hp₁ hl hys⟩
+  · obtain ⟨ys, hl, hys⟩ : ∃ ys, len ys = c.exsSize param p₁ ∧
+        ∀ i < c.exsSize param p₁, c.Graph L (c.exsChanges param i) p₁ ys.[i] :=
+      sigmaOne_skolem_vec (by definability) fun i hi ↦
+        ih p₁ (by simp) _ (by simp [f, qqExs, c.exsChanges_monotone hi.le]) hp₁
+    exact ⟨c.exs param p₁ ys, c.graph_ex hp₁ hl hys⟩
 
 lemma graph_unique {p : V} : IsUFormula L p → ∀ {param r r'}, c.Graph L param p r → c.Graph L param
   p r' → r = r' := by
@@ -1020,14 +1081,14 @@ lemma graph_unique {p : V} : IsUFormula L p → ∀ {param r r'}, c.Graph L para
     rcases ih₁ h₁ h₁'; rcases ih₂ h₂ h₂'; rfl
   case hall =>
     intro p _ ih param r r' hr hr'
-    rcases c.graph_all_inv hr with ⟨r₁, h₁, rfl⟩
-    rcases c.graph_all_inv hr' with ⟨r₁', h₁', rfl⟩
-    rcases ih h₁ h₁'; rfl
+    rcases c.graph_all_inv hr with ⟨ys, ⟨hl, hys⟩, rfl⟩
+    rcases c.graph_all_inv hr' with ⟨ys', ⟨hl', hys'⟩, rfl⟩
+    rw [nth_ext (hl.trans hl'.symm) fun i hi ↦ ih (hys i (hl ▸ hi)) (hys' i (hl ▸ hi))]
   case hexs =>
     intro p _ ih param r r' hr hr'
-    rcases c.graph_ex_inv hr with ⟨r₁, h₁, rfl⟩
-    rcases c.graph_ex_inv hr' with ⟨r₁', h₁', rfl⟩
-    rcases ih h₁ h₁'; rfl
+    rcases c.graph_ex_inv hr with ⟨ys, ⟨hl, hys⟩, rfl⟩
+    rcases c.graph_ex_inv hr' with ⟨ys', ⟨hl', hys'⟩, rfl⟩
+    rw [nth_ext (hl.trans hl'.symm) fun i hi ↦ ih (hys i (hl ▸ hi)) (hys' i (hl ▸ hi))]
 
 lemma exists_unique {p : V} (hp : IsUFormula L p) : ∃! r, c.Graph L param p r := by
   rcases c.graph_exists param hp with ⟨r, hr⟩
@@ -1078,20 +1139,22 @@ lemma result_eq_of_graph {p r} (h : c.Graph L param p r) : c.result L param p = 
     c.result L param (p ^⋎ q) = c.or param p q (c.result L param p) (c.result L param q) :=
   c.result_eq_of_graph (c.graph_or hp hq (c.result_prop param hp) (c.result_prop param hq))
 
-@[simp] lemma result_all {p} (hp : IsUFormula L p) :
-    c.result L param (^∀ p) = c.all param p (c.result L (c.allChanges param) p) :=
-  c.result_eq_of_graph (c.graph_all hp (c.result_prop (c.allChanges param) hp))
+@[simp] lemma result_all {p} (hp : IsUFormula L p) (hs : c.allSize param p = 1) :
+    c.result L param (^∀ p) = c.all param p ?[c.result L (c.allChanges param 0) p] :=
+  c.result_eq_of_graph (c.graph_all hp (by simp [hs]) fun i hi ↦ by
+    rcases lt_one_iff_eq_zero.mp (hs ▸ hi); simpa using c.result_prop _ hp)
 
-@[simp] lemma result_exs {p} (hp : IsUFormula L p) :
-    c.result L param (^∃ p) = c.exs param p (c.result L (c.exsChanges param) p) :=
-  c.result_eq_of_graph (c.graph_ex hp (c.result_prop _ hp))
+@[simp] lemma result_exs {p} (hp : IsUFormula L p) (hs : c.exsSize param p = 1) :
+    c.result L param (^∃ p) = c.exs param p ?[c.result L (c.exsChanges param 0) p] :=
+  c.result_eq_of_graph (c.graph_ex hp (by simp [hs]) fun i hi ↦ by
+    rcases lt_one_iff_eq_zero.mp (hs ▸ hi); simpa using c.result_prop _ hp)
 
 section
 
 lemma result_defined : 𝚺ᴬ₁-Function₂ c.result L via β.result L := .mk fun v ↦ by
   simp [Blueprint.result, result, c.eval_graphDef]
 
-instance result_definable : 𝚺ᴬ-[0 + 1]-Function₂ c.result L := c.result_defined.to_definable
+instance result_definable : 𝚺ᴬ_[0 + 1]-Function₂ c.result L := c.result_defined.to_definable
 
 end
 
@@ -1109,17 +1172,22 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺ᴬ₁-Re
       P param p (c.result L param p) → P param q (c.result L param q) → P param (p ^⋎ q) (c.or
         param p q (c.result L param p) (c.result L param q)))
     (hall : ∀ param p, IsUFormula L p →
-      P (c.allChanges param) p (c.result L (c.allChanges param) p) →
-      P param (^∀ p) (c.all param p (c.result L (c.allChanges param) p)))
+      (∀ i < c.allSize param p,
+        P (c.allChanges param i) p (c.result L (c.allChanges param i) p)) →
+      P param (^∀ p) (c.result L param (^∀ p)))
     (hexs : ∀ param p, IsUFormula L p →
-      P (c.exsChanges param) p (c.result L (c.exsChanges param) p) →
-      P param (^∃ p) (c.exs param p (c.result L (c.exsChanges param) p))) :
+      (∀ i < c.exsSize param p,
+        P (c.exsChanges param i) p (c.result L (c.exsChanges param i) p)) →
+      P param (^∃ p) (c.result L param (^∃ p))) :
     ∀ {param p : V}, IsUFormula L p → P param p (c.result L param p) := by
   have : 𝚺ᴬ₁-Function₂ c.result L := c.result_definable
-  have : 𝚺ᴬ₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
-  have : 𝚺ᴬ₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
-  let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exsChanges
-    param))
+  have : 𝚺ᴬ₁-Function₂ c.allChanges := c.allChanges_defined.to_definable
+  have : 𝚺ᴬ₁-Function₂ c.exsChanges := c.exChanges_defined.to_definable
+  have : 𝚺ᴬ₁-Function₂ c.allSize := c.allSize_defined.to_definable
+  have : 𝚺ᴬ₁-Function₂ c.exsSize := c.exsSize_defined.to_definable
+  let f : V → V → V := fun p param ↦ Max.max param (Max.max
+    (c.allChanges param (c.allSize param (π₂ (p - 1))))
+    (c.exsChanges param (c.exsSize param (π₂ (p - 1)))))
   have hf : 𝚺ᴬ₁-Function₂ f := by definability
   intro param p
   apply bounded_all_sigma1_order_induction hf ?_ ?_ p param
@@ -1145,10 +1213,10 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺ᴬ₁-Re
   · simpa [c.result_or hp₁ hp₂] using
       hor param p₁ p₂ hp₁ hp₂ (ih p₁ (by simp) param (by simp [f]) hp₁) (ih p₂ (by simp) param (by
         simp [f]) hp₂)
-  · simpa [c.result_all hp₁] using
-      hall param p₁ hp₁ (ih p₁ (by simp) (c.allChanges param) (by simp [f]) hp₁)
-  · simpa [c.result_exs hp₁] using
-      hexs param p₁ hp₁ (ih p₁ (by simp) (c.exsChanges param) (by simp [f]) hp₁)
+  · exact hall param p₁ hp₁ fun i hi ↦
+      ih p₁ (by simp) _ (by simp [f, qqAll, c.allChanges_monotone hi.le]) hp₁
+  · exact hexs param p₁ hp₁ fun i hi ↦
+      ih p₁ (by simp) _ (by simp [f, qqExs, c.exsChanges_monotone hi.le]) hp₁
 
 end Construction
 
@@ -1169,10 +1237,8 @@ noncomputable def blueprint : UformulaRec1.Blueprint where
   falsum := .mkSigma “y param. y = 0”
   and := .mkSigma “y param p₁ p₂ y₁ y₂. !max.dfn y y₁ y₂”
   or := .mkSigma “y param p₁ p₂ y₁ y₂. !max.dfn y y₁ y₂”
-  all := .mkSigma “y param p₁ y₁. !subDef y y₁ 1”
-  exs := .mkSigma “y param p₁ y₁. !subDef y y₁ 1”
-  allChanges := .mkSigma “param' param. param' = 0”
-  exsChanges := .mkSigma “param' param. param' = 0”
+  all := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ !subDef y y₁ 1”
+  exs := .mkSigma “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ !subDef y y₁ 1”
 
 noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   rel {_} := fun k _ v ↦ listMax (termBVVec L k v)
@@ -1181,10 +1247,8 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   falsum {_} := 0
   and {_} := fun _ _ y₁ y₂ ↦ Max.max y₁ y₂
   or {_} := fun _ _ y₁ y₂ ↦ Max.max y₁ y₂
-  all {_} := fun _ y₁ ↦ y₁ - 1
-  exs {_} := fun _ y₁ ↦ y₁ - 1
-  allChanges := fun _ ↦ 0
-  exsChanges := fun _ ↦ 0
+  all {_} := fun _ ys ↦ ys.[0] - 1
+  exs {_} := fun _ ys ↦ ys.[0] - 1
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -1193,8 +1257,6 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
   exs_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_defined := .mk fun v ↦ by simp [blueprint]
-  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end BV
 
@@ -1217,7 +1279,7 @@ instance bv.defined : 𝚺ᴬ₁-Function₁ bv (V := V) L via bvGraph L := .mk 
 
 instance bv.definable : 𝚺ᴬ₁-Function₁ bv (V := V) L := bv.defined.to_definable
 
-instance bv.definable' : Γᴬ-[m + 1]-Function₁ bv (V := V) L := bv.definable.of_sigmaOne
+instance bv.definable' : Γᴬ_[m + 1]-Function₁ bv (V := V) L := bv.definable.of_sigmaOne
 
 end
 
@@ -1280,7 +1342,7 @@ instance IsSemiformula.defined : 𝚫ᴬ₁-Relation IsSemiformula (V := V) L vi
 instance IsSemiformula.definable : 𝚫ᴬ₁-Relation IsSemiformula (V := V) L :=
   IsSemiformula.defined.to_definable
 
-instance IsSemiformula.definable' : Γᴬ-[m + 1]-Relation IsSemiformula (V := V) L :=
+instance IsSemiformula.definable' : Γᴬ_[m + 1]-Relation IsSemiformula (V := V) L :=
   IsSemiformula.definable.of_deltaOne
 
 end
@@ -1485,7 +1547,7 @@ lemma IsSemiformula.pi1_structural_induction {P : V → V → Prop} (hP : 𝚷�
     have : IsSemiformula L (n + 1) p := by simpa using h
     apply hexs _ _ this (ihp _ this)
 
-lemma IsSemiformula.induction1 (Γ) {P : V → V → Prop} (hP : Γᴬ-[1]-Relation P)
+lemma IsSemiformula.induction1 (Γ) {P : V → V → Prop} (hP : Γᴬ_[1]-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
     (hverum : ∀ n, P n ^⊤)
@@ -1527,17 +1589,22 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
       P param n p (c.result L param p) → P param n q (c.result L param q) → P param n (p ^⋎ q)
         (c.or param p q (c.result L param p) (c.result L param q)))
     (hall : ∀ n param p, IsSemiformula L (n + 1) p →
-      P (c.allChanges param) (n + 1) p (c.result L (c.allChanges param) p) →
-      P param n (^∀ p) (c.all param p (c.result L (c.allChanges param) p)))
+      (∀ i < c.allSize param p,
+        P (c.allChanges param i) (n + 1) p (c.result L (c.allChanges param i) p)) →
+      P param n (^∀ p) (c.result L param (^∀ p)))
     (hexs : ∀ n param p, IsSemiformula L (n + 1) p →
-      P (c.exsChanges param) (n + 1) p (c.result L (c.exsChanges param) p) →
-      P param n (^∃ p) (c.exs param p (c.result L (c.exsChanges param) p))) :
+      (∀ i < c.exsSize param p,
+        P (c.exsChanges param i) (n + 1) p (c.result L (c.exsChanges param i) p)) →
+      P param n (^∃ p) (c.result L param (^∃ p))) :
     ∀ {param n p : V}, IsSemiformula L n p → P param n p (c.result L param p) := by
   have : 𝚺ᴬ₁-Function₂ c.result L := c.result_definable
-  have : 𝚺ᴬ₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
-  have : 𝚺ᴬ₁-Function₁ c.exsChanges := c.exChanges_defined.to_definable
-  let f : V → V → V → V := fun _ param _ ↦ Max.max param (Max.max (c.allChanges param)
-    (c.exsChanges param))
+  have : 𝚺ᴬ₁-Function₂ c.allChanges := c.allChanges_defined.to_definable
+  have : 𝚺ᴬ₁-Function₂ c.exsChanges := c.exChanges_defined.to_definable
+  have : 𝚺ᴬ₁-Function₂ c.allSize := c.allSize_defined.to_definable
+  have : 𝚺ᴬ₁-Function₂ c.exsSize := c.exsSize_defined.to_definable
+  let f : V → V → V → V := fun p param _ ↦ Max.max param (Max.max
+    (c.allChanges param (c.allSize param (π₂ (p - 1))))
+    (c.exsChanges param (c.exsSize param (π₂ (p - 1)))))
   have hf : 𝚺ᴬ₁-Function₃ f := by definability
   let g : V → V → V → V := fun _ _ n ↦ n + 1
   have hg : 𝚺ᴬ₁-Function₃ g := by definability
@@ -1571,11 +1638,11 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
         (ih p₁ (by simp) param (by simp [f]) n (by simp [g]) h₁)
         (ih p₂ (by simp) param (by simp [f]) n (by simp [g]) h₂)
   · simpa [h₁.isUFormula] using
-      hall n param p₁ h₁
-        (ih p₁ (by simp) (c.allChanges param) (by simp [f]) (n + 1) (by simp [g]) h₁)
+      hall n param p₁ h₁ fun i hi ↦ ih p₁ (by simp) _
+        (by simp [f, qqAll, c.allChanges_monotone hi.le]) (n + 1) (by simp [g]) h₁
   · simpa [h₁.isUFormula] using
-      hexs n param p₁ h₁
-        (ih p₁ (by simp) (c.exsChanges param) (by simp [f]) (n + 1) (by simp [g]) h₁)
+      hexs n param p₁ h₁ fun i hi ↦ ih p₁ (by simp) _
+        (by simp [f, qqExs, c.exsChanges_monotone hi.le]) (n + 1) (by simp [g]) h₁
 
 end UformulaRec1.Construction
 

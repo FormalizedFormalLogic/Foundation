@@ -6,9 +6,9 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 /-!
 # $\Delta_1$ and r.e. presentations of arithmetic theories
 
-The induction schemata over all formulas, over `ℬ[<, ℒₒᵣ].Hierarchy Γ s` and over
-`ℬ[<, ℒₒᵣ].StrictHierarchy Γ s` are `Δ₁`, hence so are `𝗣𝗔`, `𝗜𝗡𝗗⁺ Γ s` (in particular `𝗜𝚺⁺ n`)
-and `𝗜𝗡𝗗 Γ s`; `𝗣𝗔` and `𝗜𝗡𝗗⁺ Γ s` are also recursively enumerable.
+The induction schemata over all formulas, over `ℬ[<, ℒₒᵣ].Hierarchy Γ s` and over the
+prenex classes are `Δ₁`, hence so are `𝗣𝗔`, `𝗜𝗡𝗗⁺ Γ s` (in particular `𝗜𝚺⁺ n`) and `𝗜𝗡𝗗 Γ s`;
+`𝗣𝗔` and `𝗜𝗡𝗗⁺ Γ s` are also recursively enumerable.
 -/
 
 @[expose] public section
@@ -116,20 +116,10 @@ instance InductionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}
     simp [chInd, Bounding.HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le,
       eq_comm];
 
-private lemma freeVariables_eq_empty_of_shift {m : ℕ} (β : ArithmeticSemiproposition m)
-    (hsh : shift ℒₒᵣ (⌜β⌝ : ℕ) = ⌜β⌝) : β.freeVariables = ∅ := by
-  have hsβ : Rewriting.shift β = β :=
-    (Semiformula.quote_inj_iff (V := ℕ)).mp <| by rw [Semiformula.quote_shift]; exact hsh;
-  by_contra! hne;
-  obtain ⟨x, hx, hmin⟩ : ∃ x ∈ β.freeVariables, ∀ y ∈ β.freeVariables, x ≤ y :=
-    ⟨_, β.freeVariables.min'_mem hne, fun y hy ↦ β.freeVariables.min'_le y hy⟩;
-  rw [← hsβ] at hx;
-  rcases Semiformula.fvar?_rew hx with (⟨i, hi⟩ | ⟨z, hz, hi⟩);
-  · simp [Rew.shift_bvar, Semiterm.FVar?] at hi;
-  · have : x = z + 1 := by
-      simpa [Rew.shift_fvar, Semiterm.FVar?, Semiterm.freeVariables_fvar] using hi;
-    have := hmin z hz;
-    omega;
+lemma InductionR.mono {S S' : V → Prop} (hS : ∀ K, S K → S' K) {p : V} (h : InductionR S p) :
+    InductionR S' p := by
+  obtain ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hKS, hsub⟩ := h;
+  exact ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hS K hKS, hsub⟩;
 
 private lemma allClosure_eq_univCl' {m : ℕ} (β : ArithmeticSemiproposition m)
     (hfree : β.freeVariables = ∅) (hbv : bv ℒₒᵣ (⌜β⌝ : ℕ) = m) :
@@ -181,10 +171,12 @@ lemma inductionR_quote_iff {S : ℕ → Prop} {C : ArithmeticSemiproposition 1 �
         simpa [hsubst, indBodyVal_quote] using (subst_fvarVec_quote' (V := ℕ) β).symm;
     have hφ : φ = ∀¹* β := (Semiformula.quote_inj_iff (V := ℕ)).mp <| by
       simp [hp, quote_allClosure];
+    have hfree : β.freeVariables = ∅ := Semiformula.freeVariables_eq_empty_of_shift_eq <|
+      (Semiformula.quote_inj_iff (V := ℕ)).mp <| by rw [Semiformula.quote_shift]; exact hsh;
     use (succInd γ).univCl;
     and_intros;
     · exact ⟨γ, (hS γ).mp hKS, rfl⟩;
-    · simp [hφ, allClosure_eq_univCl' β (freeVariables_eq_empty_of_shift β hsh) hbv, hβγ];
+    · simp [hφ, allClosure_eq_univCl' β hfree hbv, hβγ];
   · rintro ⟨_, ⟨ψ, hψ, rfl⟩, rfl⟩;
     set χ := succInd ψ;
     have hs : subst ℒₒᵣ (fvarVec (0 + χ.fvSup : ℕ))
@@ -225,10 +217,25 @@ noncomputable instance InductionScheme.delta1_hierarchy (Γ : Polarity) (s : ℕ
     (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ s)).Δ₁ :=
   InductionScheme.delta1_of (fun _ _ _ ↦ IsHierarchy.defined Γ s) isHierarchy_quote_iff_s
 
-noncomputable instance InductionScheme.delta1_strictHierarchy (Γ : Polarity) (s : ℕ) :
-    (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].StrictHierarchy Γ s)).Δ₁ :=
-  InductionScheme.delta1_of (fun _ _ _ ↦ IsStrictHierarchy.defined Γ s)
-    isStrictHierarchy_quote_iff_s
+noncomputable instance InductionScheme.delta1_prenexHierarchy (Γ : Polarity) (s : ℕ) :
+    (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)).Δ₁ :=
+  InductionScheme.delta1_of (fun _ _ _ ↦ IsPrenexHierarchy.defined Γ s)
+    isPrenexHierarchy_quote_iff_s
+
+variable {Γ : Polarity} {s : ℕ} {p : V}
+
+lemma Peano.mem_Δ₁Class_iff :
+    p ∈ 𝗣𝗔.Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (fun _ ↦ True) p :=
+  Δ₁Class.mem_union.trans <| .or .rfl <|
+    (InductionR.defined (hcond := ⟨by simp, fun _ ↦ by simp⟩)).df ![p]
+
+lemma InductionOnHierarchy.mem_Δ₁Class_iff :
+    p ∈ (𝗜𝗡𝗗⁺ Γ s).Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (IsHierarchy Γ s) p :=
+  Δ₁Class.mem_union.trans <| .or .rfl <| InductionR.defined.df ![p]
+
+lemma InductionOnPrenexHierarchy.mem_Δ₁Class_iff :
+    p ∈ (𝗜𝗡𝗗 Γ s).Δ₁Class ↔ p ∈ 𝗣𝗔⁻.Δ₁Class ∨ InductionR (IsPrenexHierarchy Γ s) p :=
+  Δ₁Class.mem_union.trans <| .or .rfl <| InductionR.defined.df ![p]
 
 lemma _root_.FFL.FirstOrder.Theory.RE.of_delta1 (T : ArithmeticTheory) [T.Δ₁] : T.RE := ⟨by
   have h : REPred (· ∈ T.Δ₁Class (V := ℕ)) :=

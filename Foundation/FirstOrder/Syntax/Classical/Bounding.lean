@@ -35,17 +35,12 @@ instance : PartialOrder (Bounding L) := .ofSetLike (Bounding L) (Semiformula.Ope
 @[simp] lemma not_mem_strict {R : Semiformula.Operator L 2} : R ∉ ℬ[L] :=
   Set.notMem_empty R
 
-lemma strict_le (ℬ : Bounding L) : ℬ[L] ≤ ℬ := fun _ h ↦ absurd h not_mem_strict
-
 open Semiformula
 
 variable {ξ ξ₁ ξ₂ : Type*} {n : ℕ} (ℬ : Bounding L)
 
 class SymbolLike (ξ₁ ξ₂ : Type*) : Prop where
   symbolLike {R : Semiformula.Operator L 2} (hR : R ∈ ℬ) : R.SymbolLike ξ₁ ξ₂
-
-instance strict.symbolLike : ℬ[L].SymbolLike ξ₁ ξ₂ where
-  symbolLike hR := absurd hR not_mem_strict
 
 instance lt.symbolLike [L.LT] : ℬ[<, L].SymbolLike ξ₁ ξ₂ where
   symbolLike hR := by

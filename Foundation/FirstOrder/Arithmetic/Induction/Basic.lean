@@ -223,8 +223,8 @@ section Induction
 
 variable (m : ℕ) [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 m]
 
-lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺ᴬ-[m]-Predicate P)
-    (hQ : 𝚷ᴬ-[m]-Predicate Q)
+lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺ᴬ_[m]-Predicate P)
+    (hQ : 𝚷ᴬ_[m]-Predicate Q)
     (zero : P 0 ∨ Q 0) (succ : ∀ x, P x ∨ Q x → P (x + 1) ∨ Q (x + 1)) : ∀ x, P x ∨ Q x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a
@@ -247,8 +247,8 @@ lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺ᴬ-[m]-Predicate 
   have := this a (by rfl)
   simpa [hp, hq] using this
 
-lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺ᴬ-[m]-Predicate P)
-    (hQ : 𝚷ᴬ-[m]-Predicate Q)
+lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺ᴬ_[m]-Predicate P)
+    (hQ : 𝚷ᴬ_[m]-Predicate Q)
     (ind : ∀ x, (∀ y < x, P y ∨ Q y) → P x ∨ Q x) : ∀ x, P x ∨ Q x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a

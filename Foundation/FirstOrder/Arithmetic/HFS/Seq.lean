@@ -241,10 +241,11 @@ end
 lemma Seq.restr {s : V} (H : Seq s) {i : V} (hi : i ≤ lh s) : Seq (s ↾ under i) :=
   ⟨H.isMapping.restr (under i), i, domain_restr_of_subset_domain (by simp [H.domain_eq, hi])⟩
 
-lemma Seq.restr_lh {s : V} (H : Seq s) {i : V} (hi : i ≤ lh s) : lh (s ↾ under i) = i :=
+@[simp] lemma Seq.restr_lh {s : V} (H : Seq s) {i : V} (hi : i ≤ lh s) : lh (s ↾ under i) = i :=
   (H.restr hi).lh_eq_of (domain_restr_of_subset_domain <| by simp [H.domain_eq, hi])
 
-lemma domain_bitRemove_of_isMapping_of_mem {x y s : V} (hs : IsMapping s) (hxy : ⟪x, y⟫ ∈ s) :
+@[simp] lemma domain_bitRemove_of_isMapping_of_mem {x y s : V}
+    (hs : IsMapping s) (hxy : ⟪x, y⟫ ∈ s) :
     domain (bitRemove ⟪x, y⟫ s) = bitRemove x (domain s) := by
   suffices ∀ x₁, (∃ y₁, (x₁ = x → y₁ ≠ y) ∧ ⟪x₁, y₁⟫ ∈ s) ↔ x₁ ≠ x ∧ ∃ y, ⟪x₁, y⟫ ∈ s by
     apply mem_ext; simpa [mem_domain_iff]
@@ -328,7 +329,7 @@ lemma Seq.cases_iff {s : V} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = s' 
 alias ⟨Seq.cases, _⟩ := Seq.cases_iff
 
 @[elab_as_elim]
-theorem seq_induction (Γ) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+theorem seq_induction (Γ) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
   (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (s ⁀' x)) :
     ∀ {s : V}, Seq s → P s := by
   intro s sseq
@@ -383,7 +384,7 @@ instance mkSeq₂_defined : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ !⟦x, y⟧)
 
 instance mkSeq₂_definable : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂_defined.to_definable
 
-instance mkSeq₂_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) :=
+instance mkSeq₂_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) :=
   mkSeq₂_definable.of_sigmaOne
 
 end

@@ -43,14 +43,14 @@ lemma least_number {P : V → Prop}
 
 end LeastNumberScheme
 
-namespace LeastNumberOnBroadHierarchy
+namespace LeastNumberOnHierarchy
 
 variable (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s]
 
 instance : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s) :=
   models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s›
 
-lemma least_number {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P) {x} (h : P x) :
+lemma least_number {P : V → Prop} (hP : Γᴬ_[s].DefinablePred P) {x} (h : P x) :
     ∃ y, P y ∧ ∀ z < y, ¬P z :=
   LeastNumberScheme.least_number (P := P) (C := ℬ[<, ℒₒᵣ].Hierarchy Γ s) (by
     classical
@@ -63,7 +63,7 @@ lemma least_number {P : V → Prop} (hP : Γᴬ-[s].DefinablePred P) {x} (h : P 
       simp [Semiformula.eval_rewriteMap, hp.df.iff]
   ) h
 
-lemma succ_induction {P : V → Prop} (hP : Γ.altᴬ-[s].DefinablePred P)
+lemma succ_induction {P : V → Prop} (hP : Γ.altᴬ_[s].DefinablePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s›;
   have : V↓[ℒₒᵣ] ⊧* 𝗤 := models_of_subtheory this;
@@ -87,7 +87,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ.altᴬ-[s].DefinablePred P)
 lemma models_alt : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ.alt s := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s›;
   suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ.alt s) by
-    simpa [InductionOnBroadHierarchy, Semantics.ModelsSet.union_iff] using ⟨‹_›, this⟩;
+    simpa [InductionOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨‹_›, this⟩;
   simp only [InductionScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
@@ -98,15 +98,15 @@ lemma models_alt : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ.alt s := by
   intro v;
   exact succ_induction Γ s (Bounding.definablePred_of_hierarchy hφ v);
 
-end LeastNumberOnBroadHierarchy
+end LeastNumberOnHierarchy
 
 variable (s : ℕ)
 
-lemma models_LeastNumberOnBroadHierarchy_of_IBroadSigma (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] :
+lemma models_LeastNumberOnHierarchy_of_IBroadSigma (Γ : Polarity) (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] :
     V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s›;
   suffices V↓[ℒₒᵣ] ⊧* LeastNumberScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s) by
-    simpa [LeastNumberOnBroadHierarchy, Semantics.ModelsSet.union_iff] using ⟨‹_›, this⟩;
+    simpa [LeastNumberOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨‹_›, this⟩;
   simp only [LeastNumberScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
@@ -114,20 +114,20 @@ lemma models_LeastNumberOnBroadHierarchy_of_IBroadSigma (Γ : Polarity) (s : ℕ
     simpa [models_iff, Semiformula.eval_univCl, leastNumber, Semiformula.eval_substs,
       Matrix.constant_eq_singleton] using this;
   intro v ⟨x, hx⟩;
-  exact InductionOnBroadHierarchy.least_number Γ s
+  exact InductionOnHierarchy.least_number Γ s
     (Bounding.definablePred_of_hierarchy hφ v) hx;
 
 instance models_LBroadSigma_of_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗟𝚺⁺ s :=
-  models_LeastNumberOnBroadHierarchy_of_IBroadSigma 𝚺 s
+  models_LeastNumberOnHierarchy_of_IBroadSigma 𝚺 s
 
 instance models_LBroadPi_of_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗟𝚷⁺ s :=
-  models_LeastNumberOnBroadHierarchy_of_IBroadSigma 𝚷 s
+  models_LeastNumberOnHierarchy_of_IBroadSigma 𝚷 s
 
 instance models_IBroadPi_of_LBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗟𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚷⁺ s :=
-  LeastNumberOnBroadHierarchy.models_alt 𝚺 s
+  LeastNumberOnHierarchy.models_alt 𝚺 s
 
 instance models_IBroadSigma_of_LBroadPi [V↓[ℒₒᵣ] ⊧* 𝗟𝚷⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s :=
-  LeastNumberOnBroadHierarchy.models_alt 𝚷 s
+  LeastNumberOnHierarchy.models_alt 𝚷 s
 
 end models
 

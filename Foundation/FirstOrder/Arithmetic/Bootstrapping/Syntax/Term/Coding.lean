@@ -205,6 +205,15 @@ theorem empty_quote_eq (t : ClosedSemiterm L n) :
 lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encode t) := by
   simp [empty_quote_def, quote_eq_encode]
 
+@[simp] lemma empty_quote_isUTerm (t : ClosedSemiterm L n) : IsUTerm L (⌜t⌝ : V) := by
+  simp [empty_quote_eq]
+
+@[simp] lemma empty_quote_bvar (x : Fin n) : (⌜(#x : ClosedSemiterm L n)⌝ : V) = ^#↑x := rfl
+
+@[simp] lemma empty_quote_bShift (t : ClosedSemiterm L n) :
+    (⌜Rew.bShift t⌝ : V) = termBShift L ⌜t⌝ := by
+  simp [empty_quote_def, ← Rew.emb_bShift_term, quote_def]
+
 @[simp] lemma coe_quote {ξ n m} (t : SyntacticSemiterm L n) :
     ↑(⌜t⌝ : ℕ) = (⌜t⌝ : ArithmeticSemiterm ξ m) := by
   simp [gödelNumber'_def, quote_eq_encode]

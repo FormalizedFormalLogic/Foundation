@@ -2,7 +2,8 @@ module
 
 public import Foundation.ProvabilityLogic.Classification.AD
 public import Foundation.ProvabilityLogic.Classification.DS
-public import Foundation.FirstOrder.Incompleteness.Reflection.Local
+public import Foundation.FirstOrder.Incompleteness.Reflection.IteratedConsistency
+public import Foundation.FirstOrder.Incompleteness.Reflection.SigmaReflection
 
 /-!
 # Classification of provability logics
@@ -211,9 +212,142 @@ theorem provabilityLogic_add_con_eq_A (hC : Consistent (T ∪ U.Con)) :
 
 lemma provabilityLogic_add_con_equiv_A (hC : Consistent (T ∪ U.Con)) :
     T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) ≊ 𝐀 :=
-  Logic.equiv_iff.mpr (provabilityLogic_add_con_eq_A hTU hU hC)
+  Logic.equiv_of_eq <| provabilityLogic_add_con_eq_A hTU hU hC
 
 end
+
+section
+
+variable [𝗜𝚺₁ ⪯ T]
+
+lemma trace_provabilityLogic_turingOmega_eq_univ :
+    (T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α)).trace = .univ := by
+  apply Set.eq_univ_of_forall;
+  intro n;
+  apply mem_trace_provabilityLogic_iff.mpr;
+  intro f;
+  have h : T ∪ T.Conω ⊢ T.standardProvability.conItr (n + 1) :=
+    by_axm <| Set.mem_union_right _ ⟨n + 1, rfl⟩;
+  simp only [alpha, standardInterpret, interpret, interpret_boxItr, Function.iterate_succ_apply',
+    ProvabilityAbstraction.Provability.conItr] at h ⊢;
+  cl_prover [h];
+
+/-- - [AB05, Example 59] -/
+theorem provabilityLogic_turingOmega_eq_A (hC : Consistent (T ∪ T.Conω)) :
+    T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α) = 𝐀 := by
+  have hT := trace_provabilityLogic_turingOmega_eq_univ (T := T) (α := α);
+  apply Logic.weakerThan_antisymm;
+  · by_contra! h;
+    obtain ⟨-, A, hAA, hAL⟩ := strictlyWeakerThan_iff.mp ⟨A_weakerThan_provabilityLogic hT, h⟩;
+    obtain ⟨U, _, hU, e⟩ := exists_prenex_axiomatization_turingOmega (T := T);
+    exact (inconsistent_of_provable_localReflectionOn_union (n := 0) hU e <|
+      provable_localReflectionOn_sigma1_of_mem_of_not_A hT hAL hAA).not_con hC;
+  · exact A_weakerThan_provabilityLogic hT;
+
+lemma provabilityLogic_turingOmega_equiv_A (hC : Consistent (T ∪ T.Conω)) :
+    T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α) ≊ 𝐀 :=
+  Logic.equiv_of_eq <| provabilityLogic_turingOmega_eq_A hC
+
+lemma provabilityLogic_turingOmega_eq_A_of_sigma1Sound [T.SoundOnHierarchy 𝚺 1] :
+    T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α) = 𝐀 := by
+  apply provabilityLogic_turingOmega_eq_A;
+  apply Consistent.of_le (inferInstance : Consistent (T ∪ 𝗥𝗳𝗻[Set.univ] T));
+  apply WeakerThan.ofAxm!;
+  rintro σ (hσ | ⟨n, rfl⟩);
+  · exact by_axm <| Set.mem_union_left _ hσ;
+  · exact provable_neg_iterate_standardProvability_bot (fun hσ ↦ by_axm <| Set.mem_union_right _ <|
+      T.standardProvability.localReflectionOn_mono (Γ' := Set.univ) (fun _ _ ↦ trivial) hσ) n;
+
+end
+
+section
+
+variable [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+
+lemma trace_provabilityLogic_add_con_self_eq :
+    (T.provabilityLogicRelativeTo (T ∪ T.Con) (α := α)).trace = {0} := by
+  ext n;
+  rw [mem_trace_provabilityLogic_iff, Set.mem_singleton_iff];
+  constructor;
+  · intro h;
+    have h₁ : T ⊢ ∼T.standardProvability ⊥ 🡒
+        T.standardProvability (T.standardProvability^[n] ⊥) 🡒 T.standardProvability^[n] ⊥ := by
+      have := h ⟨fun _ ↦ ⊥⟩;
+      rw [Set.union_singleton] at this;
+      replace := deduction this;
+      simp only [alpha, standardInterpret, interpret, interpret_boxItr,
+        Function.iterate_succ_apply'] at this;
+      exact this;
+    have h₂ : 𝐆𝐋 ⊢ (∼□⊥ 🡒 alpha n : LetterlessFormula) :=
+      Logic.GL.arithmetical_completeness_iff (T := T).mpr fun f ↦ by
+        simp only [alpha, standardInterpret, interpret, interpret_boxItr,
+          Function.iterate_succ_apply'];
+        cl_prover [h₁];
+    have h₃ : ∀ i, n ≤ i := by
+      simpa using Set.eq_univ_iff_forall.mp (Logic.GL.mem_iff_spectrum_eq_univ.mp h₂) n;
+    contrapose! h₃;
+    use 0;
+    omega;
+  · rintro rfl f;
+    have h : T ∪ T.Con ⊢ ∼T.standardProvability ⊥ := by_axm <| Set.mem_union_right _ rfl;
+    simp only [alpha, standardInterpret, interpret, interpret_boxItr];
+    cl_prover [h];
+
+/-- `PL(T, T + Con(T)) = 𝐆𝐋 + ¬□⊥` for a `𝚺₁`-sound `T`. -/
+theorem provabilityLogic_add_con_self_eq_GLAlpha :
+    T.provabilityLogicRelativeTo (T ∪ T.Con) (α := α) = 𝐆𝐋α {0} :=
+  have h := trace_provabilityLogic_add_con_self_eq (T := T) (α := α);
+  h ▸ provabilityLogic_eq_GLAlpha (h ▸ (Set.finite_singleton 0).infinite_compl)
+
+end
+
+section
+
+variable {n : ℕ} [NeZero n] [𝗜𝚺₁ ⪯ T] [𝗕𝚺n ⪯ T]
+
+theorem provabilityLogic_add_localReflectionOn_Sigma_eq_D :
+    letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
+    Consistent T' → T.provabilityLogicRelativeTo T' (α := α) = 𝐃 := by
+  set T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
+  intro hC;
+  have hR : T' ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T := by
+    intro _ hσ;
+    exact by_axm
+      <| Set.mem_union_right _
+      <| T.standardProvability.localReflectionOn_mono
+      (fun _ h ↦ h.mono NeZero.one_le) hσ;
+  have hD := D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1 (α := α) hR;
+  apply Logic.weakerThan_antisymm;
+  · by_contra! h;
+    obtain ⟨-, A, hAD, hA⟩ := strictlyWeakerThan_iff.mp ⟨hD, h⟩;
+    obtain ⟨U, _, hU, e⟩ := exists_prenex_axiomatization_localReflectionOn_Sigma (T := T) (n := n);
+    have hrfn : T' ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1)] T := by
+      rintro _ ⟨σ, -, rfl⟩;
+      exact provable_reflection_of_not_D
+        (trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1 hR) hA hAD;
+    exact (inconsistent_of_provable_localReflectionOn_union hU e hrfn).not_con hC;
+  · exact hD;
+
+lemma provabilityLogic_add_localReflectionOn_Sigma_equiv_D :
+    letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
+    Consistent T' → T.provabilityLogicRelativeTo T' (α := α) ≊ 𝐃 :=
+  fun hC ↦ Logic.equiv_of_eq <| provabilityLogic_add_localReflectionOn_Sigma_eq_D hC
+
+lemma provabilityLogic_add_localReflectionOn_Sigma_eq_D_of_sigma1Sound
+    [T.SoundOnHierarchy 𝚺 1] :
+    T.provabilityLogicRelativeTo (T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T) (α := α) = 𝐃 :=
+  provabilityLogic_add_localReflectionOn_Sigma_eq_D <|
+    Consistent.of_le inferInstance <| WeakerThan.ofSubset <| Set.union_subset_union_right T <|
+      T.standardProvability.localReflectionOn_mono (Γ' := Set.univ) fun _ _ ↦ trivial
+
+end
+
+/-- - [AB05, Example 60] -/
+theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D [𝗜𝚺₁ ⪯ T] :
+    letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T;
+    Consistent T' → T.provabilityLogicRelativeTo T' (α := α) = 𝐃 :=
+  have : 𝗕𝚺 1 ⪯ T := BSigma_weakerThan_ISigma.trans inferInstance;
+  provabilityLogic_add_localReflectionOn_Sigma_eq_D
 
 end ProvabilityLogic
 

@@ -39,7 +39,7 @@ def _root_.FFL.FirstOrder.Arithmetic.qqBexDef : 𝚺ᴬ₁.Semisentence 3 := .mk
 instance qqBex_defined : 𝚺ᴬ₁-Function₂ (qqBex : V → V → V) via qqBexDef := .mk fun v ↦ by
   simp [qqBexDef, qqBex, Arithmetic.qqLT_defined.df]
 
-instance qqBex_definable (Γ m) : Γᴬ-[m + 1]-Function₂ (qqBex : V → V → V) :=
+instance qqBex_definable (Γ m) : Γᴬ_[m + 1]-Function₂ (qqBex : V → V → V) :=
   .of_sigmaOne qqBex_defined.to_definable
 
 variable {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q)
@@ -230,7 +230,17 @@ lemma IsBounded.of_ex {p : V} (h : IsBounded (^∃ p)) :
     simp_all [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex,
       Arithmetic.qqLT];
 
-lemma IsBounded.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+lemma IsBounded.of_qqBall {u p : V} (h : IsBounded (qqBall u p)) : IsBounded p := by
+  obtain ⟨u', q', -, hq', heq⟩ := IsBounded.of_all (p := (Arithmetic.qqNLT (qqBvar 0) u) ^⋎ p) h;
+  obtain ⟨-, rfl⟩ := (qqOr_inj _ _ _ _).mp heq;
+  exact hq';
+
+lemma IsBounded.of_qqBex {u p : V} (h : IsBounded (qqBex u p)) : IsBounded p := by
+  obtain ⟨u', q', -, hq', heq⟩ := IsBounded.of_ex (p := (Arithmetic.qqLT (qqBvar 0) u) ^⋏ p) h;
+  obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq;
+  exact hq';
+
+lemma IsBounded.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hverum : P ^⊤) (hfalsum : P ^⊥)
     (hrel : ∀ k r v, P (^rel k r v)) (hnrel : ∀ k r v, P (^nrel k r v))
     (hand : ∀ p q, IsBounded p → IsBounded q → P p → P q → P (p ^⋏ q))
@@ -389,6 +399,11 @@ private lemma bounded_of_isBounded (ψ : ArithmeticSemiproposition n) :
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
+lemma quote_bex_sentence (t : ClosedSemiterm ℒₒᵣ n) (φ : ArithmeticSemisentence (n + 1)) :
+    (⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence n)⌝ : V)
+      = qqBex (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
+  simp [Semiformula.bexs_eq, Semiformula.Operator.lt_def, qqBex];
+
 lemma isBounded_quote_iff_s (ψ : ArithmeticSemiproposition n) :
     IsBounded (⌜ψ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Closure ψ := by
   simpa [Semiformula.coe_quote_eq_quote] using
@@ -398,6 +413,16 @@ lemma isBounded_quote_iff_s (ψ : ArithmeticSemiproposition n) :
 theorem isBounded_quote_iff (σ : ArithmeticSemisentence n) :
     IsBounded (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Closure σ := by
   simp [Sentence.quote_def, isBounded_quote_iff_s];
+
+section
+
+variable {a b : ℕ} (h : a = b) {θ : ArithmeticSemisentence a}
+
+lemma closure_cast (hθ : ℬ[<, ℒₒᵣ].Closure θ) :
+    ℬ[<, ℒₒᵣ].Closure (cast (congrArg ArithmeticSemisentence h) θ) := by
+  subst h; exact hθ
+
+end
 
 end correctness
 

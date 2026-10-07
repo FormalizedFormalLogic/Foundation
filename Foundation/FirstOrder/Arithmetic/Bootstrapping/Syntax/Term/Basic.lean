@@ -165,7 +165,7 @@ instance defined : 𝚫ᴬ₁-Predicate (IsUTerm L (V := V)) via (isUTerm L) :=
 
 instance definable : 𝚫ᴬ₁-Predicate (IsUTerm L (V := V)) := defined.to_definable
 
-instance definable' (Γ) : Γᴬ-[m + 1]-Predicate (IsUTerm L (V := V)) := definable.of_deltaOne
+instance definable' (Γ) : Γᴬ_[m + 1]-Predicate (IsUTerm L (V := V)) := definable.of_deltaOne
 
 end IsUTerm
 
@@ -235,7 +235,7 @@ instance defined : 𝚫ᴬ₁-Relation (IsUTermVec (V := V) L) via (isUTermVec L
 
 instance definable : 𝚫ᴬ₁-Relation (IsUTermVec (V := V) L) := defined.to_definable
 
-instance definable' (Γ) {m : ℕ} : Γᴬ-[m + 1]-Relation (IsUTermVec (V := V) L) :=
+instance definable' (Γ) {m : ℕ} : Γᴬ_[m + 1]-Relation (IsUTermVec (V := V) L) :=
   definable.of_deltaOne
 
 end
@@ -272,7 +272,7 @@ alias ⟨case, mk⟩ := case_iff
 lemma func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     IsUTerm L (^func k f v) := func_iff.mpr ⟨hkf, hv⟩
 
-lemma induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+lemma induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hbvar : ∀ z, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsUTermVec L k v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, IsUTerm L t → P t :=
@@ -458,7 +458,7 @@ lemma graph_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Graph L (v ·.succ.succ) (
 instance graph_definable : 𝚺ᴬ₁.Definable fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1) :=
   (graph_defined c).to_definable
 
-instance graph_definable₂ (param) : 𝚺ᴬ-[0 + 1]-Relation (c.Graph L param) := by
+instance graph_definable₂ (param) : 𝚺ᴬ_[0 + 1]-Relation (c.Graph L param) := by
   simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 2) (graph_definable
     c) (#0 :> #1 :> fun i ↦ &(param i))
 
@@ -731,7 +731,7 @@ instance termBV.defined : 𝚺ᴬ₁-Function₁ (termBV (V := V) L) via (termBV
 
 instance termBV.definable : 𝚺ᴬ₁-Function₁ (termBV (V := V) L) := termBV.defined.to_definable
 
-instance termBV.definable' {k : ℕ} : Γᴬ-[k + 1]-Function₁ (termBV (V := V) L) :=
+instance termBV.definable' {k : ℕ} : Γᴬ_[k + 1]-Function₁ (termBV (V := V) L) :=
   termBV.definable.of_sigmaOne
 
 instance termBVVec.defined : 𝚺ᴬ₁-Function₂ (termBVVec (V := V) L) via (termBVVecGraph L) :=
@@ -740,7 +740,7 @@ instance termBVVec.defined : 𝚺ᴬ₁-Function₂ (termBVVec (V := V) L) via (
 instance termBVVec.definable : 𝚺ᴬ₁-Function₂ (termBVVec (V := V) L) :=
   termBVVec.defined.to_definable
 
-instance termBVVec.definable' {i : ℕ} : Γᴬ-[i + 1]-Function₂ (termBVVec (V := V) L) :=
+instance termBVVec.definable' {i : ℕ} : Γᴬ_[i + 1]-Function₂ (termBVVec (V := V) L) :=
   termBVVec.definable.of_sigmaOne
 
 end
@@ -873,7 +873,7 @@ instance IsSemiterm.definable : 𝚫ᴬ₁-Relation (IsSemiterm (V := V) L) :=
   IsSemiterm.defined.to_definable
 
 instance IsSemiterm.definable' (Γ : Polarity) (m : ℕ) :
-    Γᴬ-[m + 1]-Relation (IsSemiterm (V := V) L) := IsSemiterm.definable.of_deltaOne
+    Γᴬ_[m + 1]-Relation (IsSemiterm (V := V) L) := IsSemiterm.definable.of_deltaOne
 
 instance IsSemitermVec.defined : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V) L) via (isSemitermVec L) :=
   .mk <| by
@@ -887,7 +887,7 @@ instance IsSemitermVec.definable : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V
   IsSemitermVec.defined.to_definable
 
 instance IsSemitermVec.definable' (Γ : Polarity) (m : ℕ) :
-    Γᴬ-[m + 1]-Relation₃ (IsSemitermVec (V := V) L) := IsSemitermVec.definable.of_deltaOne
+    Γᴬ_[m + 1]-Relation₃ (IsSemitermVec (V := V) L) := IsSemitermVec.definable.of_deltaOne
 
 end
 
@@ -909,7 +909,7 @@ lemma IsSemiterm.case_iff {n t : V} :
 
 alias ⟨IsSemiterm.case, IsSemiterm.mk'⟩ := IsSemiterm.case_iff
 
-lemma IsSemiterm.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+lemma IsSemiterm.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, IsSemiterm L n t → P t := by

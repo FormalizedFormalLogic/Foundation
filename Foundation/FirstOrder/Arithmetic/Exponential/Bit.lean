@@ -61,9 +61,9 @@ lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by
 @[definability] lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_ball_mem
     (Γ m) {P : (Fin k → V) → V → Prop}
     {f : (Fin k → V) → V}
-    (hf : 𝚺ᴬ-[m + 1].DefinableFunction f) (h : Γᴬ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
-    Γᴬ-[m + 1].Definable (fun v ↦ ∀ x ∈ f v, P v x) := by
-  have : Γᴬ-[m + 1].Definable (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
+    (hf : 𝚺ᴬ_[m + 1].DefinableFunction f) (h : Γᴬ_[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γᴬ_[m + 1].Definable (fun v ↦ ∀ x ∈ f v, P v x) := by
+  have : Γᴬ_[m + 1].Definable (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
     .arithmetic_ball_lt hf
       (.imp (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0)
         (hf.retraction Fin.succ)) h)
@@ -73,9 +73,9 @@ lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by
 @[definability] lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_bexs_mem
     (Γ m) {P : (Fin k → V) → V → Prop}
     {f : (Fin k → V) → V}
-    (hf : 𝚺ᴬ-[m + 1].DefinableFunction f) (h : Γᴬ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
-    Γᴬ-[m + 1].Definable (fun v ↦ ∃ x ∈ f v, P v x) := by
-  have : Γᴬ-[m + 1].Definable (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
+    (hf : 𝚺ᴬ_[m + 1].DefinableFunction f) (h : Γᴬ_[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γᴬ_[m + 1].Definable (fun v ↦ ∃ x ∈ f v, P v x) := by
+  have : Γᴬ_[m + 1].Definable (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
     .arithmetic_bexs_lt hf
       (.and (Bounding.HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0)
         (hf.retraction _)) h)
@@ -565,14 +565,14 @@ section
 
 variable {m : ℕ} [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 m]
 
-lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[m]-Predicate P) (a : V) :
+lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[m]-Predicate P) (a : V) :
   haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   have : ∃ s < Exp.exp a, ∀ i < a, P i → i ∈ s :=
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
-  have : Γ.altᴬ-[m].DefinablePred (fun s : V ↦ ∀ i < a, P i → i ∈ s) := by
+  have : Γ.altᴬ_[m].DefinablePred (fun s : V ↦ ∀ i < a, P i → i ∈ s) := by
     apply Bounding.HierarchySymbol.Definable.arithmetic_ball_blt
     · simp
     apply Bounding.HierarchySymbol.Definable.imp
@@ -580,7 +580,7 @@ lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[m]-
     · simpa using Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₂
         (by definability) (by definability)
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : V) := by
-    simpa using InductionOnBroadHierarchy.least_number Γ.alt m this hs
+    simpa using InductionOnHierarchy.least_number Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩
   have t_le_s : t ≤ s := not_lt.mp (by
     intro lt
@@ -595,7 +595,7 @@ lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[m]-
     rcases hm (ht j hjn Hj); contradiction
   exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
 
-theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γᴬ-[m]-Predicate P) (a : V) :
+theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γᴬ_[m]-Predicate P) (a : V) :
     haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i :=
   match Γ with
@@ -603,7 +603,7 @@ theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γᴬ-[m]-Predicate P) 
   | 𝚷 => finset_comprehension_aux 𝚷 hP a
   | 𝚫 => finset_comprehension_aux 𝚺 hP.of_delta a
 
-theorem finset_comprehension_exists_unique {P : V → Prop} (hP : Γᴬ-[m]-Predicate P) (a : V) :
+theorem finset_comprehension_exists_unique {P : V → Prop} (hP : Γᴬ_[m]-Predicate P) (a : V) :
     haveI : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃! s, s < Exp.exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
@@ -629,11 +629,11 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 instance : Fact (1 ≤ 1) := ⟨by rfl⟩
 
-theorem finset_comprehension₁ {P : V → Prop} (hP : Γᴬ-[1]-Predicate P) (a : V) :
+theorem finset_comprehension₁ {P : V → Prop} (hP : Γᴬ_[1]-Predicate P) (a : V) :
     ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i :=
   finset_comprehension hP a
 
-theorem finset_comprehension₁! {P : V → Prop} (hP : Γᴬ-[1]-Predicate P) (a : V) :
+theorem finset_comprehension₁! {P : V → Prop} (hP : Γᴬ_[1]-Predicate P) (a : V) :
     ∃! s, s < Exp.exp a ∧ (∀ i < a, i ∈ s ↔ P i) := by
   rcases finset_comprehension₁ hP a with ⟨s, hs, Ha⟩
   exact ExistsUnique.intro s ⟨hs, Ha⟩
@@ -649,7 +649,7 @@ theorem finset_comprehension₁! {P : V → Prop} (hP : Γᴬ-[1]-Predicate P) (
         have : x < a := exp_monotone.mp <| LE.le.trans_lt (exp_le_of_mem hx) hs
         exact (Hb x this).mpr <| (Ha x this).mp hx)
 
-theorem finite_comprehension₁! {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+theorem finite_comprehension₁! {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (fin : ∃ m, ∀ i, P i → i < m) :
     ∃! s : V, ∀ i, i ∈ s ↔ P i := by
   rcases fin with ⟨m, mh⟩

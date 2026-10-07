@@ -81,12 +81,6 @@ theorem eq_provabilityLogic [T.SoundOnHierarchy 𝚺 1] : 𝐆𝐋 = T.provabili
 lemma equiv_provabilityLogic [T.SoundOnHierarchy 𝚺 1] : 𝐆𝐋 ≊ T.provabilityLogic (α := α) :=
   equiv_iff.mpr eq_provabilityLogic
 
-theorem eq_provabilityLogic_peano : 𝐆𝐋 = 𝗣𝗔.provabilityLogic (α := α) :=
-  eq_provabilityLogic
-
-lemma equiv_provabilityLogic_peano : 𝐆𝐋 ≊ 𝗣𝗔.provabilityLogic (α := α) :=
-  equiv_provabilityLogic
-
 end Logic.GL
 
 end FFL.ProvabilityLogic
