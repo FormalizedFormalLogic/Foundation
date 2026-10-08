@@ -74,22 +74,22 @@ instance : 𝗘𝗤 ℒₒᵣ ⪯ finiteAxiomatization n :=
 
 section eval
 
-variable {M : Type*} [ORingStructure M]
+variable {V : Type*} [ORingStructure V]
 
 @[simp]
-lemma eval_indFormula (x : M) (g : ℕ → M) :
+lemma eval_indFormula (x : V) (g : ℕ → V) :
     (indFormula n).Eval ![x] g ↔
       ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.PrenexSatisfied 𝚺 (n + 1) ev (g 0) := by
   simp [indFormula, Reading.Adjoin, Reading.PrenexSatisfied]
 
 @[simp]
-lemma eval_collFormula (x y : M) (g : ℕ → M) :
+lemma eval_collFormula (x y : V) (g : ℕ → V) :
     (collFormula n).Eval ![x, y] g ↔ ∃ ev₀, Reading.Adjoin ev₀ x (g 1) ∧
         ∃ ev, Reading.Adjoin ev y ev₀ ∧ Reading.PrenexSatisfied 𝚺 (n + 1) ev (g 0) := by
   simp [collFormula, Reading.Adjoin, Reading.PrenexSatisfied]
 
 private lemma models_succInd_iff (φ : ArithmeticSemiformula ℕ 1) :
-    M↓[ℒₒᵣ] ⊧ .univCl (succInd φ) ↔ ∀ f : ℕ → M, φ.Eval ![0] f →
+    V↓[ℒₒᵣ] ⊧ .univCl (succInd φ) ↔ ∀ f : ℕ → V, φ.Eval ![0] f →
       (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) → ∀ x, φ.Eval ![x] f := by
   simp [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
 
@@ -109,74 +109,74 @@ section models
 
 open Reading
 
-variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* finiteAxiomatization n]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* finiteAxiomatization n]
 
 include n in
-lemma models_peanoMinus : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+lemma models_peanoMinus : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
   Semantics.ModelsSet.of_subset' (peanoMinus_subset_finiteAxiomatization (n := n))
 
 include n in
-lemma models_tarski : ∀ σ ∈ tarski, M↓[ℒₒᵣ] ⊧ σ := fun _ hσ ↦
+lemma models_tarski : ∀ σ ∈ tarski, V↓[ℒₒᵣ] ⊧ σ := fun _ hσ ↦
   Semantics.ModelsSet.models _ (tarski_mem_finiteAxiomatization (n := n) hσ)
 
 private lemma exists_assignment_eval_indFormula (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 1)
-    (f : ℕ → M) :
-    ∃ g : ℕ → M, ∀ x : M, (indFormula n).Eval ![x] g ↔ φ.val.Eval ![x] f := by
-  have := models_peanoMinus (n := n) (M := M);
-  have hM := models_tarski (n := n) (M := M);
+    (f : ℕ → V) :
+    ∃ g : ℕ → V, ∀ x : V, (indFormula n).Eval ![x] g ↔ φ.val.Eval ![x] f := by
+  have := models_peanoMinus (n := n) (V := V);
+  have hV := models_tarski (n := n) (V := V);
   set ψ := φ.rew (φ.val.paramSubst ![#0]);
-  obtain ⟨e₀, he₀⟩ := exists_codes hM (fun i : Fin φ.val.fvSup ↦ f i);
-  use ((⌜ψ.matrix.val⌝ : ℕ) : M) :>ₙ fun _ ↦ e₀;
+  obtain ⟨e₀, he₀⟩ := exists_codes hV (fun i : Fin φ.val.fvSup ↦ f i);
+  use ((⌜ψ.matrix.val⌝ : ℕ) : V) :>ₙ fun _ ↦ e₀;
   intro x;
-  have hψ : M ⊧/(x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x] f :=
+  have hψ : V ⊧/(x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x] f :=
     (φ.val_rew _).symm ▸ Semiformula.eval_toSemisentence_one φ.val x f;
-  have H {ev : M} (hadj : Adjoin ev x e₀) :=
-    (prenexSatisfied_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
-      (codes_cons hM he₀ hadj)).trans hψ;
+  have H {ev : V} (hadj : Adjoin ev x e₀) :=
+    (prenexSatisfied_quote_reading hV (Γ := 𝚺) ψ.matrix.bounded _ ev
+      (codes_cons hV he₀ hadj)).trans hψ;
   apply (eval_indFormula x _).trans;
   constructor;
   · rintro ⟨ev, hadj, hsat⟩;
     exact (H hadj).mp hsat;
   · intro h;
-    obtain ⟨ev, hadj⟩ := read_adjoinTotal hM x e₀;
+    obtain ⟨ev, hadj⟩ := read_adjoinTotal hV x e₀;
     exact ⟨ev, hadj, (H hadj).mpr h⟩;
 
 private lemma exists_assignment_eval_collFormula (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2)
-    (f : ℕ → M) :
-    ∃ g : ℕ → M, ∀ x y : M, (collFormula n).Eval ![x, y] g ↔ φ.val.Eval ![x, y] f := by
-  have := models_peanoMinus (n := n) (M := M);
-  have hM := models_tarski (n := n) (M := M);
+    (f : ℕ → V) :
+    ∃ g : ℕ → V, ∀ x y : V, (collFormula n).Eval ![x, y] g ↔ φ.val.Eval ![x, y] f := by
+  have := models_peanoMinus (n := n) (V := V);
+  have hV := models_tarski (n := n) (V := V);
   set ψ := φ.rew (φ.val.paramSubst ![#1, #0]);
-  obtain ⟨e₀, he₀⟩ := exists_codes hM (fun i : Fin φ.val.fvSup ↦ f i);
-  use ((⌜ψ.matrix.val⌝ : ℕ) : M) :>ₙ fun _ ↦ e₀;
+  obtain ⟨e₀, he₀⟩ := exists_codes hV (fun i : Fin φ.val.fvSup ↦ f i);
+  use ((⌜ψ.matrix.val⌝ : ℕ) : V) :>ₙ fun _ ↦ e₀;
   intro x y;
-  have hψ : M ⊧/(y :> x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x, y] f :=
+  have hψ : V ⊧/(y :> x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x, y] f :=
     (φ.val_rew _).symm ▸ Semiformula.eval_toSemisentence_two φ.val x y f;
-  have H {ev₀ ev : M} (hadj₀ : Adjoin ev₀ x e₀) (hadj : Adjoin ev y ev₀) :=
-    (prenexSatisfied_quote_reading hM (Γ := 𝚺) ψ.matrix.bounded _ ev
-      (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).trans hψ;
+  have H {ev₀ ev : V} (hadj₀ : Adjoin ev₀ x e₀) (hadj : Adjoin ev y ev₀) :=
+    (prenexSatisfied_quote_reading hV (Γ := 𝚺) ψ.matrix.bounded _ ev
+      (codes_cons hV (codes_cons hV he₀ hadj₀) hadj)).trans hψ;
   apply (eval_collFormula x y _).trans;
   constructor;
   · rintro ⟨ev₀, hadj₀, ev, hadj, hsat⟩;
     exact (H hadj₀ hadj).mp hsat;
   · intro h;
-    obtain ⟨ev₀, hadj₀⟩ := read_adjoinTotal hM x e₀;
-    obtain ⟨ev, hadj⟩ := read_adjoinTotal hM y ev₀;
+    obtain ⟨ev₀, hadj₀⟩ := read_adjoinTotal hV x e₀;
+    obtain ⟨ev, hadj⟩ := read_adjoinTotal hV y ev₀;
     exact ⟨ev₀, hadj₀, ev, hadj, (H hadj₀ hadj).mpr h⟩;
 
-lemma succ_induction_prenex (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 1) (f : ℕ → M)
+lemma succ_induction_prenex (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 1) (f : ℕ → V)
     (zero : φ.val.Eval ![0] f)
     (succ : ∀ x, φ.val.Eval ![x] f → φ.val.Eval ![x + 1] f) : ∀ x, φ.val.Eval ![x] f := by
-  have hInd : M↓[ℒₒᵣ] ⊧ indSentence n :=
+  have hInd : V↓[ℒₒᵣ] ⊧ indSentence n :=
     Semantics.ModelsSet.models _ indSentence_mem_finiteAxiomatization;
   obtain ⟨g, hg⟩ := exists_assignment_eval_indFormula φ f;
   intro x;
   exact (hg x).mp <| (models_succInd_iff _).mp hInd g ((hg 0).mpr zero)
     (fun y hy ↦ (hg (y + 1)).mpr (succ y ((hg y).mp hy))) x;
 
-lemma collection_prenex (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2) (f : ℕ → M) (a : M)
+lemma collection_prenex (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2) (f : ℕ → V) (a : V)
     (h : ∀ x < a, ∃ y, φ.val.Eval ![x, y] f) : ∃ b, ∀ x < a, ∃ y < b, φ.val.Eval ![x, y] f := by
-  have hColl : M↓[ℒₒᵣ] ⊧ collSentence n :=
+  have hColl : V↓[ℒₒᵣ] ⊧ collSentence n :=
     Semantics.ModelsSet.models _ collSentence_mem_finiteAxiomatization;
   obtain ⟨g, hg⟩ := exists_assignment_eval_collFormula φ f;
   obtain ⟨b, hb⟩ := (models_collectionAxiom_iff (collFormula n)).mp hColl g a
@@ -188,9 +188,9 @@ lemma collection_prenex (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2) (f : 
 
 private lemma models_IBroadSigma_of {s : ℕ}
     (H : ∀ φ : ArithmeticSemiformula ℕ 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s φ →
-      ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 1, ∀ (e : Fin 1 → M) (f : ℕ → M),
+      ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 1, ∀ (e : Fin 1 → V) (f : ℕ → V),
         φ'.val.Eval e f ↔ φ.Eval e f) :
-    M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := by
+    V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
   · exact models_peanoMinus (n := n);
@@ -201,11 +201,11 @@ private lemma models_IBroadSigma_of {s : ℕ}
     obtain ⟨φ', hφ'⟩ := H φ hφ;
     simpa only [hφ'] using succ_induction_prenex φ' f;
 
-private lemma models_CollectionOnHierarchy_of [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {Γ : Polarity} {s : ℕ}
+private lemma models_CollectionOnHierarchy_of [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {Γ : Polarity} {s : ℕ}
     (H : ∀ φ : ArithmeticSemiformula ℕ 2, ℬ[<, ℒₒᵣ].Hierarchy Γ s φ →
-      ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2, ∀ (e : Fin 2 → M) (f : ℕ → M),
+      ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2, ∀ (e : Fin 2 → V) (f : ℕ → V),
         φ'.val.Eval e f ↔ φ.Eval e f) :
-    M↓[ℒₒᵣ] ⊧* 𝗕⁺ Γ s := by
+    V↓[ℒₒᵣ] ⊧* 𝗕⁺ Γ s := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
   · assumption;
@@ -216,21 +216,21 @@ private lemma models_CollectionOnHierarchy_of [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
     obtain ⟨φ', hφ'⟩ := H φ hφ;
     simpa only [hφ'] using collection_prenex φ' f;
 
-omit [M↓[ℒₒᵣ] ⊧* finiteAxiomatization n] in
+omit [V↓[ℒₒᵣ] ⊧* finiteAxiomatization n] in
 private lemma exists_prenex_of_zero {k : ℕ} {Γ : Polarity} {φ : ArithmeticSemiformula ℕ k}
     (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ 0 φ) :
-    ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ k, ∀ (e : Fin k → M) (f : ℕ → M),
+    ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ k, ∀ (e : Fin k → V) (f : ℕ → V),
       φ'.val.Eval e f ↔ φ.Eval e f :=
   ⟨.ofΔ₀ ⟨φ, Bounding.Hierarchy.zero_iff_bounded.mp hφ⟩ 𝚺 (n + 1), fun e _ ↦
     Bounding.Prenex.models_ofΔ₀ _ e⟩
 
 include n in
-private lemma models_ISigmaZero : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
-  have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ 0 := models_IBroadSigma_of (n := n) fun _ hφ ↦ exists_prenex_of_zero hφ
+private lemma models_ISigmaZero : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ 0 := models_IBroadSigma_of (n := n) fun _ hφ ↦ exists_prenex_of_zero hφ
   inferInstance
 
-private lemma models_BPi : ∀ j ≤ n, M↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := by
-  have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_ISigmaZero (n := n);
+private lemma models_BPi : ∀ j ≤ n, V↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_ISigmaZero (n := n);
   intro j hj;
   induction j with
   | zero =>
@@ -238,20 +238,20 @@ private lemma models_BPi : ∀ j ≤ n, M↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := by
       (models_CollectionOnHierarchy_of (n := n) fun _ hφ ↦ exists_prenex_of_zero hφ)
       CollectionOnPrenexHierarchy_subset_CollectionOnHierarchy;
   | succ j ih =>
-    have : M↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := ih (by omega);
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := ih (by omega);
     apply models_of_ss _ CollectionOnPrenexHierarchy_subset_CollectionOnHierarchy;
     apply models_CollectionOnHierarchy_of (n := n);
     intro φ hφ;
     obtain ⟨φ₁, h₁⟩ := Bounding.Prenex.models_exists_prenex (Γ' := 𝚺) hφ;
     obtain ⟨_, ⟨φ₂, rfl⟩, h₂⟩ :=
       φ₁.val_prenexHierarchy.exists_eval_iff_of_lt 𝚺 (s' := n + 1) (by omega);
-    exact ⟨φ₂, fun e f ↦ ((h₁ M e f).trans (h₂ M e f)).symm⟩;
+    exact ⟨φ₂, fun e f ↦ ((h₁ V e f).trans (h₂ V e f)).symm⟩;
 
-lemma models_ISigma : M↓[ℒₒᵣ] ⊧* 𝗜𝚺 (n + 1) := by
-  have : M↓[ℒₒᵣ] ⊧* 𝗕𝚷 n := models_BPi n le_rfl;
-  have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (n + 1) := models_IBroadSigma_of fun φ hφ ↦ by
+lemma models_ISigma : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (n + 1) := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n := models_BPi n le_rfl;
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (n + 1) := models_IBroadSigma_of fun φ hφ ↦ by
     obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex (Γ' := 𝚺) hφ;
-    exact ⟨φ', fun e f ↦ (hφ' M e f).symm⟩;
+    exact ⟨φ', fun e f ↦ (hφ' V e f).symm⟩;
   infer_instance;
 
 end models
