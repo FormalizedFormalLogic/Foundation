@@ -39,11 +39,6 @@ notation "𝗜𝚫₀" => IDelta 0
 
 notation "𝗜𝚫₁" => IDelta 1
 
-abbrev IDeltaOnBroadHierarchy (s : ℕ) : ArithmeticTheory :=
-  𝗜𝚺₀ ∪ DeltaInductionScheme (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s)
-
-prefix:max "𝗜𝚫⁺ " => IDeltaOnBroadHierarchy
-
 variable {C C' : ArithmeticSemiformula ℕ 1 → Prop}
 
 lemma DeltaInductionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 1}, C φ → C' φ) :
@@ -52,12 +47,6 @@ lemma DeltaInductionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 1}, C
 
 lemma mem_DeltaInductionScheme_of_mem {φ ψ : ArithmeticSemiformula ℕ 1} (hφ : C φ) (hψ : C ψ) :
     .univCl (deltaInd φ ψ) ∈ DeltaInductionScheme C := ⟨φ, ψ, hφ, hψ, rfl⟩
-
-lemma IDelta_subset_IDeltaOnBroadHierarchy (s : ℕ) : 𝗜𝚫 s ⊆ 𝗜𝚫⁺ s :=
-  Set.union_subset_union_right _ (DeltaInductionScheme_subset (·.hierarchy))
-
-instance IDelta_weakerThan_IDeltaOnBroadHierarchy (s : ℕ) : 𝗜𝚫 s ⪯ 𝗜𝚫⁺ s :=
-  WeakerThan.ofSubset (IDelta_subset_IDeltaOnBroadHierarchy s)
 
 instance (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗜𝚫 s := WeakerThan.ofSubset Set.subset_union_left
 
@@ -123,7 +112,7 @@ end models
 
 section standardModel
 
-instance models_IDeltaOnBroadHierarchy (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺ s := by
+instance models_IDelta (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚫 s := by
   apply Semantics.ModelsSet.union_iff.mpr
   and_intros
   · exact inferInstance
@@ -134,10 +123,6 @@ instance models_IDeltaOnBroadHierarchy (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜�
     induction x with
     | zero => exact hzero
     | succ x ih => exact hsucc x ih
-
-instance models_IDelta (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚫 s :=
-  Semantics.ModelsSet.of_subset (models_IDeltaOnBroadHierarchy s)
-    (IDelta_subset_IDeltaOnBroadHierarchy s)
 
 instance (s : ℕ) : Consistent (𝗜𝚫 s) := (𝗜𝚫 s).consistent_of_sound (Eq ⊥) rfl
 

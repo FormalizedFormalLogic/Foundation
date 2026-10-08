@@ -30,11 +30,8 @@ variable {V : Type*} [ORingStructure V] {n : ℕ}
 
 section theorems
 
-private lemma models_DeltaInductionScheme_of_definablePred
-    {C : ArithmeticSemiformula ℕ 1 → Prop} [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)]
-    (hC : ∀ {φ : ArithmeticSemiformula ℕ 1}, C φ → ∀ f : ℕ → V,
-      𝚺ᴬ_[n + 1].DefinablePred fun x : V ↦ φ.Eval ![x] f) :
-    V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ DeltaInductionScheme C := by
+lemma models_IDelta_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚫(n + 1) := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   have h₀ : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n :=
@@ -47,26 +44,15 @@ private lemma models_DeltaInductionScheme_of_definablePred
     rintro _ ⟨φ, ψ, hφ, hψ, rfl⟩
     apply (models_deltaInd_iff φ ψ).mpr
     intro f heq zero succ
-    obtain ⟨Q, hQ, hQiff⟩ := exists_pi_definableRel_iff (hC hφ f)
-    obtain ⟨R, hR, hRiff⟩ := exists_pi_definableRel_iff (hC hψ f)
+    obtain ⟨Q, hQ, hQiff⟩ :=
+      exists_pi_definableRel_iff (Bounding.definablePred_of_hierarchy hφ.hierarchy f)
+    obtain ⟨R, hR, hRiff⟩ :=
+      exists_pi_definableRel_iff (Bounding.definablePred_of_hierarchy hψ.hierarchy f)
     exact succ_induction_of_complementary_exists_pi hQ hR hQiff
       (fun x ↦ by rw [heq x, not_not]; exact hRiff x) zero succ
 
-lemma models_IDelta_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure V]
-    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚫(n + 1) :=
-  models_DeltaInductionScheme_of_definablePred fun hφ f ↦
-    Bounding.definablePred_of_hierarchy hφ.hierarchy f
-
 theorem IDelta_weakerThan_BSigma (n : ℕ) : 𝗜𝚫(n + 1) ⪯ 𝗕𝚺(n + 1) :=
   weakerThan_of_models.{0} _ _ fun V _ _ ↦ models_IDelta_of_models_BSigma_succ n V
-
-lemma models_IDeltaOnBroadHierarchy_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure V]
-    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺(n + 1) :=
-  models_DeltaInductionScheme_of_definablePred fun hφ f ↦ Bounding.definablePred_of_hierarchy hφ f
-
-theorem IDeltaOnBroadHierarchy_weakerThan_BSigma (n : ℕ) : 𝗜𝚫⁺(n + 1) ⪯ 𝗕𝚺(n + 1) :=
-  weakerThan_of_models.{0} _ _ fun V _ _ ↦
-    models_IDeltaOnBroadHierarchy_of_models_BSigma_succ n V
 
 theorem ISigma_weakerThan_IDelta_succ (n : ℕ) : 𝗜𝚺n ⪯ 𝗜𝚫 (n + 1) :=
   weakerThan_of_models.{0} _ _ fun V _ _ ↦ by
