@@ -32,6 +32,7 @@
       "𝗜𝚺⁺₀": IBroadSigma(0),
       "𝗜𝚺⁺₁": IBroadSigma(1),
       "𝗜𝚺2": ISigma(2),
+      "𝗜𝚫 0": IDelta(0),
       "𝗜𝚫 1": IDelta(1),
       "𝗜𝚫 2": IDelta(2),
       "𝗜𝚷₁": IPi(1),

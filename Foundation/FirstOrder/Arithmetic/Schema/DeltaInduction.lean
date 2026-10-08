@@ -99,6 +99,22 @@ lemma IDelta_weakerThan_of_le {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) : 𝗜𝚫 s
       exact DeltaInductionScheme.models_of_exists_eval_iff fun _ hφ ↦
         (hφ.exists_eval_iff_of_le h).imp fun _ H ↦ ⟨H.1, H.2 V⟩
 
+lemma IDeltaZero_weakerThan_ISigmaZero : 𝗜𝚫 0 ⪯ 𝗜𝚺₀ :=
+  weakerThan_of_models.{0} _ _ fun V _ hV ↦ by
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
+    apply Semantics.ModelsSet.union_iff.mpr
+    and_intros
+    · exact hV
+    · apply Semantics.ModelsSet.setOf_iff.mpr
+      rintro _ ⟨φ, ψ, hφ, -, rfl⟩
+      apply (models_deltaInd_iff φ ψ).mpr
+      intro f _ zero succ
+      exact InductionOnPrenexHierarchy.succ_induction 𝚺 0
+        ⟨f, φ, hφ, fun _ ↦ Iff.rfl⟩ zero succ
+
+instance IDeltaZero_equiv_ISigmaZero : 𝗜𝚫 0 ≊ 𝗜𝚺₀ :=
+  Entailment.Equiv.antisymm ⟨IDeltaZero_weakerThan_ISigmaZero, inferInstance⟩
+
 end models
 
 section standardModel
