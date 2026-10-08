@@ -20,6 +20,10 @@ instance : 𝗕𝚺 1 ⪯ 𝗜𝚺 1 := BSigma_weakerThan_ISigma (s := 0)
 
 instance : 𝗕𝚺 2 ⪯ 𝗜𝚺 2 := BSigma_weakerThan_ISigma (s := 1)
 
+instance : 𝗕𝚺 0 ≊ 𝗕𝚺 1 := by
+  rw [BSigmaZero_eq_BPiZero]
+  exact (BSigma_succ_equiv_BPi (s := 0)).symm
+
 instance : 𝗕𝚺 1 ≊ 𝗕𝚷 0 := BSigma_succ_equiv_BPi (s := 0)
 
 instance : 𝗕𝚺 2 ≊ 𝗕𝚷 1 := BSigma_succ_equiv_BPi (s := 1)

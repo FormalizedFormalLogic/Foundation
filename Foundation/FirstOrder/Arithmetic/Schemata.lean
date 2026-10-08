@@ -806,6 +806,15 @@ lemma CollectionOnPrenexHierarchy_weakerThan_of_le (h : s ≤ s') : 𝗕 Γ s �
 lemma CollectionOnPrenexHierarchy_weakerThan_of_lt (h : s < s') : 𝗕 Γ s ⪯ 𝗕 Γ' s' :=
   weakerThan_of_models.{0} _ _ fun _ _ _ ↦ models_CollectionOnPrenexHierarchy_of_lt (Γ' := Γ') h
 
+lemma CollectionOnPrenexHierarchy_zero_eq (Γ Γ' : Polarity) : 𝗕 Γ 0 = 𝗕 Γ' 0 := by
+  have : ℬ[<, ℒₒᵣ].PrenexHierarchy (ξ := ℕ) (n := 2) Γ 0 = ℬ[<, ℒₒᵣ].PrenexHierarchy Γ' 0 :=
+    funext fun _ ↦ propext <|
+      Bounding.PrenexHierarchy.zero_iff_bounded.trans Bounding.PrenexHierarchy.zero_iff_bounded.symm
+  simp [CollectionOnPrenexHierarchy, this]
+
+lemma BSigmaZero_eq_BPiZero : 𝗕𝚺 0 = 𝗕𝚷 0 :=
+  CollectionOnPrenexHierarchy_zero_eq 𝚺 𝚷
+
 lemma CollectionOnPrenexHierarchy_weakerThan_BSigma_succ (Γ : Polarity) (s : ℕ) :
     𝗕 Γ s ⪯ 𝗕𝚺 (s + 1) :=
   CollectionOnPrenexHierarchy_weakerThan_of_lt (Nat.lt_succ_self s)
