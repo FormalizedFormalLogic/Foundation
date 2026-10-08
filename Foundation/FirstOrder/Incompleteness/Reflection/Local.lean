@@ -143,6 +143,12 @@ theorem not_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
   fun h ↦ (inconsistent_of_provable_localReflectionOn_insert hπ h).not_con
     inferInstance
 
+theorem not_provable_localReflectionOn_univ_insert {π : ArithmeticSentence}
+    (hC : Consistent (insert π T)) :
+    ¬ insert π T ⊢* 𝗥𝗳𝗻[Set.univ] T := fun h ↦
+  (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+    (Γ := fun _ ↦ True) (fun _ _ ↦ trivial) trivial h).not_con hC
+
 theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n ⪯ T]
     {U U' : ArithmeticTheory} (e : U ≊ U') (hU' : U'.Finite)
     (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].Hierarchy Γ n σ)
