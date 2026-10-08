@@ -494,22 +494,22 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
     match k', f, w, ih with
     | 0, .zero, w, _ =>
       rw [show (⌜(FirstOrder.Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝
-        : ℕ) = 𝟎 by simp];
+        : ℕ) = 𝟎 from (Arithmetic.coe_zero_eq (V := ℕ)).symm];
       exact (read_termValZero hM ev 0).mpr rfl;
     | 0, .one, w, _ =>
       rw [show (⌜(FirstOrder.Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝
-        : ℕ) = 𝟏 by simp];
+        : ℕ) = 𝟏 from (Arithmetic.coe_one_eq (V := ℕ)).symm];
       exact (read_termValOne hM ev 1).mpr rfl;
     | 2, .add, w, ih =>
       have hq : M ⊧/![((⌜FirstOrder.Semiterm.func Language.ORing.Func.add w⌝ : ℕ) : M),
           ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
-        sigmaOne_upward_absolute₃ Arithmetic.qqAddGraph (by simp);
+        sigmaOne_upward_absolute₃ _ <| (Arithmetic.qqAdd_defined.df _).mpr rfl;
       exact (read_termValAdd hM ev _ _ _ _ _ _ (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq
         (ih 0) (ih 1)).mpr rfl;
     | 2, .mul, w, ih =>
       have hq : M ⊧/![((⌜FirstOrder.Semiterm.func Language.ORing.Func.mul w⌝ : ℕ) : M),
           ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
-        sigmaOne_upward_absolute₃ Arithmetic.qqMulGraph (by simp);
+        sigmaOne_upward_absolute₃ _ <| (Arithmetic.qqMul_defined.df _).mpr rfl;
       exact (read_termValMul hM ev _ _ _ _ _ _ (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq
         (ih 0) (ih 1)).mpr rfl;
 
