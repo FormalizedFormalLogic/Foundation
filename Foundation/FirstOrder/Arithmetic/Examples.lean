@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
+public import Foundation.FirstOrder.Arithmetic.IDelta.Basic
 public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
@@ -41,6 +42,14 @@ instance : 𝗜𝚺 1 ⪯ 𝗜𝚺 2 := ISigma_weakerThan_of_le (by decide)
 instance : 𝗜𝚺 0 ⪯ 𝗕𝚺 1 := ISigma_weakerThan_BSigma_succ (s := 0)
 
 instance : 𝗜𝚺 1 ⪯ 𝗕𝚺 2 := ISigma_weakerThan_BSigma_succ (s := 1)
+
+instance : 𝗜𝚺 0 ⪯ 𝗜𝚫 1 := ISigma_weakerThan_IDelta_succ 0
+
+instance : 𝗜𝚺 1 ⪯ 𝗜𝚫 2 := ISigma_weakerThan_IDelta_succ 1
+
+instance : 𝗜𝚫 1 ⪯ 𝗕𝚺 1 := IDelta_weakerThan_BSigma 0
+
+instance : 𝗜𝚫 2 ⪯ 𝗕𝚺 2 := IDelta_weakerThan_BSigma 1
 
 instance : 𝗜𝚺 2 ⪯ 𝗣𝗔 := inferInstance
 
