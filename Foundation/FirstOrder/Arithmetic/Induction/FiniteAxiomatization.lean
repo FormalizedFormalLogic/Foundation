@@ -79,14 +79,14 @@ variable {V : Type*} [ORingStructure V]
 @[simp]
 lemma eval_indFormula (x : V) (g : ℕ → V) :
     (indFormula n).Eval ![x] g ↔
-      ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.PrenexSatisfied 𝚺 (n + 1) ev (g 0) := by
-  simp [indFormula, Reading.Adjoin, Reading.PrenexSatisfied]
+      ∃ ev, V ⊧/![ev, x, g 1] adjoinDef.val ∧ V ⊧/![ev, g 0] (prenexSatisfied' 𝚺 n).val := by
+  simp [indFormula]
 
 @[simp]
 lemma eval_collFormula (x y : V) (g : ℕ → V) :
-    (collFormula n).Eval ![x, y] g ↔ ∃ ev₀, Reading.Adjoin ev₀ x (g 1) ∧
-        ∃ ev, Reading.Adjoin ev y ev₀ ∧ Reading.PrenexSatisfied 𝚺 (n + 1) ev (g 0) := by
-  simp [collFormula, Reading.Adjoin, Reading.PrenexSatisfied]
+    (collFormula n).Eval ![x, y] g ↔ ∃ ev₀, V ⊧/![ev₀, x, g 1] adjoinDef.val ∧
+      ∃ ev, V ⊧/![ev, y, ev₀] adjoinDef.val ∧ V ⊧/![ev, g 0] (prenexSatisfied' 𝚺 n).val := by
+  simp [collFormula]
 
 private lemma models_succInd_iff (φ : ArithmeticSemiformula ℕ 1) :
     V↓[ℒₒᵣ] ⊧ .univCl (succInd φ) ↔ ∀ f : ℕ → V, φ.Eval ![0] f →
@@ -106,8 +106,6 @@ theorem provable_finiteAxiomatization (n : ℕ) : 𝗜𝚺 (n + 1) ⊢* finiteAx
       (by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hierarchy_collFormula)));
 
 section models
-
-open Reading
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* finiteAxiomatization n]
 
@@ -130,8 +128,8 @@ private lemma exists_assignment_eval_indFormula (φ : ℬ[<, ℒₒᵣ].Prenex �
   intro x;
   have hψ : V ⊧/(x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x] f :=
     (φ.val_rew _).symm ▸ Semiformula.eval_toSemisentence_one φ.val x f;
-  have H {ev : V} (hadj : Adjoin ev x e₀) :=
-    (prenexSatisfied_quote_reading hV (Γ := 𝚺) ψ.matrix.bounded _ ev
+  have H {ev : V} (hadj : V ⊧/![ev, x, e₀] adjoinDef.val) :=
+    (models_prenexSatisfied'_quote_iff hV (Γ := 𝚺) ψ.matrix.bounded _ ev
       (codes_cons hV he₀ hadj)).trans hψ;
   apply (eval_indFormula x _).trans;
   constructor;
@@ -152,8 +150,9 @@ private lemma exists_assignment_eval_collFormula (φ : ℬ[<, ℒₒᵣ].Prenex 
   intro x y;
   have hψ : V ⊧/(y :> x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x, y] f :=
     (φ.val_rew _).symm ▸ Semiformula.eval_toSemisentence_two φ.val x y f;
-  have H {ev₀ ev : V} (hadj₀ : Adjoin ev₀ x e₀) (hadj : Adjoin ev y ev₀) :=
-    (prenexSatisfied_quote_reading hV (Γ := 𝚺) ψ.matrix.bounded _ ev
+  have H {ev₀ ev : V} (hadj₀ : V ⊧/![ev₀, x, e₀] adjoinDef.val)
+      (hadj : V ⊧/![ev, y, ev₀] adjoinDef.val) :=
+    (models_prenexSatisfied'_quote_iff hV (Γ := 𝚺) ψ.matrix.bounded _ ev
       (codes_cons hV (codes_cons hV he₀ hadj₀) hadj)).trans hψ;
   apply (eval_collFormula x y _).trans;
   constructor;

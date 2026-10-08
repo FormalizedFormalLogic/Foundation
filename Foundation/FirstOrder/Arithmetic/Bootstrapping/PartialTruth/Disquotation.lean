@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Genera
 # The Tarski conditions and disquotation over `𝗣𝗔⁻`
 
 The finite theory `tarski` of Tarski conditions for $\Delta_0$ satisfaction, provable in `𝗜𝚺₁`.
-In a model of `𝗣𝗔⁻ ∪ tarski`, the partial satisfaction `Reading.PrenexSatisfied Γ s` holds
+In a model of `𝗣𝗔⁻ ∪ tarski`, the partial satisfaction `prenexSatisfied' Γ s` holds
 of the code of a prenex formula with a $\Delta_0$ matrix exactly when the formula holds.
 
 ## References
@@ -286,151 +286,119 @@ end models
 theorem _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_tarski : 𝗜𝚺₁ ⊢* tarski :=
   fun {_} hσ ↦ Arithmetic.complete.{0} _ _ fun _ _ _ ↦ models_tarski hσ
 
-/-! ## Readings in models of `𝗣𝗔⁻` -/
-
-namespace Reading
-
-variable {V : Type*} [ORingStructure V]
-
-def BoundedSatisfied (e z : V) : Prop := V ⊧/![e, z] boundedSatisfied.val
-
-def PrenexSatisfied : Polarity → ℕ → V → V → Prop
-  | _, 0 => BoundedSatisfied
-  | Γ, s + 1 => fun e z ↦ V ⊧/![e, z] (prenexSatisfied' Γ s).val
-
-def Bounded (z : V) : Prop := V ⊧/![z] isBounded.val
-
-def UFormula (z : V) : Prop := V ⊧/![z] (isUFormula ℒₒᵣ).val
-
-def UTerm (t : V) : Prop := V ⊧/![t] (isUTerm ℒₒᵣ).val
-
-def Adjoin (e' x e : V) : Prop := V ⊧/![e', x, e] adjoinDef.val
-
-def Nth (y e i : V) : Prop := V ⊧/![y, e, i] nthDef.val
-
-def Len (l e : V) : Prop := V ⊧/![l, e] lenDef.val
-
-def TermVal (y e t : V) : Prop := V ⊧/![y, e, t] termValGraph.val
-
-end Reading
-
-lemma read_prenexSatisfied_sigma_succ {V : Type*} [ORingStructure V] (s : ℕ) (e p : V) :
-    Reading.PrenexSatisfied 𝚺 (s + 1) e p ↔
-      ∃ x e', Reading.Adjoin e' x e ∧ Reading.PrenexSatisfied 𝚷 s e' p := by
-  cases s <;> simp [Reading.PrenexSatisfied, Reading.BoundedSatisfied, Reading.Adjoin,
-    prenexSatisfied', HierarchySymbol.Semiformula.val_sigma];
+/-! ## The Tarski conditions in models of `𝗣𝗔⁻` -/
 
 section readings
-
-open Reading
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
   (hV : ∀ σ ∈ tarski, V↓[ℒₒᵣ] ⊧ σ)
 
 include hV
 
--- The readings are unfolded only here, to match them against the sentences of `tarski`.
-attribute [local simp] models_iff Reading.BoundedSatisfied Reading.PrenexSatisfied
-  Reading.Bounded Reading.UFormula Reading.UTerm Reading.Adjoin Reading.Nth Reading.Len
-  Reading.TermVal
+attribute [local simp] models_iff
 
 private lemma models_of_mem (σ : ArithmeticSentence) (hσ : σ ∈ tarski := by simp [tarski]) :
     V↓[ℒₒᵣ] ⊧ σ :=
   hV σ hσ
 
 lemma read_boundedSatisfiedVerum : ∀ z e : V, V ⊧/![z] qqVerumDef.val →
-    Reading.BoundedSatisfied e z := by
+    V ⊧/![e, z] boundedSatisfied.val := by
   simpa [Tarski.boundedSatisfiedVerum] using models_of_mem hV Tarski.boundedSatisfiedVerum;
 
 lemma read_boundedSatisfiedFalsum : ∀ z e : V, V ⊧/![z] qqFalsumDef.val →
-    ¬Reading.BoundedSatisfied e z := by
+    ¬V ⊧/![e, z] boundedSatisfied.val := by
   simpa [Tarski.boundedSatisfiedFalsum] using models_of_mem hV Tarski.boundedSatisfiedFalsum;
 
-lemma read_boundedSatisfiedEq : ∀ t u z e vt vu : V, UTerm t → UTerm u →
-    V ⊧/![z, t, u] qqEQDef.val → TermVal vt e t → TermVal vu e u →
-      (Reading.BoundedSatisfied e z ↔ vt = vu) := by
+lemma read_boundedSatisfiedEq : ∀ t u z e vt vu : V, V ⊧/![t] (isUTerm ℒₒᵣ).val →
+    V ⊧/![u] (isUTerm ℒₒᵣ).val → V ⊧/![z, t, u] qqEQDef.val →
+    V ⊧/![vt, e, t] termValGraph.val → V ⊧/![vu, e, u] termValGraph.val →
+      (V ⊧/![e, z] boundedSatisfied.val ↔ vt = vu) := by
   simpa [Tarski.boundedSatisfiedEq] using models_of_mem hV Tarski.boundedSatisfiedEq;
 
-lemma read_boundedSatisfiedNeq : ∀ t u z e vt vu : V, UTerm t → UTerm u →
-    V ⊧/![z, t, u] qqNEQDef.val → TermVal vt e t → TermVal vu e u →
-      (Reading.BoundedSatisfied e z ↔ vt ≠ vu) := by
+lemma read_boundedSatisfiedNeq : ∀ t u z e vt vu : V, V ⊧/![t] (isUTerm ℒₒᵣ).val →
+    V ⊧/![u] (isUTerm ℒₒᵣ).val → V ⊧/![z, t, u] qqNEQDef.val →
+    V ⊧/![vt, e, t] termValGraph.val → V ⊧/![vu, e, u] termValGraph.val →
+      (V ⊧/![e, z] boundedSatisfied.val ↔ vt ≠ vu) := by
   simpa [Tarski.boundedSatisfiedNeq] using models_of_mem hV Tarski.boundedSatisfiedNeq;
 
-lemma read_boundedSatisfiedLt : ∀ t u z e vt vu : V, UTerm t → UTerm u →
-    V ⊧/![z, t, u] qqLTDef.val → TermVal vt e t → TermVal vu e u →
-      (Reading.BoundedSatisfied e z ↔ vt < vu) := by
+lemma read_boundedSatisfiedLt : ∀ t u z e vt vu : V, V ⊧/![t] (isUTerm ℒₒᵣ).val →
+    V ⊧/![u] (isUTerm ℒₒᵣ).val → V ⊧/![z, t, u] qqLTDef.val →
+    V ⊧/![vt, e, t] termValGraph.val → V ⊧/![vu, e, u] termValGraph.val →
+      (V ⊧/![e, z] boundedSatisfied.val ↔ vt < vu) := by
   simpa [Tarski.boundedSatisfiedLt] using models_of_mem hV Tarski.boundedSatisfiedLt;
 
-lemma read_boundedSatisfiedNlt : ∀ t u z e vt vu : V, UTerm t → UTerm u →
-    V ⊧/![z, t, u] qqNLTDef.val → TermVal vt e t → TermVal vu e u →
-    (Reading.BoundedSatisfied e z ↔ ¬(vt < vu)) := by
+lemma read_boundedSatisfiedNlt : ∀ t u z e vt vu : V, V ⊧/![t] (isUTerm ℒₒᵣ).val →
+    V ⊧/![u] (isUTerm ℒₒᵣ).val → V ⊧/![z, t, u] qqNLTDef.val →
+    V ⊧/![vt, e, t] termValGraph.val → V ⊧/![vu, e, u] termValGraph.val →
+      (V ⊧/![e, z] boundedSatisfied.val ↔ ¬(vt < vu)) := by
   simpa [Tarski.boundedSatisfiedNlt] using models_of_mem hV Tarski.boundedSatisfiedNlt;
 
 lemma read_boundedSatisfiedAnd : ∀ p q z e : V, V ⊧/![z, p, q] qqAndDef.val →
-    (Reading.BoundedSatisfied e z ↔
-      Reading.BoundedSatisfied e p ∧ Reading.BoundedSatisfied e q) := by
+    (V ⊧/![e, z] boundedSatisfied.val ↔
+      V ⊧/![e, p] boundedSatisfied.val ∧ V ⊧/![e, q] boundedSatisfied.val) := by
   simpa [Tarski.boundedSatisfiedAnd] using models_of_mem hV Tarski.boundedSatisfiedAnd;
 
-lemma read_boundedSatisfiedOr : ∀ p q z e : V, Reading.Bounded p → UFormula p →
-    Reading.Bounded q → UFormula q →
+lemma read_boundedSatisfiedOr : ∀ p q z e : V, V ⊧/![p] isBounded.val →
+    V ⊧/![p] (isUFormula ℒₒᵣ).val → V ⊧/![q] isBounded.val → V ⊧/![q] (isUFormula ℒₒᵣ).val →
     V ⊧/![z, p, q] qqOrDef.val →
-      (Reading.BoundedSatisfied e z ↔
-        Reading.BoundedSatisfied e p ∨ Reading.BoundedSatisfied e q) := by
+      (V ⊧/![e, z] boundedSatisfied.val ↔
+        V ⊧/![e, p] boundedSatisfied.val ∨ V ⊧/![e, q] boundedSatisfied.val) := by
   simpa [Tarski.boundedSatisfiedOr] using models_of_mem hV Tarski.boundedSatisfiedOr;
 
-lemma read_boundedSatisfiedBall : ∀ t u q z e v : V, UTerm t → Reading.Bounded q → UFormula q →
-    V ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → V ⊧/![z, u, q] qqBallDef.val → TermVal v e t →
-    (Reading.BoundedSatisfied e z ↔
-      ∀ x < v, ∀ e', Adjoin e' x e → Reading.BoundedSatisfied e' q) := by
+lemma read_boundedSatisfiedBall : ∀ t u q z e v : V, V ⊧/![t] (isUTerm ℒₒᵣ).val →
+    V ⊧/![q] isBounded.val → V ⊧/![q] (isUFormula ℒₒᵣ).val →
+    V ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → V ⊧/![z, u, q] qqBallDef.val →
+    V ⊧/![v, e, t] termValGraph.val →
+    (V ⊧/![e, z] boundedSatisfied.val ↔
+      ∀ x < v, ∀ e', V ⊧/![e', x, e] adjoinDef.val → V ⊧/![e', q] boundedSatisfied.val) := by
   simpa [Tarski.boundedSatisfiedBall] using models_of_mem hV Tarski.boundedSatisfiedBall;
 
-lemma read_boundedSatisfiedBex : ∀ t u q z e v : V, UTerm t →
-    V ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → V ⊧/![z, u, q] qqBexDef.val → TermVal v e t →
-    (Reading.BoundedSatisfied e z ↔
-      ∃ x < v, ∃ e', Adjoin e' x e ∧ Reading.BoundedSatisfied e' q) := by
+lemma read_boundedSatisfiedBex : ∀ t u q z e v : V, V ⊧/![t] (isUTerm ℒₒᵣ).val →
+    V ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → V ⊧/![z, u, q] qqBexDef.val →
+    V ⊧/![v, e, t] termValGraph.val →
+    (V ⊧/![e, z] boundedSatisfied.val ↔
+      ∃ x < v, ∃ e', V ⊧/![e', x, e] adjoinDef.val ∧ V ⊧/![e', q] boundedSatisfied.val) := by
   simpa [Tarski.boundedSatisfiedBex] using models_of_mem hV Tarski.boundedSatisfiedBex;
 
 lemma read_termValBvar : ∀ e z t v : V, V ⊧/![t, z] qqBvarDef.val →
-    (TermVal v e t ↔ Nth v e z) := by
+    (V ⊧/![v, e, t] termValGraph.val ↔ V ⊧/![v, e, z] nthDef.val) := by
   simpa [Tarski.termValBvar] using models_of_mem hV Tarski.termValBvar;
 
-lemma read_termValZero : ∀ e v : V, TermVal v e ((𝟎 : ℕ) : V) ↔ v = 0 := by
+lemma read_termValZero : ∀ e v : V, V ⊧/![v, e, ((𝟎 : ℕ) : V)] termValGraph.val ↔ v = 0 := by
   simpa [Tarski.termValZero, numeral_eq_natCast] using models_of_mem hV Tarski.termValZero;
 
-lemma read_termValOne : ∀ e v : V, TermVal v e ((𝟏 : ℕ) : V) ↔ v = 1 := by
+lemma read_termValOne : ∀ e v : V, V ⊧/![v, e, ((𝟏 : ℕ) : V)] termValGraph.val ↔ v = 1 := by
   simpa [Tarski.termValOne, numeral_eq_natCast] using models_of_mem hV Tarski.termValOne;
 
-lemma read_termValAdd : ∀ e t u s vt vu v : V, UTerm t → UTerm u →
-    V ⊧/![s, t, u] Arithmetic.qqAddGraph.val → TermVal vt e t → TermVal vu e u →
-    (TermVal v e s ↔ v = vt + vu) := by
+lemma read_termValAdd : ∀ e t u s vt vu v : V, V ⊧/![t] (isUTerm ℒₒᵣ).val →
+    V ⊧/![u] (isUTerm ℒₒᵣ).val → V ⊧/![s, t, u] Arithmetic.qqAddGraph.val →
+    V ⊧/![vt, e, t] termValGraph.val → V ⊧/![vu, e, u] termValGraph.val →
+    (V ⊧/![v, e, s] termValGraph.val ↔ v = vt + vu) := by
   simpa [Tarski.termValAdd] using models_of_mem hV Tarski.termValAdd;
 
-lemma read_termValMul : ∀ e t u s vt vu v : V, UTerm t → UTerm u →
-    V ⊧/![s, t, u] Arithmetic.qqMulGraph.val → TermVal vt e t → TermVal vu e u →
-    (TermVal v e s ↔ v = vt * vu) := by
+lemma read_termValMul : ∀ e t u s vt vu v : V, V ⊧/![t] (isUTerm ℒₒᵣ).val →
+    V ⊧/![u] (isUTerm ℒₒᵣ).val → V ⊧/![s, t, u] Arithmetic.qqMulGraph.val →
+    V ⊧/![vt, e, t] termValGraph.val → V ⊧/![vu, e, u] termValGraph.val →
+    (V ⊧/![v, e, s] termValGraph.val ↔ v = vt * vu) := by
   simpa [Tarski.termValMul] using models_of_mem hV Tarski.termValMul;
 
-lemma read_adjoinTotal : ∀ x v : V, ∃ e, Adjoin e x v := by
+lemma read_adjoinTotal : ∀ x v : V, ∃ e, V ⊧/![e, x, v] adjoinDef.val := by
   simpa [Tarski.adjoinTotal] using models_of_mem hV Tarski.adjoinTotal;
 
-lemma read_nthAdjoinZero : ∀ x v e y : V, Adjoin e x v → (Nth y e 0 ↔ y = x) := by
+lemma read_nthAdjoinZero : ∀ x v e y : V, V ⊧/![e, x, v] adjoinDef.val →
+    (V ⊧/![y, e, 0] nthDef.val ↔ y = x) := by
   simpa [Tarski.nthAdjoinZero] using models_of_mem hV Tarski.nthAdjoinZero;
 
-lemma read_nthAdjoinSucc : ∀ x v e i y : V, Adjoin e x v → (Nth y e (i + 1) ↔ Nth y v i) := by
+lemma read_nthAdjoinSucc : ∀ x v e i y : V, V ⊧/![e, x, v] adjoinDef.val →
+    (V ⊧/![y, e, i + 1] nthDef.val ↔ V ⊧/![y, v, i] nthDef.val) := by
   simpa [Tarski.nthAdjoinSucc] using models_of_mem hV Tarski.nthAdjoinSucc;
 
-lemma read_lenNil : ∀ l : V, Len l 0 ↔ l = 0 := by
+lemma read_lenNil : ∀ l : V, V ⊧/![l, 0] lenDef.val ↔ l = 0 := by
   simpa [Tarski.lenNil] using models_of_mem hV Tarski.lenNil;
 
-lemma read_lenAdjoin : ∀ x v e l : V, Adjoin e x v → (Len (l + 1) e ↔ Len l v) := by
+lemma read_lenAdjoin : ∀ x v e l : V, V ⊧/![e, x, v] adjoinDef.val →
+    (V ⊧/![l + 1, e] lenDef.val ↔ V ⊧/![l, v] lenDef.val) := by
   simpa [Tarski.lenAdjoin] using models_of_mem hV Tarski.lenAdjoin;
-
-lemma read_prenexSatisfied_pi_succ (s : ℕ) (e p : V) :
-    Reading.PrenexSatisfied 𝚷 (s + 1) e p ↔
-      ∀ x e', Adjoin e' x e → Reading.PrenexSatisfied 𝚺 s e' p := by
-  have h := models_of_mem hV Tarski.boundedSatisfiedProper;
-  cases s <;> simp_all [Tarski.boundedSatisfiedProper, prenexSatisfied',
-    HierarchySymbol.Semiformula.val_sigma];
 
 end readings
 
@@ -438,13 +406,11 @@ end readings
 
 section disquotation
 
-open Reading
-
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
   (hV : ∀ σ ∈ tarski, V↓[ℒₒᵣ] ⊧ σ)
 
-def Reading.Codes {m : ℕ} (v : Fin m → V) (ev : V) : Prop :=
-  Len (m : V) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : V)
+def Codes {m : ℕ} (v : Fin m → V) (ev : V) : Prop :=
+  V ⊧/![(m : V), ev] lenDef.val ∧ ∀ i : Fin m, V ⊧/![v i, ev, (i.val : V)] nthDef.val
 
 include hV in
 lemma codes_nil (v : Fin 0 → V) : Codes v 0 :=
@@ -452,7 +418,7 @@ lemma codes_nil (v : Fin 0 → V) : Codes v 0 :=
 
 include hV in
 lemma codes_cons {m : ℕ} {v : Fin m → V} {ev ev' x : V} (h : Codes v ev)
-    (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' :=
+    (hadj : V ⊧/![ev', x, ev] adjoinDef.val) : Codes (x :> v) ev' :=
   ⟨by simpa using (read_lenAdjoin hV x ev ev' (m : V) hadj).mpr h.1,
     fun i ↦ Fin.cases (by simpa using (read_nthAdjoinZero hV x ev ev' x hadj).mpr rfl)
       (fun j ↦ by
@@ -470,20 +436,20 @@ lemma exists_codes : ∀ {m : ℕ} (v : Fin m → V), ∃ ev, Codes v ev := by
     exact ⟨ev', Matrix.cons_head_tail v ▸ codes_cons hV hev hadj⟩;
 
 private lemma uTerm_quote_cast {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) :
-    UTerm ((⌜t⌝ : ℕ) : V) :=
+    V ⊧/![((⌜t⌝ : ℕ) : V)] (isUTerm ℒₒᵣ).val :=
   deltaOne_upward_absolute₁ (isUTerm ℒₒᵣ) (by simp)
 
 private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
-    UFormula ((⌜φ⌝ : ℕ) : V) :=
+    V ⊧/![((⌜φ⌝ : ℕ) : V)] (isUFormula ℒₒᵣ).val :=
   deltaOne_upward_absolute₁ (isUFormula ℒₒᵣ) (by simp)
 
 private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k}
-    (h : ℬ[<, ℒₒᵣ].Closure φ) : Reading.Bounded ((⌜φ⌝ : ℕ) : V) :=
+    (h : ℬ[<, ℒₒᵣ].Closure φ) : V ⊧/![((⌜φ⌝ : ℕ) : V)] isBounded.val :=
   deltaOne_upward_absolute₁ isBounded (by simpa using (isBounded_quote_iff (V := ℕ) φ).mpr h)
 
 include hV in
 private lemma termVal_quote_cast {k : ℕ} {v : Fin k → V} {ev : V} (hev : Codes v ev)
-    (t : ClosedSemiterm ℒₒᵣ k) : TermVal (t.valb v) ev ((⌜t⌝ : ℕ) : V) := by
+    (t : ClosedSemiterm ℒₒᵣ k) : V ⊧/![t.valb v, ev, ((⌜t⌝ : ℕ) : V)] termValGraph.val := by
   induction t with
   | bvar i =>
     have hb : V ⊧/![((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : V), ((i.val : ℕ) : V)] qqBvarDef.val :=
@@ -514,14 +480,14 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → V} {ev : V} (hev : Cod
         (ih 0) (ih 1)).mpr rfl;
 
 include hV in
-private lemma boundedSatisfied_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
+private lemma models_boundedSatisfied_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : ℬ[<, ℒₒᵣ].Closure φ) :
     ∀ (v : Fin k → V) (ev : V), Codes v ev →
-      (Reading.BoundedSatisfied ev ((⌜φ⌝ : ℕ) : V) ↔ V ⊧/v φ) := by
+      (V ⊧/![ev, ((⌜φ⌝ : ℕ) : V)] boundedSatisfied.val ↔ V ⊧/v φ) := by
   revert hφ;
   apply Bounding.Closure.arithmetic_induction (ξ := Empty)
     (P := fun k φ ↦ ∀ (v : Fin k → V) (ev : V), Codes v ev →
-      (Reading.BoundedSatisfied ev ((⌜φ⌝ : ℕ) : V) ↔ V ⊧/v φ));
+      (V ⊧/![ev, ((⌜φ⌝ : ℕ) : V)] boundedSatisfied.val ↔ V ⊧/v φ));
   · intro m v ev _;
     exact iff_of_true (read_boundedSatisfiedVerum hV _ ev
       (sigmaZero_upward_absolute₁ qqVerumDef (by simp [Sentence.quote_verum]))) (by simp);
@@ -587,33 +553,60 @@ private lemma boundedSatisfied_quote_reading {k : ℕ} {φ : ArithmeticSemisente
         (ihφ (x :> v) e' (codes_cons hV hev hadj)).mpr (by simpa [Function.comp_def] using hsat)⟩;
 
 include hV in
-lemma prenexSatisfied_quote_reading : ∀ {Γ : Polarity} {s k : ℕ}
-    {θ : ArithmeticSemisentence (k + s)}, ℬ[<, ℒₒᵣ].Closure θ →
+private lemma exists_adjoin_iff {k : ℕ} {v : Fin k → V} {ev : V} (hev : Codes v ev)
+    {P : V → Prop} {Q : (Fin (k + 1) → V) → Prop} (h : ∀ w ew, Codes w ew → (P ew ↔ Q w)) :
+    (∃ x e', V ⊧/![e', x, ev] adjoinDef.val ∧ P e') ↔ ∃ x, Q (x :> v) := by
+  constructor;
+  · rintro ⟨x, e', hadj, hP⟩;
+    exact ⟨x, (h _ e' (codes_cons hV hev hadj)).mp hP⟩;
+  · rintro ⟨x, hQ⟩;
+    obtain ⟨e', hadj⟩ := read_adjoinTotal hV x ev;
+    exact ⟨x, e', hadj, (h _ e' (codes_cons hV hev hadj)).mpr hQ⟩;
+
+include hV in
+private lemma forall_adjoin_iff {k : ℕ} {v : Fin k → V} {ev : V} (hev : Codes v ev)
+    {P : V → Prop} {Q : (Fin (k + 1) → V) → Prop} (h : ∀ w ew, Codes w ew → (P ew ↔ Q w)) :
+    (∀ x e', V ⊧/![e', x, ev] adjoinDef.val → P e') ↔ ∀ x, Q (x :> v) := by
+  constructor;
+  · intro hP x;
+    obtain ⟨e', hadj⟩ := read_adjoinTotal hV x ev;
+    exact (h _ e' (codes_cons hV hev hadj)).mp (hP x e' hadj);
+  · intro hQ x e' hadj;
+    exact (h _ e' (codes_cons hV hev hadj)).mpr (hQ x);
+
+include hV in
+lemma models_prenexSatisfied'_quote_iff : ∀ {Γ : Polarity} {s k : ℕ}
+    {θ : ArithmeticSemisentence (k + (s + 1))}, ℬ[<, ℒₒᵣ].Closure θ →
     ∀ (v : Fin k → V) (ev : V), Codes v ev →
-      (Reading.PrenexSatisfied Γ s ev ((⌜θ⌝ : ℕ) : V) ↔ V ⊧/v (θ.toPrenex Γ s))
-  | _, 0, _, _, hθ, v, ev, hev => boundedSatisfied_quote_reading hV hθ v ev hev
-  | 𝚺, s + 1, k, θ, hθ, v, ev, hev => by
-    have ih := prenexSatisfied_quote_reading (Γ := 𝚷)
-      (closure_cast (Nat.succ_add k s).symm hθ);
-    rw [read_prenexSatisfied_sigma_succ, quote_cast (Nat.succ_add k s).symm] at *;
+      (V ⊧/![ev, ((⌜θ⌝ : ℕ) : V)] (prenexSatisfied' Γ s).val ↔ V ⊧/v (θ.toPrenex Γ (s + 1)))
+  | 𝚺, 0, k, θ, hθ, v, ev, hev => by
+    have ih := models_boundedSatisfied_quote_iff hV (closure_cast (Nat.succ_add k 0).symm hθ);
+    rw [quote_cast (Nat.succ_add k 0).symm] at ih;
     simp only [Polarity.quantItr_succ, Polarity.quant_sigma, Semiformula.eval_ex];
-    constructor;
-    · rintro ⟨x, e', hadj, hsat⟩;
-      exact ⟨x, (ih (x :> v) e' (codes_cons hV hev hadj)).mp hsat⟩;
-    · rintro ⟨x, hsat⟩;
-      obtain ⟨e', hadj⟩ := read_adjoinTotal hV x ev;
-      exact ⟨x, e', hadj, (ih (x :> v) e' (codes_cons hV hev hadj)).mpr hsat⟩;
-  | 𝚷, s + 1, k, θ, hθ, v, ev, hev => by
-    have ih := prenexSatisfied_quote_reading (Γ := 𝚺)
-      (closure_cast (Nat.succ_add k s).symm hθ);
-    rw [read_prenexSatisfied_pi_succ hV, quote_cast (Nat.succ_add k s).symm] at *;
+    refine Iff.trans ?_ (exists_adjoin_iff hV hev ih);
+    simp [prenexSatisfied', HierarchySymbol.Semiformula.val_sigma];
+  | 𝚷, 0, k, θ, hθ, v, ev, hev => by
+    have ih := models_boundedSatisfied_quote_iff hV (closure_cast (Nat.succ_add k 0).symm hθ);
+    rw [quote_cast (Nat.succ_add k 0).symm] at ih;
     simp only [Polarity.quantItr_succ, Polarity.quant_pi, Semiformula.eval_all];
-    constructor;
-    · intro hsat x;
-      obtain ⟨e', hadj⟩ := read_adjoinTotal hV x ev;
-      exact (ih (x :> v) e' (codes_cons hV hev hadj)).mp (hsat x e' hadj);
-    · intro hsat x e' hadj;
-      exact (ih (x :> v) e' (codes_cons hV hev hadj)).mpr (hsat x);
+    refine Iff.trans ?_ (forall_adjoin_iff hV hev ih);
+    have h := models_of_mem hV Tarski.boundedSatisfiedProper;
+    simp_all [models_iff, Tarski.boundedSatisfiedProper, prenexSatisfied',
+      HierarchySymbol.Semiformula.val_sigma];
+  | 𝚺, s + 1, k, θ, hθ, v, ev, hev => by
+    have ih := models_prenexSatisfied'_quote_iff (Γ := 𝚷)
+      (closure_cast (Nat.succ_add k (s + 1)).symm hθ);
+    rw [quote_cast (Nat.succ_add k (s + 1)).symm] at ih;
+    simp only [Polarity.quantItr_succ, Polarity.quant_sigma, Semiformula.eval_ex];
+    refine Iff.trans ?_ (exists_adjoin_iff hV hev ih);
+    simp [prenexSatisfied'];
+  | 𝚷, s + 1, k, θ, hθ, v, ev, hev => by
+    have ih := models_prenexSatisfied'_quote_iff (Γ := 𝚺)
+      (closure_cast (Nat.succ_add k (s + 1)).symm hθ);
+    rw [quote_cast (Nat.succ_add k (s + 1)).symm] at ih;
+    simp only [Polarity.quantItr_succ, Polarity.quant_pi, Semiformula.eval_all];
+    refine Iff.trans ?_ (forall_adjoin_iff hV hev ih);
+    simp [prenexSatisfied'];
 
 end disquotation
 
