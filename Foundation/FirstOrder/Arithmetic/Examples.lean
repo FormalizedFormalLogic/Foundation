@@ -43,11 +43,11 @@ instance : 𝗜𝚺 0 ⪯ 𝗕𝚺 1 := ISigma_weakerThan_BSigma_succ (s := 0)
 
 instance : 𝗜𝚺 1 ⪯ 𝗕𝚺 2 := ISigma_weakerThan_BSigma_succ (s := 1)
 
-instance : 𝗜𝚺 0 ⪯ 𝗜𝚫 1 := ISigma_weakerThan_IDelta_succ 0
+instance : 𝗜𝚺₀ ⪯ 𝗜𝚫₁ := ISigma_weakerThan_IDelta_succ 0
 
 instance : 𝗜𝚺 1 ⪯ 𝗜𝚫 2 := ISigma_weakerThan_IDelta_succ 1
 
-instance : 𝗜𝚫 1 ⪯ 𝗕𝚺 1 := IDelta_weakerThan_BSigma 0
+instance : 𝗜𝚫₁ ⪯ 𝗕𝚺 1 := IDelta_weakerThan_BSigma 0
 
 instance : 𝗜𝚫 2 ⪯ 𝗕𝚺 2 := IDelta_weakerThan_BSigma 1
 

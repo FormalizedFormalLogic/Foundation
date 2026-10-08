@@ -35,6 +35,10 @@ abbrev IDelta (s : ℕ) : ArithmeticTheory :=
 
 prefix:max "𝗜𝚫 " => IDelta
 
+notation "𝗜𝚫₀" => IDelta 0
+
+notation "𝗜𝚫₁" => IDelta 1
+
 abbrev IDeltaOnBroadHierarchy (s : ℕ) : ArithmeticTheory :=
   𝗜𝚺₀ ∪ DeltaInductionScheme (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s)
 
@@ -99,7 +103,7 @@ lemma IDelta_weakerThan_of_le {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) : 𝗜𝚫 s
       exact DeltaInductionScheme.models_of_exists_eval_iff fun _ hφ ↦
         (hφ.exists_eval_iff_of_le h).imp fun _ H ↦ ⟨H.1, H.2 V⟩
 
-lemma IDeltaZero_weakerThan_ISigmaZero : 𝗜𝚫 0 ⪯ 𝗜𝚺₀ :=
+lemma IDeltaZero_weakerThan_ISigmaZero : 𝗜𝚫₀ ⪯ 𝗜𝚺₀ :=
   weakerThan_of_models.{0} _ _ fun V _ hV ↦ by
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
     apply Semantics.ModelsSet.union_iff.mpr
@@ -112,7 +116,7 @@ lemma IDeltaZero_weakerThan_ISigmaZero : 𝗜𝚫 0 ⪯ 𝗜𝚺₀ :=
       exact InductionOnPrenexHierarchy.succ_induction 𝚺 0
         ⟨f, φ, hφ, fun _ ↦ Iff.rfl⟩ zero succ
 
-instance IDeltaZero_equiv_ISigmaZero : 𝗜𝚫 0 ≊ 𝗜𝚺₀ :=
+instance IDeltaZero_equiv_ISigmaZero : 𝗜𝚫₀ ≊ 𝗜𝚺₀ :=
   Entailment.Equiv.antisymm ⟨IDeltaZero_weakerThan_ISigmaZero, inferInstance⟩
 
 end models
