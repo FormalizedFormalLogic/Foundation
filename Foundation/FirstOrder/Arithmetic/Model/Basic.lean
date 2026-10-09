@@ -10,8 +10,7 @@ End extensions of `ℒₒᵣ`-structures, absoluteness of bounded formulas, and 
 
 ## References
 
-- [HP98, Definition IV.1.3(2), Definition IV.1.14, Corollary IV.1.16, Fact IV.1.3(4),
-  Remark IV.1.18, Remark IV.1.21(2)]
+- [HP98]
 - [Kay91]
 -/
 

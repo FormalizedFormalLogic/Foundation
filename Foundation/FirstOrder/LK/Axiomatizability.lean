@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.LK.Basic
 
 ## References
 
-- [HP98, Discussion III.2.28]
+- [HP98]
 -/
 
 @[expose] public section
