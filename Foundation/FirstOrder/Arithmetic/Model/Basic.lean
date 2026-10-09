@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-! # End extensions and overspill
 
-End extensions of `ℒₒᵣ`-structures and overspill.
+End extensions of `ℒₒᵣ`-structures, overspill, and cuts.
 
 ## References
 
@@ -176,5 +176,82 @@ theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 �
   exact hMN.not_surjective fun x ↦ h₁ x (h₃ x)
 
 end Overspill
+
+section Cut
+
+structure Cut (M : Type u) [ORingStructure M] where
+  carrier : Set M
+  succ_mem {a : M} : a ∈ carrier → a + 1 ∈ carrier
+  mem_of_lt {a b : M} : a < b → b ∈ carrier → a ∈ carrier
+
+namespace Cut
+
+class Closed (I : Cut M) : Prop where
+  zero_mem : (0 : M) ∈ I.carrier
+  one_mem : (1 : M) ∈ I.carrier
+  add_mem {a b : M} : a ∈ I.carrier → b ∈ I.carrier → a + b ∈ I.carrier
+  mul_mem {a b : M} : a ∈ I.carrier → b ∈ I.carrier → a * b ∈ I.carrier
+
+variable (I : Cut M) [hI : I.Closed]
+
+instance oringStructure : ORingStructure I.carrier where
+  zero := ⟨0, hI.zero_mem⟩
+  one := ⟨1, hI.one_mem⟩
+  add a b := ⟨a.1 + b.1, hI.add_mem a.2 b.2⟩
+  mul a b := ⟨a.1 * b.1, hI.mul_mem a.2 b.2⟩
+  lt a b := a.1 < b.1
+
+@[instance_reducible]
+def endExtension : I.carrier ⊆ₑ M where
+  emb := {
+    toFun := Subtype.val,
+    func' f v := by cases f <;> rfl
+    rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
+    toFun_inj := Subtype.val_injective
+    rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
+  }
+  mem_range_of_lt {a b} h := ⟨⟨b, I.mem_of_lt h a.2⟩, rfl⟩
+
+@[simp]
+lemma endExtension_emb (x : I.carrier) : I.endExtension.emb x = x.val := rfl
+
+end Cut
+
+namespace EndExtension
+
+variable [hMN : M ⊆ₑ N]
+
+lemma models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := hMN.models_peanoMinus
+  simp only [Semantics.ModelsSet.union_iff, InductionScheme];
+  and_intros;
+  · exact this
+  · apply Semantics.ModelsSet.setOf_iff.mpr;
+    rintro _ ⟨φ, hφ, rfl⟩
+    have hφ := Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ
+    suffices ∀ (v : ℕ → M), φ.Eval ![0] v → (∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) →
+        ∀ a, φ.Eval ![a] v by
+      simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs] using this
+    intro v h0 hs a
+    have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![hMN.emb x] (hMN.emb ∘ v) := by
+      intro x;
+      simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
+        Bounding.bounded_absolute hMN.emb hφ ![x] v
+    have h₂ : ∀ y : N, y < hMN.emb a + 1 → φ.Eval ![y] (hMN.emb ∘ v) := by
+      refine InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0)
+        ⟨(hMN.emb a + 1) :>ₙ fun j ↦ hMN.emb (v j),
+          “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ),
+          by simp [Bounding.Hierarchy.zero_iff_bounded.mpr hφ],
+          by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
+        (by intro _; simpa using (h₁ 0).mp h0) ?_
+      intro y ih hy
+      have h₃ : y < hMN.emb a := lt_of_lt_of_le (lt_add_one y) (lt_succ_iff_le.mp hy)
+      obtain ⟨x, rfl⟩ := hMN.mem_range_of_lt h₃
+      simpa using (h₁ (x + 1)).mp (hs x ((h₁ x).mpr (ih (lt_trans h₃ (lt_add_one _)))))
+    exact (h₁ a).mpr (h₂ (hMN.emb a) (by simp))
+
+end EndExtension
+
+end Cut
 
 end FFL.FirstOrder.Arithmetic
