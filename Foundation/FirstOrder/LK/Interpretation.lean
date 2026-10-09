@@ -482,19 +482,16 @@ def compDirectTranslation (τ : DirectTranslation T₂ L₃) (π : T₁ ⊳ T₂
       simpa [Matrix.constant_eq_singleton, Model.eval_translate_iff, ←dom_iff]
     intro w hw
     have iT₂ : (π.Model M)↓[L₂] ⊧* T₂ := π.model_models_theory hT
-    let w' : Fin k → τ.Model (π.Model M) :=
-      fun i ↦ ⟨⟨w i, (hw i).1⟩,
-          Model.evalb_translate_iff.mp <| by simpa [Matrix.constant_eq_singleton] using (hw i).2⟩
-    apply ExistsUnique.intro ↑↑(Tarski.Structure.func f w')
-    · rw [show w = (fun i ↦ ↑↑(w' i)) by ext i; simp [w']]
-      simp [Model.evalb_cons_translate_iff, Model.evalb_singleton_translate_iff,
-        ←Semiformula.Operator.val.eq_def]
-    · rintro y ⟨⟨hy, hhy⟩, hf⟩
-      let y' : τ.Model (π.Model M) :=
-        ⟨⟨y, hy⟩, Model.evalb_translate_iff.mp <| by simpa [Matrix.constant_eq_singleton] using hhy⟩
-      suffices y' = Tarski.Structure.func f w' by
-        simpa [y'] using congr_arg Model.val <| congr_arg Model.val this
-      apply Model.func_iff.mpr <| Model.evalb_cons_translate_iff.mp <| by simpa [y', w'] using hf
+    let w' : Fin k → π.Model M := fun i ↦ ⟨w i, (hw i).1⟩
+    obtain ⟨y, hy, hu⟩ := Model.func_existsUnique_on_dom (π := τ) f w' (fun i ↦
+      Model.evalb_singleton_translate_iff.mp (hw i).2)
+    apply ExistsUnique.intro (y : M)
+    · rw [show w = (fun i ↦ (w' i : M)) from rfl]
+      simpa [Dom, Model.evalb_cons_translate_iff, Model.evalb_singleton_translate_iff,
+        ←Semiformula.Operator.val.eq_def] using And.intro y.dom hy
+    · rintro z ⟨⟨hz, hhz⟩, hf⟩
+      exact congrArg Model.val (hu ⟨z, hz⟩ ⟨Model.evalb_singleton_translate_iff.mp hhz,
+        Model.evalb_cons_translate_iff.mp hf⟩)
   preserve_eq := by
     apply Theory.Proof.complete_on_eq_models.{_, 0}
     intro M _ _ _ hT
@@ -507,14 +504,11 @@ def compDirectTranslation (τ : DirectTranslation T₂ L₃) (π : T₁ ⊳ T₂
           (M ⊧/![x, y] (π.translate (τ.rel Language.Eq.eq).sentence) ↔ x = y) by
       simpa [Matrix.comp_vecCons', Matrix.constant_eq_singleton, Model.eval_translate_iff, ←dom_iff]
     intro x y hx hhx hy hhy
-    let x' : τ.Model (π.Model M) :=
-      ⟨⟨x, hx⟩, by
-      simpa [dom_iff, Semiformula.Operator.val, ←Model.evalb_singleton_translate_iff] using hhx⟩
-    let y' : τ.Model (π.Model M) :=
-      ⟨⟨y, hy⟩, by
-      simpa [dom_iff, Semiformula.Operator.val, ←Model.evalb_singleton_translate_iff] using hhy⟩
-    rw [show x = ↑↑x' by simp [x'], show y = ↑↑y' by simp [y']]
-    simp [Model.evalb_doubleton_translate_iff, ←Semiformula.Operator.val.eq_def]
+    simpa [Semiformula.Operator.val, ←Model.evalb_doubleton_translate_iff,
+      ←Model.val_inj_iff] using
+      (Model.eq_iff' (π := τ) (M := π.Model M)
+        (a := ⟨⟨x, hx⟩, Model.evalb_singleton_translate_iff.mp hhx⟩)
+        (b := ⟨⟨y, hy⟩, Model.evalb_singleton_translate_iff.mp hhy⟩))
 
 @[simp] lemma compDirectTranslation_domain_def (τ : DirectTranslation T₂ L₃) (π : T₁ ⊳ T₂) :
     (compDirectTranslation τ π).domain = π.trln.domain.and (π.translateOperator τ.domain) := rfl
@@ -542,15 +536,8 @@ omit [𝗘𝗤 L₂ ⪯ T₂] in
 
 lemma compDirectTranslation_Dom_iff {x : M} :
     (compDirectTranslation τ π).Dom x ↔ (∃ z : τ.Model (π.Model M), x = z) := by
-  suffices π.trln.Dom x ∧ M ⊧/![x] (π.translate τ.domain.sentence) ↔
-      ∃ z : τ.Model (π.Model M), x = ↑↑z by
-    simpa [dom_iff (π := compDirectTranslation τ π), ←dom_iff (π := π.trln)]
-  constructor
-  · rintro ⟨hx, H⟩
-    exact ⟨⟨⟨x, hx⟩, by
-      simpa [dom_iff, Operator.val, ←Model.evalb_singleton_translate_iff] using H⟩, by simp⟩
-  · rintro ⟨z, rfl, hz⟩
-    simp [Model.evalb_singleton_translate_iff, ←Operator.val.eq_def]
+  simp [Dom, Model.exists_iff, Operator.val, Operator.and,
+    ←Model.evalb_singleton_translate_iff, and_comm]
 
 lemma val_compDirectTranslation_Model_equiv {t : Semiterm L₃ ξ n}
     {ε : ξ → (compDirectTranslation τ π).Model M} {ε' : ξ → τ.Model (π.Model M)}
