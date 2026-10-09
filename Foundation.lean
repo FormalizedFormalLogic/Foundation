@@ -47,6 +47,7 @@ public import Foundation.FirstOrder.Arithmetic.Exponential.Exp
 public import Foundation.FirstOrder.Arithmetic.Exponential.Log
 public import Foundation.FirstOrder.Arithmetic.Exponential.PPow2
 public import Foundation.FirstOrder.Arithmetic.Exponential.Pow2
+public import Foundation.FirstOrder.Arithmetic.Function.Basic
 public import Foundation.FirstOrder.Arithmetic.HFS
 public import Foundation.FirstOrder.Arithmetic.HFS.Basic
 public import Foundation.FirstOrder.Arithmetic.HFS.Coding
