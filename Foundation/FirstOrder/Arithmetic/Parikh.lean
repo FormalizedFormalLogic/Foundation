@@ -161,8 +161,9 @@ private instance termCut_closed (c : Fin k → M) : (termCut c).Closed where
 
 end termCut
 
-theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Closure φ)
-  (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) :
+theorem exists_term_bounded_witness_of_provable
+    (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Closure φ)
+    (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) :
   ∃ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊢ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ := by
   by_contra! hcon
   set Tn : ℕ → Theory (Language.oringConst k) := fun n ↦
@@ -214,6 +215,8 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Cl
     simp only [Matrix.comp_vecCons'', Empty.eq_elim] at h₂
     exact h₂
   exact hunbounded ‘!!t + 1’ b (by simpa using lt_succ_iff_le.mpr ht) hbM
+
+alias parikh := exists_term_bounded_witness_of_provable
 
 end Arithmetic
 
