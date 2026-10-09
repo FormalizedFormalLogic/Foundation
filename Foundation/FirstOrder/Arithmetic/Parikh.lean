@@ -133,7 +133,6 @@ lemma models_of_lMap_image_subset {U : ArithmeticTheory}
 
 end
 
-
 lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T]
     {σ : ArithmeticSentence} (h : T ⊬ σ) :
     ∃ (M : Type) (_ : ORingStructure M) (_ : M↓[ℒₒᵣ] ⊧* T), ¬M↓[ℒₒᵣ] ⊧ σ := by
@@ -152,12 +151,9 @@ private def termCut (c : Fin k → M) : Cut M where
 private instance termCut_closed (c : Fin k → M) : (termCut c).Closed where
   zero_mem := ⟨‘0’, by simp⟩
   one_mem := ⟨‘1’, by simp⟩
-  add_mem := fun ⟨s, hs⟩ ⟨t, ht⟩ ↦ ⟨‘!!s + !!t’, by
-    simpa using add_le_add hs ht
-  ⟩
+  add_mem := fun ⟨s, hs⟩ ⟨t, ht⟩ ↦ ⟨‘!!s + !!t’, by simpa using add_le_add hs ht⟩
   mul_mem := fun ⟨s, hs⟩ ⟨t, ht⟩ ↦ ⟨‘!!s * !!t’, by
-    simpa using mul_le_mul hs ht (by simp) (by simp)
-  ⟩
+    simpa using mul_le_mul hs ht (by simp) (by simp)⟩
 
 end termCut
 

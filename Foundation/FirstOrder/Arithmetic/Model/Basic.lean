@@ -221,37 +221,34 @@ namespace EndExtension
 
 variable [hMN : M ⊆ₑ N]
 
-private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : ArithmeticSemiformula ℕ 1}
-    (hφ : ℬ[<, ℒₒᵣ].Closure φ)
-    (v : ℕ → M) (h0 : φ.Eval ![0] v) (hs : ∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) (a : M) :
-    φ.Eval ![a] v := by
+lemma models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := hMN.models_peanoMinus
-  have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![hMN.emb x] (hMN.emb ∘ v) := by
-    intro x;
-    simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
-      Bounding.bounded_absolute hMN.emb hφ ![x] v
-  have h₂ : ∀ y : N, y < hMN.emb a + 1 → φ.Eval ![y] (hMN.emb ∘ v) := by
-    refine InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0)
-      ⟨(hMN.emb a + 1) :>ₙ fun j ↦ hMN.emb (v j),
-        “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ),
-        by simp [Bounding.Hierarchy.zero_iff_bounded.mpr hφ],
-        by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
-      (by intro _; simpa using (h₁ 0).mp h0) ?_
-    intro y ih hy
-    have h₃ : y < hMN.emb a := lt_of_lt_of_le (lt_add_one y) (lt_succ_iff_le.mp hy)
-    obtain ⟨x, rfl⟩ := hMN.mem_range_of_lt h₃
-    simpa using (h₁ (x + 1)).mp (hs x ((h₁ x).mpr (ih (lt_trans h₃ (lt_add_one _)))))
-  exact (h₁ a).mpr (h₂ (hMN.emb a) (by simp))
-
-theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
   simp only [Semantics.ModelsSet.union_iff, InductionScheme];
   and_intros;
-  · exact hMN.models_peanoMinus
+  · exact this
   · apply Semantics.ModelsSet.setOf_iff.mpr;
     rintro _ ⟨φ, hφ, rfl⟩
-    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
-      using hMN.eval_of_endExtension
-        (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
+    have hφ := Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ
+    suffices ∀ (v : ℕ → M), φ.Eval ![0] v → (∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) →
+        ∀ a, φ.Eval ![a] v by
+      simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs] using this
+    intro v h0 hs a
+    have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![hMN.emb x] (hMN.emb ∘ v) := by
+      intro x;
+      simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
+        Bounding.bounded_absolute hMN.emb hφ ![x] v
+    have h₂ : ∀ y : N, y < hMN.emb a + 1 → φ.Eval ![y] (hMN.emb ∘ v) := by
+      refine InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0)
+        ⟨(hMN.emb a + 1) :>ₙ fun j ↦ hMN.emb (v j),
+          “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ),
+          by simp [Bounding.Hierarchy.zero_iff_bounded.mpr hφ],
+          by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
+        (by intro _; simpa using (h₁ 0).mp h0) ?_
+      intro y ih hy
+      have h₃ : y < hMN.emb a := lt_of_lt_of_le (lt_add_one y) (lt_succ_iff_le.mp hy)
+      obtain ⟨x, rfl⟩ := hMN.mem_range_of_lt h₃
+      simpa using (h₁ (x + 1)).mp (hs x ((h₁ x).mpr (ih (lt_trans h₃ (lt_add_one _)))))
+    exact (h₁ a).mpr (h₂ (hMN.emb a) (by simp))
 
 end EndExtension
 
