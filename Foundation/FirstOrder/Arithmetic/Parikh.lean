@@ -1,10 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Model.Basic
-public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
-public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.LK.Eq
-public import Foundation.FirstOrder.Tarski.Eq
 
 /-!
 # Parikh's theorem
