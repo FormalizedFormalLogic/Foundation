@@ -1,12 +1,12 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
-public import Foundation.FirstOrder.LK.Axiomatizability
+public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-! # End extensions and overspill
 
-End extensions of `ℒₒᵣ`-structures, absoluteness of bounded formulas, and overspill.
+End extensions of `ℒₒᵣ`-structures and overspill.
 
 ## References
 
@@ -116,30 +116,15 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     simp only [← hMN.emb_lt_emb, ← hMN.emb_eq_emb]
     simp [add_comm, add_left_comm, mul_comm, mul_left_comm, mul_add]
 
-theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ)
-    (e : Fin n → M) (f : ξ → M) : φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f) :=
-  Bounding.Hierarchy.arithmetic_sigma₁_induction'
-    (P := fun n φ ↦ ∀ (e : Fin n → M) (f : ξ → M), φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f))
-    hφ
-    (fun _ _ _ _ ↦ by simp)
-    (fun _ _ _ h ↦ by simp at h)
-    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)
-    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)
-    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)
-    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)
-    (fun _ _ _ _ _ ih₁ ih₂ e f h ↦ ⟨ih₁ e f h.1, ih₂ e f h.2⟩)
-    (fun _ _ _ _ _ ih₁ ih₂ e f h ↦ h.imp (ih₁ e f) (ih₂ e f))
-    (fun _ t θ _ ih e f h ↦ by
-      change (θ.ballLT t).Eval (hMN.emb ∘ e) (hMN.emb ∘ f)
-      simp only [eval_ballLT, ← HomClass.val_term hMN.emb e f t]
-      intro y hy
-      obtain ⟨x, rfl⟩ := hMN.mem_range_of_lt hy
-      rw [← Matrix.comp_vecCons'']
-      exact ih (x :> e) f (eval_ballLT.mp h x (by simpa using hy)))
-    (fun _ _ _ ih e f ↦ by
-      rintro ⟨x, hx⟩
-      exact ⟨hMN.emb x, by rw [← Matrix.comp_vecCons'']; exact ih (x :> e) f hx⟩)
-    e f
+instance : ℬ[<, ℒₒᵣ].IsInitial hMN.emb where
+  operator_iff := by
+    intro R hR a b
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    simp
+  initial := by
+    intro R hR a b hb
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    exact hMN.mem_range_of_lt (by simpa using hb)
 
 theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 σ)
     [N↓[ℒₒᵣ] ⊧* T] :
@@ -150,18 +135,11 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, ℬ[<, ℒₒ�
     have h₁ : ¬σ.Realize N := by
       suffices (∼σ).Eval ![] Empty.elim by simpa
       exact Eval.of_eq
-        (hMN.eval_of_Sigma1 (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
+        (Bounding.sigma_one_upward hMN.emb (hT σ hσ).neg ![] Empty.elim
+          (by simpa [models_iff] using h))
         (funext (·.elim0))
         (funext (·.elim))
     exact notModels_iff.mpr h₁ (models_theory_iff.mp (inferInstance : N↓[ℒₒᵣ] ⊧* T) σ hσ)
-
-theorem models_of_Pi1Axiomatizable {T : ArithmeticTheory}
-    (hT : Axiomatizable (ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1) T) [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := by
-  obtain ⟨U, hU, hTU⟩ := hT
-  have : U ⪯ T := hTU.symm.le
-  have : T ⪯ U := hTU.le
-  have : N↓[ℒₒᵣ] ⊧* U := models_of_subtheory ‹N↓[ℒₒᵣ] ⊧* T›
-  exact models_of_subtheory (hMN.models_of_Pi1 hU)
 
 end EndExtension
 
@@ -173,52 +151,6 @@ lemma exists_not_mem_range : ∃ c : N, c ∉ Set.range hMN.emb := by
   simpa [Function.Surjective, Set.range, not_forall] using hMN.not_surjective
 
 end ProperEndExtension
-
-section Absolute
-
-def Absolute (T : ArithmeticTheory) {n : ℕ} (φ : ArithmeticSemiformula ξ n) : Prop :=
-  ∀ (M : Type u) (N : Type v) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T] [hMN : M ⊆ₑ N] [N↓[ℒₒᵣ] ⊧* T]
-    (e : Fin n → M) (f : ξ → M), φ.Eval e f ↔ φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f)
-
-lemma absolute_of_open (T : ArithmeticTheory) {n} {φ : ArithmeticSemiformula ξ n} (hφ : φ.Open) :
-    Absolute T φ := by
-  intro M N _ _ hMN _ e f
-  exact eval_hom_iff_of_open hMN.emb hφ
-
-@[simp, grind .]
-theorem absolute_of_bounded {T : ArithmeticTheory} {n : ℕ} {φ : ArithmeticSemiformula ξ n}
-    (hφ : ℬ[<, ℒₒᵣ].Closure φ) : Absolute T φ :=
-  bounded_induction_open (P := fun _ φ ↦ Absolute T φ)
-    (fun _ _ hφ ↦ absolute_of_open T hφ)
-    (fun _ _ _ _ _ ihφ ihψ M N _ _ hMN _ e f ↦ by simp [ihφ M N e f, ihψ M N e f])
-    (fun _ _ _ _ _ ihφ ihψ M N _ _ hMN _ e f ↦ by simp [ihφ M N e f, ihψ M N e f])
-    (fun _ t θ _ ih ↦ show Absolute T (θ.ballLT t) from fun M N _ _ hMN _ e f ↦ by
-      simp only [eval_ballLT, ← HomClass.val_term hMN.emb e f t]
-      constructor
-      · intro h y hy
-        obtain ⟨x, rfl⟩ := hMN.mem_range_of_lt hy
-        rw [← Matrix.comp_vecCons'']
-        exact (ih M N (x :> e) f).mp (h x (by simpa using hy))
-      · intro h x hx
-        have h₁ := h (hMN.emb x) (by simpa using hx)
-        rw [← Matrix.comp_vecCons''] at h₁
-        exact (ih M N (x :> e) f).mpr h₁)
-    (fun _ t θ _ ih ↦ show Absolute T (θ.bexsLT t) from fun M N _ _ hMN _ e f ↦ by
-      simp only [eval_bexsLT, ← HomClass.val_term hMN.emb e f t]
-      constructor
-      · rintro ⟨x, hx, h⟩
-        use hMN.emb x
-        and_intros
-        · simpa using hx
-        · rw [← Matrix.comp_vecCons'']
-          exact (ih M N (x :> e) f).mp h
-      · rintro ⟨y, hy, h⟩
-        obtain ⟨x, rfl⟩ := hMN.mem_range_of_lt hy
-        rw [← Matrix.comp_vecCons''] at h
-        exact ⟨x, by simpa using hy, (ih M N (x :> e) f).mpr h⟩)
-    n φ hφ
-
-end Absolute
 
 section Overspill
 
