@@ -2,7 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.LK.Axiomatizability
-public import Foundation.FirstOrder.Arithmetic.Schemata
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-! # End extensions and overspill
 
@@ -224,11 +224,11 @@ section Overspill
 
 variable [hMN : M ⊂ₑ N]
 
-theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m]
+theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
     {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ m φ) (e : ℕ → N)
     (h : ∀ a : M, φ.Eval ![hMN.emb a] e) :
     ∃ c : N, c ∉ Set.range hMN.emb ∧ ∀ x < c, φ.Eval ![x] e := by
-  have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m)
+  have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m)
   by_contra! hc
   have h₁ : ∀ x : N, (∀ y < x, φ.Eval ![y] e) → x ∈ Set.range hMN.emb := by grind
   have h₂ : ∀ x : N, (∀ y < x, φ.Eval ![y] e) → ∀ y < x + 1, φ.Eval ![y] e := by
