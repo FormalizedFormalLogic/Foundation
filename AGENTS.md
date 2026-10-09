@@ -3,6 +3,7 @@
 - Before committing or submitting PRs, read **`contribute/index.md`**.
 - Before writing or refactoring proofs, read **`contribute/style.md`**, **`contribute/refactoring.md`**.
 - Before porting anything from AlphaCentauri, read **`contribute/alpha-centauri.md`**.
+- In a PR body, the `## Comment` section is written by a human: never fill in, edit, or remove it. Leave it empty and put everything else under `## AI Summary`.
 
 ## Setup
 
