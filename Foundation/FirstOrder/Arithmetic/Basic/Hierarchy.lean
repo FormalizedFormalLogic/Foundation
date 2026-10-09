@@ -193,3 +193,66 @@ instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚷 2] : Entailment.Consist
   T.consistent_of_sound (ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2) (by simp)
 
 end FFL.FirstOrder
+
+namespace FFL.FirstOrder.Arithmetic
+
+variable {ξ : Type*}
+
+lemma bounded_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
+    (hVerum : ∀ n, P n ⊤)
+    (hFalsum : ∀ n, P n ⊥)
+    (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))
+    (hNEQ : ∀ n t₁ t₂, P n (.nrel Language.Eq.eq ![t₁, t₂]))
+    (hLT : ∀ n t₁ t₂, P n (.rel Language.LT.lt ![t₁, t₂]))
+    (hNLT : ∀ n t₁ t₂, P n (.nrel Language.LT.lt ![t₁, t₂]))
+    (hAnd : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBex : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (n φ) : ℬ[<, ℒₒᵣ].Closure φ → P n φ
+  | .verum _ => hVerum _
+  | .falsum _ => hFalsum _
+  | .rel Language.Eq.eq v => by
+      simpa [←Matrix.fun_eq_vec_two] using hEQ _ (v 0) (v 1)
+  | .nrel Language.Eq.eq v => by
+      simpa [←Matrix.fun_eq_vec_two] using hNEQ _ (v 0) (v 1)
+  | .rel Language.LT.lt v => by
+      simpa [←Matrix.fun_eq_vec_two] using hLT _ (v 0) (v 1)
+  | .nrel Language.LT.lt v => by
+      simpa [←Matrix.fun_eq_vec_two] using hNLT _ (v 0) (v 1)
+  | .and hp hq =>
+    hAnd _ _ _ hp hq
+      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
+      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hq)
+  | .or hp hq =>
+    hOr _ _ _ hp hq
+      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
+      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hq)
+  | .ball hR pt hp => by
+    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    simpa [Semiformula.Operator.lt_def] using hBall _ t _ hp
+      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
+  | .bexs hR pt hp => by
+    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    simpa [Semiformula.Operator.lt_def] using hBex _ t _ hp
+      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
+
+lemma bounded_induction_open {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
+    (hOpen : ∀ n φ, Semiformula.Open φ → P n φ)
+    (hAnd : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBex : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (n φ) : ℬ[<, ℒₒᵣ].Closure φ → P n φ :=
+  bounded_induction
+    (fun _ ↦ hOpen _ _ (by simp))
+    (fun _ ↦ hOpen _ _ (by simp))
+    (fun _ _ _ ↦ hOpen _ _ (by simp))
+    (fun _ _ _ ↦ hOpen _ _ (by simp))
+    (fun _ _ _ ↦ hOpen _ _ (by simp))
+    (fun _ _ _ ↦ hOpen _ _ (by simp))
+    hAnd hOr hBall hBex n φ
+
+end FFL.FirstOrder.Arithmetic

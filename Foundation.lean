@@ -61,6 +61,7 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.LE
 public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
+public import Foundation.FirstOrder.Arithmetic.Model.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 public import Foundation.FirstOrder.Arithmetic.PA.Prenex
@@ -108,6 +109,7 @@ public import Foundation.FirstOrder.Kripke.Classical
 public import Foundation.FirstOrder.Kripke.Intuitionistic
 public import Foundation.FirstOrder.LJ.Basic
 public import Foundation.FirstOrder.LJ.GoedelGentzen
+public import Foundation.FirstOrder.LK.Axiomatizability
 public import Foundation.FirstOrder.LK.Basic
 public import Foundation.FirstOrder.LK.Completeness
 public import Foundation.FirstOrder.LK.Completeness.CanonicalModel
