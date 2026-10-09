@@ -542,6 +542,11 @@ lemma weakerThan_union_right (h : U ⪯ S) (T : Theory L) : T ∪ U ⪯ T ∪ S 
 lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
   Entailment.Equiv.antisymm ⟨weakerThan_union_right e.le T, weakerThan_union_right e.symm.le T⟩
 
+/-- `U.ConservativeOver T Γ`: every sentence satisfying `Γ` that `U` proves is provable in `T`.
+- [Bek99, §2] -/
+def ConservativeOver (U T : Theory L) (Γ : Sentence L → Prop) : Prop :=
+  ∀ σ, Γ σ → U ⊢ σ → T ⊢ σ
+
 section compact
 
 open Entailment

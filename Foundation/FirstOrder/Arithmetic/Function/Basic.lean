@@ -228,15 +228,6 @@ end Arithmetic
 
 open Arithmetic
 
-namespace Theory
-
-/-- `U.ConservativeOver T Γ`: every sentence satisfying `Γ` that `U` proves is provable in `T`.
-- [Bek99, §2] -/
-def ConservativeOver {L : Language} (U T : Theory L) (Γ : Sentence L → Prop) : Prop :=
-  ∀ σ, Γ σ → U ⊢ σ → T ⊢ σ
-
-end Theory
-
 namespace ArithmeticTheory
 
 variable {T U : ArithmeticTheory} {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 𝚺ᴬ₁.Semisentence (k + 1)}
@@ -272,7 +263,7 @@ lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f �
 
 /-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
-lemma of_Pi2 (h : T.ProvablyTotalVia f φ)
+lemma of_Pi2_conservative (h : T.ProvablyTotalVia f φ)
     (H : T.ConservativeOver U fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ) :
     U.ProvablyTotalVia f φ :=
   ⟨h.defined, H _ (by simp) h.total⟩
@@ -393,14 +384,15 @@ end ProvablyFunctionalVia
 
 namespace ProvablyTotal
 
-lemma mono (h : T.ProvablyTotal f) (hT : T ⪯ U) : U.ProvablyTotal f :=
-  have ⟨_, h⟩ := h; ⟨_, h.mono hT⟩
+lemma mono (hT : T ⪯ U) : T.ProvablyTotal f → U.ProvablyTotal f :=
+  fun ⟨_, h⟩ ↦ ⟨_, h.mono hT⟩
 
 /-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
-lemma of_Pi2 (h : T.ProvablyTotal f)
-    (H : T.ConservativeOver U fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ) : U.ProvablyTotal f :=
-  have ⟨_, h⟩ := h; ⟨_, h.of_Pi2 H⟩
+lemma of_Pi2_conservative
+    (H : T.ConservativeOver U fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ) :
+    T.ProvablyTotal f → U.ProvablyTotal f :=
+  fun ⟨_, h⟩ ↦ ⟨_, h.of_Pi2_conservative H⟩
 
 section
 variable [𝗘𝗤 ℒₒᵣ ⪯ T] {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
@@ -413,9 +405,9 @@ lemma comp (hg : T.ProvablyTotal g) (hh : ∀ i, T.ProvablyTotal (h i)) :
 
 end
 
-lemma exists_unique [𝗟𝚺1 ⪯ T] (h : T.ProvablyTotal f) :
-    ∃ φ, T.ProvablyTotalVia f φ ∧ T ⊢ uniqueTotalitySentence φ :=
-  have ⟨_, h⟩ := h; ⟨_, h, h.exists_unique⟩
+lemma exists_unique [𝗟𝚺1 ⪯ T] :
+    T.ProvablyTotal f → ∃ φ, T.ProvablyTotalVia f φ ∧ T ⊢ uniqueTotalitySentence φ :=
+  fun ⟨_, h⟩ ↦ ⟨_, h, h.exists_unique⟩
 
 end ProvablyTotal
 
@@ -424,14 +416,14 @@ lemma provablyTotalFunctions_subset (h : T ⪯ U) :
 
 /-- The class of provably total functions depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
-lemma provablyTotalFunctions_subset_of_Pi2
+lemma provablyTotalFunctions_subset_of_Pi2_conservative
     (H : T.ConservativeOver U fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ) :
-    T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2 H
+    T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2_conservative H
 
 namespace ProvablyFunctional
 
-lemma toProvablyTotal (h : T.ProvablyFunctional f) : T.ProvablyTotal f :=
-  have ⟨_, h⟩ := h; ⟨_, h.toProvablyTotalVia⟩
+lemma toProvablyTotal : T.ProvablyFunctional f → T.ProvablyTotal f :=
+  fun ⟨_, h⟩ ↦ ⟨_, h.toProvablyTotalVia⟩
 
 end ProvablyFunctional
 
