@@ -2,6 +2,7 @@
 
 - Before committing or submitting PRs, read **`contribute/index.md`**.
 - Before writing or refactoring proofs, read **`contribute/style.md`**, **`contribute/refactoring.md`**.
+- Before porting anything from AlphaCentauri, read **`contribute/alpha-centauri.md`**.
 
 ## Setup
 
@@ -44,4 +45,3 @@ Delegate matching work to these roles when the client exposes them:
 
 - `lean4-proof-writer`: formalize a new Lean proof from an already-decided mathematical plan.
 - `lean4-proof-refactorer`: clean up an existing proof that already compiles without `sorry`.
-- `transporter-alpha-centauri`: faithfully port an existing result from AlphaCentauri.
