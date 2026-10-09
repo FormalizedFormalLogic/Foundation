@@ -18,7 +18,7 @@ The allowlist is `propext`, `Classical.choice`, `Quot.sound`. Anything reaching 
 
 ## Style adaptation
 
-- Keep a short module docstring per file; delete per-declaration docstrings. Collect the source's citations into a `## References` section at the end of the module docstring (the key must exist in `references.bib`).
+- Keep a short module docstring per file; delete per-declaration docstrings. Collect the source's citations into a `## References` section at the end of the module docstring (the key must exist in `references.bib`). Citing the reference alone is enough; theorem or lemma numbers are not required.
 - Remove development-time artifacts: PR/issue numbers, plan steps, section labels, and proof-strategy comments. See [style.md](./style.md#stale-comments-and-planning-artifacts).
 - Do not name declarations or files after vocabulary specific to one source (e.g. a nickname used by a single paper); use the general term and cite the source.
 - Factor repeated binders into `variable` within scoped `section`s, keeping each declaration's implicit arguments unchanged (compare `#check @<name>` before and after).
