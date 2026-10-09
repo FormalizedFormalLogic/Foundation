@@ -22,6 +22,13 @@ namespace Language
 
 abbrev oringConst (k : ℕ) : Language := Language.add ℒₒᵣ (Language.constant (Fin k))
 
+namespace Hom
+
+abbrev oringConst (k : ℕ) : ℒₒᵣ →ᵥ Language.oringConst k :=
+  Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))
+
+end Hom
+
 end Language
 
 namespace Arithmetic
@@ -38,7 +45,7 @@ def cst {ξ n} (i : Fin k) : Semiterm (Language.oringConst k) ξ n :=
   Semiterm.func (arity := 0) (Sum.inr (Language.Constant.Func.const i)) ![]
 
 def lift (φ : ArithmeticSemisentence k) : Sentence (Language.oringConst k) :=
-  Rew.subst (fun i ↦ cst i) ▹ Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) φ
+  Rew.subst (fun i ↦ cst i) ▹ Semiformula.lMap (Language.Hom.oringConst k) φ
 
 section
 
@@ -55,23 +62,21 @@ def strucOfTuple : Tarski.Struc (Language.oringConst k) where
 
 @[simp] lemma strucOfTuple_models_lift_iff (φ : ArithmeticSemisentence k) :
     strucOfTuple M a ⊧ lift φ ↔ φ.Evalb a := by
-  simp only [lift, strucOfTuple, models_iff, Semiformula.Realize, eval_substs,
+  simp only [lift, strucOfTuple, models_iff, Realize, eval_substs,
     Tarski.Structure.eval_lMap_add₁]
   exact Iff.rfl
 
 lemma strucOfTuple_models_eq : strucOfTuple M a ⊧* 𝗘𝗤 (Language.oringConst k) := by
-  let s : Tarski.Structure (Language.oringConst k) M := (strucOfTuple M a).struc
-  have : Nonempty M := ⟨0⟩
+  let _ : Tarski.Structure (Language.oringConst k) M := (strucOfTuple M a).struc
   have : Tarski.Structure.Eq (Language.oringConst k) M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
-  change M↓[Language.oringConst k] ⊧* 𝗘𝗤 (Language.oringConst k)
-  infer_instance
+  exact (inferInstance : M↓[Language.oringConst k] ⊧* 𝗘𝗤 (Language.oringConst k))
 
 lemma strucOfTuple_models_lMap_image {U : ArithmeticTheory} (h : M↓[ℒₒᵣ] ⊧* U) :
     strucOfTuple M a ⊧*
-      Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) '' U := by
-  apply Semantics.modelsSet_iff.mpr
+      Semiformula.lMap (Language.Hom.oringConst k) '' U := by
+  apply modelsSet_iff.mpr
   rintro _ ⟨σ, hσ, rfl⟩
-  simpa [strucOfTuple, models_iff, Semiformula.Realize] using Semantics.modelsSet_iff.mp h hσ
+  simpa [strucOfTuple, models_iff, Realize] using modelsSet_iff.mp h hσ
 
 end
 
@@ -105,30 +110,29 @@ variable {T : Theory (Language.oringConst k)} [𝗘𝗤 (Language.oringConst k) 
 noncomputable def cstVal (i : Fin k) : ModelOfSatEq sat := Semiterm.valb ![] (cst i)
 
 lemma reduct_eq :
-    (ModelOfSatEq.struc sat).lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) =
+    (ModelOfSatEq.struc sat).lMap (Language.Hom.oringConst k) =
       standardModel (ModelOfSatEq sat) :=
   letI s : Tarski.Structure ℒₒᵣ (ModelOfSatEq sat) :=
-    (ModelOfSatEq.struc sat).lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k)))
+    (ModelOfSatEq.struc sat).lMap (Language.Hom.oringConst k)
   have : Tarski.Structure.Zero ℒₒᵣ (ModelOfSatEq sat) := ⟨rfl⟩
   have : Tarski.Structure.One ℒₒᵣ (ModelOfSatEq sat) := ⟨rfl⟩
   have : Tarski.Structure.Add ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
   have : Tarski.Structure.Mul ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
-  have : Tarski.Structure.Eq ℒₒᵣ (ModelOfSatEq sat) := ⟨by
-    intro _ _;
+  have : Tarski.Structure.Eq ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ by
     simp [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq, Matrix.fun_eq_vec_two]⟩
   have : Tarski.Structure.LT ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ iff_of_eq rfl⟩
   standardModel_unique _ _
 
 lemma models_lift_iff (φ : ArithmeticSemisentence k) :
     (ModelOfSatEq sat)↓[Language.oringConst k] ⊧ lift φ ↔ φ.Evalb (cstVal sat) := by
-  simp only [lift, models_iff, Semiformula.Realize, eval_substs, Semiformula.eval_lMap]
+  simp only [lift, models_iff, Realize, eval_substs, eval_lMap]
   rw [reduct_eq]
   exact Iff.rfl
 
 lemma models_of_lMap_image_subset {U : ArithmeticTheory}
-    (h : Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) '' U ⊆ T) :
+    (h : Semiformula.lMap (Language.Hom.oringConst k) '' U ⊆ T) :
     (ModelOfSatEq sat)↓[ℒₒᵣ] ⊧* U := ⟨fun _ hσ ↦
-  reduct_eq sat ▸ Semiformula.models_lMap.mp
+  reduct_eq sat ▸ models_lMap.mp
     ((ModelOfSatEq.models sat).models _ (h (Set.mem_image_of_mem _ hσ)))⟩
 
 end
@@ -163,14 +167,11 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Cl
   by_contra! hcon
   set Tn : ℕ → Theory (Language.oringConst k) := fun n ↦
     𝗘𝗤 _
-    ∪ Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ _) '' 𝗜𝚺₀
+    ∪ Semiformula.lMap (Language.Hom.oringConst k) '' 𝗜𝚺₀
     ∪ (fun t : ClosedSemiterm ℒₒᵣ k ↦ lift ((∼φ).ballLT t)) '' {t | Encodable.encode t < n}
   have : Cumulative Tn := by
     intro;
-    apply Set.union_subset_union_right _;
-    apply Set.image_mono;
-    intro _ ht;
-    exact Nat.lt_succ_of_lt ht;
+    exact Set.union_subset_union_right _ (Set.image_mono fun _ ht ↦ Nat.lt_succ_of_lt ht);
   set T := ⋃ n, Tn n;
   have sat : Satisfiable T := (Compact.compact_cumulative ‹_›).mpr <| by
     intro n;
@@ -202,7 +203,7 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Cl
   let _ : K.Closed := termCut_closed _
   let _ : ↥K.carrier ⊆ₑ ModelOfSatEq sat := K.endExtension
   have hK : (↥K.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
-    EndExtension.models_ISigma0 (M := ↥K.carrier) (N := ModelOfSatEq sat)
+    EndExtension.models_ISigma0 (N := ModelOfSatEq sat)
   have hwit : ∀ w : Fin k → ↥K.carrier, ∃ b, φ.Evalb (b :> w) := by
     simpa [models_iff, eval_allClosure] using models_of_provable hK h
   obtain ⟨b, hb⟩ := hwit fun i ↦ ⟨cstVal sat i, Semiterm.bvar i, by simp⟩
