@@ -77,20 +77,6 @@ lemma definedFunction_compGraph {ψ : 𝚺ᴬ₁.Semisentence (l + 1)}
     exact ⟨fun ⟨z, hz, hχ⟩ ↦ by simpa [funext hχ] using hz,
       fun e ↦ ⟨_, by simpa using e, fun _ ↦ rfl⟩⟩
 
-lemma definablePred_evalb (φ : 𝚺ᴬ₁.Semisentence (k + 1)) (v : Fin k → V) :
-    𝚺ᴬ₁-Predicate fun y ↦ φ.val.Evalb (y :> v) :=
-  HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 1)
-    (Rew.bind (#0 :> fun i ↦ &(v i)) Empty.elim ▹ φ.val)
-    (Bounding.Hierarchy.rew _ (by simp)) fun w ↦ by
-      simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
-
-def leastGraph (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSemisentence (k + 1) :=
-  φ.val ⋏ (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val))
-
-@[simp] lemma eval_leastGraph (φ : 𝚺ᴬ₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
-    (leastGraph φ).Evalb w ↔ φ.val.Evalb w ∧ ∀ y < w 0, ¬φ.val.Evalb (y :> (w ·.succ)) := by
-  simp [leastGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
-
 noncomputable def minimalGraphMatrix (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : 𝚺ᴬ₀.Semisentence (k + 2) :=
   .mkSigma (Classical.choose (Bounding.Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺)
     (s := 1) φ.sigma_prop)).matrix.val (by simp)
@@ -210,18 +196,6 @@ private lemma models_existsUnique_minimalPairGraph {θ : 𝚺ᴬ₀.Semisentence
     · rfl
     · exact absurd hy'A (hyC y' hlt)
 
-def uniqueTotalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence :=
-  ∀¹* ((∃¹ leastGraph φ) ⋏ (∀¹ ∀¹
-    (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ) ⋏
-      (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ)) 🡒 “#1 = #0”)))
-
-lemma models_uniqueTotalitySentence_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
-    V↓[ℒₒᵣ] ⊧ uniqueTotalitySentence φ ↔ ∀ v : Fin k → V,
-      (∃ y, (leastGraph φ).Evalb (y :> v)) ∧
-        ∀ y y', (leastGraph φ).Evalb (y :> v) → (leastGraph φ).Evalb (y' :> v) → y = y' := by
-  simp [uniqueTotalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
-    Matrix.comp_vecCons', Empty.eq_elim]
-
 end
 
 end Arithmetic
@@ -276,29 +250,6 @@ lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction
     (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T], ∀ v : Fin k → V,
       ∃ y, φ.val.Evalb (y :> v)) : T.ProvablyTotalVia f φ :=
   ⟨hf, Arithmetic.complete T _ fun V _ _ ↦ models_totalitySentence_iff.mpr (H V)⟩
-
-lemma leastGraph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
-    (leastGraph φ).Evalb v ↔ v 0 = f (v ·.succ) := by
-  simp [h.graph_iff]
-  omega
-
-lemma exists_unique [𝗟𝚺1 ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ uniqueTotalitySentence φ := by
-  have : 𝗣𝗔⁻ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗟𝚺1) inferInstance inferInstance
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
-  have : 𝗟𝚺⁺1 ⪯ T := (LSigma_equiv_LBroadSigma 1).symm.le.trans inferInstance
-  apply Arithmetic.complete.{0}
-  intro (V : Type) _ _
-  have : V↓[ℒₒᵣ] ⊧* 𝗟𝚺⁺1 := ModelsTheory.of_provably_subtheory V 𝗟𝚺⁺1 T inferInstance
-  apply models_uniqueTotalitySentence_iff.mpr
-  intro v
-  constructor
-  · obtain ⟨y, hy⟩ := h.models V v
-    obtain ⟨y₀, h₀, hmin⟩ := LeastNumberOnHierarchy.least_number 𝚺 1 (definablePred_evalb φ v) hy
-    use y₀
-    simp_all
-  · intro y y' hy hy'
-    simp only [eval_leastGraph, Matrix.cons_val_zero, Matrix.cons_val_succ] at hy hy'
-    grind
 
 lemma models_existsUnique_minimalGraph {V : Type*} [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁] {φ : 𝚺ᴬ₁.Semisentence (k + 1)} {v : Fin k → V}
@@ -404,10 +355,6 @@ lemma comp (hg : T.ProvablyTotal g) (hh : ∀ i, T.ProvablyTotal (h i)) :
   ⟨_, hg.comp hh⟩
 
 end
-
-lemma exists_unique [𝗟𝚺1 ⪯ T] :
-    T.ProvablyTotal f → ∃ φ, T.ProvablyTotalVia f φ ∧ T ⊢ uniqueTotalitySentence φ :=
-  fun ⟨_, h⟩ ↦ ⟨_, h, h.exists_unique⟩
 
 end ProvablyTotal
 
