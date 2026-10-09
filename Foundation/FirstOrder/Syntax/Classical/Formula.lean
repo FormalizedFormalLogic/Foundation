@@ -415,6 +415,12 @@ def Open (φ : Semiformula L ξ n) : Prop := φ.qr = 0
 @[simp] lemma open_iff {φ ψ : Semiformula L ξ n} : (φ 🡘 ψ).Open ↔ φ.Open ∧ ψ.Open :=
   by simp [Open]
 
+lemma open_conj {k} {φ : Fin k → Semiformula L ξ n} (h : ∀ i, (φ i).Open) :
+    (Matrix.conj φ).Open := by
+  induction k with
+  | zero => simp
+  | succ k ih => simpa [Matrix.conj] using ⟨h 0, ih fun i ↦ h i.succ⟩
+
 end Open
 
 /-! Free Variables -/
