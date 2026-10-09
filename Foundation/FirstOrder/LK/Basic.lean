@@ -547,6 +547,8 @@ lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
 def ConservativeOver (U T : Theory L) (Γ : Sentence L → Prop) : Prop :=
   ∀ σ, Γ σ → U ⊢ σ → T ⊢ σ
 
+@[inherit_doc] notation:40 U:41 " ⪯[" Γ "] " T:41 => Theory.ConservativeOver U T Γ
+
 section compact
 
 open Entailment

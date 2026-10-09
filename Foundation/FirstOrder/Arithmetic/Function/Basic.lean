@@ -264,7 +264,7 @@ lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f �
 /-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma of_Pi2_conservative (h : T.ProvablyTotalVia f φ)
-    (H : T.ConservativeOver U fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ) :
+    (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     U.ProvablyTotalVia f φ :=
   ⟨h.defined, H _ (by simp) h.total⟩
 
@@ -390,7 +390,7 @@ lemma mono (hT : T ⪯ U) : T.ProvablyTotal f → U.ProvablyTotal f :=
 /-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma of_Pi2_conservative
-    (H : T.ConservativeOver U fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ) :
+    (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.ProvablyTotal f → U.ProvablyTotal f :=
   fun ⟨_, h⟩ ↦ ⟨_, h.of_Pi2_conservative H⟩
 
@@ -417,7 +417,7 @@ lemma provablyTotalFunctions_subset (h : T ⪯ U) :
 /-- The class of provably total functions depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma provablyTotalFunctions_subset_of_Pi2_conservative
-    (H : T.ConservativeOver U fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ) :
+    (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2_conservative H
 
 namespace ProvablyFunctional
