@@ -269,7 +269,8 @@ macro_rules
   | `(⤫term(lit)[ $binders* | $fbinders* | !$t:term $vs:first_order_term* ⋯  ]) =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ Semiterm.bvar (finSuccItr x $length)))
+    let v ← vs.foldrM (β := Lean.TSyntax _)
+      (init := ← `(fun x ↦ Semiterm.bvar (finSuccItr x $length)))
       (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
     `(Rew.subst $v $t)
   | `(⤫term(lit)[ $binders* | $fbinders* | .!$t:term $vs:first_order_term*   ]) => do
@@ -279,7 +280,8 @@ macro_rules
   | `(⤫term(lit)[ $binders* | $fbinders* | .!$t:term $vs:first_order_term* ⋯ ]) =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ Semiterm.bvar (finSuccItr x $length)))
+    let v ← vs.foldrM (β := Lean.TSyntax _)
+      (init := ← `(fun x ↦ Semiterm.bvar (finSuccItr x $length)))
       (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
     `(Rew.embSubsts $v $t)
 

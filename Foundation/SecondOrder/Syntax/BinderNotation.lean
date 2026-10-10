@@ -5,28 +5,6 @@ public import Foundation.SecondOrder.Syntax.Rew
 
 /-!
 # Binder notation for second-order arithmetic
-
-`s“∀² X, ∀ x, x ∈ X → x + 0 = x”` denotes a second-order arithmetic formula.
-In `s“X Y ; x y. …”`, the headers name bound set and number variables, respectively;
-replace `.` by `|` to name free variables. Each header starts at index zero.
-Numerical terms share the `first_order_term` syntax category. Quantifiers maintain independent
-stacks of set and number variables. Names cannot be repeated within either sort.
-
-`!!φ` inserts a formula unchanged. `!φ t₁ … tₙ` substitutes its bound number variables;
-`!φ[X₁ … Xₖ] t₁ … tₙ` first substitutes its bound set variables as well.
-An optional `⋯` after the number arguments supplies the remaining bound number variables,
-starting after the named number binders, as in the first-order notation.
-Parenthesize compound formula expressions, as in `!(f a)[X] x`.
-Sets can also be written `#i` (bound) or `&i` (free).
-
-The intermediate notation is `⤫formula[boundSets ; boundNumbers | freeSets ; freeNumbers | φ]`.
-Extend `second_order_formula` and add `macro_rules` for this notation to define new formula syntax.
-Every subformula passes through this notation, including under quantifiers.
-Numerical terms use `⤫term[boundNumbers | freeNumbers | t]`. Extend `first_order_term` and add
-`macro_rules` for this intermediate notation to define new term syntax, including inside arithmetic
-operations and substitution arguments.
-
-These syntax translations are specific to this formalization.
 -/
 
 @[expose] public section
