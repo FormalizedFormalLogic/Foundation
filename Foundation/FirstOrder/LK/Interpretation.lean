@@ -86,16 +86,16 @@ def translate : Semiformula L₂ ξ n →ˡᶜ Semiformula L₁ ξ n where
 
 variable {π}
 
-@[simp] lemma translate_rel {k} (R : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n) :
+lemma translate_rel {k} (R : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n) :
     π.translate (Semiformula.rel R v) = π.translateRel R v := rfl
 
-@[simp] lemma translate_nrel {k} (R : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n) :
+lemma translate_nrel {k} (R : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n) :
     π.translate (Semiformula.nrel R v) = ∼π.translateRel R v := rfl
 
-@[simp] lemma translate_all (φ : Semiformula L₂ ξ (n + 1)) :
+lemma translate_all (φ : Semiformula L₂ ξ (n + 1)) :
     π.translate (∀¹ φ) = ∀_[π] π.translate φ := rfl
 
-@[simp] lemma translate_ex (φ : Semiformula L₂ ξ (n + 1)) :
+lemma translate_ex (φ : Semiformula L₂ ξ (n + 1)) :
     π.translate (∃¹ φ) = ∃_[π] π.translate φ := rfl
 
 section semantics
@@ -276,17 +276,17 @@ lemma eval_translateRel_iff {n k} {ε : ξ → π.Model M} (e : Fin n → π.Mod
 lemma eval_translate_iff {φ : Semiformula L₂ ξ n} {ε : ξ → π.Model M} {e : Fin n → π.Model M} :
     Semiformula.Eval (M := M) (fun i ↦ e i) (fun i ↦ ε i) (π.translate φ) ↔ φ.Eval e ε := by
   match φ with
-  |  .rel R v => simp [eval_rel, eval_translateRel_iff, Function.comp_def]
-  | .nrel R v => simp [eval_nrel, eval_translateRel_iff, Function.comp_def]
+  |  .rel R v => simp [translate_rel, eval_rel, eval_translateRel_iff, Function.comp_def]
+  | .nrel R v => simp [translate_nrel, eval_nrel, eval_translateRel_iff, Function.comp_def]
   |         ⊤ => simp
   |         ⊥ => simp
   |     φ ⋏ ψ => simp [eval_translate_iff (φ := φ), eval_translate_iff (φ := ψ)]
   |     φ ⋎ ψ => simp [eval_translate_iff (φ := φ), eval_translate_iff (φ := ψ)]
   |      ∀¹ φ =>
-    simpa [Matrix.comp_vecCons'] using
+    simpa [translate_all, Matrix.comp_vecCons'] using
       (forall_congr' fun a : π.Model M ↦ eval_translate_iff (φ := φ) (e := a :> e) (ε := ε))
   |      ∃¹ φ =>
-    simpa [Matrix.comp_vecCons'] using
+    simpa [translate_ex, Matrix.comp_vecCons'] using
       (exists_congr fun a : π.Model M ↦ eval_translate_iff (φ := φ) (e := a :> e) (ε := ε))
 
 lemma evalb_translate_iff {φ : Semisentence L₂ n} {e : Fin n → π.Model M} :
@@ -392,8 +392,8 @@ end semantics
 
 end DirectTranslation
 
-class DirectInterpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝗘𝗤 _ ⪯ T]
-    (U : Theory L₂) where
+class DirectInterpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq]
+    (T : Theory L₁) [𝗘𝗤 _ ⪯ T] (U : Theory L₂) where
   trln : DirectTranslation T L₂
   interpret_theory : ∀ φ ∈ U, T ⊢ trln.translate φ
 
@@ -419,9 +419,13 @@ section
 
 variable {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {U : Theory L₂} (π : T ⊳ U)
 
-abbrev translate (φ : Semiformula L₂ ξ n) : Semiformula L₁ ξ n := π.trln.translate φ
+@[coe] abbrev translate (φ : Semiformula L₂ ξ n) : Semiformula L₁ ξ n := π.trln.translate φ
 
 abbrev Model (M : Type*) [Tarski.Structure L₁ M] : Type _ := π.trln.Model M
+
+instance {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝗘𝗤 _ ⪯ T] (U : Theory L₂) :
+    CoeFun (DirectInterpretation T U) (fun _ ↦ Sentence L₂ → Sentence L₁) :=
+  ⟨fun π ↦ π.translate⟩
 
 open Classical in
 instance model_models_theory {M : Type v} [Nonempty M] [Tarski.Structure L₁ M]
@@ -430,12 +434,9 @@ instance model_models_theory {M : Type v} [Nonempty M] [Tarski.Structure L₁ M]
   models_theory_iff.mpr fun {σ} hσ ↦
     Model.translate_iff.mp <| models_of_provable hT (π.interpret_theory σ hσ)
 
-open Classical in
-lemma of_provability {σ : Sentence L₂} (h : U ⊢ σ) : T ⊢ π.translate σ :=
-  by
-  apply Theory.Proof.complete_on_eq_models.{_, 0}
-  intro M _ _ _ hT
-  exact
+/-- The soundness of a direct interpretation. -/
+lemma sound : U ⊢ σ → T ⊢ π σ := fun h ↦
+  Theory.Proof.complete_on_eq_models.{_, 0} _ fun _ _ _ _ hT ↦
     Model.translate_iff.mpr <| models_of_provable (π.model_models_theory hT) h
 
 end
@@ -465,8 +466,9 @@ def compDirectTranslation (τ : DirectTranslation T₂ L₃) (π : T₁ ⊳ T₂
     DirectTranslation T₁ L₃ where
   domain := π.trln.domain.and (π.translateOperator τ.domain)
   domain_nonempty := by
-    simpa [exs, Semiformula.Operator.operator, Semiformula.Operator.and, Rewriting.emb]
-      using! π.of_provability τ.domain_nonempty
+    simpa [translate_ex, exs, Semiformula.Operator.operator,
+      Semiformula.Operator.and, Rewriting.emb]
+      using! π.sound τ.domain_nonempty
   rel R := π.translateOperator (τ.rel R)
   func {k} f := π.translateOperator (τ.func f)
   func_defined {k} f := by
