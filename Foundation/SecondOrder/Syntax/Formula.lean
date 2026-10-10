@@ -39,6 +39,8 @@ abbrev Semiproposition (L : Language) (n N : ℕ) := Semiformula L ℕ ℕ n N
 
 abbrev Proposition (L : Language) := Semiformula L ℕ ℕ 0 0
 
+abbrev Theory (L : Language) := Set (Sentence L)
+
 namespace Semiformula
 
 variable {L : Language} {Ξ ξ : Type*}
@@ -344,6 +346,10 @@ def complexity : Semiformula L Ξ ξ N n → ℕ
 inductive IsElementary : Semiformula L Ξ ξ N n → Prop
 | rel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsElementary (rel R v)
 | nrel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsElementary (nrel R v)
+| bvar : IsElementary (t ∈# X)
+| nbvar : IsElementary (t ∉# X)
+| fvar : IsElementary (t ∈& X)
+| nfvar : IsElementary (t ∉& X)
 | verum : IsElementary ⊤
 | falsum : IsElementary ⊥
 | and (φ ψ : Semiformula L Ξ ξ N n) : IsElementary φ → IsElementary ψ → IsElementary (φ ⋏ ψ)
@@ -353,7 +359,7 @@ inductive IsElementary : Semiformula L Ξ ξ N n → Prop
 
 namespace IsElementary
 
-attribute [simp] rel nrel verum falsum
+attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
 
 @[simp] lemma and_iff {φ ψ : Semiformula L Ξ ξ N n} :
     (φ ⋏ ψ).IsElementary ↔ φ.IsElementary ∧ ψ.IsElementary := by
@@ -453,7 +459,14 @@ def toSecondOrder : FirstOrder.Semiformula L ξ n →ˡᶜ SecondOrder.Semiformu
       ∼toSecondOrderAux Ξ N φ ⋎ toSecondOrderAux Ξ N ψ
     rw [toSecondOrderAux_neg]
 
-end FirstOrder.Semiformula
+end Semiformula
+
+@[coe] def Theory.toSecondOrder (T : Theory L) : SecondOrder.Theory L :=
+  Semiformula.toSecondOrder Empty 0 '' T
+
+instance : Coe (Theory L) (SecondOrder.Theory L) := ⟨Theory.toSecondOrder⟩
+
+end FirstOrder
 
 namespace SecondOrder.Semiformula
 
@@ -469,32 +482,6 @@ lemma isElementary_toSecondOrder (φ : FirstOrder.Semiformula L ξ n) :
   | or φ ψ ihφ ihψ => exact .or _ _ ihφ ihψ
   | all φ ih => exact .all₁ _ ih
   | exs φ ih => exact .exs₁ _ ih
-
-lemma isElementary_iff {φ : SecondOrder.Semiformula L Ξ ξ N n} :
-    φ.IsElementary ↔ φ ∈ Set.range (FirstOrder.Semiformula.toSecondOrder Ξ N) := by
-  constructor
-  · intro h
-    induction h with
-    | rel R v => exact ⟨.rel R v, rfl⟩
-    | nrel R v => exact ⟨.nrel R v, rfl⟩
-    | verum => exact ⟨⊤, rfl⟩
-    | falsum => exact ⟨⊥, rfl⟩
-    | and φ ψ hφ hψ ihφ ihψ =>
-      rcases ihφ with ⟨φ', rfl⟩
-      rcases ihψ with ⟨ψ', rfl⟩
-      exact ⟨φ' ⋏ ψ', rfl⟩
-    | or φ ψ hφ hψ ihφ ihψ =>
-      rcases ihφ with ⟨φ', rfl⟩
-      rcases ihψ with ⟨ψ', rfl⟩
-      exact ⟨φ' ⋎ ψ', rfl⟩
-    | all₁ φ hφ ih =>
-      rcases ih with ⟨φ', rfl⟩
-      exact ⟨∀¹ φ', rfl⟩
-    | exs₁ φ hφ ih =>
-      rcases ih with ⟨φ', rfl⟩
-      exact ⟨∃¹ φ', rfl⟩
-  · rintro ⟨φ, rfl⟩
-    exact isElementary_toSecondOrder (Ξ := Ξ) (N := N) φ
 
 end SecondOrder.Semiformula
 

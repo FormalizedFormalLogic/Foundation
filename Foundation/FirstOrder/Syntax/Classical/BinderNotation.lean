@@ -229,12 +229,12 @@ macro_rules
       | none => Macro.throwErrorAt x "error: variable did not found."
       | some x =>
         let i := Syntax.mkNumLit (toString x)
-        `(&$i)
+        `(Semiterm.fvar $i)
     | some x =>
       let i := Syntax.mkNumLit (toString x)
-      `(#$i)
-  | `(⤫term(lit)[ $_*       | $_*        | #$x:term   ]) => `(#$x)
-  | `(⤫term(lit)[ $_*       | $_*        | &$x:term   ]) => `(&$x)
+      `(Semiterm.bvar $i)
+  | `(⤫term(lit)[ $_*       | $_*        | #$x:term   ]) => `(Semiterm.bvar $x)
+  | `(⤫term(lit)[ $_*       | $_*        | &$x:term   ]) => `(Semiterm.fvar $x)
   | `(⤫term(lit)[ $_*       | $_*        | $m:num     ]) => `(Semiterm.numeral $m)
   | `(⤫term(lit)[ $_*       | $_*        | ↑$m:term   ]) => `(Semiterm.numeral $m)
   | `(⤫term(lit)[ $_*       | $_*        | ⌜$x:term⌝  ]) => `(⌜$x⌝)
@@ -269,7 +269,7 @@ macro_rules
   | `(⤫term(lit)[ $binders* | $fbinders* | !$t:term $vs:first_order_term* ⋯  ]) =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length)))
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ Semiterm.bvar (finSuccItr x $length)))
       (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
     `(Rew.subst $v $t)
   | `(⤫term(lit)[ $binders* | $fbinders* | .!$t:term $vs:first_order_term*   ]) => do
@@ -279,7 +279,7 @@ macro_rules
   | `(⤫term(lit)[ $binders* | $fbinders* | .!$t:term $vs:first_order_term* ⋯ ]) =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length)))
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ Semiterm.bvar (finSuccItr x $length)))
       (fun a s ↦ `(⤫term(lit)[ $binders* | $fbinders* | $a] :> $s))
     `(Rew.embSubsts $v $t)
 
