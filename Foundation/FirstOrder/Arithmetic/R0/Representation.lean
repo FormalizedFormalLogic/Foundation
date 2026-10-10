@@ -70,12 +70,12 @@ lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
     exact (Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)).not;
   case hAnd =>
     intro n φ ψ _ _ ihp ihq h;
-    exact (ihp (Bounding.Hierarchy.and_iff (ℬ := ℬ[<, ℒₒᵣ]).mp h).1).and
-      (ihq (Bounding.Hierarchy.and_iff (ℬ := ℬ[<, ℒₒᵣ]).mp h).2) |>.of_eq fun v ↦ by simp;
+    exact (ihp (Bounding.HierarchyOn.and_iff.mp h).1).and
+      (ihq (Bounding.HierarchyOn.and_iff.mp h).2) |>.of_eq fun v ↦ by simp;
   case hOr =>
     intro n φ ψ _ _ ihp ihq h;
-    exact (ihp (Bounding.Hierarchy.or_iff (ℬ := ℬ[<, ℒₒᵣ]).mp h).1).or
-      (ihq (Bounding.Hierarchy.or_iff (ℬ := ℬ[<, ℒₒᵣ]).mp h).2) |>.of_eq fun v ↦ by simp;
+    exact (ihp (Bounding.HierarchyOn.or_iff.mp h).1).or
+      (ihq (Bounding.HierarchyOn.or_iff.mp h).2) |>.of_eq fun v ↦ by simp;
   case hBall =>
     intro n t φ _ ih h;
     exact (primrecPred_ball ε t
@@ -87,9 +87,8 @@ lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
     | bexs hR ht hφ =>
       obtain rfl := Set.mem_singleton_iff.mp hR
       rcases Rew.positive_iff.mp ht with ⟨t, rfl⟩;
-      exact (primrecPred_bexs ε t
-        (ih (Bounding.Hierarchy.and_iff (ℬ := ℬ[<, ℒₒᵣ]).mpr
-          ⟨by simp, Bounding.Hierarchy.bounded _ _ _ hφ⟩))).of_eq fun v ↦ by simp;
+      exact (primrecPred_bexs ε t (ih (.and (by simp) (.initial _ _ _ hφ)))).of_eq
+        fun v ↦ by simp;
   exact hp;
 
 lemma sigma1_re (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k} (hp : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) :
@@ -202,7 +201,7 @@ private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) :
   case equal => simp [codeAux, Matrix.fun_eq_vec_two]
   case proj => simp [codeAux]
   case comp c d ihc ihg =>
-    exact Bounding.Hierarchy.exsClosure (ℬ := ℬ[<, ℒₒᵣ]) (by simp [ihc, ihg])
+    exact .exsClosure (by simp [ihc, ihg])
   case rfind k c ih => simp [codeAux, Matrix.fun_eq_vec_two]; simp [ih]
 
 @[simp] lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (code c) :=

@@ -30,6 +30,11 @@ instance : SetLike (Bounding L) (Semiformula.Operator L 2) where
   coe ℬ := ℬ.set
   coe_injective := by rintro ⟨s⟩ ⟨t⟩; simp
 
+instance : PartialOrder (Bounding L) := .ofSetLike (Bounding L) (Semiformula.Operator L 2)
+
+@[simp] lemma not_mem_strict {R : Semiformula.Operator L 2} : R ∉ ℬ[L] :=
+  Set.notMem_empty R
+
 open Semiformula
 
 variable {ξ ξ₁ ξ₂ : Type*} {n : ℕ} (ℬ : Bounding L)
@@ -168,13 +173,7 @@ end Closure
     ℬ[L].Closure φ ↔ φ.Open := by
   constructor
   · intro h
-    induction h <;> try simp_all [Bounding.strict]
-    case ball R φ t hR ht hp ih =>
-      change R ∈ (∅ : Set (Semiformula.Operator L 2)) at hR
-      simp at hR
-    case bexs R φ t hR ht hp ih =>
-      change R ∈ (∅ : Set (Semiformula.Operator L 2)) at hR
-      simp at hR
+    induction h <;> simp_all
   · intro h
     induction φ using Semiformula.rec' <;> simp_all [Semiformula.Open]
 

@@ -157,8 +157,7 @@ theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n �
   have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right e T;
   have hmem : ∀ σ, σ ∈ hU'.toFinset.toList ↔ σ ∈ U' := by simp;
   have hconj : ℬ[<, ℒₒᵣ].Hierarchy Γ n (⋀hU'.toFinset.toList) :=
-    Bounding.Hierarchy.list_conj₂_iff (ℬ := ℬ[<, ℒₒᵣ]).mpr fun σ hσ ↦
-      hΓ σ ((hmem σ).mp hσ);
+    Bounding.HierarchyOn.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ);
   have hle : T ∪ U' ⪯ insert (⋀hU'.toFinset.toList) T := WeakerThan.ofAxm! <| by
     rintro φ (hφ | hφ);
     · exact by_axm (Set.mem_insert_of_mem _ hφ);

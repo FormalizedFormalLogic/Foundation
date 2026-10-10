@@ -34,8 +34,7 @@ lemma prenexDefinableRel_of_models_IBroadSigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺
     (hR : Γᴬ_[s].DefinableRel R) : PrenexDefinableRel Γ s R := by
   rcases s with _ | t;
   · obtain ⟨φ, hφ⟩ := hR;
-    exact ⟨φ.val, Bounding.PrenexHierarchy.zero_iff.mpr
-      (Bounding.Hierarchy.zero_iff (ℬ := ℬ[<, ℒₒᵣ]).mp φ.polarity_prop),
+    exact ⟨φ.val, Bounding.PrenexHierarchy.zero_iff.mpr φ.polarity_prop.of_zero,
       fun v ↦ hφ.iff⟩;
   · have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := IBroadSigma.models_BSigma_succ;
     exact PrenexDefinable.of_definable (Γ' := 𝚺) hR;
