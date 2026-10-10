@@ -8,12 +8,11 @@ public import Mathlib.Computability.Primrec.List
 /-!
 # Primitive recursive functions are `𝗜𝚺₁`-provably total
 
-Every primitive recursive function is `𝗜𝚺₁`-provably functional, by induction on its derivation of
-primitive recursiveness.
+Primitive recursive functions are `𝗜𝚺₁`-provably functional, hence provably total.
 
 ## References
 
-- [HP98, Theorem I.1.54, Lemma I.1.55]
+- [HP98]
 -/
 
 @[expose] public section
@@ -27,10 +26,6 @@ namespace Arithmetic
 open ArithmeticTheory Bounding.HierarchySymbol
 
 open ProvablyFunctionalVia in
-/-- Every primitive recursive function in the `List.Vector` form `Nat.Primrec'` is
-`𝗜𝚺₁`-provably functional.
-- [HP98, Theorem I.1.54]
-- [HP98, Lemma I.1.55] -/
 theorem provablyFunctional_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
     𝗜𝚺₁.ProvablyFunctional (fun v ↦ f (.ofFn v)) := by
   induction hf with

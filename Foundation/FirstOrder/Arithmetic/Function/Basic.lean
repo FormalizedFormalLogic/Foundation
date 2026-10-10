@@ -10,10 +10,9 @@ composition.
 
 ## References
 
-- [HP98, Definition I.1.51, Definition I.1.51(2), Lemma I.1.53, Theorem I.2.5(3), Lemma I.2.9,
-  Definition IV.3.1, Lemma IV.3.4]
-- [AB05, §10.2]
-- [Bek99, §1]
+- [HP98]
+- [AB05]
+- [Bek99]
 -/
 
 @[expose] public section
@@ -235,8 +234,6 @@ lemma graph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
 lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f φ :=
   ⟨h.defined, hT.pbl h.total⟩
 
-/-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
-- [AB05, §10.2] -/
 lemma of_Pi2_conservative (h : T.ProvablyTotalVia f φ)
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     U.ProvablyTotalVia f φ :=
@@ -338,8 +335,6 @@ namespace ProvablyTotal
 lemma mono (hT : T ⪯ U) : T.ProvablyTotal f → U.ProvablyTotal f :=
   fun ⟨_, h⟩ ↦ ⟨_, h.mono hT⟩
 
-/-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
-- [AB05, §10.2] -/
 lemma of_Pi2_conservative
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.ProvablyTotal f → U.ProvablyTotal f :=
@@ -361,8 +356,6 @@ end ProvablyTotal
 lemma provablyTotalFunctions_subset (h : T ⪯ U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.mono h
 
-/-- The class of provably total functions depends only on the $\Pi_2$ consequences of the theory.
-- [AB05, §10.2] -/
 lemma provablyTotalFunctions_subset_of_Pi2_conservative
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2_conservative H
