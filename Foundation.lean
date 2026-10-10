@@ -263,7 +263,11 @@ public import Foundation.ProvabilityLogic.S.Gentzen.Basic
 public import Foundation.ProvabilityLogic.S.Gentzen.Kripke
 public import Foundation.ProvabilityLogic.Sequent
 public import Foundation.ProvabilityLogic.Trace
+public import Foundation.SecondOrder.Arithmetic.ACA0
+public import Foundation.SecondOrder.Arithmetic.Z2
 public import Foundation.SecondOrder.LK.Basic
+public import Foundation.SecondOrder.LK.RestrictedComprehension
+public import Foundation.SecondOrder.Syntax.BinderNotation
 public import Foundation.SecondOrder.Syntax.Formula
 public import Foundation.SecondOrder.Syntax.Rew
 public import Foundation.SecondOrder.Tarski.Basic
