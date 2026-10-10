@@ -339,8 +339,163 @@ def complexity : Semiformula L Ξ ξ N n → ℕ
 @[simp] lemma complexity_exs₂' (φ : Semiformula L Ξ ξ (N + 1) n) :
     φ.exs₂.complexity = φ.complexity + 1 := rfl
 
+/- ### Elementary Semiformulas -/
+
+inductive IsElementary : Semiformula L Ξ ξ N n → Prop
+| rel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsElementary (rel R v)
+| nrel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsElementary (nrel R v)
+| verum : IsElementary ⊤
+| falsum : IsElementary ⊥
+| and (φ ψ : Semiformula L Ξ ξ N n) : IsElementary φ → IsElementary ψ → IsElementary (φ ⋏ ψ)
+| or (φ ψ : Semiformula L Ξ ξ N n) : IsElementary φ → IsElementary ψ → IsElementary (φ ⋎ ψ)
+| all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsElementary φ → IsElementary (∀¹ φ)
+| exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsElementary φ → IsElementary (∃¹ φ)
+
+namespace IsElementary
+
+attribute [simp] rel nrel verum falsum
+
+@[simp] lemma and_iff {φ ψ : Semiformula L Ξ ξ N n} :
+    (φ ⋏ ψ).IsElementary ↔ φ.IsElementary ∧ ψ.IsElementary := by
+  constructor
+  · intro h
+    cases h with
+    | and _ _ hφ hψ => exact ⟨hφ, hψ⟩
+  · rintro ⟨hφ, hψ⟩
+    exact .and _ _ hφ hψ
+
+@[simp] lemma or_iff {φ ψ : Semiformula L Ξ ξ N n} :
+    (φ ⋎ ψ).IsElementary ↔ φ.IsElementary ∧ ψ.IsElementary := by
+  constructor
+  · intro h
+    cases h with
+    | or _ _ hφ hψ => exact ⟨hφ, hψ⟩
+  · rintro ⟨hφ, hψ⟩
+    exact .or _ _ hφ hψ
+
+@[simp] lemma all₁_iff {φ : Semiformula L Ξ ξ N (n + 1)} :
+    (∀¹ φ).IsElementary ↔ φ.IsElementary := by
+  constructor
+  · intro h
+    cases h with
+    | all₁ _ hφ => exact hφ
+  · exact .all₁ _
+
+@[simp] lemma exs₁_iff {φ : Semiformula L Ξ ξ N (n + 1)} :
+    (∃¹ φ).IsElementary ↔ φ.IsElementary := by
+  constructor
+  · intro h
+    cases h with
+    | exs₁ _ hφ => exact hφ
+  · exact .exs₁ _
+
+@[simp] lemma not_all₂ {φ : Semiformula L Ξ ξ (N + 1) n} :
+    ¬(∀² φ).IsElementary := by
+  intro h
+  cases h
+
+@[simp] lemma not_exs₂ {φ : Semiformula L Ξ ξ (N + 1) n} :
+    ¬(∃² φ).IsElementary := by
+  intro h
+  cases h
+
+end IsElementary
+
 end Semiformula
 
 end SecondOrder
+
+namespace FirstOrder.Semiformula
+
+variable (Ξ N)
+
+def toSecondOrderAux : Semiformula L ξ n → SecondOrder.Semiformula L Ξ ξ N n
+|  .rel R v => .rel R v
+| .nrel R v => .nrel R v
+|         ⊤ => ⊤
+|         ⊥ => ⊥
+|     φ ⋏ ψ => φ.toSecondOrderAux ⋏ ψ.toSecondOrderAux
+|     φ ⋎ ψ => φ.toSecondOrderAux ⋎ ψ.toSecondOrderAux
+|      ∀¹ φ => ∀¹ φ.toSecondOrderAux
+|      ∃¹ φ => ∃¹ φ.toSecondOrderAux
+
+lemma toSecondOrderAux_neg (φ : FirstOrder.Semiformula L ξ n) :
+    (∼φ).toSecondOrderAux Ξ N = ∼φ.toSecondOrderAux Ξ N := by
+  induction φ with
+  | verum => rfl
+  | falsum => rfl
+  | rel R v => rfl
+  | nrel R v => rfl
+  | and φ ψ ihφ ihψ =>
+    change (toSecondOrderAux Ξ N (∼φ)) ⋎ toSecondOrderAux Ξ N (∼ψ) =
+      (∼toSecondOrderAux Ξ N φ) ⋎ ∼toSecondOrderAux Ξ N ψ
+    rw [ihφ, ihψ]
+  | or φ ψ ihφ ihψ =>
+    change (toSecondOrderAux Ξ N (∼φ)) ⋏ toSecondOrderAux Ξ N (∼ψ) =
+      (∼toSecondOrderAux Ξ N φ) ⋏ ∼toSecondOrderAux Ξ N ψ
+    rw [ihφ, ihψ]
+  | all φ ih =>
+    change ∃¹ toSecondOrderAux Ξ N (∼φ) = ∃¹ ∼toSecondOrderAux Ξ N φ
+    rw [ih]
+  | exs φ ih =>
+    change ∀¹ toSecondOrderAux Ξ N (∼φ) = ∀¹ ∼toSecondOrderAux Ξ N φ
+    rw [ih]
+
+def toSecondOrder : FirstOrder.Semiformula L ξ n →ˡᶜ SecondOrder.Semiformula L Ξ ξ N n where
+  toTr := toSecondOrderAux Ξ N
+  map_top' := rfl
+  map_bot' := rfl
+  map_neg' := toSecondOrderAux_neg Ξ N
+  map_and' _ _ := rfl
+  map_or' _ _ := rfl
+  map_imply' φ ψ := by
+    change (∼φ).toSecondOrderAux Ξ N ⋎ toSecondOrderAux Ξ N ψ =
+      ∼toSecondOrderAux Ξ N φ ⋎ toSecondOrderAux Ξ N ψ
+    rw [toSecondOrderAux_neg]
+
+end FirstOrder.Semiformula
+
+namespace SecondOrder.Semiformula
+
+lemma isElementary_toSecondOrder (φ : FirstOrder.Semiformula L ξ n) :
+    (φ.toSecondOrder Ξ N).IsElementary := by
+  change (FirstOrder.Semiformula.toSecondOrderAux Ξ N φ).IsElementary
+  induction φ with
+  | verum => exact .verum
+  | falsum => exact .falsum
+  | rel R v => exact .rel R v
+  | nrel R v => exact .nrel R v
+  | and φ ψ ihφ ihψ => exact .and _ _ ihφ ihψ
+  | or φ ψ ihφ ihψ => exact .or _ _ ihφ ihψ
+  | all φ ih => exact .all₁ _ ih
+  | exs φ ih => exact .exs₁ _ ih
+
+lemma isElementary_iff {φ : SecondOrder.Semiformula L Ξ ξ N n} :
+    φ.IsElementary ↔ φ ∈ Set.range (FirstOrder.Semiformula.toSecondOrder Ξ N) := by
+  constructor
+  · intro h
+    induction h with
+    | rel R v => exact ⟨.rel R v, rfl⟩
+    | nrel R v => exact ⟨.nrel R v, rfl⟩
+    | verum => exact ⟨⊤, rfl⟩
+    | falsum => exact ⟨⊥, rfl⟩
+    | and φ ψ hφ hψ ihφ ihψ =>
+      rcases ihφ with ⟨φ', rfl⟩
+      rcases ihψ with ⟨ψ', rfl⟩
+      exact ⟨φ' ⋏ ψ', rfl⟩
+    | or φ ψ hφ hψ ihφ ihψ =>
+      rcases ihφ with ⟨φ', rfl⟩
+      rcases ihψ with ⟨ψ', rfl⟩
+      exact ⟨φ' ⋎ ψ', rfl⟩
+    | all₁ φ hφ ih =>
+      rcases ih with ⟨φ', rfl⟩
+      exact ⟨∀¹ φ', rfl⟩
+    | exs₁ φ hφ ih =>
+      rcases ih with ⟨φ', rfl⟩
+      exact ⟨∃¹ φ', rfl⟩
+  · rintro ⟨φ, rfl⟩
+    exact isElementary_toSecondOrder (Ξ := Ξ) (N := N) φ
+
+end SecondOrder.Semiformula
 
 end FFL
