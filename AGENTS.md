@@ -45,8 +45,3 @@ Delegate matching work to these roles when the client exposes them:
 - `lean4-proof-writer`: formalize a new Lean proof from an already-decided mathematical plan.
 - `lean4-proof-refactorer`: clean up an existing proof that already compiles without `sorry`.
 - `transporter-alpha-centauri`: faithfully port an existing result from AlphaCentauri.
-
-## Math notes
-
-Before writing a mathematical write-up (Typst) of a formalized result, read
-`.claude/proofs/README.md` in the main checkout (git-excluded) and follow it.
