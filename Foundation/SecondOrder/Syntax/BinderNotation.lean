@@ -104,9 +104,9 @@ syntax:max "⋁ " ident ", " second_order_formula:0 : second_order_formula
 syntax "⤫formula[" ident* ";" ident* " | " ident* ";" ident* " | "
   second_order_formula:0 "]" : term
 
-syntax "s“" second_order_formula:0 "”" : term
-syntax "s“" ident* ";" ident* "." second_order_formula:0 "”" : term
-syntax "s“" ident* ";" ident* "|" second_order_formula:0 "”" : term
+syntax "S“" second_order_formula:0 "”" : term
+syntax "S“" ident* ";" ident* "." second_order_formula:0 "”" : term
+syntax "S“" ident* ";" ident* "|" second_order_formula:0 "”" : term
 
 private meta def checkNames (xs : TSyntaxArray `ident) : MacroM Unit := do
   let mut seen := #[]
@@ -256,13 +256,13 @@ macro_rules
     `(Matrix.disj fun $i => ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ])
 
 macro_rules
-  | `(s“$p:second_order_formula”) =>
+  | `(S“$p:second_order_formula”) =>
     `((⤫formula[ ; | ; | $p ] : SecondOrder.Semiformula ℒₒᵣ _ _ _ _))
-  | `(s“$ss* ; $xs*. $p:second_order_formula”) => do
+  | `(S“$ss* ; $xs*. $p:second_order_formula”) => do
     checkNames ss
     checkNames xs
     `((⤫formula[ $ss* ; $xs* | ; | $p ] : SecondOrder.Semiformula ℒₒᵣ _ _ _ _))
-  | `(s“$ss* ; $xs* | $p:second_order_formula”) => do
+  | `(S“$ss* ; $xs* | $p:second_order_formula”) => do
     checkNames ss
     checkNames xs
     `((⤫formula[ ; | $ss* ; $xs* | $p ] : SecondOrder.Semiformula ℒₒᵣ _ _ _ _))
@@ -285,7 +285,7 @@ private meta partial def termSyntax (s : Syntax) : DelabM (TSyntax `first_order_
 private meta partial def formulaSyntax (s : Syntax) : DelabM (TSyntax `second_order_formula) :=
   match s with
   | `(($p)) => formulaSyntax p
-  | `(s“$p:second_order_formula”) => pure p
+  | `(S“$p:second_order_formula”) => pure p
   | `($t ∈# $i) => do `(second_order_formula| $(← termSyntax t):first_order_term ∈ #$i)
   | `($t ∉# $i) => do `(second_order_formula| $(← termSyntax t):first_order_term ∉ #$i)
   | `($t ∈& $i) => do `(second_order_formula| $(← termSyntax t):first_order_term ∈ &$i)
@@ -323,21 +323,21 @@ meta def delabArithmetic : Delab :=
   let body := do formulaSyntax (← last)
   match e.getAppFn.constName! with
   | ``HArrow.hArrow | ``Arrow.arrow =>
-    `(s“$(← formulaSyntax (← penultimate)) → $(← body)”)
-  | ``LogicalConnective.iff => `(s“$(← formulaSyntax (← penultimate)) ↔ $(← body)”)
-  | ``Semiformula.verum => `(s“⊤”)
-  | ``Semiformula.falsum => `(s“⊥”)
-  | ``Semiformula.bvar => `(s“$(← termSyntax (← last)):first_order_term ∈ #$(← penultimate)”)
-  | ``Semiformula.nbvar => `(s“$(← termSyntax (← last)):first_order_term ∉ #$(← penultimate)”)
-  | ``Semiformula.fvar => `(s“$(← termSyntax (← last)):first_order_term ∈ &$(← penultimate)”)
-  | ``Semiformula.nfvar => `(s“$(← termSyntax (← last)):first_order_term ∉ &$(← penultimate)”)
-  | ``Semiformula.and => `(s“$(← formulaSyntax (← penultimate)) ∧ $(← body)”)
-  | ``Semiformula.or => `(s“$(← formulaSyntax (← penultimate)) ∨ $(← body)”)
-  | ``Semiformula.neg => `(s“¬$(← body)”)
-  | ``Semiformula.all₁ => `(s“∀¹ $(← body)”)
-  | ``Semiformula.exs₁ => `(s“∃¹ $(← body)”)
-  | ``Semiformula.all₂ => `(s“∀² $(← body)”)
-  | ``Semiformula.exs₂ => `(s“∃² $(← body)”)
+    `(S“$(← formulaSyntax (← penultimate)) → $(← body)”)
+  | ``LogicalConnective.iff => `(S“$(← formulaSyntax (← penultimate)) ↔ $(← body)”)
+  | ``Semiformula.verum => `(S“⊤”)
+  | ``Semiformula.falsum => `(S“⊥”)
+  | ``Semiformula.bvar => `(S“$(← termSyntax (← last)):first_order_term ∈ #$(← penultimate)”)
+  | ``Semiformula.nbvar => `(S“$(← termSyntax (← last)):first_order_term ∉ #$(← penultimate)”)
+  | ``Semiformula.fvar => `(S“$(← termSyntax (← last)):first_order_term ∈ &$(← penultimate)”)
+  | ``Semiformula.nfvar => `(S“$(← termSyntax (← last)):first_order_term ∉ &$(← penultimate)”)
+  | ``Semiformula.and => `(S“$(← formulaSyntax (← penultimate)) ∧ $(← body)”)
+  | ``Semiformula.or => `(S“$(← formulaSyntax (← penultimate)) ∨ $(← body)”)
+  | ``Semiformula.neg => `(S“¬$(← body)”)
+  | ``Semiformula.all₁ => `(S“∀¹ $(← body)”)
+  | ``Semiformula.exs₁ => `(S“∃¹ $(← body)”)
+  | ``Semiformula.all₂ => `(S“∀² $(← body)”)
+  | ``Semiformula.exs₂ => `(S“∃² $(← body)”)
   | ``Semiformula.rel | ``Semiformula.nrel =>
     let r ← withAppFn <| withAppArg do Meta.whnf (← getExpr)
     let `(![$t, $u]) ← last | failure
@@ -347,7 +347,7 @@ meta def delabArithmetic : Delab :=
       | ``Language.ORing.Rel.eq => `(second_order_formula| $t:first_order_term = $u)
       | ``Language.ORing.Rel.lt => `(second_order_formula| $t:first_order_term < $u)
       | _ => failure
-    if e.isAppOf ``Semiformula.nrel then `(s“¬$p”) else `(s“$p”)
+    if e.isAppOf ``Semiformula.nrel then `(S“¬$p”) else `(S“$p”)
   | _ => failure
 
 end FFL.SecondOrder.BinderNotation

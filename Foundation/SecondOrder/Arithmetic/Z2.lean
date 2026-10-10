@@ -14,7 +14,7 @@ namespace FFL.SecondOrder
 
 namespace Theory
 
-def induction : Sentence ℒₒᵣ := s“∀² X, 0 ∈ X ∧ (∀ x, x ∈ X → x + 1 ∈ X) → ∀ x, x ∈ X”
+def induction : Sentence ℒₒᵣ := S“∀² X, 0 ∈ X ∧ (∀ x, x ∈ X → x + 1 ∈ X) → ∀ x, x ∈ X”
 
 /-! The second-order arithmetic. -/
 def Arithmetic : Theory ℒₒᵣ := insert induction 𝗣𝗔⁻
