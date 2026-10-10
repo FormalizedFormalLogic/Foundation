@@ -139,8 +139,11 @@ def translationᵢ {n} : Semiformulaᵢ K ξ n → Semiformula L ξ (n + 1)
 
 def translation {n} : Semiformula K ξ n → Semiformula L ξ (n + 1) := fun φ ↦ 𝔭.translationᵢ φᴺ
 
-def interpret (φ : Semiformula K ξ n) : Semiformula L ξ n :=
+@[coe] def interpret (φ : Semiformula K ξ n) : Semiformula L ξ n :=
   “∀ p, %𝔭.isCond p → !(𝔭.translation φ) p ⋯”
+
+instance : CoeFun (ForcingTranslation T K) (fun _ ↦ Sentence K → Sentence L) :=
+  ⟨fun 𝔭 ↦ 𝔭.interpret⟩
 
 section semantics
 
@@ -302,7 +305,7 @@ lemma models_translation {φ : Sentence K} :
     (𝔭.translation φ).Evalb ![(p : M)] ↔ p ⊩ᶜ φ := eval_translation_iff_kripke (by simp) (by simp)
 
 lemma models_interpret {φ : Sentence K} :
-    M↓[L] ⊧ 𝔭.interpret φ ↔ 𝔭.Condition M ∀⊩ᶜ φ := by
+    M↓[L] ⊧ 𝔭 φ ↔ 𝔭.Condition M ∀⊩ᶜ φ := by
   simp [models_iff, interpret, ←models_translation]; rfl
 
 end semantics
@@ -310,9 +313,9 @@ end semantics
 variable {U : Theory L} [T ⪯ U] [K.Relational] {V : Theory K}
 
 structure Interpret (U : Theory L) [T ⪯ U] (V : Theory K) : Prop where
-  proves_interpret : ∀ ψ ∈ V, U ⊢ 𝔭.interpret ψ
+  proves_interpret : ∀ ψ ∈ V, U ⊢ 𝔭 ψ
 
-theorem soundness {φ : Sentence K} (H : 𝔭.Interpret U V) : V ⊢ φ → U ⊢ 𝔭.interpret φ := fun h ↦ by
+theorem sound {φ : Sentence K} (H : 𝔭.Interpret U V) : V ⊢ φ → U ⊢ 𝔭 φ := fun h ↦ by
   have : 𝗘𝗤 L ⪯ U := Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 L ⪯ T) (inferInstance : T ⪯ U)
   apply Theory.Proof.complete_on_eq_models.{_,0}
   intro M _ _ _ _
@@ -323,7 +326,7 @@ theorem soundness {φ : Sentence K} (H : 𝔭.Interpret U V) : V ⊢ φ → U �
   exact 𝔭.models_interpret.mp
     (models_of_provable (M := M) inferInstance (H.proves_interpret ψ hψ))
 
-theorem soundness_consistency (H : 𝔭.Interpret U V) :
+theorem sound_consistency (H : 𝔭.Interpret U V) :
     Entailment.Consistent U → Entailment.Consistent V := by
   have : 𝗘𝗤 L ⪯ U := Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 L ⪯ T) (inferInstance : T ⪯ U)
   intro hT
@@ -339,7 +342,7 @@ theorem soundness_consistency (H : 𝔭.Interpret U V) :
       models_of_provable (M := M) inferInstance 𝔭.condition_nonempty
   obtain ⟨p, hp⟩ := h₁
   have h₂ : 𝔭.Condition M ∀⊩ᶜ (⊥ : Sentence K) := 𝔭.models_interpret.mp
-    (models_of_provable (M := M) inferInstance (𝔭.soundness H hV))
+    (models_of_provable (M := M) inferInstance (𝔭.sound H hV))
   simpa using h₂ ⟨p, hp⟩
 
 end ForcingTranslation
