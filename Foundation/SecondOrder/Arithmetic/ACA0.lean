@@ -14,11 +14,11 @@ namespace FFL.SecondOrder
 namespace TheoryRestrictedComprehension
 
 /-! The fragment of second-order arithmetic with arithmetic comprehension. -/
-def ACA0 : TheoryRestrictedComprehension ℒₒᵣ where
+def ArithmeticalComprehensionAxiom : TheoryRestrictedComprehension ℒₒᵣ where
   theory := 𝗭₂
   comprehension := Semiformula.IsElementary
 
-notation "𝗔𝗖𝗔₀" => ACA0
+notation "𝗔𝗖𝗔₀" => ArithmeticalComprehensionAxiom
 
 end TheoryRestrictedComprehension
 

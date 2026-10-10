@@ -17,9 +17,9 @@ namespace Theory
 def induction : Sentence ℒₒᵣ := s“∀² X, 0 ∈ X ∧ (∀ x, x ∈ X → x + 1 ∈ X) → ∀ x, x ∈ X”
 
 /-! The second-order arithmetic. -/
-def Z2 : Theory ℒₒᵣ := insert induction 𝗣𝗔⁻
+def Arithmetic : Theory ℒₒᵣ := insert induction 𝗣𝗔⁻
 
-notation "𝗭₂" => Z2
+notation "𝗭₂" => Arithmetic
 
 end Theory
 

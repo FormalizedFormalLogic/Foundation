@@ -9,7 +9,7 @@ public import Foundation.SecondOrder.Syntax.Rew
 `s“∀² X, ∀ x, x ∈ X → x + 0 = x”` denotes a second-order arithmetic formula.
 In `s“X Y ; x y. …”`, the headers name bound set and number variables, respectively;
 replace `.` by `|` to name free variables. Each header starts at index zero.
-Numerical terms use the first-order literal notation. Quantifiers maintain independent
+Numerical terms share the `first_order_term` syntax category. Quantifiers maintain independent
 stacks of set and number variables. Names cannot be repeated within either sort.
 
 `!!φ` inserts a formula unchanged. `!φ t₁ … tₙ` substitutes its bound number variables;
@@ -19,6 +19,13 @@ starting after the named number binders, as in the first-order notation.
 Parenthesize compound formula expressions, as in `!(f a)[X] x`.
 Sets can also be written `#i` (bound) or `&i` (free).
 
+The intermediate notation is `⤫formula[boundSets ; boundNumbers | freeSets ; freeNumbers | φ]`.
+Extend `second_order_formula` and add `macro_rules` for this notation to define new formula syntax.
+Every subformula passes through this notation, including under quantifiers.
+Numerical terms use `⤫term[boundNumbers | freeNumbers | t]`. Extend `first_order_term` and add
+`macro_rules` for this intermediate notation to define new term syntax, including inside arithmetic
+operations and substitution arguments.
+
 These syntax translations are specific to this formalization.
 -/
 
@@ -27,6 +34,46 @@ These syntax translations are specific to this formalization.
 namespace FFL.SecondOrder.BinderNotation
 
 open Lean FirstOrder FirstOrder.BinderNotation
+
+syntax "⤫term[" ident* " | " ident* " | " first_order_term:0 "]" : term
+
+macro_rules
+  | `(⤫term[ $xs* | $fx* | $t:first_order_term ]) =>
+    `(⤫term(lit)[ $xs* | $fx* | $t ])
+
+macro_rules
+  | `(⤫term[ $xs* | $fx* | ($t) ]) => `(⤫term[ $xs* | $fx* | $t ])
+  | `(⤫term[ $xs* | $fx* | $t + $u ]) =>
+    `(FirstOrder.Semiterm.Operator.Add.add.operator
+      ![⤫term[ $xs* | $fx* | $t ], ⤫term[ $xs* | $fx* | $u ]])
+  | `(⤫term[ $xs* | $fx* | $t * $u ]) =>
+    `(FirstOrder.Semiterm.Operator.Mul.mul.operator
+      ![⤫term[ $xs* | $fx* | $t ], ⤫term[ $xs* | $fx* | $u ]])
+  | `(⤫term[ $xs* | $fx* | $t ^ $u ]) =>
+    `(FirstOrder.Semiterm.Operator.Pow.pow.operator
+      ![⤫term[ $xs* | $fx* | $t ], ⤫term[ $xs* | $fx* | $u ]])
+  | `(⤫term[ $xs* | $fx* | $t ^' $n ]) =>
+    `((FirstOrder.Semiterm.Operator.npow _ $n).operator ![⤫term[ $xs* | $fx* | $t ]])
+  | `(⤫term[ $xs* | $fx* | $t² ]) =>
+    `(⤫term[ $xs* | $fx* | $t ^' 2 ])
+  | `(⤫term[ $xs* | $fx* | $t³ ]) =>
+    `(⤫term[ $xs* | $fx* | $t ^' 3 ])
+  | `(⤫term[ $xs* | $fx* | $t⁴ ]) =>
+    `(⤫term[ $xs* | $fx* | $t ^' 4 ])
+  | `(⤫term[ $xs* | $fx* | exp $t ]) =>
+    `(FirstOrder.Semiterm.Operator.Exp.exp.operator ![⤫term[ $xs* | $fx* | $t ]])
+  | `(⤫term[ $xs* | $fx* | !$t:term $vs:first_order_term* $[⋯%$tail]? ]) => do
+    let tail ← match tail with
+      | none => `(![])
+      | some _ => `(fun i => FirstOrder.Semiterm.bvar (finSuccItr i $(quote xs.size)))
+    let args ← vs.foldrM (fun v rest => `(⤫term[ $xs* | $fx* | $v ] :> $rest)) tail
+    `(FirstOrder.Rew.subst $args $t)
+  | `(⤫term[ $xs* | $fx* | .!$t:term $vs:first_order_term* $[⋯%$tail]? ]) => do
+    let tail ← match tail with
+      | none => `(![])
+      | some _ => `(fun i => FirstOrder.Semiterm.bvar (finSuccItr i $(quote xs.size)))
+    let args ← vs.foldrM (fun v rest => `(⤫term[ $xs* | $fx* | $v ] :> $rest)) tail
+    `(FirstOrder.Rew.embSubsts $args $t)
 
 declare_syntax_cat second_order_set
 declare_syntax_cat second_order_formula
@@ -76,6 +123,9 @@ syntax:60 "!" second_order_splice ("[" second_order_set* "]")?
 syntax:max "⋀ " ident ", " second_order_formula:0 : second_order_formula
 syntax:max "⋁ " ident ", " second_order_formula:0 : second_order_formula
 
+syntax "⤫formula[" ident* ";" ident* " | " ident* ";" ident* " | "
+  second_order_formula:0 "]" : term
+
 syntax "s“" second_order_formula:0 "”" : term
 syntax "s“" ident* ";" ident* "." second_order_formula:0 "”" : term
 syntax "s“" ident* ";" ident* "|" second_order_formula:0 "”" : term
@@ -104,118 +154,140 @@ private meta def membership (bound free : TSyntaxArray `ident)
     else Macro.throwErrorAt x "unknown set variable"
   | _ => Macro.throwUnsupported
 
-private meta partial def expand (sets fsets nums fnums : TSyntaxArray `ident)
-    (φ : TSyntax `second_order_formula) : MacroM (TSyntax `term) := do
-  let go := expand sets fsets nums fnums
-  let term := fun t => `(⤫term(lit)[$nums* | $fnums* | $t:first_order_term])
-  match φ with
-  | `(second_order_formula| ($p)) => go p
-  | `(second_order_formula| ⊤) => `(Semiformula.verum)
-  | `(second_order_formula| ⊥) => `(Semiformula.falsum)
-  | `(second_order_formula| $p ∧ $q) => `(Semiformula.and $(← go p) $(← go q))
-  | `(second_order_formula| $p ∨ $q) => `(Semiformula.or $(← go p) $(← go q))
-  | `(second_order_formula| ¬$p) => `(Semiformula.neg $(← go p))
-  | `(second_order_formula| $p → $q) => `($(← go p) 🡒 $(← go q))
-  | `(second_order_formula| $p ↔ $q) => `($(← go p) 🡘 $(← go q))
-  | `(second_order_formula| $t:first_order_term = $u:first_order_term) =>
-    `(Semiformula.rel Language.ORing.Rel.eq ![$(← term t), $(← term u)])
-  | `(second_order_formula| $t:first_order_term ≠ $u:first_order_term) =>
-    go (← `(second_order_formula| ¬($t:first_order_term = $u:first_order_term)))
-  | `(second_order_formula| $t:first_order_term < $u:first_order_term) =>
-    `(Semiformula.rel Language.ORing.Rel.lt ![$(← term t), $(← term u)])
-  | `(second_order_formula| $t:first_order_term ≤ $u:first_order_term) =>
-    go (← `(second_order_formula|
-      $t:first_order_term = $u:first_order_term ∨ $t:first_order_term < $u:first_order_term))
-  | `(second_order_formula| $t:first_order_term > $u:first_order_term) =>
-    go (← `(second_order_formula| $u:first_order_term < $t:first_order_term))
-  | `(second_order_formula| $t:first_order_term ≥ $u:first_order_term) =>
-    go (← `(second_order_formula| $u:first_order_term ≤ $t:first_order_term))
-  | `(second_order_formula| $t:first_order_term ≮ $u:first_order_term) =>
-    go (← `(second_order_formula| ¬($t:first_order_term < $u:first_order_term)))
-  | `(second_order_formula| $t:first_order_term ≰ $u:first_order_term) =>
-    go (← `(second_order_formula| ¬($t:first_order_term ≤ $u:first_order_term)))
-  | `(second_order_formula| $t:first_order_term ∈ $s:second_order_set) =>
-    membership sets fsets s (← term t)
-  | `(second_order_formula| $t:first_order_term ∉ $s:second_order_set) =>
-    `(Semiformula.neg $(← membership sets fsets s (← term t)))
-  | `(second_order_formula| ∀ $xs*, $p) =>
-    let mut p ← expand sets fsets (← extend nums fnums xs) fnums p
-    for _ in xs do p ← `(Semiformula.all₁ $p)
+macro_rules
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ($p) ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ])
+  | `(⤫formula[ $_* ; $_* | $_* ; $_* | ⊤ ]) =>
+    `(Semiformula.verum)
+  | `(⤫formula[ $_* ; $_* | $_* ; $_* | ⊥ ]) =>
+    `(Semiformula.falsum)
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ∧ $q ]) =>
+    `(Semiformula.and ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ]
+      ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $q ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ∨ $q ]) =>
+    `(Semiformula.or ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ]
+      ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $q ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ¬$p ]) =>
+    `(Semiformula.neg ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p → $q ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ] 🡒
+      ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $q ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ↔ $q ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ] 🡘
+      ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $q ])
+  | `(⤫formula[ $_* ; $xs* | $_* ; $fx* | $t:first_order_term = $u:first_order_term ]) =>
+    `(Semiformula.rel Language.ORing.Rel.eq
+      ![⤫term[ $xs* | $fx* | $t:first_order_term ],
+        ⤫term[ $xs* | $fx* | $u:first_order_term ]])
+  | `(⤫formula[ $_* ; $xs* | $_* ; $fx* | $t:first_order_term < $u:first_order_term ]) =>
+    `(Semiformula.rel Language.ORing.Rel.lt
+      ![⤫term[ $xs* | $fx* | $t:first_order_term ],
+        ⤫term[ $xs* | $fx* | $u:first_order_term ]])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $t:first_order_term ≠ $u:first_order_term ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* |
+      ¬($t:first_order_term = $u:first_order_term) ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $t:first_order_term ≤ $u:first_order_term ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* |
+      $t:first_order_term = $u:first_order_term ∨ $t:first_order_term < $u:first_order_term ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $t:first_order_term > $u:first_order_term ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* |
+      $u:first_order_term < $t:first_order_term ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $t:first_order_term ≥ $u:first_order_term ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* |
+      $u:first_order_term ≤ $t:first_order_term ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $t:first_order_term ≮ $u:first_order_term ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* |
+      ¬($t:first_order_term < $u:first_order_term) ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $t:first_order_term ≰ $u:first_order_term ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* |
+      ¬($t:first_order_term ≤ $u:first_order_term) ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $t:first_order_term ∈ $s:second_order_set ]) => do
+    membership ss fs s (← `(⤫term[ $xs* | $fx* | $t:first_order_term ]))
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $t:first_order_term ∉ $s:second_order_set ]) =>
+    `(Semiformula.neg
+      ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $t:first_order_term ∈ $s:second_order_set ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀ $vs*, $p ]) => do
+    let xs' ← extend xs fx vs
+    let mut p ← `(⤫formula[ $ss* ; $xs'* | $fs* ; $fx* | $p ])
+    for _ in vs do p ← `(Semiformula.all₁ $p)
     return p
-  | `(second_order_formula| ∃ $xs*, $p) =>
-    let mut p ← expand sets fsets (← extend nums fnums xs) fnums p
-    for _ in xs do p ← `(Semiformula.exs₁ $p)
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃ $vs*, $p ]) => do
+    let xs' ← extend xs fx vs
+    let mut p ← `(⤫formula[ $ss* ; $xs'* | $fs* ; $fx* | $p ])
+    for _ in vs do p ← `(Semiformula.exs₁ $p)
     return p
-  | `(second_order_formula| ∀² $xs*, $p) =>
-    let mut p ← expand (← extend sets fsets xs) fsets nums fnums p
-    for _ in xs do p ← `(Semiformula.all₂ $p)
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀² $vs*, $p ]) => do
+    let ss' ← extend ss fs vs
+    let mut p ← `(⤫formula[ $ss'* ; $xs* | $fs* ; $fx* | $p ])
+    for _ in vs do p ← `(Semiformula.all₂ $p)
     return p
-  | `(second_order_formula| ∃² $xs*, $p) =>
-    let mut p ← expand (← extend sets fsets xs) fsets nums fnums p
-    for _ in xs do p ← `(Semiformula.exs₂ $p)
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃² $vs*, $p ]) => do
+    let ss' ← extend ss fs vs
+    let mut p ← `(⤫formula[ $ss'* ; $xs* | $fs* ; $fx* | $p ])
+    for _ in vs do p ← `(Semiformula.exs₂ $p)
     return p
-  | `(second_order_formula| ∀¹ $p) =>
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀¹ $p ]) => do
     let x ← TSyntax.freshIdent
-    `(Semiformula.all₁ $(← expand sets fsets (#[x] ++ nums) fnums p))
-  | `(second_order_formula| ∃¹ $p) =>
+    `(Semiformula.all₁ ⤫formula[ $ss* ; $x $xs* | $fs* ; $fx* | $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃¹ $p ]) => do
     let x ← TSyntax.freshIdent
-    `(Semiformula.exs₁ $(← expand sets fsets (#[x] ++ nums) fnums p))
-  | `(second_order_formula| ∀² $p) =>
+    `(Semiformula.exs₁ ⤫formula[ $ss* ; $x $xs* | $fs* ; $fx* | $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀² $p ]) => do
     let x ← TSyntax.freshIdent
-    `(Semiformula.all₂ $(← expand (#[x] ++ sets) fsets nums fnums p))
-  | `(second_order_formula| ∃² $p) =>
+    `(Semiformula.all₂ ⤫formula[ $x $ss* ; $xs* | $fs* ; $fx* | $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃² $p ]) => do
     let x ← TSyntax.freshIdent
-    `(Semiformula.exs₂ $(← expand (#[x] ++ sets) fsets nums fnums p))
-  | `(second_order_formula| ∀ $x < $t, $p) => do
-    let t ← `(FirstOrder.Rew.bShift $(← term t))
-    go (← `(second_order_formula| ∀ $x, $x:ident < !!$t → $p))
-  | `(second_order_formula| ∃ $x < $t, $p) => do
-    let t ← `(FirstOrder.Rew.bShift $(← term t))
-    go (← `(second_order_formula| ∃ $x, $x:ident < !!$t ∧ $p))
-  | `(second_order_formula| ∀ $x ≤ $t, $p) => do
-    let t ← `(FirstOrder.Rew.bShift $(← term t))
-    go (← `(second_order_formula| ∀ $x, $x:ident ≤ !!$t → $p))
-  | `(second_order_formula| ∃ $x ≤ $t, $p) => do
-    let t ← `(FirstOrder.Rew.bShift $(← term t))
-    go (← `(second_order_formula| ∃ $x, $x:ident ≤ !!$t ∧ $p))
-  | `(second_order_formula| ∀ $x ∈ $s, $p) =>
-    go (← `(second_order_formula| ∀ $x, $x:ident ∈ $s:second_order_set → $p))
-  | `(second_order_formula| ∃ $x ∈ $s, $p) =>
-    go (← `(second_order_formula| ∃ $x, $x:ident ∈ $s:second_order_set ∧ $p))
-  | `(second_order_formula| !!$p:term) => return p
-  | `(second_order_formula| !$p:second_order_splice $[[$ss*]]? $ts* $[⋯%$tail]?) =>
+    `(Semiformula.exs₂ ⤫formula[ $x $ss* ; $xs* | $fs* ; $fx* | $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀ $x < $t, $p ]) => do
+    let t ← `(FirstOrder.Rew.bShift ⤫term[ $xs* | $fx* | $t:first_order_term ])
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀ $x, $x:ident < !!$t → $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃ $x < $t, $p ]) => do
+    let t ← `(FirstOrder.Rew.bShift ⤫term[ $xs* | $fx* | $t:first_order_term ])
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃ $x, $x:ident < !!$t ∧ $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀ $x ≤ $t, $p ]) => do
+    let t ← `(FirstOrder.Rew.bShift ⤫term[ $xs* | $fx* | $t:first_order_term ])
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀ $x, $x:ident ≤ !!$t → $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃ $x ≤ $t, $p ]) => do
+    let t ← `(FirstOrder.Rew.bShift ⤫term[ $xs* | $fx* | $t:first_order_term ])
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃ $x, $x:ident ≤ !!$t ∧ $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀ $x ∈ $s, $p ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∀ $x, $x:ident ∈ $s:second_order_set → $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃ $x ∈ $s, $p ]) =>
+    `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ∃ $x, $x:ident ∈ $s:second_order_set ∧ $p ])
+  | `(⤫formula[ $_* ; $_* | $_* ; $_* | !!$p:term ]) =>
+    pure p
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* |
+      !$p:second_order_splice $[[$ss₀*]]? $ts* $[⋯%$tail]? ]) => do
     let p : TSyntax `term ← match p with
       | `(second_order_splice| $p:ident) => pure ⟨p.raw⟩
       | `(second_order_splice| ($p:term)) => pure p
       | _ => Macro.throwUnsupported
-    let p ← match ss with
+    let p ← match ss₀ with
       | none => pure p
-      | some ss => do
-        let args ← ss.mapM fun s => do membership sets fsets s (← `(FirstOrder.Semiterm.bvar 0))
+      | some ss₀ => do
+        let args ← ss₀.mapM fun s => do membership ss fs s (← `(FirstOrder.Semiterm.bvar 0))
         `((SecondOrder.Rew.subst ![$args,*]).app $p)
     let tail ← match tail with
       | none => `(![])
-      | some _ => `(fun i => FirstOrder.Semiterm.bvar (finSuccItr i $(quote nums.size)))
-    let args ← ts.foldrM (fun t rest => do `($(← term t) :> $rest)) tail
+      | some _ => `(fun i => FirstOrder.Semiterm.bvar (finSuccItr i $(quote xs.size)))
+    let args ← ts.foldrM (fun t rest => `(⤫term[ $xs* | $fx* | $t ] :> $rest)) tail
     `(FirstOrder.Rewriting.subst $p $args)
-  | `(second_order_formula| ⋀ $i, $p) => `(Matrix.conj fun $i => $(← go p))
-  | `(second_order_formula| ⋁ $i, $p) => `(Matrix.disj fun $i => $(← go p))
-  | _ => Macro.throwUnsupported
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ⋀ $i, $p ]) =>
+    `(Matrix.conj fun $i => ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ])
+  | `(⤫formula[ $ss* ; $xs* | $fs* ; $fx* | ⋁ $i, $p ]) =>
+    `(Matrix.disj fun $i => ⤫formula[ $ss* ; $xs* | $fs* ; $fx* | $p ])
 
 macro_rules
-  | `(s“$p:second_order_formula”) => do
-    let p ← expand #[] #[] #[] #[] p
-    `(($p : SecondOrder.Semiformula ℒₒᵣ _ _ _ _))
+  | `(s“$p:second_order_formula”) =>
+    `((⤫formula[ ; | ; | $p ] : SecondOrder.Semiformula ℒₒᵣ _ _ _ _))
   | `(s“$ss* ; $xs*. $p:second_order_formula”) => do
     checkNames ss
     checkNames xs
-    let p ← expand ss #[] xs #[] p
-    `(($p : SecondOrder.Semiformula ℒₒᵣ _ _ _ _))
+    `((⤫formula[ $ss* ; $xs* | ; | $p ] : SecondOrder.Semiformula ℒₒᵣ _ _ _ _))
   | `(s“$ss* ; $xs* | $p:second_order_formula”) => do
     checkNames ss
     checkNames xs
-    let p ← expand #[] ss #[] xs p
-    `(($p : SecondOrder.Semiformula ℒₒᵣ _ _ _ _))
+    `((⤫formula[ ; | $ss* ; $xs* | $p ] : SecondOrder.Semiformula ℒₒᵣ _ _ _ _))
 
 open PrettyPrinter Delaborator SubExpr
 
