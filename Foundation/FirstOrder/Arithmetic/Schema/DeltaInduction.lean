@@ -3,15 +3,11 @@ module
 public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
-# The `Δ` induction scheme `𝗜𝚫` over the prenex hierarchy
-
-A $\Delta_s$ formula is not a syntactic class, so the induction scheme for it carries its own
-equivalence hypothesis: the axiom for a pair `φ`, `ψ` of $\Sigma_s$ formulas assumes that `φ` and
-`¬ψ` define the same set and concludes successor induction for `φ`.
+# The `Δ` induction scheme `𝗜𝚫`
 
 ## References
 
-- [Sla04, §1.2]
+- [Sla04]
 -/
 
 @[expose] public section

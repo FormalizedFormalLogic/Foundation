@@ -4,17 +4,11 @@ public import Foundation.FirstOrder.Arithmetic.Schema.DeltaInduction
 public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
 
 /-!
-# The `Δ` induction schemes between `𝗜𝚺 n` and `𝗕𝚺(n + 1)`
-
-A $\Delta_{n + 1}$ predicate of a model of `𝗕𝚺(n + 1)` is at once the existential quantification
-of a $\Pi_n$ relation and the complement of another such, and it obeys successor induction. In
-the other direction, a $\Sigma_n$ formula and its negation are equivalent to an admissible pair for
-the `Δ` induction axiom, so `𝗜𝚫 (n + 1)` proves `𝗜𝚺 n`.
+# `𝗜𝚺 n ⪯ 𝗜𝚫 (n + 1) ⪯ 𝗕𝚺 (n + 1)`
 
 ## References
 
-- [Sla04, §1.2]
-- [Sla04, §2.1]
+- [Sla04]
 -/
 
 @[expose] public section
