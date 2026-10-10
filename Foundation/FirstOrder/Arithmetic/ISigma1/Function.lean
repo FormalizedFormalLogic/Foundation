@@ -26,22 +26,6 @@ namespace Arithmetic
 
 open ArithmeticTheory Bounding.HierarchySymbol
 
-private def precBlueprint {n : ℕ} (ψ : 𝚺ᴬ₁.Semisentence (n + 1)) (χ : 𝚺ᴬ₁.Semisentence (n + 3)) :
-    PR.Blueprint n where
-  zero := ψ
-  succ := χ.rew (Rew.subst (#0 :> #2 :> #1 :> (#·.succ.succ.succ)))
-
-private def precConstruction {n : ℕ} {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-    {ψ : 𝚺ᴬ₁.Semisentence (n + 1)} {χ : 𝚺ᴬ₁.Semisentence (n + 3)}
-    {f : (Fin n → V) → V} {g : (Fin (n + 2) → V) → V}
-    (hf : 𝚺ᴬ₁.DefinedFunction f ψ) (hg : 𝚺ᴬ₁.DefinedFunction g χ) :
-    PR.Construction V (precBlueprint ψ χ) where
-  zero := f
-  succ := fun v i z ↦ g (i :> z :> v)
-  zero_defined := hf
-  succ_defined := .mk fun v ↦ by
-    simp [precBlueprint, Semiformula.eval_rew, Empty.eq_elim, hg.iff, Matrix.comp_vecCons']
-
 open ProvablyFunctionalVia in
 /-- Every primitive recursive function in the `List.Vector` form `Nat.Primrec'` is
 `𝗜𝚺₁`-provably functional.
@@ -77,18 +61,27 @@ theorem provablyFunctional_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ}
   | @prec n f g _ _ ihf ihg =>
     obtain ⟨ψ, hψ⟩ := ihf
     obtain ⟨χ, hχ⟩ := ihg
+    let bp : PR.Blueprint n := ⟨ψ, χ.rew (Rew.subst (#0 :> #2 :> #1 :> (#·.succ.succ.succ)))⟩
+    let con (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {F : (Fin n → V) → V}
+        {G : (Fin (n + 2) → V) → V} (hF : 𝚺ᴬ₁.DefinedFunction F ψ)
+        (hG : 𝚺ᴬ₁.DefinedFunction G χ) : PR.Construction V bp :=
+      { zero := F
+        succ := fun v i z ↦ G (i :> z :> v)
+        zero_defined := hF
+        succ_defined := .mk fun v ↦ by
+          simp [bp, Semiformula.eval_rew, Empty.eq_elim, hG.iff, Matrix.comp_vecCons'] }
     have h (v : Fin n → ℕ) (u : ℕ) :
-        (precConstruction hψ.defined hχ.defined).result v u =
+        (con ℕ hψ.defined hχ.defined).result v u =
           u.rec (f (.ofFn v)) fun y ih ↦ g (.ofFn (y :> ih :> v)) := by
       induction u with
-      | zero => simp [precConstruction]
-      | succ u ih => rw [PR.Construction.result_succ, ih]; rfl
+      | zero => simp [con]
+      | succ u ih => rw [PR.Construction.result_succ, ih]
     exact ⟨_, of_models (DefinedFunction.of_eq (fun v ↦ h _ _ |>.trans (by simp))
-      (precConstruction hψ.defined hχ.defined).result_defined) fun V _ _ ↦ by
+      (con ℕ hψ.defined hχ.defined).result_defined) fun V _ _ ↦ by
         have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ 𝗜𝚺₁ inferInstance
         obtain ⟨F, hF⟩ := hψ.models V
         obtain ⟨G, hG⟩ := hχ.models V
-        exact ⟨_, (precConstruction hF hG).result_defined⟩⟩
+        exact ⟨_, (con V hF hG).result_defined⟩⟩
 
 theorem provablyFunctional_of_primrec {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
     𝗜𝚺₁.ProvablyFunctional (fun v ↦ f (.ofFn v)) :=
