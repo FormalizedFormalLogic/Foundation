@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Syntax.Classical.Bounding
 public import Foundation.FirstOrder.Syntax.Classical.Padding
+public import Foundation.FirstOrder.Syntax.Classical.Eq
 
 /-!
 # Hierarchies over a bounding
@@ -345,6 +346,12 @@ lemma pi_of_pi_all [Small ℬ ξ] {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚷 (s + 1) (∀¹^[k] φ) ↔ ℬ.Hierarchy 𝚷 (s + 1) φ := by
   induction k <;> simp [allItr_succ, *]
 
+lemma allClosure [Small ℬ ξ] {φ : Semiformula L ξ n} (h : ℬ.Hierarchy 𝚷 (s + 1) φ) :
+    ℬ.Hierarchy 𝚷 (s + 1) (∀¹* φ) := by
+  induction n with
+  | zero => simpa using h
+  | succ n ih => exact ih (all h)
+
 lemma sigma_of_sigma_ex [Small ℬ ξ] {φ : Semiformula L ξ (n + 1)} :
     ℬ.Hierarchy 𝚺 s (∃¹ φ) → ℬ.Hierarchy 𝚺 s φ := by
   intro h;
@@ -607,6 +614,15 @@ lemma toPrenex {j : ℕ} {φ : Semiformula L ξ (n + s)}
     · apply ih
       rw [hΓ] at h ⊢
       exact h.pi
+
+lemma of_eqAxiom [L.Eq] [Small ℬ Empty] {σ : Sentence L} (hσ : 𝗘𝗤 L σ) :
+    ℬ.Hierarchy 𝚷 (s + 1) σ := by
+  rcases hσ with _ | _ | _ | ⟨f⟩ | ⟨r⟩
+  · simp
+  · simp
+  · simp
+  · exact allClosure (of_open (by simp [Semiformula.open_conj]))
+  · exact allClosure (of_open (by simp [Semiformula.open_conj]))
 
 end Hierarchy
 

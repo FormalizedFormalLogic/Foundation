@@ -61,6 +61,7 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.LE
 public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
+public import Foundation.FirstOrder.Arithmetic.Model.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 public import Foundation.FirstOrder.Arithmetic.PA.Prenex
