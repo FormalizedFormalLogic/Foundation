@@ -24,8 +24,7 @@ namespace FFL.FirstOrder
 
 namespace Arithmetic
 
-section
-variable {k l : ℕ} {V : Type*} [ORingStructure V]
+variable {k : ℕ} {V : Type*} [ORingStructure V]
 
 def totalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence := ∀¹* ∃¹ φ.val
 
@@ -52,29 +51,6 @@ lemma models_functionalitySentence_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
       φ.val.Evalb (y :> v) → φ.val.Evalb (y' :> v) → y = y' := by
   simp [functionalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
     Matrix.comp_vecCons', Empty.eq_elim]
-
-def compGraph (ψ : 𝚺ᴬ₁.Semisentence (l + 1)) (χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)) :
-    𝚺ᴬ₁.Semisentence (k + 1) :=
-  .mkSigma
-    (Rew.bind ![] (#·) ▹ (∃¹* ((Rew.bind (&0 :> (#·)) Empty.elim ▹ ψ.val) ⋏
-      Matrix.conj fun i ↦ Rew.bind (#i :> (&·.succ)) Empty.elim ▹ (χ i).val)))
-    (Bounding.Hierarchy.rew _ (Bounding.Hierarchy.exsClosure (by simp)))
-
-@[simp] lemma eval_compGraph (ψ : 𝚺ᴬ₁.Semisentence (l + 1))
-    (χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
-    (compGraph ψ χ).val.Evalb w ↔
-      ∃ z : Fin l → V, ψ.val.Evalb (w 0 :> z) ∧ ∀ i, (χ i).val.Evalb (z i :> (w ·.succ)) := by
-  simp [compGraph, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
-    Matrix.comp_vecCons', Empty.eq_elim]
-
-lemma definedFunction_compGraph {ψ : 𝚺ᴬ₁.Semisentence (l + 1)}
-    {χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V}
-    (hf : 𝚺ᴬ₁.DefinedFunction f ψ) (hg : ∀ i, 𝚺ᴬ₁.DefinedFunction (g i) (χ i)) :
-    𝚺ᴬ₁.DefinedFunction (fun v ↦ f fun i ↦ g i v) (compGraph ψ χ) :=
-  .mk fun w ↦ by
-    simp only [eval_compGraph, hf.iff, (hg _).iff, Matrix.cons_val_zero, Matrix.cons_val_succ]
-    exact ⟨fun ⟨z, hz, hχ⟩ ↦ by simpa [funext hχ] using hz,
-      fun e ↦ ⟨_, by simpa using e, fun _ ↦ rfl⟩⟩
 
 noncomputable def minimalGraphMatrix (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : 𝚺ᴬ₀.Semisentence (k + 2) :=
   .mkSigma (Classical.choose (Bounding.Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺)
@@ -195,8 +171,6 @@ private lemma models_existsUnique_minimalPairGraph {θ : 𝚺ᴬ₀.Semisentence
     · rfl
     · exact absurd hy'A (hyC y' hlt)
 
-end
-
 end Arithmetic
 
 open Arithmetic
@@ -293,20 +267,6 @@ lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTota
     exact (models_existsUnique_minimalGraph ⟨y₀, hy₀⟩).2 y y' hy hy'
   exact ⟨⟨hdef, hT⟩, hF⟩
 
-section
-variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
-  {ψ : 𝚺ᴬ₁.Semisentence (l + 1)} {χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)}
-
-lemma comp [𝗘𝗤 ℒₒᵣ ⪯ T] (hg : T.ProvablyTotalVia g ψ) (hh : ∀ i, T.ProvablyTotalVia (h i) (χ i)) :
-    T.ProvablyTotalVia (fun v ↦ g fun i ↦ h i v) (compGraph ψ χ) := by
-  apply of_models (definedFunction_compGraph hg.defined fun i ↦ (hh i).defined)
-  intro V _ _ v
-  choose z hz using fun i ↦ (hh i).models V v
-  obtain ⟨y, hy⟩ := hg.models V z
-  exact ⟨y, by simpa using ⟨z, hy, hz⟩⟩
-
-end
-
 end ProvablyTotalVia
 
 namespace ProvablyFunctionalVia
@@ -340,17 +300,6 @@ lemma of_Pi2_conservative
     T.ProvablyTotal f → U.ProvablyTotal f :=
   fun ⟨_, h⟩ ↦ ⟨_, h.of_Pi2_conservative H⟩
 
-section
-variable [𝗘𝗤 ℒₒᵣ ⪯ T] {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
-
-lemma comp (hg : T.ProvablyTotal g) (hh : ∀ i, T.ProvablyTotal (h i)) :
-    T.ProvablyTotal fun v ↦ g fun i ↦ h i v :=
-  have ⟨_, hg⟩ := hg
-  have ⟨_, hh⟩ := Classical.skolem.mp hh
-  ⟨_, hg.comp hh⟩
-
-end
-
 end ProvablyTotal
 
 lemma provablyTotalFunctions_subset (h : T ⪯ U) :
@@ -360,18 +309,61 @@ lemma provablyTotalFunctions_subset_of_Pi2_conservative
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2_conservative H
 
-namespace ProvablyFunctional
-
-lemma toProvablyTotal : T.ProvablyFunctional f → T.ProvablyTotal f :=
+lemma ProvablyFunctional.toProvablyTotal : T.ProvablyFunctional f → T.ProvablyTotal f :=
   fun ⟨_, h⟩ ↦ ⟨_, h.toProvablyTotalVia⟩
-
-end ProvablyFunctional
 
 theorem provablyTotal_iff_provablyFunctional [𝗕𝚺₁ ⪯ T] :
     T.ProvablyTotal f ↔ T.ProvablyFunctional f :=
-  ⟨fun ⟨_, h⟩ ↦ ⟨_, h.provablyFunctionalVia_minimalGraph⟩,
-    fun ⟨_, h⟩ ↦ ⟨_, h.toProvablyTotalVia⟩⟩
+  ⟨fun ⟨_, h⟩ ↦ ⟨_, h.provablyFunctionalVia_minimalGraph⟩, ProvablyFunctional.toProvablyTotal⟩
 
 end ArithmeticTheory
+
+/-! ### Composition -/
+
+section
+variable {T : ArithmeticTheory} {k l : ℕ} {V : Type*} [ORingStructure V]
+
+def Arithmetic.compGraph (ψ : 𝚺ᴬ₁.Semisentence (l + 1)) (χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)) :
+    𝚺ᴬ₁.Semisentence (k + 1) :=
+  .mkSigma
+    (Rew.bind ![] (#·) ▹ (∃¹* ((Rew.bind (&0 :> (#·)) Empty.elim ▹ ψ.val) ⋏
+      Matrix.conj fun i ↦ Rew.bind (#i :> (&·.succ)) Empty.elim ▹ (χ i).val)))
+    (Bounding.Hierarchy.rew _ (Bounding.Hierarchy.exsClosure (by simp)))
+
+@[simp] lemma Arithmetic.eval_compGraph (ψ : 𝚺ᴬ₁.Semisentence (l + 1))
+    (χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
+    (compGraph ψ χ).val.Evalb w ↔
+      ∃ z : Fin l → V, ψ.val.Evalb (w 0 :> z) ∧ ∀ i, (χ i).val.Evalb (z i :> (w ·.succ)) := by
+  simp [compGraph, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
+    Matrix.comp_vecCons', Empty.eq_elim]
+
+lemma Arithmetic.definedFunction_compGraph {ψ : 𝚺ᴬ₁.Semisentence (l + 1)}
+    {χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V}
+    (hf : 𝚺ᴬ₁.DefinedFunction f ψ) (hg : ∀ i, 𝚺ᴬ₁.DefinedFunction (g i) (χ i)) :
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ f fun i ↦ g i v) (compGraph ψ χ) :=
+  .mk fun w ↦ by
+    simp only [eval_compGraph, hf.iff, (hg _).iff, Matrix.cons_val_zero, Matrix.cons_val_succ]
+    exact ⟨fun ⟨z, hz, hχ⟩ ↦ by simpa [funext hχ] using hz,
+      fun e ↦ ⟨_, by simpa using e, fun _ ↦ rfl⟩⟩
+
+lemma ArithmeticTheory.ProvablyTotalVia.comp [𝗘𝗤 ℒₒᵣ ⪯ T] {g : (Fin l → ℕ) → ℕ}
+    {h : Fin l → (Fin k → ℕ) → ℕ} {ψ : 𝚺ᴬ₁.Semisentence (l + 1)}
+    {χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)} (hg : T.ProvablyTotalVia g ψ)
+    (hh : ∀ i, T.ProvablyTotalVia (h i) (χ i)) :
+    T.ProvablyTotalVia (fun v ↦ g fun i ↦ h i v) (compGraph ψ χ) := by
+  apply of_models (definedFunction_compGraph hg.defined fun i ↦ (hh i).defined)
+  intro V _ _ v
+  choose z hz using fun i ↦ (hh i).models V v
+  obtain ⟨y, hy⟩ := hg.models V z
+  exact ⟨y, by simpa using ⟨z, hy, hz⟩⟩
+
+lemma ArithmeticTheory.ProvablyTotal.comp [𝗘𝗤 ℒₒᵣ ⪯ T] {g : (Fin l → ℕ) → ℕ}
+    {h : Fin l → (Fin k → ℕ) → ℕ} (hg : T.ProvablyTotal g) (hh : ∀ i, T.ProvablyTotal (h i)) :
+    T.ProvablyTotal fun v ↦ g fun i ↦ h i v :=
+  have ⟨_, hg⟩ := hg
+  have ⟨_, hh⟩ := Classical.skolem.mp hh
+  ⟨_, hg.comp hh⟩
+
+end
 
 end FFL.FirstOrder
