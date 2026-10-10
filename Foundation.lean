@@ -47,6 +47,7 @@ public import Foundation.FirstOrder.Arithmetic.Exponential.Exp
 public import Foundation.FirstOrder.Arithmetic.Exponential.Log
 public import Foundation.FirstOrder.Arithmetic.Exponential.PPow2
 public import Foundation.FirstOrder.Arithmetic.Exponential.Pow2
+public import Foundation.FirstOrder.Arithmetic.Function.Basic
 public import Foundation.FirstOrder.Arithmetic.HFS
 public import Foundation.FirstOrder.Arithmetic.HFS.Basic
 public import Foundation.FirstOrder.Arithmetic.HFS.Coding
@@ -56,6 +57,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+public import Foundation.FirstOrder.Arithmetic.ISigma1.Function
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
@@ -287,6 +289,7 @@ public import Foundation.Vorspiel.IsEmpty
 public import Foundation.Vorspiel.List.Basic
 public import Foundation.Vorspiel.List.ChainI
 public import Foundation.Vorspiel.List.OAOO
+public import Foundation.Vorspiel.List.Vector
 public import Foundation.Vorspiel.Matrix
 public import Foundation.Vorspiel.Multiset
 public import Foundation.Vorspiel.Nat.Basic
