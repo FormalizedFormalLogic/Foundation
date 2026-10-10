@@ -56,6 +56,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+public import Foundation.FirstOrder.Arithmetic.ISigma0.Parikh
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
@@ -65,7 +66,6 @@ public import Foundation.FirstOrder.Arithmetic.Model.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 public import Foundation.FirstOrder.Arithmetic.PA.Prenex
-public import Foundation.FirstOrder.Arithmetic.Parikh
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Q

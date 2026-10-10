@@ -85,6 +85,12 @@ lemma complete (T : ArithmeticTheory) [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : Arithmeti
   rcases standardModel_unique M s
   exact H M
 
+lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T]
+    {σ : ArithmeticSentence} (h : T ⊬ σ) :
+    ∃ (M : Type) (_ : ORingStructure M) (_ : M↓[ℒₒᵣ] ⊧* T), ¬M↓[ℒₒᵣ] ⊧ σ := by
+  by_contra! hc
+  exact h (complete T σ fun M _ _ ↦ hc M ‹_› ‹_›)
+
 lemma provable_iff_of_models_iff {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T] {n}
     {φ ψ : ArithmeticSemisentence n}
     (h : ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (e : Fin n → V),

@@ -137,12 +137,6 @@ lemma models_of_lMap_image_subset {U : ArithmeticTheory}
 
 end
 
-lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T]
-    {σ : ArithmeticSentence} (h : T ⊬ σ) :
-    ∃ (M : Type) (_ : ORingStructure M) (_ : M↓[ℒₒᵣ] ⊧* T), ¬M↓[ℒₒᵣ] ⊧ σ := by
-  by_contra! hc
-  exact h (complete T σ fun M _ _ ↦ hc M ‹_› ‹_›)
-
 section termCut
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
@@ -161,18 +155,18 @@ private instance termCut_closed (c : Fin k → M) : (termCut c).Closed where
 
 end termCut
 
-theorem exists_term_bounded_witness_of_provable
-    (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Closure φ)
-    (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) :
-  ∃ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊢ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ := by
+lemma exists_model_without_term_bounded_witness
+    (φ : ArithmeticSemisentence (k + 1))
+    (hcon : ∀ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊬ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ) :
+    ∃ (M : Type) (_ : ORingStructure M) (_ : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀) (c : Fin k → M),
+      ∀ (t : ClosedSemiterm ℒₒᵣ k), ∀ y < t.valb c, ¬φ.Evalb (y :> c) := by
   set Tn : ℕ → Theory (Language.oringConst k) := fun n ↦ 𝗘𝗤 _
     ∪ Semiformula.lMap (Language.Hom.oringConst k) '' 𝗜𝚺₀
     ∪ (fun t : ClosedSemiterm ℒₒᵣ k ↦ lift ((∼φ).ballLT t)) '' {t | Encodable.encode t < n}
   set T := ⋃ n, Tn n;
   have : Cumulative Tn := fun _ =>
     Set.union_subset_union_right _ (Set.image_mono fun _ ht ↦ Nat.lt_succ_of_lt ht);
-  by_contra! hcon
-  have sat : Satisfiable T := (Compact.compact_cumulative ‹_›).mpr <| by
+  have sat : Satisfiable T := Compact.satisfiable_iUnion ‹_› <| by
     intro n;
     obtain ⟨M, _, _, hM⟩ := exists_countermodel_of_unprovable <| hcon <| dominatingTerm k n;
     obtain ⟨a, ha⟩ : ∃ a : Fin k → M, ∀ y < (dominatingTerm k n).valb a, ¬φ.Evalb (y :> a) := by
@@ -189,31 +183,46 @@ theorem exists_term_bounded_witness_of_provable
   have : 𝗘𝗤 (Language.oringConst k) ⪯ T := WeakerThan.ofSubset
     <| Set.subset_iUnion_of_subset 0
     <| Set.subset_union_of_subset_left Set.subset_union_left _
-  have hM : (ModelOfSatEq sat)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_lMap_image_subset sat
+  refine ⟨ModelOfSatEq sat, inferInstance, models_of_lMap_image_subset sat
     <| Set.subset_iUnion_of_subset 0
-    <| Set.subset_union_of_subset_left Set.subset_union_right _
-  have hunbounded : ∀ (t : ClosedSemiterm ℒₒᵣ k) (y), y < t.valb (cstVal sat) →
-      ¬φ.Evalb (y :> cstVal sat) := by
-    intro t;
-    simpa [models_lift_iff, eval_ballLT] using modelsSet_iff.mp (ModelOfSatEq.models sat)
-      <| Set.mem_iUnion_of_mem (Encodable.encode t + 1)
-      <| Set.mem_union_right _ ⟨t, Nat.lt_succ_self _, rfl⟩
-  set K : Cut (ModelOfSatEq sat) := termCut (cstVal sat);
+    <| Set.subset_union_of_subset_left Set.subset_union_right _, cstVal sat, ?_⟩
+  intro t
+  simpa [models_lift_iff, eval_ballLT] using modelsSet_iff.mp (ModelOfSatEq.models sat)
+    <| Set.mem_iUnion_of_mem (Encodable.encode t + 1)
+    <| Set.mem_union_right _ ⟨t, Nat.lt_succ_self _, rfl⟩
+
+lemma exists_term_bounded_witness_of_models {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
+    (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Closure φ)
+    (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) (c : Fin k → M) :
+    ∃ (t : ClosedSemiterm ℒₒᵣ k), ∃ y < t.valb c, φ.Evalb (y :> c) := by
+  set K : Cut M := termCut c;
   let _ : K.Closed := termCut_closed _
-  let _ : ↥K.carrier ⊆ₑ ModelOfSatEq sat := K.endExtension
-  have hK : (↥K.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
-    EndExtension.models_ISigma0 (N := ModelOfSatEq sat)
+  let _ : ↥K.carrier ⊆ₑ M := K.endExtension
+  have hK : (↥K.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := EndExtension.models_ISigma0 (N := M)
   have hwit : ∀ w : Fin k → ↥K.carrier, ∃ b, φ.Evalb (b :> w) := by
     simpa [models_iff, eval_allClosure] using models_of_provable hK h
-  obtain ⟨b, hb⟩ := hwit fun i ↦ ⟨cstVal sat i, Semiterm.bvar i, by simp⟩
-  obtain ⟨t, ht⟩ : ∃ t : ClosedSemiterm ℒₒᵣ k, (b : ModelOfSatEq sat) ≤ t.valb (cstVal sat) := b.2
-  have hbM : φ.Evalb ((b : ModelOfSatEq sat) :> cstVal sat) := by
+  obtain ⟨b, hb⟩ := hwit fun i ↦ ⟨c i, Semiterm.bvar i, by simp⟩
+  obtain ⟨t, ht⟩ : ∃ t : ClosedSemiterm ℒₒᵣ k, (b : M) ≤ t.valb c := b.2
+  have hbM : φ.Evalb ((b : M) :> c) := by
     have h₂ := (Bounding.bounded_absolute (ι := K.endExtension.emb) hφ _ Empty.elim).mp hb
     simp only [Matrix.comp_vecCons'', Empty.eq_elim] at h₂
     exact h₂
-  exact hunbounded ‘!!t + 1’ b (by simpa using lt_succ_iff_le.mpr ht) hbM
+  exact ⟨‘!!t + 1’, b, by simpa using lt_succ_iff_le.mpr ht, hbM⟩
+
+namespace ISigma0
+
+theorem exists_term_bounded_witness_of_provable
+    (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Closure φ)
+    (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) :
+  ∃ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊢ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ := by
+  by_contra! hcon
+  obtain ⟨M, _, _, c, hc⟩ := exists_model_without_term_bounded_witness φ hcon
+  obtain ⟨t, y, hy, hφy⟩ := exists_term_bounded_witness_of_models φ hφ h c
+  exact hc t y hy hφy
 
 alias parikh := exists_term_bounded_witness_of_provable
+
+end ISigma0
 
 end Arithmetic
 
