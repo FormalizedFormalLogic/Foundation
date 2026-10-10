@@ -251,7 +251,20 @@ section ISigma_BSigma_succ
 
 /-! ### `𝗜𝚺⁺ s` from `𝗕𝚺 (s + 1)` -/
 
-variable {P : V → Prop} {Q : V → V → Prop}
+variable {P : V → Prop} {Q R : V → V → Prop}
+
+private lemma definablePred_lt_or_witness_below [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hQ : 𝚷ᴬ_[s].DefinableRel Q)
+    (a b : V) : 𝚷ᴬ_[s].DefinablePred fun x ↦ a < x ∨ ∃ y < b, Q x y := by
+  have h₁ : 𝚷ᴬ_[s].Definable fun v : Fin 1 → V ↦ a < v 0 :=
+    .of_iff
+      (Definable.retractiont (n := 1)
+        (inferInstance : 𝚷ᴬ_[s].DefinableRel (LT.lt : V → V → Prop)) ![&a, #0])
+      (by intro v; simp)
+  have h₂ : 𝚷ᴬ_[s].Definable
+      fun v : Fin 1 → V ↦ ∃ y < (&b : ArithmeticSemiterm V 1).val v id, Q (v 0) y := by
+    apply Definable.arithmetic_bexs
+    exact .of_iff (hQ.retraction ![1, 0]) (by intro w; simp)
+  exact (h₁.or h₂).of_iff (by intro v; simp)
 
 lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] [V↓[ℒₒᵣ] ⊧* 𝗕𝚷(s + 1)]
     (hQ : 𝚷ᴬ_[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
@@ -274,15 +287,7 @@ lemma succ_induction_of_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] [V↓[ℒ�
   obtain ⟨w₀, hw₀⟩ := (hPQ 0).mp zero;
   obtain ⟨b, hvb, hw₀b⟩ : ∃ b : V, v ≤ b ∧ w₀ < b :=
     ⟨max v (w₀ + 1), le_max_left _ _, lt_of_lt_of_le (lt_add_one w₀) (le_max_right _ _)⟩;
-  have hbdd : 𝚷ᴬ_[s].DefinablePred fun x ↦ a < x ∨ ∃ y < b, Q x y := by
-    have hlt : 𝚷ᴬ_[s].Definable fun v : Fin 1 → V ↦ a < v 0 := .of_iff
-      (Definable.retractiont (n := 1)
-        (inferInstance : 𝚷ᴬ_[s].DefinableRel (LT.lt : V → V → Prop)) ![&a, #0]) (by intro v; simp);
-    have hbexs : 𝚷ᴬ_[s].Definable
-        fun v : Fin 1 → V ↦ ∃ y < (&b : ArithmeticSemiterm V 1).val v id, Q (v 0) y := by
-      apply Definable.arithmetic_bexs;
-      exact .of_iff (hQ.retraction ![1, 0]) (by intro w; simp);
-    exact (hlt.or hbexs).of_iff (by intro v; simp);
+  have hbdd := definablePred_lt_or_witness_below hQ a b;
   have key : ∀ x, a < x ∨ ∃ y < b, Q x y := by
     apply InductionOnHierarchy.succ_induction 𝚷 s hbdd;
     · right;
@@ -325,6 +330,40 @@ lemma models_IBroadSigma_of_models_BSigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s 
     obtain ⟨Q, hQ, hiff⟩ := exists_pi_definableRel_iff
       (Bounding.definablePred_of_hierarchy hφ f);
     exact succ_induction_of_exists_pi hQ hiff;
+
+lemma succ_induction_of_complementary_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s + 1)]
+    (hQ : 𝚷ᴬ_[s].DefinableRel Q) (hR : 𝚷ᴬ_[s].DefinableRel R) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
+    (hPR : ∀ x, ¬P x ↔ ∃ w, R x w) (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s + 1))
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := models_IBroadSigma_of_models_BSigma_succ
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s :=
+    have : 𝗕𝚷 s ⪯ 𝗕𝚺 (s + 1) := CollectionOnPrenexHierarchy_weakerThan_BSigma_succ 𝚷 s
+    models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s + 1))
+  intro a
+  by_contra ha
+  have hQR : 𝚷ᴬ_[s].DefinableRel fun x y ↦ Q x y ∨ R x y := .of_iff (hQ.or hR) (by intro v; simp)
+  obtain ⟨b, hb⟩ := CollectionOnPrenexHierarchy.collection_of_definable (Γ := 𝚷) hQR (a + 1) <| by
+    intro x _
+    by_cases hx : P x
+    · exact ((hPQ x).mp hx).imp fun w hw ↦ Or.inl hw
+    · exact ((hPR x).mp hx).imp fun w hw ↦ Or.inr hw
+  have h : ∀ x < a + 1, P x → ∃ y < b, Q x y := by
+    intro x hx hPx
+    obtain ⟨y, hy, hQy | hRy⟩ := hb x hx
+    · exact ⟨y, hy, hQy⟩
+    · exact absurd hPx ((hPR x).mpr ⟨y, hRy⟩)
+  have key : ∀ x, a < x ∨ ∃ y < b, Q x y := by
+    apply InductionOnHierarchy.succ_induction 𝚷 s (definablePred_lt_or_witness_below hQ a b)
+    · exact Or.inr (h 0 (lt_of_le_of_lt (by simp) (lt_add_one a)) zero)
+    · rintro x (hx | ⟨y, -, hy⟩)
+      · exact Or.inl (lt_trans hx (lt_add_one x))
+      · rcases lt_or_ge a (x + 1) with hax | hax
+        · exact Or.inl hax
+        · exact Or.inr <|
+            h (x + 1) (lt_of_le_of_lt hax (lt_add_one a)) (succ x ((hPQ x).mpr ⟨y, hy⟩))
+  obtain hy | ⟨y, -, hy⟩ := key a
+  · exact absurd hy (lt_irrefl a)
+  · exact ha ((hPQ a).mpr ⟨y, hy⟩)
 
 @[instance]
 theorem IBroadSigma_weakerThan_BSigma_succ : 𝗜𝚺⁺ s ⪯ 𝗕𝚺 (s + 1) :=

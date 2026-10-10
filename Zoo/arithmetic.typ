@@ -11,6 +11,7 @@
 #let LPi(n) = $Theory(L)Pi_#n$
 #let BSigma(n) = $Theory(B)Sigma_#n$
 #let BPi(n) = $Theory(B)Pi_#n$
+#let IDelta(n) = $Theory(I)Delta_#n$
 #let IBroadSigma(n) = $Theory(I)Sigma^+_#n$
 
 // Keys are the theories as pretty-printed by `lake exe zoo_arithmetic`; a theory with no entry
@@ -31,6 +32,9 @@
       "𝗜𝚺⁺₀": IBroadSigma(0),
       "𝗜𝚺⁺₁": IBroadSigma(1),
       "𝗜𝚺2": ISigma(2),
+      "𝗜𝚫₀": IDelta(0),
+      "𝗜𝚫₁": IDelta(1),
+      "𝗜𝚫 2": IDelta(2),
       "𝗜𝚷₁": IPi(1),
       "𝗜𝚷2": IPi(2),
       "𝗟𝚺1": LSigma(1),
