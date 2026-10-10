@@ -4,9 +4,7 @@ public import Foundation.SecondOrder.Syntax.Rew
 public import Foundation.Logic.Calculus
 
 /-!
-# Second-order one-sided $\mathbf{LK}$
-
-The structural rules are the standard local weakening and contraction rules.
+# Second-order $\mathbf{LK}$
 -/
 
 @[expose] public section

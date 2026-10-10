@@ -3,9 +3,7 @@ module
 public import Foundation.SecondOrder.LK.Basic
 
 /-!
-# Second-order one-sided $\mathbf{LK}$ with restricted comprehension
-
-The structural rules are the standard local weakening and contraction rules.
+# Second-order $\mathbf{LK}$ with restricted comprehension
 -/
 
 @[expose] public section
