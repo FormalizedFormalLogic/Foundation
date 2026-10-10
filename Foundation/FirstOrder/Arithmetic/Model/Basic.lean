@@ -24,7 +24,6 @@ universe u v
 
 variable {ξ : Type*} {M : Type u} {N : Type v} [ORingStructure M]
 
-/-- `N` is an end extension of `M`. -/
 class EndExtension (M : outParam (Type u)) (N : Type v) [ORingStructure M] where
   [oring : ORingStructure N]
   emb : M ↪ₛ[ℒₒᵣ] N
@@ -32,7 +31,6 @@ class EndExtension (M : outParam (Type u)) (N : Type v) [ORingStructure M] where
 
 @[inherit_doc] infix:50 " ⊆ₑ " => EndExtension
 
-/-- `N` is a proper end extension of `M`. -/
 class ProperEndExtension (M : outParam (Type u)) (N : Type v) [ORingStructure M]
     extends EndExtension M N where
   not_surjective : ¬Function.Surjective emb
