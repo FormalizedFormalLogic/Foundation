@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Model.Basic
 /-!
 # Parikh's theorem
 
-An `𝗜𝚺₀`-provable $\Pi^0_2$ sentence with a $\Delta_0$ matrix is provable with the existential
+An `𝗜𝚺₀`-provable $\Pi_2$ sentence with a $\Delta_0$ matrix is provable with the existential
 quantifier bounded by a term.
 
 ## References
@@ -165,15 +165,13 @@ theorem exists_term_bounded_witness_of_provable
     (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Closure φ)
     (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) :
   ∃ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊢ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ := by
-  by_contra! hcon
-  set Tn : ℕ → Theory (Language.oringConst k) := fun n ↦
-    𝗘𝗤 _
+  set Tn : ℕ → Theory (Language.oringConst k) := fun n ↦ 𝗘𝗤 _
     ∪ Semiformula.lMap (Language.Hom.oringConst k) '' 𝗜𝚺₀
     ∪ (fun t : ClosedSemiterm ℒₒᵣ k ↦ lift ((∼φ).ballLT t)) '' {t | Encodable.encode t < n}
-  have : Cumulative Tn := by
-    intro;
-    exact Set.union_subset_union_right _ (Set.image_mono fun _ ht ↦ Nat.lt_succ_of_lt ht);
   set T := ⋃ n, Tn n;
+  have : Cumulative Tn := fun _ =>
+    Set.union_subset_union_right _ (Set.image_mono fun _ ht ↦ Nat.lt_succ_of_lt ht);
+  by_contra! hcon
   have sat : Satisfiable T := (Compact.compact_cumulative ‹_›).mpr <| by
     intro n;
     obtain ⟨M, _, _, hM⟩ := exists_countermodel_of_unprovable <| hcon <| dominatingTerm k n;
@@ -210,8 +208,7 @@ theorem exists_term_bounded_witness_of_provable
   obtain ⟨b, hb⟩ := hwit fun i ↦ ⟨cstVal sat i, Semiterm.bvar i, by simp⟩
   obtain ⟨t, ht⟩ : ∃ t : ClosedSemiterm ℒₒᵣ k, (b : ModelOfSatEq sat) ≤ t.valb (cstVal sat) := b.2
   have hbM : φ.Evalb ((b : ModelOfSatEq sat) :> cstVal sat) := by
-    have h₂ :=
-      (Bounding.bounded_absolute (ι := K.endExtension.emb) hφ _ Empty.elim).mp hb
+    have h₂ := (Bounding.bounded_absolute (ι := K.endExtension.emb) hφ _ Empty.elim).mp hb
     simp only [Matrix.comp_vecCons'', Empty.eq_elim] at h₂
     exact h₂
   exact hunbounded ‘!!t + 1’ b (by simpa using lt_succ_iff_le.mpr ht) hbM
