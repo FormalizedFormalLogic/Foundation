@@ -11,7 +11,7 @@ of the code of a prenex formula with a $\Delta_0$ matrix exactly when the formul
 
 ## References
 
-- [HP98, 1.64(5), Theorem I.1.70, Remark I.1.77, Remark I.1.80]
+- [HP98]
 -/
 
 @[expose] public section

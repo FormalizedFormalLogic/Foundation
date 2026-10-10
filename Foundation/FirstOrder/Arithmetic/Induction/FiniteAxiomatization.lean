@@ -12,7 +12,7 @@ the partial satisfaction `prenexSatisfied 𝚺 (n + 1)`, is a finite theory equi
 
 ## References
 
-- [HP98, Theorem I.2.52]
+- [HP98]
 -/
 
 @[expose] public section
