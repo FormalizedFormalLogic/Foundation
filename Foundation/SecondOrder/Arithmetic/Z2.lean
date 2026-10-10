@@ -5,7 +5,7 @@ public import Foundation.SecondOrder.Syntax.BinderNotation
 public import Foundation.SecondOrder.LK.Basic
 
 /-!
-# Second-order arithmetic: $\mathsf{Z}_2$
+# Second-order arithmetic: $\mathsf{Z_2}$
 -/
 
 @[expose] public section

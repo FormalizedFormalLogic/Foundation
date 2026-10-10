@@ -5,8 +5,6 @@ public import Foundation.SecondOrder.LK.RestrictedComprehension
 
 /-!
 # Theory $\mathsf{ACA_0}$
-
-The structural rules are the standard local weakening and contraction rules.
 -/
 
 @[expose] public section

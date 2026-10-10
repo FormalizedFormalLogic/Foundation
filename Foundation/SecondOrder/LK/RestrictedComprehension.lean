@@ -18,61 +18,144 @@ variable {L : Language}
 
 namespace LK.Derivation
 
-def RestrictedComprehension (C : Semiproposition L 0 1 → Prop) :
+inductive RestrictedComprehension (C : Semiproposition L 0 1 → Prop) :
     {Γ : Sequent L} → Derivation Γ → Prop
-  | _, .identity => True
-  | _, .cut d₁ d₂ => d₁.RestrictedComprehension C ∧ d₂.RestrictedComprehension C
-  | _, .contraction d => d.RestrictedComprehension C
-  | _, .weakening d => d.RestrictedComprehension C
-  | _, .verum => True
-  | _, .and d₁ d₂ => d₁.RestrictedComprehension C ∧ d₂.RestrictedComprehension C
-  | _, .or d => d.RestrictedComprehension C
-  | _, .all₁ d => d.RestrictedComprehension C
-  | _, .exs₁ d => d.RestrictedComprehension C
-  | _, .all₂ d => d.RestrictedComprehension C
-  | _, .exs₂ (ψ := ψ) d => d.RestrictedComprehension C ∧ C ψ
+| identity : RestrictedComprehension C Derivation.identity
+| cut {Γ Δ φ} {d₁ : Derivation (Γ + ⦃φ⦄)} {d₂ : Derivation (Δ + ⦃∼φ⦄)} :
+    d₁.RestrictedComprehension C → d₂.RestrictedComprehension C →
+    (d₁.cut d₂).RestrictedComprehension C
+| contraction {Γ φ} {d : Derivation (Γ + ⦃φ, φ⦄)} :
+    d.RestrictedComprehension C → d.contraction.RestrictedComprehension C
+| weakening {Γ} {d : Derivation Γ} :
+    d.RestrictedComprehension C → d.weakening.RestrictedComprehension C
+| verum : RestrictedComprehension C Derivation.verum
+| and {Γ φ ψ} {d₁ : Derivation (Γ + ⦃φ⦄)} {d₂ : Derivation (Γ + ⦃ψ⦄)} :
+    d₁.RestrictedComprehension C → d₂.RestrictedComprehension C →
+      (d₁.and d₂).RestrictedComprehension C
+| or {Γ φ ψ} {d : Derivation (Γ + ⦃φ, ψ⦄)} :
+    d.RestrictedComprehension C → d.or.RestrictedComprehension C
+| all₁ {Γ} {φ : Semiproposition L 0 1} {d : Derivation (LK.Sequent.shift₀ Γ + ⦃φ.free₀⦄)} :
+    d.RestrictedComprehension C → d.all₁.RestrictedComprehension C
+| exs₁ {Γ φ t} {d : Derivation (Γ + ⦃φ/[t]⦄)} :
+    d.RestrictedComprehension C → d.exs₁.RestrictedComprehension C
+| all₂ {Γ} {φ : Semiproposition L 1 0} {d : Derivation (LK.Sequent.shift₁ Γ + ⦃φ.free₁⦄)} :
+    d.RestrictedComprehension C → d.all₂.RestrictedComprehension C
+| exs₂ {Γ φ} {ψ : Semiproposition L 0 1} {d : Derivation (Γ + ⦃φ/⟦ψ⟧⦄)} :
+    d.RestrictedComprehension C → C ψ → d.exs₂.RestrictedComprehension C
 
 namespace RestrictedComprehension
 
 variable {C : Semiproposition L 0 1 → Prop} {Γ Δ Ξ : Sequent L} {φ ψ χ : Proposition L}
 
+attribute [simp] identity verum
+
 @[simp] lemma cut_iff
     (d₁ : Derivation (Γ + ⦃φ⦄)) (d₂ : Derivation (Δ + ⦃∼φ⦄)) :
     (d₁.cut d₂).RestrictedComprehension C ↔
-    d₁.RestrictedComprehension C ∧ d₂.RestrictedComprehension C := Iff.rfl
+    d₁.RestrictedComprehension C ∧ d₂.RestrictedComprehension C := by
+  constructor
+  · intro h
+    refine h.rec
+      (motive := fun {_} d _ ↦
+        match d with
+        | .cut d₁ d₂ => d₁.RestrictedComprehension C ∧ d₂.RestrictedComprehension C
+        | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    all_goals simp_all
+  · rintro ⟨h₁, h₂⟩
+    exact .cut h₁ h₂
 
 @[simp] lemma contraction_iff
     (d : Derivation (Γ + ⦃φ, φ⦄)) :
-    d.contraction.RestrictedComprehension C ↔ d.RestrictedComprehension C := Iff.rfl
+    d.contraction.RestrictedComprehension C ↔ d.RestrictedComprehension C := by
+  constructor
+  · intro h
+    refine h.rec
+      (motive := fun {_} d _ ↦
+        match d with | .contraction d => d.RestrictedComprehension C | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    all_goals simp_all
+  · exact .contraction
 
 @[simp] lemma weakening_iff
     (d : Derivation Γ) :
     (d.weakening : Derivation (Γ + ⦃φ⦄)).RestrictedComprehension C ↔
-    d.RestrictedComprehension C := Iff.rfl
+    d.RestrictedComprehension C := by
+  constructor
+  · intro h
+    refine h.rec
+      (motive := fun {_} d _ ↦
+        match d with | .weakening d => d.RestrictedComprehension C | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    all_goals simp_all
+  · exact .weakening
 
 @[simp] lemma or_iff
     (d : Derivation (Γ + ⦃φ, ψ⦄)) :
-    d.or.RestrictedComprehension C ↔ d.RestrictedComprehension C := Iff.rfl
+    d.or.RestrictedComprehension C ↔ d.RestrictedComprehension C := by
+  constructor
+  · intro h
+    refine h.rec
+      (motive := fun {_} d _ ↦
+        match d with | .or d => d.RestrictedComprehension C | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    all_goals simp_all
+  · exact .or
 
 @[simp] lemma all₁_iff
     {φ : Semiproposition L 0 1}
     (d : Derivation (LK.Sequent.shift₀ Γ + ⦃φ.free₀⦄)) :
-    d.all₁.RestrictedComprehension C ↔ d.RestrictedComprehension C := Iff.rfl
+    d.all₁.RestrictedComprehension C ↔ d.RestrictedComprehension C := by
+  constructor
+  · intro h
+    refine h.rec
+      (motive := fun {_} d _ ↦
+        match d with | .all₁ d => d.RestrictedComprehension C | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    all_goals simp_all
+  · exact .all₁
 
 @[simp] lemma exs₁_iff
     {φ : Semiproposition L 0 1} {t}
     (d : Derivation (Γ + ⦃φ/[t]⦄)) :
-    d.exs₁.RestrictedComprehension C ↔ d.RestrictedComprehension C := Iff.rfl
+    d.exs₁.RestrictedComprehension C ↔ d.RestrictedComprehension C := by
+  constructor
+  · intro h
+    refine h.rec
+      (motive := fun {_} d _ ↦
+        match d with | .exs₁ d => d.RestrictedComprehension C | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    all_goals simp_all
+  · exact .exs₁
 
 @[simp] lemma all₂_iff
     {φ : Semiproposition L 1 0}
     (d : Derivation (LK.Sequent.shift₁ Γ + ⦃φ.free₁⦄)) :
-    d.all₂.RestrictedComprehension C ↔ d.RestrictedComprehension C := Iff.rfl
+    d.all₂.RestrictedComprehension C ↔ d.RestrictedComprehension C := by
+  constructor
+  · intro h
+    refine h.rec
+      (motive := fun {_} d _ ↦
+        match d with | .all₂ d => d.RestrictedComprehension C | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    all_goals simp_all
+  · exact .all₂
 
 @[simp] lemma exs₂_iff
     {φ : Semiproposition L 1 0} {ψ : Semiproposition L 0 1}
     (d : Derivation (Γ + ⦃φ/⟦ψ⟧⦄)) :
-    d.exs₂.RestrictedComprehension C ↔ d.RestrictedComprehension C ∧ C ψ := Iff.rfl
+    d.exs₂.RestrictedComprehension C ↔ d.RestrictedComprehension C ∧ C ψ := by
+  constructor
+  · intro h
+    refine h.rec
+      (motive := fun {_} d _ ↦
+        match d with
+        | .exs₂ (ψ := ψ') d => d.RestrictedComprehension C ∧ C ψ'
+        | _ => True)
+      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    all_goals simp_all
+  · rintro ⟨hd, hψ⟩
+    exact .exs₂ hd hψ
 
 end RestrictedComprehension
 
