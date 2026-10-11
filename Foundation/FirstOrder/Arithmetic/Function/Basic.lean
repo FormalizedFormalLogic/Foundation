@@ -25,10 +25,7 @@ namespace Arithmetic
 
 variable {k : ℕ} {V : Type*} [ORingStructure V]
 
-/-- `∃¹!` states totality directly; `of_Pi2_conservative` transfers it along `Π₂` conservativity
-via a `Π₂` sentence equivalent under equality axioms. -/
-def provablyTotality (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence :=
-  ∀¹* ∃¹! φ.val
+def provablyTotality (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence := ∀¹* ∃¹! φ.val
 
 lemma models_provablyTotality_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ provablyTotality φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) ∧
@@ -37,19 +34,12 @@ lemma models_provablyTotality_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
     Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
 noncomputable def minimalGraphMatrix (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : 𝚺ᴬ₀.Semisentence (k + 2) :=
-  .mkSigma (Classical.choose (Bounding.Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺)
-    (s := 1) φ.sigma_prop)).matrix.val (by simp)
+  .mkSigma φ.sigma_prop.prenex.matrix.val (by simp)
 
 lemma provable_iff_exists_minimalGraphMatrix (T : ArithmeticTheory) [𝗕𝚺₁ ⪯ T]
     (φ : 𝚺ᴬ₁.Semisentence (k + 1)) :
     T ⊢ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := 1)
-  apply provable_iff_of_models_iff
-  intro V _ _ e
-  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁ := models_of_subtheory (T := 𝗕𝚺₁) (U := T) inferInstance
-  simpa [minimalGraphMatrix, Bounding.Prenex.val] using
-    Classical.choose_spec (Bounding.Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺)
-      (s := 1) φ.sigma_prop) V e Empty.elim
+  simpa [minimalGraphMatrix, Bounding.Prenex.val] using φ.sigma_prop.provable_prenex T
 
 lemma evalb_iff_exists_minimalGraphMatrix [V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁] (φ : 𝚺ᴬ₁.Semisentence (k + 1))
     (v : Fin (k + 1) → V) : φ.val.Evalb v ↔ ∃ z, (minimalGraphMatrix φ).val.Evalb (z :> v) := by
