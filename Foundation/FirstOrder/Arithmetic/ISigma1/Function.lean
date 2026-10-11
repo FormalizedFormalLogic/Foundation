@@ -31,28 +31,33 @@ theorem provablyTotal_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf 
   induction hf with
   | zero =>
     have h (V : Type) [ORingStructure V] :
-        𝚺ᴬ₁.DefinedFunction (fun _ : Fin 0 → V ↦ 0) (.mkSigma “y. y = 0”) :=
-      .mk fun _ ↦ by simp
+        𝚺ᴬ₁.DefinedFunction (fun _ : Fin 0 → V ↦ 0) (.mkSigma “y. y = 0”) := by
+      constructor
+      intro _
+      simp
     exact ⟨_, of_models (h ℕ) fun V _ _ ↦ ⟨_, h V⟩⟩
   | succ =>
     have h (V : Type) [ORingStructure V] :
-        𝚺ᴬ₁.DefinedFunction (fun v : Fin 1 → V ↦ v 0 + 1) (.mkSigma “y x. y = x + 1”) :=
-      .mk fun _ ↦ by simp
+        𝚺ᴬ₁.DefinedFunction (fun v : Fin 1 → V ↦ v 0 + 1) (.mkSigma “y x. y = x + 1”) := by
+      constructor
+      intro _
+      simp
     exact ⟨_, of_models ((h ℕ).of_eq (by simp)) fun V _ _ ↦ ⟨_, h V⟩⟩
   | @get n i =>
     have h (V : Type) [ORingStructure V] :
         𝚺ᴬ₁.DefinedFunction (fun v : Fin n → V ↦ v i)
-          ((.mkSigma “y x. y = x” : 𝚺ᴬ₁.Semisentence 2).rew (Rew.subst ![#0, #i.succ])) :=
-      .mk fun _ ↦ by simp
+          ((.mkSigma “y x. y = x” : 𝚺ᴬ₁.Semisentence 2).rew (Rew.subst ![#0, #i.succ])) := by
+      constructor
+      intro _
+      simp
     exact ⟨_, of_models ((h ℕ).of_eq (by simp)) fun V _ _ ↦ ⟨_, h V⟩⟩
   | comp g _ _ ihf ihg =>
     obtain ⟨ψ, hψ⟩ := ihf
     choose χ hχ using ihg
-    exact ⟨_, of_models ((definedFunction_compGraph hψ.defined fun i ↦ (hχ i).defined).of_eq
-      (by simp)) fun V _ _ ↦ by
-        obtain ⟨G, hG⟩ := hψ.models V
-        choose H hH using fun i ↦ (hχ i).models V
-        exact ⟨_, definedFunction_compGraph hG hH⟩⟩
+    apply Exists.intro
+    apply of_models ((definedFunction_compGraph hψ.defined fun i ↦ (hχ i).defined).of_eq (by simp))
+    intro V _ _
+    exact ⟨_, definedFunction_compGraph (hψ.definedFunction V) fun i ↦ (hχ i).definedFunction V⟩
   | @prec n f g _ _ ihf ihg =>
     obtain ⟨ψ, hψ⟩ := ihf
     obtain ⟨χ, hχ⟩ := ihg
@@ -63,7 +68,9 @@ theorem provablyTotal_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf 
       { zero := F
         succ := fun v i z ↦ G (i :> z :> v)
         zero_defined := hF
-        succ_defined := .mk fun v ↦ by
+        succ_defined := by
+          constructor
+          intro v
           simp [bp, Semiformula.eval_rew, Empty.eq_elim, hG.iff, Matrix.comp_vecCons'] }
     have h (v : Fin n → ℕ) (u : ℕ) :
         (con ℕ hψ.defined hχ.defined).result v u =
@@ -71,12 +78,12 @@ theorem provablyTotal_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf 
       induction u with
       | zero => simp [con]
       | succ u ih => rw [PR.Construction.result_succ, ih]
-    exact ⟨_, of_models (DefinedFunction.of_eq (fun v ↦ h _ _ |>.trans (by simp))
-      (con ℕ hψ.defined hχ.defined).result_defined) fun V _ _ ↦ by
-        have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ 𝗜𝚺₁ inferInstance
-        obtain ⟨F, hF⟩ := hψ.models V
-        obtain ⟨G, hG⟩ := hχ.models V
-        exact ⟨_, (con V hF hG).result_defined⟩⟩
+    apply Exists.intro
+    apply of_models (DefinedFunction.of_eq (fun v ↦ h _ _ |>.trans (by simp))
+      (con ℕ hψ.defined hχ.defined).result_defined)
+    intro V _ _
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ 𝗜𝚺₁ inferInstance
+    exact ⟨_, (con V (hψ.definedFunction V) (hχ.definedFunction V)).result_defined⟩
 
 theorem provablyTotal_of_primrec {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
     𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
