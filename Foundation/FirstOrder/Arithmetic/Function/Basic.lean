@@ -27,12 +27,6 @@ variable {k : ℕ} {V : Type*} [ORingStructure V]
 
 def provablyTotality (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence := ∀¹* ∃¹! φ.val
 
-lemma models_provablyTotality_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
-    V↓[ℒₒᵣ] ⊧ provablyTotality φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) ∧
-      ∀ z, φ.val.Evalb (z :> v) → z = y := by
-  simp [provablyTotality, Semiformula.existsUnique, models_iff, Semiformula.eval_rew,
-    Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
-
 noncomputable def minimalGraphMatrix (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : 𝚺ᴬ₀.Semisentence (k + 2) :=
   .mkSigma φ.sigma_prop.prenex.matrix.val (by simp)
 
@@ -139,7 +133,11 @@ lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f �
 
 lemma models (h : T.ProvablyTotalVia f φ) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] :
     ∃ F : (Fin k → V) → V, 𝚺ᴬ₁.DefinedFunction F φ := by
-  have h₁ := models_provablyTotality_iff.mp (consequence_iff'.mp (Theory.Proof.sound h.total) V)
+  have h₁ : ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) ∧
+      ∀ z, φ.val.Evalb (z :> v) → z = y := by
+    simpa [provablyTotality, Semiformula.existsUnique, models_iff, Semiformula.eval_rew,
+      Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim] using
+        consequence_iff'.mp (Theory.Proof.sound h.total) V
   choose F hF hu using h₁
   exact ⟨F, .mk fun v ↦ ⟨fun hv ↦ hu _ _ (by simpa using hv),
     fun e ↦ by simpa [← e] using (hF (v ·.succ))⟩⟩
@@ -147,9 +145,14 @@ lemma models (h : T.ProvablyTotalVia f φ) (V : Type*) [ORingStructure V] [V↓[
 lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction (V := ℕ) f φ)
     (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T],
       ∃ F : (Fin k → V) → V, 𝚺ᴬ₁.DefinedFunction F φ) : T.ProvablyTotalVia f φ :=
-  ⟨hf, Arithmetic.complete T _ fun V _ _ ↦ models_provablyTotality_iff.mpr fun v ↦ by
-    obtain ⟨F, hF⟩ := H V
-    exact ⟨F v, by simp [hF.iff], by simp_all [hF.iff]⟩⟩
+  ⟨hf, Arithmetic.complete T (provablyTotality φ) fun V _ _ ↦ by
+    have hv : ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) ∧
+        ∀ z, φ.val.Evalb (z :> v) → z = y := by
+      intro v
+      obtain ⟨F, hF⟩ := H V
+      exact ⟨F v, by simp [hF.iff], by simp_all [hF.iff]⟩
+    simpa [provablyTotality, Semiformula.existsUnique, models_iff, Semiformula.eval_rew,
+      Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim] using hv⟩
 
 lemma exists_minimalGraph {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁]
     {φ : 𝚺ᴬ₁.Semisentence (k + 1)} {v : Fin k → V} (hex : ∃ y, φ.val.Evalb (y :> v)) :
@@ -219,8 +222,12 @@ lemma of_exists [𝗕𝚺₁ ⪯ T] (hf : HierarchySymbol.DefinedFunction (V := 
 
 lemma exists_sentence [𝗘𝗤 ℒₒᵣ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ ∀¹* ∃¹ φ.val :=
   Arithmetic.complete T _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff] using fun v ↦ (models_provablyTotality_iff.mp
-      (consequence_iff'.mp (Theory.Proof.sound h.total) V) v).imp fun _ h ↦ h.1
+    have hv : ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) ∧
+        ∀ z, φ.val.Evalb (z :> v) → z = y := by
+      simpa [provablyTotality, Semiformula.existsUnique, models_iff, Semiformula.eval_rew,
+        Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim] using
+          consequence_iff'.mp (Theory.Proof.sound h.total) V
+    simpa [models_iff] using fun v ↦ (hv v).imp fun _ h ↦ h.1
 
 /-- NOTE: `provablyTotality` is not `Π₂`-sentence because of `∃!`-quantifier. -/
 lemma of_Pi2_conservative [𝗘𝗤 ℒₒᵣ ⪯ T] [𝗘𝗤 ℒₒᵣ ⪯ U] (h : T.ProvablyTotalVia f φ)
@@ -230,12 +237,15 @@ lemma of_Pi2_conservative [𝗘𝗤 ℒₒᵣ ⪯ T] [𝗘𝗤 ℒₒᵣ ⪯ U] 
       (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val)) 🡒 “#1 = #0”)))
   have hπ : ∀ V : Type, ∀ [ORingStructure V], V↓[ℒₒᵣ] ⊧ π ↔ V↓[ℒₒᵣ] ⊧ provablyTotality φ := by
     intro V _
-    rw [models_provablyTotality_iff]
     have : V↓[ℒₒᵣ] ⊧ π ↔ ∀ v : Fin k → V, (∃ y, φ.val.Evalb (y :> v)) ∧
         ∀ y y', φ.val.Evalb (y :> v) → φ.val.Evalb (y' :> v) → y = y' := by
       simp [π, models_iff, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons',
         Empty.eq_elim]
-    rw [this]
+    have hT : V↓[ℒₒᵣ] ⊧ provablyTotality φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) ∧
+        ∀ z, φ.val.Evalb (z :> v) → z = y := by
+      simp [provablyTotality, Semiformula.existsUnique, models_iff, Semiformula.eval_rew,
+        Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
+    rw [this, hT]
     exact forall_congr' fun v ↦ ⟨fun ⟨⟨y, hy⟩, hu⟩ ↦ ⟨y, hy, fun z hz ↦ hu z y hz hy⟩,
       fun ⟨y, hy, hu⟩ ↦ ⟨⟨y, hy⟩, fun a b ha hb ↦ (hu a ha).trans (hu b hb).symm⟩⟩
   have hP : ∀ {n : ℕ} (ψ : ArithmeticSemiformula Empty n),
