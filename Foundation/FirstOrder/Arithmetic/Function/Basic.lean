@@ -232,16 +232,18 @@ lemma exists_sentence [𝗘𝗤 ℒₒᵣ ⪯ T] (h : T.ProvablyTotalVia f φ) :
     simpa [models_iff] using fun v ↦ (models_provablyTotality_iff.mp
       (consequence_iff'.mp (Theory.Proof.sound h.total) V) v).1
 
-lemma of_Pi2_conservative [𝗕𝚺₁ ⪯ T] [𝗕𝚺₁ ⪯ U] (h : T.ProvablyTotalVia f φ)
-    (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) : U.ProvablyTotalVia f (minimalGraph φ) := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := 1)
+lemma of_Pi2_conservative (h : T.ProvablyTotalVia f φ)
+    (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) : U.ProvablyTotalVia f φ := by
   have hP : ∀ {n : ℕ} (ψ : ArithmeticSemiformula Empty n),
       ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 ψ → ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 (∀¹* ψ) := by
     intro n
     induction n with
     | zero => exact fun _ h ↦ h
     | succ n ih => exact fun ψ h ↦ ih _ h.all
-  exact of_exists h.defined (H _ (hP _ (φ.sigma_prop.exs.accum 𝚷)) h.exists_sentence)
+  refine ⟨h.defined, H _ (hP _ ?_) h.total⟩
+  simp only [Bounding.Hierarchy.and_iff]
+  refine ⟨φ.sigma_prop.exs.accum 𝚷, Bounding.Hierarchy.all (Bounding.Hierarchy.all ?_)⟩
+  simpa [Bounding.Hierarchy.imp_iff] using φ.sigma_prop.accum 𝚺
 
 end ProvablyTotalVia
 
@@ -250,7 +252,7 @@ namespace ProvablyTotal
 lemma mono (hT : T ⪯ U) : T.ProvablyTotal f → U.ProvablyTotal f :=
   fun ⟨_, h⟩ ↦ ⟨_, h.mono hT⟩
 
-lemma of_Pi2_conservative [𝗕𝚺₁ ⪯ T] [𝗕𝚺₁ ⪯ U]
+lemma of_Pi2_conservative
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.ProvablyTotal f → U.ProvablyTotal f :=
   fun ⟨_, h⟩ ↦ ⟨_, h.of_Pi2_conservative H⟩
@@ -260,7 +262,7 @@ end ProvablyTotal
 lemma provablyTotalFunctions_subset (h : T ⪯ U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.mono h
 
-lemma provablyTotalFunctions_subset_of_Pi2_conservative [𝗕𝚺₁ ⪯ T] [𝗕𝚺₁ ⪯ U]
+lemma provablyTotalFunctions_subset_of_Pi2_conservative
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2_conservative H
 
