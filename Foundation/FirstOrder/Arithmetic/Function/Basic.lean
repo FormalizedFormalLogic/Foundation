@@ -133,44 +133,6 @@ private lemma definablePred_pairGraph (θ : 𝚺ᴬ₀.Semisentence (k + 2)) (n�
     (Bounding.Hierarchy.rew _ (by simp [pairGraph])) fun w ↦ by
       simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
-private lemma models_existsUnique_minimalPairGraph {θ : 𝚺ᴬ₀.Semisentence (k + 2)}
-    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {v : Fin k → V} (hex : ∃ y z : V, θ.val.Evalb (z :> y :> v)) :
-    (∃ y, (minimalPairGraph θ).Evalb (y :> v)) ∧
-      ∀ y y', (minimalPairGraph θ).Evalb (y :> v) → (minimalPairGraph θ).Evalb (y' :> v) →
-        y = y' := by
-  obtain ⟨y₀, z₀, hz₀⟩ := hex
-  have hP : (existsAtSum θ).Evalb ((z₀ + y₀) :> v) :=
-    (eval_existsAtSum θ _).mpr ⟨y₀, by simp, z₀, by simp, by simp, by simpa using hz₀⟩
-  obtain ⟨n₀, hn₀, hnmin⟩ := InductionOnHierarchy.least_number 𝚺 0
-    (definablePred_existsAtSum θ v) hP
-  obtain ⟨y₁, hy₁len, z₁, hz₁len, hsum₁, hθ₁⟩ := (eval_existsAtSum θ _).mp hn₀
-  have hPy : (pairGraph θ).Evalb (n₀ :> y₁ :> v) :=
-    (eval_pairGraph θ _).mpr ⟨z₁, hz₁len, hsum₁, hθ₁⟩
-  obtain ⟨ymin, hymin, hyminmin⟩ := InductionOnHierarchy.least_number 𝚺 0
-    (definablePred_pairGraph θ n₀ v) hPy
-  have toExistsAtSum : ∀ {n y : V}, (∃ z ≤ n, z + y = n ∧ θ.val.Evalb (z :> y :> v)) →
-      ∃ y' ≤ n, ∃ z' ≤ n, z' + y' = n ∧ θ.val.Evalb (z' :> y' :> v) := by
-    rintro n y ⟨z, hzn, hsum, hθ⟩
-    exact ⟨y, by rw [← hsum]; simp, z, hzn, hsum, hθ⟩
-  constructor
-  · use ymin
-    simp only [eval_minimalPairGraph]
-    exact ⟨n₀, by simpa using hymin, by simpa using hnmin, by simpa using hyminmin⟩
-  · rintro y y' hy hy'
-    simp only [eval_minimalPairGraph] at hy hy'
-    obtain ⟨n, hyA, hyB, hyC⟩ := hy
-    obtain ⟨n', hy'A, hy'B, hy'C⟩ := hy'
-    have hnn' : n = n' := by
-      rcases lt_trichotomy n n' with hlt | rfl | hlt
-      · exact absurd (toExistsAtSum hyA) (hy'B n hlt)
-      · rfl
-      · exact absurd (toExistsAtSum hy'A) (hyB n' hlt)
-    subst hnn'
-    rcases lt_trichotomy y y' with hlt | rfl | hlt
-    · exact absurd hyA (hy'C y hlt)
-    · rfl
-    · exact absurd hy'A (hyC y' hlt)
-
 end Arithmetic
 
 open Arithmetic
@@ -222,16 +184,25 @@ lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction
       ∃ y, φ.val.Evalb (y :> v)) : T.ProvablyTotalVia f φ :=
   ⟨hf, Arithmetic.complete T _ fun V _ _ ↦ models_totalitySentence_iff.mpr (H V)⟩
 
-lemma models_existsUnique_minimalGraph {V : Type*} [ORingStructure V]
-    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁] {φ : 𝚺ᴬ₁.Semisentence (k + 1)} {v : Fin k → V}
-    (hex : ∃ y, φ.val.Evalb (y :> v)) :
-    (∃ y, (minimalGraph φ).val.Evalb (y :> v)) ∧
-      ∀ y y', (minimalGraph φ).val.Evalb (y :> v) → (minimalGraph φ).val.Evalb (y' :> v) →
-        y = y' := by
+lemma exists_minimalGraph {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁]
+    {φ : 𝚺ᴬ₁.Semisentence (k + 1)} {v : Fin k → V} (hex : ∃ y, φ.val.Evalb (y :> v)) :
+    ∃ y, (minimalGraph φ).val.Evalb (y :> v) := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₀ 𝗕𝚺₁ inferInstance
-  obtain ⟨y, hy⟩ := hex
-  obtain ⟨z, hz⟩ := (evalb_iff_exists_minimalGraphMatrix φ (y :> v)).mp hy
-  exact models_existsUnique_minimalPairGraph ⟨y, z, hz⟩
+  obtain ⟨y₀, hy₀⟩ := hex
+  obtain ⟨z₀, hz₀⟩ := (evalb_iff_exists_minimalGraphMatrix φ (y₀ :> v)).mp hy₀
+  have hP : (existsAtSum (minimalGraphMatrix φ)).Evalb ((z₀ + y₀) :> v) :=
+    (eval_existsAtSum _ _).mpr ⟨y₀, by simp, z₀, by simp, by simp, by simpa using hz₀⟩
+  obtain ⟨n₀, hn₀, hnmin⟩ := InductionOnHierarchy.least_number 𝚺 0
+    (definablePred_existsAtSum _ v) hP
+  obtain ⟨y₁, -, z₁, hz₁len, hsum₁, hθ₁⟩ := (eval_existsAtSum _ _).mp hn₀
+  have hPy : (pairGraph (minimalGraphMatrix φ)).Evalb (n₀ :> y₁ :> v) :=
+    (eval_pairGraph _ _).mpr ⟨z₁, hz₁len, hsum₁, hθ₁⟩
+  obtain ⟨ymin, hymin, hyminmin⟩ := InductionOnHierarchy.least_number 𝚺 0
+    (definablePred_pairGraph _ n₀ v) hPy
+  refine ⟨ymin, ?_⟩
+  change (minimalPairGraph _).Evalb _
+  simp only [eval_minimalPairGraph]
+  exact ⟨n₀, by simpa using hymin, by simpa using hnmin, by simpa using hyminmin⟩
 
 lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) :
     T.ProvablyFunctionalVia f (minimalGraph φ) := by
@@ -242,7 +213,7 @@ lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTota
       simpa using h.graph_iff.mp ((evalb_iff_exists_minimalGraphMatrix φ (y :> x)).mpr ⟨z, hθ⟩)
   have hdef : HierarchySymbol.DefinedFunction (V := ℕ) f (minimalGraph φ) := .mk fun v ↦ by
     obtain ⟨y₀, x, rfl⟩ : ∃ y x, v = y :> x := ⟨v 0, _, (Fin.cons_self_tail v).symm⟩
-    obtain ⟨⟨y₁, hy₁⟩, -⟩ := models_existsUnique_minimalGraph (V := ℕ) (φ := φ) (v := x)
+    obtain ⟨y₁, hy₁⟩ := exists_minimalGraph (V := ℕ) (φ := φ) (v := x)
       ⟨f x, h.graph_iff.mpr (by simp)⟩
     constructor
     · exact fun hv ↦ hforce hv
@@ -256,15 +227,32 @@ lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTota
     apply models_totalitySentence_iff.mpr
     intro v
     obtain ⟨y, hy⟩ := h.models V v
-    exact (models_existsUnique_minimalGraph ⟨y, hy⟩).1
+    exact exists_minimalGraph ⟨y, hy⟩
   have hF : T ⊢ functionalitySentence (minimalGraph φ) := by
     apply Arithmetic.complete.{0}
     intro (V : Type) _ _
     have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗕𝚺₁ T inferInstance
     apply models_functionalitySentence_iff.mpr
     intro v y y' hy hy'
-    obtain ⟨y₀, hy₀⟩ := h.models V v
-    exact (models_existsUnique_minimalGraph ⟨y₀, hy₀⟩).2 y y' hy hy'
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ModelsTheory.of_provably_subtheory V 𝗣𝗔⁻ 𝗕𝚺₁ inferInstance
+    have toExistsAtSum : ∀ {n y : V}, (∃ z ≤ n, z + y = n ∧
+        (minimalGraphMatrix φ).val.Evalb (z :> y :> v)) →
+        ∃ y' ≤ n, ∃ z' ≤ n, z' + y' = n ∧ (minimalGraphMatrix φ).val.Evalb (z' :> y' :> v) := by
+      rintro n y ⟨z, hzn, hsum, hθ⟩
+      exact ⟨y, by rw [← hsum]; simp, z, hzn, hsum, hθ⟩
+    change (minimalPairGraph _).Evalb _ at hy hy'
+    simp only [eval_minimalPairGraph] at hy hy'
+    obtain ⟨n, hyA, hyB, hyC⟩ := hy
+    obtain ⟨n', hy'A, hy'B, hy'C⟩ := hy'
+    obtain rfl : n = n' := by
+      rcases lt_trichotomy n n' with hlt | rfl | hlt
+      · exact absurd (toExistsAtSum hyA) (hy'B n hlt)
+      · rfl
+      · exact absurd (toExistsAtSum hy'A) (hyB n' hlt)
+    rcases lt_trichotomy y y' with hlt | rfl | hlt
+    · exact absurd hyA (hy'C y hlt)
+    · rfl
+    · exact absurd hy'A (hyC y' hlt)
   exact ⟨⟨hdef, hT⟩, hF⟩
 
 end ProvablyTotalVia
