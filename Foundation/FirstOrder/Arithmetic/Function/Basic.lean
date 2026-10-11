@@ -222,6 +222,7 @@ lemma exists_sentence [𝗘𝗤 ℒₒᵣ ⪯ T] (h : T.ProvablyTotalVia f φ) :
     simpa [models_iff] using fun v ↦ (models_provablyTotality_iff.mp
       (consequence_iff'.mp (Theory.Proof.sound h.total) V) v).imp fun _ h ↦ h.1
 
+/-- NOTE: `provablyTotality` is not `Π₂`-sentence because of `∃!`-quantifier. -/
 lemma of_Pi2_conservative [𝗘𝗤 ℒₒᵣ ⪯ T] [𝗘𝗤 ℒₒᵣ ⪯ U] (h : T.ProvablyTotalVia f φ)
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) : U.ProvablyTotalVia f φ := by
   let π : ArithmeticSentence :=
