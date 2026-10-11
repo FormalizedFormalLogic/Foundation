@@ -8,7 +8,7 @@ public import Mathlib.Computability.Primrec.List
 /-!
 # Primitive recursive functions are `𝗜𝚺₁`-provably total
 
-Primitive recursive functions are `𝗜𝚺₁`-provably functional, hence provably total.
+Primitive recursive functions are `𝗜𝚺₁`-provably total.
 
 ## References
 
@@ -25,9 +25,9 @@ namespace Arithmetic
 
 open ArithmeticTheory Bounding.HierarchySymbol
 
-open ProvablyFunctionalVia in
-theorem provablyFunctional_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
-    𝗜𝚺₁.ProvablyFunctional (fun v ↦ f (.ofFn v)) := by
+open ProvablyTotalVia in
+theorem provablyTotal_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
+    𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) := by
   induction hf with
   | zero =>
     have h (V : Type) [ORingStructure V] :
@@ -78,17 +78,9 @@ theorem provablyFunctional_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ}
         obtain ⟨G, hG⟩ := hχ.models V
         exact ⟨_, (con V hF hG).result_defined⟩⟩
 
-theorem provablyFunctional_of_primrec {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
-    𝗜𝚺₁.ProvablyFunctional (fun v ↦ f (.ofFn v)) :=
-  provablyFunctional_of_primrec' (Nat.Primrec'.prim_iff.mpr hf)
-
-lemma provablyTotal_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
+theorem provablyTotal_of_primrec {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
     𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
-  (provablyFunctional_of_primrec' hf).toProvablyTotal
-
-lemma provablyTotal_of_primrec {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
-    𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
-  (provablyFunctional_of_primrec hf).toProvablyTotal
+  provablyTotal_of_primrec' (Nat.Primrec'.prim_iff.mpr hf)
 
 end Arithmetic
 
