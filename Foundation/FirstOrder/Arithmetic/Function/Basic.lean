@@ -25,15 +25,16 @@ namespace Arithmetic
 
 variable {k : ℕ} {V : Type*} [ORingStructure V]
 
+/-- `∃¹!` states totality directly; `of_Pi2_conservative` transfers it along `Π₂` conservativity
+via a `Π₂` sentence equivalent under equality axioms. -/
 def provablyTotality (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence :=
-  ∀¹* ((∃¹ φ.val) ⋏ (∀¹ ∀¹ (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val) ⋏
-    (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val)) 🡒 “#1 = #0”)))
+  ∀¹* ∃¹! φ.val
 
 lemma models_provablyTotality_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
-    V↓[ℒₒᵣ] ⊧ provablyTotality φ ↔ ∀ v : Fin k → V, (∃ y, φ.val.Evalb (y :> v)) ∧
-      ∀ y y', φ.val.Evalb (y :> v) → φ.val.Evalb (y' :> v) → y = y' := by
-  simp [provablyTotality, models_iff, Semiformula.eval_rew, Function.comp_def,
-    Matrix.comp_vecCons', Empty.eq_elim]
+    V↓[ℒₒᵣ] ⊧ provablyTotality φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) ∧
+      ∀ z, φ.val.Evalb (z :> v) → z = y := by
+  simp [provablyTotality, Semiformula.existsUnique, models_iff, Semiformula.eval_rew,
+    Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
 noncomputable def minimalGraphMatrix (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : 𝚺ᴬ₀.Semisentence (k + 2) :=
   .mkSigma (Classical.choose (Bounding.Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺)
@@ -149,17 +150,16 @@ lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f �
 lemma models (h : T.ProvablyTotalVia f φ) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] :
     ∃ F : (Fin k → V) → V, 𝚺ᴬ₁.DefinedFunction F φ := by
   have h₁ := models_provablyTotality_iff.mp (consequence_iff'.mp (Theory.Proof.sound h.total) V)
-  choose hex hu using h₁
-  choose F hF using hex
-  exact ⟨F, .mk fun v ↦ ⟨fun hv ↦ hu _ _ _ (by simpa using hv) (hF _),
-    fun e ↦ by simpa [← e] using hF (v ·.succ)⟩⟩
+  choose F hF hu using h₁
+  exact ⟨F, .mk fun v ↦ ⟨fun hv ↦ hu _ _ (by simpa using hv),
+    fun e ↦ by simpa [← e] using (hF (v ·.succ))⟩⟩
 
 lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction (V := ℕ) f φ)
     (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T],
       ∃ F : (Fin k → V) → V, 𝚺ᴬ₁.DefinedFunction F φ) : T.ProvablyTotalVia f φ :=
   ⟨hf, Arithmetic.complete T _ fun V _ _ ↦ models_provablyTotality_iff.mpr fun v ↦ by
     obtain ⟨F, hF⟩ := H V
-    exact ⟨⟨F v, by simp [hF.iff]⟩, by simp_all [hF.iff]⟩⟩
+    exact ⟨F v, by simp [hF.iff], by simp_all [hF.iff]⟩⟩
 
 lemma exists_minimalGraph {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁]
     {φ : 𝚺ᴬ₁.Semisentence (k + 1)} {v : Fin k → V} (hex : ∃ y, φ.val.Evalb (y :> v)) :
@@ -230,20 +230,38 @@ lemma of_exists [𝗕𝚺₁ ⪯ T] (hf : HierarchySymbol.DefinedFunction (V := 
 lemma exists_sentence [𝗘𝗤 ℒₒᵣ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ ∀¹* ∃¹ φ.val :=
   Arithmetic.complete T _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using fun v ↦ (models_provablyTotality_iff.mp
-      (consequence_iff'.mp (Theory.Proof.sound h.total) V) v).1
+      (consequence_iff'.mp (Theory.Proof.sound h.total) V) v).imp fun _ h ↦ h.1
 
-lemma of_Pi2_conservative (h : T.ProvablyTotalVia f φ)
+lemma of_Pi2_conservative [𝗘𝗤 ℒₒᵣ ⪯ T] [𝗘𝗤 ℒₒᵣ ⪯ U] (h : T.ProvablyTotalVia f φ)
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) : U.ProvablyTotalVia f φ := by
+  let π : ArithmeticSentence :=
+    ∀¹* ((∃¹ φ.val) ⋏ (∀¹ ∀¹ (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val) ⋏
+      (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val)) 🡒 “#1 = #0”)))
+  have hπ : ∀ V : Type, ∀ [ORingStructure V], V↓[ℒₒᵣ] ⊧ π ↔ V↓[ℒₒᵣ] ⊧ provablyTotality φ := by
+    intro V _
+    rw [models_provablyTotality_iff]
+    have : V↓[ℒₒᵣ] ⊧ π ↔ ∀ v : Fin k → V, (∃ y, φ.val.Evalb (y :> v)) ∧
+        ∀ y y', φ.val.Evalb (y :> v) → φ.val.Evalb (y' :> v) → y = y' := by
+      simp [π, models_iff, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons',
+        Empty.eq_elim]
+    rw [this]
+    exact forall_congr' fun v ↦ ⟨fun ⟨⟨y, hy⟩, hu⟩ ↦ ⟨y, hy, fun z hz ↦ hu z y hz hy⟩,
+      fun ⟨y, hy, hu⟩ ↦ ⟨⟨y, hy⟩, fun a b ha hb ↦ (hu a ha).trans (hu b hb).symm⟩⟩
   have hP : ∀ {n : ℕ} (ψ : ArithmeticSemiformula Empty n),
       ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 ψ → ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 (∀¹* ψ) := by
     intro n
     induction n with
     | zero => exact fun _ h ↦ h
     | succ n ih => exact fun ψ h ↦ ih _ h.all
-  refine ⟨h.defined, H _ (hP _ ?_) h.total⟩
-  simp only [Bounding.Hierarchy.and_iff]
-  refine ⟨φ.sigma_prop.exs.accum 𝚷, Bounding.Hierarchy.all (Bounding.Hierarchy.all ?_)⟩
-  simpa [Bounding.Hierarchy.imp_iff] using φ.sigma_prop.accum 𝚺
+  have hπP : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 π := by
+    refine hP _ ?_
+    simp only [Bounding.Hierarchy.and_iff]
+    refine ⟨φ.sigma_prop.exs.accum 𝚷, Bounding.Hierarchy.all (Bounding.Hierarchy.all ?_)⟩
+    simpa [Bounding.Hierarchy.imp_iff] using φ.sigma_prop.accum 𝚺
+  have hTπ : T ⊢ π := Arithmetic.complete T _ fun (V : Type) _ _ ↦
+    (hπ V).mpr (consequence_iff'.mp (Theory.Proof.sound h.total) V)
+  exact ⟨h.defined, Arithmetic.complete U _ fun (V : Type) _ _ ↦
+    (hπ V).mp (consequence_iff'.mp (Theory.Proof.sound (H _ hπP hTπ)) V)⟩
 
 end ProvablyTotalVia
 
@@ -252,7 +270,7 @@ namespace ProvablyTotal
 lemma mono (hT : T ⪯ U) : T.ProvablyTotal f → U.ProvablyTotal f :=
   fun ⟨_, h⟩ ↦ ⟨_, h.mono hT⟩
 
-lemma of_Pi2_conservative
+lemma of_Pi2_conservative [𝗘𝗤 ℒₒᵣ ⪯ T] [𝗘𝗤 ℒₒᵣ ⪯ U]
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.ProvablyTotal f → U.ProvablyTotal f :=
   fun ⟨_, h⟩ ↦ ⟨_, h.of_Pi2_conservative H⟩
@@ -262,7 +280,7 @@ end ProvablyTotal
 lemma provablyTotalFunctions_subset (h : T ⪯ U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.mono h
 
-lemma provablyTotalFunctions_subset_of_Pi2_conservative
+lemma provablyTotalFunctions_subset_of_Pi2_conservative [𝗘𝗤 ℒₒᵣ ⪯ T] [𝗘𝗤 ℒₒᵣ ⪯ U]
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2_conservative H
 
