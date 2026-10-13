@@ -5,10 +5,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Disquo
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`
 
-`𝗣𝗔⁻` together with the finite theory `tarski`, a single instance of the $\Sigma_{n + 1}$
-induction scheme and a single instance of the $\Sigma_{n + 1}$ collection scheme, both stated with
-the partial satisfaction `prenexSatisfied 𝚺 (n + 1)`, is a finite theory equivalent to
-`𝗜𝚺 (n + 1)`; hence `𝗜𝚺 n` is finitely axiomatizable for `n ≥ 1`.
+`𝗣𝗔⁻` together with the finite theory `tarski` and a single instance of the $\Sigma_{n + 1}$
+induction scheme stated with the partial satisfaction `prenexSatisfied 𝚺 (n + 1)` is a finite
+theory equivalent to `𝗜𝚺 (n + 1)`; hence `𝗜𝚺 n` is finitely axiomatizable for `n ≥ 1`.
 
 ## References
 
@@ -35,23 +34,12 @@ lemma hierarchy_indFormula : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (indFormul
 
 noncomputable def indSentence (n : ℕ) : ArithmeticSentence := .univCl (succInd (indFormula n))
 
-noncomputable def collFormula (n : ℕ) : ArithmeticSemiformula ℕ 2 :=
-  “x y. ∃ ev₀, !adjoinDef.val ev₀ x &1 ∧
-    ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(prenexSatisfied' 𝚺 n).val ev &0”
-
-@[simp]
-lemma hierarchy_collFormula : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (collFormula n) := by
-  simp [collFormula, (prenexSatisfied' 𝚺 n).sigma_prop]
-
-noncomputable def collSentence (n : ℕ) : ArithmeticSentence :=
-  .univCl (collectionAxiom (collFormula n))
-
 noncomputable def finiteAxiomatization (n : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ tarski ∪ {indSentence n, collSentence n}
+  𝗣𝗔⁻ ∪ tarski ∪ {indSentence n}
 
 @[simp]
 lemma finiteAxiomatization_finite : (finiteAxiomatization n).Finite :=
-  (PeanoMinus.finite.union tarski_finite).union ((Set.finite_singleton _).insert _)
+  (PeanoMinus.finite.union tarski_finite).union (Set.finite_singleton _)
 
 @[simp]
 lemma peanoMinus_subset_finiteAxiomatization : 𝗣𝗔⁻ ⊆ finiteAxiomatization n :=
@@ -62,11 +50,7 @@ lemma tarski_mem_finiteAxiomatization {σ : ArithmeticSentence} (h : σ ∈ tars
 
 @[simp]
 lemma indSentence_mem_finiteAxiomatization : indSentence n ∈ finiteAxiomatization n :=
-  Set.mem_union_right _ (Set.mem_insert _ _)
-
-@[simp]
-lemma collSentence_mem_finiteAxiomatization : collSentence n ∈ finiteAxiomatization n :=
-  Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
+  Set.mem_union_right _ rfl
 
 instance : 𝗘𝗤 ℒₒᵣ ⪯ finiteAxiomatization n :=
   WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
@@ -82,12 +66,6 @@ lemma eval_indFormula (x : V) (g : ℕ → V) :
       ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.PrenexSatisfied 𝚺 (n + 1) ev (g 0) := by
   simp [indFormula, Reading.Adjoin, Reading.PrenexSatisfied]
 
-@[simp]
-lemma eval_collFormula (x y : V) (g : ℕ → V) :
-    (collFormula n).Eval ![x, y] g ↔ ∃ ev₀, Reading.Adjoin ev₀ x (g 1) ∧
-        ∃ ev, Reading.Adjoin ev y ev₀ ∧ Reading.PrenexSatisfied 𝚺 (n + 1) ev (g 0) := by
-  simp [collFormula, Reading.Adjoin, Reading.PrenexSatisfied]
-
 private lemma models_succInd_iff (φ : ArithmeticSemiformula ℕ 1) :
     V↓[ℒₒᵣ] ⊧ .univCl (succInd φ) ↔ ∀ f : ℕ → V, φ.Eval ![0] f →
       (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) → ∀ x, φ.Eval ![x] f := by
@@ -96,14 +74,11 @@ private lemma models_succInd_iff (φ : ArithmeticSemiformula ℕ 1) :
 end eval
 
 theorem provable_finiteAxiomatization (n : ℕ) : 𝗜𝚺 (n + 1) ⊢* finiteAxiomatization n := by
-  rintro σ ((hσ | hσ) | rfl | rfl);
+  rintro σ ((hσ | hσ) | rfl);
   · exact by_axm (Set.mem_union_left _ hσ);
   · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega)) (ISigma1.provable_tarski hσ);
   · exact WeakerThan.pbl (h := InductionOnHierarchy_weakerThan_InductionOnPrenexHierarchy 𝚺 (n + 1))
       (by_axm (Set.mem_union_right _ (mem_InductionScheme_of_mem hierarchy_indFormula)));
-  · have h : 𝗕⁺ 𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance;
-    exact WeakerThan.pbl (h := h)
-      (by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hierarchy_collFormula)));
 
 section models
 
@@ -141,118 +116,19 @@ private lemma exists_assignment_eval_indFormula (φ : ℬ[<, ℒₒᵣ].Prenex �
     obtain ⟨ev, hadj⟩ := read_adjoinTotal hV x e₀;
     exact ⟨ev, hadj, (H hadj).mpr h⟩;
 
-private lemma exists_assignment_eval_collFormula (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2)
-    (f : ℕ → V) :
-    ∃ g : ℕ → V, ∀ x y : V, (collFormula n).Eval ![x, y] g ↔ φ.val.Eval ![x, y] f := by
-  have := models_peanoMinus (n := n) (V := V);
-  have hV := models_tarski (n := n) (V := V);
-  set ψ := φ.rew (φ.val.paramSubst ![#1, #0]);
-  obtain ⟨e₀, he₀⟩ := exists_codes hV (fun i : Fin φ.val.fvSup ↦ f i);
-  use ((⌜ψ.matrix.val⌝ : ℕ) : V) :>ₙ fun _ ↦ e₀;
-  intro x y;
-  have hψ : V ⊧/(y :> x :> fun i : Fin φ.val.fvSup ↦ f i) ψ.val ↔ φ.val.Eval ![x, y] f :=
-    (φ.val_rew _).symm ▸ Semiformula.eval_toSemisentence_two φ.val x y f;
-  have H {ev₀ ev : V} (hadj₀ : Adjoin ev₀ x e₀) (hadj : Adjoin ev y ev₀) :=
-    (prenexSatisfied_quote_reading hV (Γ := 𝚺) ψ.matrix.bounded _ ev
-      (codes_cons hV (codes_cons hV he₀ hadj₀) hadj)).trans hψ;
-  apply (eval_collFormula x y _).trans;
-  constructor;
-  · rintro ⟨ev₀, hadj₀, ev, hadj, hsat⟩;
-    exact (H hadj₀ hadj).mp hsat;
-  · intro h;
-    obtain ⟨ev₀, hadj₀⟩ := read_adjoinTotal hV x e₀;
-    obtain ⟨ev, hadj⟩ := read_adjoinTotal hV y ev₀;
-    exact ⟨ev₀, hadj₀, ev, hadj, (H hadj₀ hadj).mpr h⟩;
-
-lemma succ_induction_prenex (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 1) (f : ℕ → V)
-    (zero : φ.val.Eval ![0] f)
-    (succ : ∀ x, φ.val.Eval ![x] f → φ.val.Eval ![x + 1] f) : ∀ x, φ.val.Eval ![x] f := by
-  have hInd : V↓[ℒₒᵣ] ⊧ indSentence n :=
-    Semantics.ModelsSet.models _ indSentence_mem_finiteAxiomatization;
-  obtain ⟨g, hg⟩ := exists_assignment_eval_indFormula φ f;
-  intro x;
-  exact (hg x).mp <| (models_succInd_iff _).mp hInd g ((hg 0).mpr zero)
-    (fun y hy ↦ (hg (y + 1)).mpr (succ y ((hg y).mp hy))) x;
-
-lemma collection_prenex (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2) (f : ℕ → V) (a : V)
-    (h : ∀ x < a, ∃ y, φ.val.Eval ![x, y] f) : ∃ b, ∀ x < a, ∃ y < b, φ.val.Eval ![x, y] f := by
-  have hColl : V↓[ℒₒᵣ] ⊧ collSentence n :=
-    Semantics.ModelsSet.models _ collSentence_mem_finiteAxiomatization;
-  obtain ⟨g, hg⟩ := exists_assignment_eval_collFormula φ f;
-  obtain ⟨b, hb⟩ := (models_collectionAxiom_iff (collFormula n)).mp hColl g a
-    fun x hx ↦ (h x hx).imp fun y hy ↦ (hg x y).mpr hy;
-  use b;
-  intro x hx;
-  obtain ⟨y, hyb, hy⟩ := hb x hx;
-  exact ⟨y, hyb, (hg x y).mp hy⟩;
-
-private lemma models_IBroadSigma_of {s : ℕ}
-    (H : ∀ φ : ArithmeticSemiformula ℕ 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s φ →
-      ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 1, ∀ (e : Fin 1 → V) (f : ℕ → V),
-        φ'.val.Eval e f ↔ φ.Eval e f) :
-    V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := by
+lemma models_ISigma : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (n + 1) := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
   · exact models_peanoMinus (n := n);
   · apply Semantics.ModelsSet.setOf_iff.mpr;
-    rintro _ ⟨φ, hφ, rfl⟩;
-    apply (models_succInd_iff φ).mpr;
-    intro f;
-    obtain ⟨φ', hφ'⟩ := H φ hφ;
-    simpa only [hφ'] using succ_induction_prenex φ' f;
-
-private lemma models_CollectionOnHierarchy_of [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {Γ : Polarity} {s : ℕ}
-    (H : ∀ φ : ArithmeticSemiformula ℕ 2, ℬ[<, ℒₒᵣ].Hierarchy Γ s φ →
-      ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2, ∀ (e : Fin 2 → V) (f : ℕ → V),
-        φ'.val.Eval e f ↔ φ.Eval e f) :
-    V↓[ℒₒᵣ] ⊧* 𝗕⁺ Γ s := by
-  apply Semantics.ModelsSet.union_iff.mpr;
-  and_intros;
-  · assumption;
-  · apply Semantics.ModelsSet.setOf_iff.mpr;
-    rintro _ ⟨φ, hφ, rfl⟩;
-    apply (models_collectionAxiom_iff φ).mpr;
-    intro f;
-    obtain ⟨φ', hφ'⟩ := H φ hφ;
-    simpa only [hφ'] using collection_prenex φ' f;
-
-omit [V↓[ℒₒᵣ] ⊧* finiteAxiomatization n] in
-private lemma exists_prenex_of_zero {k : ℕ} {Γ : Polarity} {φ : ArithmeticSemiformula ℕ k}
-    (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ 0 φ) :
-    ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ k, ∀ (e : Fin k → V) (f : ℕ → V),
-      φ'.val.Eval e f ↔ φ.Eval e f :=
-  ⟨.ofΔ₀ ⟨φ, Bounding.Hierarchy.zero_iff_bounded.mp hφ⟩ 𝚺 (n + 1), fun e _ ↦
-    Bounding.Prenex.models_ofΔ₀ _ e⟩
-
-include n in
-private lemma models_ISigmaZero : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ 0 := models_IBroadSigma_of (n := n) fun _ hφ ↦ exists_prenex_of_zero hφ
-  inferInstance
-
-private lemma models_BPi : ∀ j ≤ n, V↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_ISigmaZero (n := n);
-  intro j hj;
-  induction j with
-  | zero =>
-    exact models_of_ss
-      (models_CollectionOnHierarchy_of (n := n) fun _ hφ ↦ exists_prenex_of_zero hφ)
-      CollectionOnPrenexHierarchy_subset_CollectionOnHierarchy;
-  | succ j ih =>
-    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := ih (by omega);
-    apply models_of_ss _ CollectionOnPrenexHierarchy_subset_CollectionOnHierarchy;
-    apply models_CollectionOnHierarchy_of (n := n);
-    intro φ hφ;
-    obtain ⟨φ₁, h₁⟩ := Bounding.Prenex.models_exists_prenex (Γ' := 𝚺) hφ;
-    obtain ⟨_, ⟨φ₂, rfl⟩, h₂⟩ :=
-      φ₁.val_prenexHierarchy.exists_eval_iff_of_lt 𝚺 (s' := n + 1) (by omega);
-    exact ⟨φ₂, fun e f ↦ ((h₁ V e f).trans (h₂ V e f)).symm⟩;
-
-lemma models_ISigma : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (n + 1) := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n := models_BPi n le_rfl;
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (n + 1) := models_IBroadSigma_of fun φ hφ ↦ by
-    obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex (Γ' := 𝚺) hφ;
-    exact ⟨φ', fun e f ↦ (hφ' V e f).symm⟩;
-  infer_instance;
+    rintro _ ⟨_, ⟨φ, rfl⟩, rfl⟩;
+    apply (models_succInd_iff _).mpr;
+    intro f zero succ x;
+    have hInd : V↓[ℒₒᵣ] ⊧ indSentence n :=
+      Semantics.ModelsSet.models _ indSentence_mem_finiteAxiomatization;
+    obtain ⟨g, hg⟩ := exists_assignment_eval_indFormula φ f;
+    exact (hg x).mp <| (models_succInd_iff _).mp hInd g ((hg 0).mpr zero)
+      (fun y hy ↦ (hg (y + 1)).mpr (succ y ((hg y).mp hy))) x;
 
 end models
 

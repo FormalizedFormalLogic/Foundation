@@ -524,17 +524,6 @@ lemma eval_toSemisentence_one (φ : Semiformula L ℕ 1) (x : M) (f : ℕ → M)
     (fun i ↦ by induction i using Fin.cases with | zero => simp | succ i => exact i.elim0)
     (fun _ ↦ by simp)
 
-lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M) (f : ℕ → M) :
-    M ⊧/(y :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) ↔ φ.Eval ![x, y] f :=
-  eval_toSemisentence ![#1, #0]
-    (fun i ↦ by
-      induction i using Fin.cases with
-      | zero => simp
-      | succ i => induction i using Fin.cases with
-        | zero => simp
-        | succ i => exact i.elim0)
-    (fun _ ↦ by simp)
-
 end toSemisentence
 
 end Semiformula
