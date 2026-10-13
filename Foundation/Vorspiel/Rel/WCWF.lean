@@ -22,7 +22,7 @@ class IsWeaklyConverseWellFounded (α) (rel : Rel α α) : Prop where
 
 section
 
-variable {α} {r : Rel α α}
+variable {α : Type*} {r : Rel α α}
 
 lemma WeaklyConverseWellFounded.has_max [IsWeaklyConverseWellFounded α r] (s : Set α)
     (hs : s.Nonempty) : ∃ m ∈ s, ∀ x ∈ s, r m x → m = x := by

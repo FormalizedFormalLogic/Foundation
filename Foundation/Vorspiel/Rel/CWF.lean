@@ -26,7 +26,7 @@ end
 
 section
 
-variable {α} {R : Rel α α}
+variable {α : Type*} {R : Rel α α}
 
 lemma ConverseWellFounded.iff_has_max :
     ConverseWellFounded R ↔ (∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(R m x)) := by
@@ -124,7 +124,7 @@ end
 
 section
 
-variable {α} {r : Rel α α}
+variable {α : Type*} {r : Rel α α}
 
 instance [Std.Irrefl (flip r)] : Std.Irrefl r := by
   constructor;
