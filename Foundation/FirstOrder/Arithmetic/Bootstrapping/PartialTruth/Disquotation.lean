@@ -100,11 +100,6 @@ noncomputable def nthAdjoinZero : ArithmeticSentence :=
 noncomputable def nthAdjoinSucc : ArithmeticSentence := “∀ x v e i y, !adjoinDef.val e x v →
     (!nthDef.val y e (i + 1) ↔ !nthDef.val y v i)”
 
-noncomputable def lenNil : ArithmeticSentence := “∀ l, !lenDef.val l 0 ↔ l = 0”
-
-noncomputable def lenAdjoin : ArithmeticSentence :=
-  “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
-
 noncomputable def boundedSatisfiedProper : ArithmeticSentence :=
   “∀ z e, !boundedSatisfied.sigma.val e z ↔ !boundedSatisfied.pi.val e z”
 
@@ -130,9 +125,7 @@ noncomputable def tarski : ArithmeticTheory := {
   termValMul,
   adjoinTotal,
   nthAdjoinZero,
-  nthAdjoinSucc,
-  lenNil,
-  lenAdjoin
+  nthAdjoinSucc
 }
 
 lemma tarski_finite : tarski.Finite := by simp [tarski]
@@ -255,15 +248,6 @@ lemma models_nthAdjoinSucc : V↓[ℒₒᵣ] ⊧ nthAdjoinSucc := by
   rintro x v _ i y rfl;
   simp;
 
-lemma models_lenNil : V↓[ℒₒᵣ] ⊧ lenNil := by
-  simp [models_iff, lenNil];
-
-lemma models_lenAdjoin : V↓[ℒₒᵣ] ⊧ lenAdjoin := by
-  suffices ∀ x v e l : V, e = x ∷ v → (l + 1 = len e ↔ l = len v) by
-    simpa [models_iff, lenAdjoin] using this;
-  rintro x v _ l rfl;
-  simp;
-
 lemma models_boundedSatisfiedProper : V↓[ℒₒᵣ] ⊧ boundedSatisfiedProper := by
   simp [models_iff, boundedSatisfiedProper, BoundedSatisfied.defined.proper.iff];
 
@@ -272,14 +256,14 @@ end Tarski
 open Bootstrapping.Tarski in
 lemma models_tarski {σ : ArithmeticSentence} (h : σ ∈ tarski) : V↓[ℒₒᵣ] ⊧ σ := by
   rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
-    rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl;
+    rfl | rfl | rfl | rfl | rfl | rfl;
   exacts [models_boundedSatisfiedVerum, models_boundedSatisfiedFalsum,
     models_boundedSatisfiedEq, models_boundedSatisfiedNeq, models_boundedSatisfiedLt,
     models_boundedSatisfiedNlt, models_boundedSatisfiedAnd, models_boundedSatisfiedOr,
     models_boundedSatisfiedBall, models_boundedSatisfiedBex,
     models_boundedSatisfiedProper, models_termValBvar, models_termValZero, models_termValOne,
     models_termValAdd, models_termValMul, models_adjoinTotal, models_nthAdjoinZero,
-    models_nthAdjoinSucc, models_lenNil, models_lenAdjoin];
+    models_nthAdjoinSucc];
 
 end models
 
@@ -308,8 +292,6 @@ def Adjoin (e' x e : V) : Prop := V ⊧/![e', x, e] adjoinDef.val
 
 def Nth (y e i : V) : Prop := V ⊧/![y, e, i] nthDef.val
 
-def Len (l e : V) : Prop := V ⊧/![l, e] lenDef.val
-
 def TermVal (y e t : V) : Prop := V ⊧/![y, e, t] termValGraph.val
 
 end Reading
@@ -331,7 +313,7 @@ include hV
 
 -- The readings are unfolded only here, to match them against the sentences of `tarski`.
 attribute [local simp] models_iff Reading.BoundedSatisfied Reading.PrenexSatisfied
-  Reading.Bounded Reading.UFormula Reading.UTerm Reading.Adjoin Reading.Nth Reading.Len
+  Reading.Bounded Reading.UFormula Reading.UTerm Reading.Adjoin Reading.Nth
   Reading.TermVal
 
 private lemma models_of_mem (σ : ArithmeticSentence) (hσ : σ ∈ tarski := by simp [tarski]) :
@@ -419,12 +401,6 @@ lemma read_nthAdjoinZero : ∀ x v e y : V, Adjoin e x v → (Nth y e 0 ↔ y = 
 lemma read_nthAdjoinSucc : ∀ x v e i y : V, Adjoin e x v → (Nth y e (i + 1) ↔ Nth y v i) := by
   simpa [Tarski.nthAdjoinSucc] using models_of_mem hV Tarski.nthAdjoinSucc;
 
-lemma read_lenNil : ∀ l : V, Len l 0 ↔ l = 0 := by
-  simpa [Tarski.lenNil] using models_of_mem hV Tarski.lenNil;
-
-lemma read_lenAdjoin : ∀ x v e l : V, Adjoin e x v → (Len (l + 1) e ↔ Len l v) := by
-  simpa [Tarski.lenAdjoin] using models_of_mem hV Tarski.lenAdjoin;
-
 lemma read_prenexSatisfied_pi_succ (s : ℕ) (e p : V) :
     Reading.PrenexSatisfied 𝚷 (s + 1) e p ↔
       ∀ x e', Adjoin e' x e → Reading.PrenexSatisfied 𝚺 s e' p := by
@@ -444,25 +420,23 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
   (hV : ∀ σ ∈ tarski, V↓[ℒₒᵣ] ⊧ σ)
 
 def Reading.Codes {m : ℕ} (v : Fin m → V) (ev : V) : Prop :=
-  Len (m : V) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : V)
+  ∀ i : Fin m, Nth (v i) ev (i.val : V)
 
-include hV in
 lemma codes_nil (v : Fin 0 → V) : Codes v 0 :=
-  ⟨by simpa using (read_lenNil hV 0).mpr rfl, fun i ↦ i.elim0⟩
+  fun i ↦ i.elim0
 
 include hV in
 lemma codes_cons {m : ℕ} {v : Fin m → V} {ev ev' x : V} (h : Codes v ev)
     (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' :=
-  ⟨by simpa using (read_lenAdjoin hV x ev ev' (m : V) hadj).mpr h.1,
-    fun i ↦ Fin.cases (by simpa using (read_nthAdjoinZero hV x ev ev' x hadj).mpr rfl)
-      (fun j ↦ by
-        simpa using (read_nthAdjoinSucc hV x ev ev' (j.val : V) (v j) hadj).mpr (h.2 j)) i⟩
+  fun i ↦ Fin.cases (by simpa using (read_nthAdjoinZero hV x ev ev' x hadj).mpr rfl)
+    (fun j ↦ by
+      simpa using (read_nthAdjoinSucc hV x ev ev' (j.val : V) (v j) hadj).mpr (h j)) i
 
 include hV in
 lemma exists_codes : ∀ {m : ℕ} (v : Fin m → V), ∃ ev, Codes v ev := by
   intro m;
   induction m with
-  | zero => exact fun v ↦ ⟨0, codes_nil hV v⟩;
+  | zero => exact fun v ↦ ⟨0, codes_nil v⟩;
   | succ m ih =>
     intro v;
     obtain ⟨ev, hev⟩ := ih (fun i ↦ v i.succ);
@@ -488,7 +462,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → V} {ev : V} (hev : Cod
   | bvar i =>
     have hb : V ⊧/![((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : V), ((i.val : ℕ) : V)] qqBvarDef.val :=
       sigmaZero_upward_absolute₂ qqBvarDef (by simp);
-    simpa using (read_termValBvar hV ev _ _ (v i) hb).mpr (hev.2 i);
+    simpa using (read_termValBvar hV ev _ _ (v i) hb).mpr (hev i);
   | fvar x => exact x.elim;
   | @func k' f w ih =>
     match k', f, w, ih with
