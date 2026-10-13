@@ -4,7 +4,7 @@ public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.ProvabilityLogic.Kripke.RootExtension
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Height
 public import Foundation.Vorspiel.List.ChainI
-public import Mathlib.Data.ENat.SuccOrder
+public import Mathlib.Order.SuccPred.ENat
 
 /-!
 # Solovay sentences
