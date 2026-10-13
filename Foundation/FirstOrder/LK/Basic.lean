@@ -542,6 +542,11 @@ lemma weakerThan_union_right (h : U ⪯ S) (T : Theory L) : T ∪ U ⪯ T ∪ S 
 lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
   Entailment.Equiv.antisymm ⟨weakerThan_union_right e.le T, weakerThan_union_right e.symm.le T⟩
 
+def Conservative (T U : Theory L) (Γ : Sentence L → Prop) : Prop :=
+  ∀ σ, Γ σ → T ⊢ σ → U ⊢ σ
+
+@[inherit_doc] notation:40 T:41 " ⪯[" Γ "] " U:41 => Theory.Conservative T U Γ
+
 section compact
 
 open Entailment
