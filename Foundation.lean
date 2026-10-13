@@ -72,6 +72,7 @@ public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.Q.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Independence
+public import Foundation.FirstOrder.Arithmetic.R0.Primrec
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 public import Foundation.FirstOrder.Arithmetic.Schema.DeltaInduction
 public import Foundation.FirstOrder.Arithmetic.Schemata
