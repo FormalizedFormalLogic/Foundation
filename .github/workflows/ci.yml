@@ -39,7 +39,13 @@ jobs:
           lean --version
 
       - run: lake build Foundation --wfail
-      - run: just forgive
+      # `lake check` sandboxes the project with `bwrap`, which the runner image does not ship and
+      # whose user namespaces Ubuntu 24.04 restricts for unprivileged users by default.
+      - name: Install bubblewrap
+        run: |
+          sudo apt-get install -y --no-install-recommends bubblewrap
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - run: just kernel-check
 
       # A merge-queue commit becomes `master` as is, so publishing it there lets the push run that
       # follows, and the jobs below, restore it instead of compiling it again.

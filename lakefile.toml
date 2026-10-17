@@ -40,8 +40,3 @@ rev = "v4.35.0"
 scope = "leanprover"
 name = "doc-gen4"
 rev = "v4.35.0"
-
-[[require]]
-name = "Forgive"
-git = "https://github.com/FormalizedFormalLogic/forgive"
-rev = "v4.35.0"

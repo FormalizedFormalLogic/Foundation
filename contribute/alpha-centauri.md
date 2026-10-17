@@ -39,7 +39,7 @@ From the worktree root:
 1. `lake build <module>` with `--wfail`: no errors or warnings.
 2. `lake build Foundation`.
 3. `just mk-all`: no diff in `Foundation.lean`.
-4. `just forgive`.
+4. `just kernel-check`.
 5. No `sorry` in the ported files.
 6. `lake shake --keep-public <module>`, dropping the imports it reports as redundant (not the project-wide `just shake`, which passes `--fix`).
 7. No development-time artifacts (`grep -n "see plan\|issue #\|Step [0-9]\|§[0-9]\|L[0-9]-[0-9]\|PR [0-9]"`).
