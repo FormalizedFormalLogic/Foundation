@@ -39,6 +39,9 @@ jobs:
           lean --version
 
       - run: lake build Foundation --wfail
+      # `lake check` sandboxes the project with `bwrap`, which the runner image does not ship.
+      - name: Install bubblewrap
+        run: sudo apt-get install -y --no-install-recommends bubblewrap
       - run: just kernel-check
 
       # A merge-queue commit becomes `master` as is, so publishing it there lets the push run that
