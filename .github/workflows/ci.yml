@@ -39,7 +39,7 @@ jobs:
           lean --version
 
       - run: lake build Foundation --wfail
-      - run: just forgive
+      - run: just kernel-check
 
       # A merge-queue commit becomes `master` as is, so publishing it there lets the push run that
       # follows, and the jobs below, restore it instead of compiling it again.
