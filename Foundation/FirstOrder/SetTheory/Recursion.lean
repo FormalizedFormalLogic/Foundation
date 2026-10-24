@@ -1,9 +1,9 @@
 module
 
 public import Foundation.FirstOrder.SetTheory.Ordinal
-public import Foundation.FirstOrder.SetTheory.Function
+public import Foundation.FirstOrder.SetTheory.FunctionSet
 public import Foundation.FirstOrder.SetTheory.Recursion.Seq
-public import Foundation.FirstOrder.SetTheory.ZF
+public import Foundation.FirstOrder.SetTheory.ZF.ZF
 
 @[expose] public section
 

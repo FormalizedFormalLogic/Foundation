@@ -4,9 +4,7 @@ public import Foundation.SecondOrder.Syntax.Rew
 public import Foundation.Logic.Calculus
 
 /-!
-# Second-order one-sided $\mathbf{LK}$
-
-The structural rules are the standard local weakening and contraction rules.
+# Second-order $\mathbf{LK}$
 -/
 
 @[expose] public section
@@ -131,8 +129,6 @@ notation "𝐋𝐊²" => LK.Proof.Symbol.symbol
 instance : Entailment (LK.Proof.Symbol L) (Sentence L) := ⟨fun _ φ ↦ Nonempty (LK.Proof φ)⟩
 
 /-! ## Proof system with axioms -/
-
-abbrev Theory (L : Language) := Set (Sentence L)
 
 /-- A theory proof uses finitely many sentence axioms, as in first-order LK. -/
 structure Theory.Proof (T : Theory L) (σ : Sentence L) where

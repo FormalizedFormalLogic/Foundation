@@ -39,7 +39,7 @@ namespace Semiformula
 variable {M : Type w} [𝓈 : FirstOrder.Tarski.Structure L M]
 
 def EvalAux
-    (𝕊 : Set (Set M))
+    (𝓢 : Set (Set M))
     (F : Ξ → Set M) (f : ξ → M) (E : Fin N → Set M) (e : Fin n → M) : Semiformula L Ξ ξ N n → Prop
   |  rel R v => 𝓈.rel R (Semiterm.val e f ∘ v)
   | nrel R v => ¬𝓈.rel R (Semiterm.val e f ∘ v)
@@ -49,22 +49,22 @@ def EvalAux
   |   t ∉# X => t.val e f ∉ E X
   |        ⊤ => True
   |        ⊥ => False
-  |    φ ⋏ ψ => φ.EvalAux 𝕊 F f E e ∧ ψ.EvalAux 𝕊 F f E e
-  |    φ ⋎ ψ => φ.EvalAux 𝕊 F f E e ∨ ψ.EvalAux 𝕊 F f E e
-  |     ∀¹ φ => ∀ x, φ.EvalAux 𝕊 F f E (x :> e)
-  |     ∃¹ φ => ∃ x, φ.EvalAux 𝕊 F f E (x :> e)
-  |     ∀² φ => ∀ X ∈ 𝕊, φ.EvalAux 𝕊 F f (X :> E) e
-  |     ∃² φ => ∃ X ∈ 𝕊, φ.EvalAux 𝕊 F f (X :> E) e
+  |    φ ⋏ ψ => φ.EvalAux 𝓢 F f E e ∧ ψ.EvalAux 𝓢 F f E e
+  |    φ ⋎ ψ => φ.EvalAux 𝓢 F f E e ∨ ψ.EvalAux 𝓢 F f E e
+  |     ∀¹ φ => ∀ x, φ.EvalAux 𝓢 F f E (x :> e)
+  |     ∃¹ φ => ∃ x, φ.EvalAux 𝓢 F f E (x :> e)
+  |     ∀² φ => ∀ X ∈ 𝓢, φ.EvalAux 𝓢 F f (X :> E) e
+  |     ∃² φ => ∃ X ∈ 𝓢, φ.EvalAux 𝓢 F f (X :> E) e
 
-variable {𝕊 : Set (Set M)} {F : Ξ → Set M} {f : ξ → M} {E : Fin N → Set M} {e : Fin n → M}
+variable {𝓢 : Set (Set M)} {F : Ξ → Set M} {f : ξ → M} {E : Fin N → Set M} {e : Fin n → M}
 
 @[simp] lemma EvalAux_neg (φ : Semiformula L Ξ ξ N n) :
-    EvalAux 𝕊 F f E e (∼φ) ↔ ¬EvalAux 𝕊 F f E e φ := by
+    EvalAux 𝓢 F f E e (∼φ) ↔ ¬EvalAux 𝓢 F f E e φ := by
   induction φ using rec' <;> simp [*, EvalAux, or_iff_not_imp_left]
 
-def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → Set M) (e : Fin n → M) :
+def Eval (𝓢 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → Set M) (e : Fin n → M) :
     Semiformula L Ξ ξ N n →ˡᶜ Prop where
-  toTr := EvalAux 𝕊 F f E e
+  toTr := EvalAux 𝓢 F f E e
   map_top' := rfl
   map_bot' := rfl
   map_and' := by simp [EvalAux]
@@ -73,41 +73,41 @@ def Eval (𝕊 : Set (Set M)) (F : Ξ → Set M) (f : ξ → M) (E : Fin N → S
   map_imply' := by simp [LogicalConnective.DeMorgan.imply, EvalAux_neg, EvalAux]
 
 @[simp] lemma eval_rel {k} {R : L.Rel k} {v} :
-    (rel R v).Eval 𝕊 F f E e ↔ 𝓈.rel R (Semiterm.val e f ∘ v) := by rfl
+    (rel R v).Eval 𝓢 F f E e ↔ 𝓈.rel R (Semiterm.val e f ∘ v) := by rfl
 
 @[simp] lemma eval_nrel {k} {R : L.Rel k} {v} :
-    (nrel R v).Eval 𝕊 F f E e ↔ ¬𝓈.rel R (Semiterm.val e f ∘ v) := by rfl
+    (nrel R v).Eval 𝓢 F f E e ↔ ¬𝓈.rel R (Semiterm.val e f ∘ v) := by rfl
 
 @[simp] lemma eval_fvar {X : Ξ} {t : Semiterm L ξ n} :
-    (t ∈& X).Eval 𝕊 F f E e ↔ t.val e f ∈ F X := by rfl
+    (t ∈& X).Eval 𝓢 F f E e ↔ t.val e f ∈ F X := by rfl
 
 @[simp] lemma eval_nfvar {X : Ξ} {t : Semiterm L ξ n} :
-    (t ∉& X).Eval 𝕊 F f E e ↔ t.val e f ∉ F X := by rfl
+    (t ∉& X).Eval 𝓢 F f E e ↔ t.val e f ∉ F X := by rfl
 
 @[simp] lemma eval_bvar {X : Fin N} {t : Semiterm L ξ n} :
-    (t ∈# X).Eval 𝕊 F f E e ↔ t.val e f ∈ E X := by rfl
+    (t ∈# X).Eval 𝓢 F f E e ↔ t.val e f ∈ E X := by rfl
 
 @[simp] lemma eval_nbvar {X : Fin N} {t : Semiterm L ξ n} :
-    (t ∉# X).Eval 𝕊 F f E e ↔ t.val e f ∉ E X := by rfl
+    (t ∉# X).Eval 𝓢 F f E e ↔ t.val e f ∉ E X := by rfl
 
 @[simp] lemma eval_fal₀ {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∀¹ φ).Eval 𝕊 F f E e ↔ ∀ x, φ.Eval 𝕊 F f E (x :> e) := by rfl
+    (∀¹ φ).Eval 𝓢 F f E e ↔ ∀ x, φ.Eval 𝓢 F f E (x :> e) := by rfl
 
 @[simp] lemma eval_exs₀ {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∃¹ φ).Eval 𝕊 F f E e ↔ ∃ x, φ.Eval 𝕊 F f E (x :> e) := by rfl
+    (∃¹ φ).Eval 𝓢 F f E e ↔ ∃ x, φ.Eval 𝓢 F f E (x :> e) := by rfl
 
 @[simp] lemma eval_fal₁ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    (∀² φ).Eval 𝕊 F f E e ↔ ∀ X ∈ 𝕊, φ.Eval 𝕊 F f (X :> E) e := by rfl
+    (∀² φ).Eval 𝓢 F f E e ↔ ∀ X ∈ 𝓢, φ.Eval 𝓢 F f (X :> E) e := by rfl
 
 @[simp] lemma eval_exs₁ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    (∃² φ).Eval 𝕊 F f E e ↔ ∃ X ∈ 𝕊, φ.Eval 𝕊 F f (X :> E) e := by rfl
+    (∃² φ).Eval 𝓢 F f E e ↔ ∃ X ∈ 𝓢, φ.Eval 𝓢 F f (X :> E) e := by rfl
 
 end Semiformula
 
-def Tarski.Struc.of {M : Type*} [Nonempty M] (𝕊 : Set (Set M)) (L : Language)
-    [𝓈 : FirstOrder.Tarski.Structure L M] : Tarski.Struc L := ⟨𝓈.toStruc, 𝕊⟩
+def Tarski.Struc.of {M : Type*} [Nonempty M] (𝓢 : Set (Set M)) (L : Language)
+    [𝓈 : FirstOrder.Tarski.Structure L M] : Tarski.Struc L := ⟨𝓈.toStruc, 𝓢⟩
 
-notation:max 𝕊 "↓[" L "]" => Tarski.Struc.of 𝕊 L
+notation:max 𝓢 "↓[" L "]" => Tarski.Struc.of 𝓢 L
 
 instance : Semantics (Tarski.Struc L) (Sentence L) where
   Models 𝓈 σ := σ.Eval 𝓈.sets Empty.elim Empty.elim ![] ![]
@@ -115,8 +115,8 @@ instance : Semantics (Tarski.Struc L) (Sentence L) where
 lemma models_def {𝓈 : Tarski.Struc L} {σ : Sentence L} :
     𝓈 ⊧ σ ↔ σ.Eval 𝓈.sets Empty.elim Empty.elim ![] ![] := by rfl
 
-lemma models_iff [Nonempty M] [FirstOrder.Tarski.Structure L M] {𝕊 : Set (Set M)} {σ : Sentence L} :
-    𝕊↓[L] ⊧ σ ↔ σ.Eval 𝕊 Empty.elim Empty.elim ![] ![] := by rfl
+lemma models_iff [Nonempty M] [FirstOrder.Tarski.Structure L M] {𝓢 : Set (Set M)} {σ : Sentence L} :
+    𝓢↓[L] ⊧ σ ↔ σ.Eval 𝓢 Empty.elim Empty.elim ![] ![] := by rfl
 
 instance : Semantics.Tarski (Tarski.Struc L) where
   models_verum _ := by simp [models_def]

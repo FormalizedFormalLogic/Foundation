@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Z
+public import Foundation.FirstOrder.SetTheory.Z.Z
 
 @[expose] public section
 /-!
@@ -113,7 +113,7 @@ lemma range_inter_subset {R₁ R₂ : V} : range (R₁ ∩ R₂) ⊆ range R₁ 
 
 end range
 
-/-! ### Functions -/
+/-! ### Function sets -/
 
 noncomputable def function (Y X : V) : V := {f ∈ ℘ (X ×ˢ Y) ; ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f}
 

@@ -6,8 +6,11 @@ public import Foundation.FirstOrder.Syntax.Classical.Padding
 /-!
 # Hierarchies over a bounding
 
-`ℬ.Hierarchy Γ s` is the `Γ`-hierarchy of level `s` over `ℬ`-bounded formulas, and
-`ℬ.PrenexHierarchy Γ s` is its subclass of prenex formulas.
+`ℬ.Hierarchy Γ s` is the `s`th level of the `Γ` side of the hierarchy using `ℬ` to bound
+quantifiers, and `ℬ.PrenexHierarchy Γ s` is its subclass of formulas in prenex normal form.
+
+We may insert bounded quantifiers wherever we like in a `ℬ.Hierarchy Γ s` formula, however
+this is not allowed for `ℬ.PrenexHierarchy Γ s` formulas.
 
 ## References
 

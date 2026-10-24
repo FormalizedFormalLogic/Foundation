@@ -78,7 +78,7 @@ def Exponential.Seqₛ (y X Y : V) : Prop :=
 def Exponential.Seqₘ (x y X Y : V) : Prop :=
   ∃ u ≤ y ^ 2, u ≠ 2 ∧ PPow2 u ∧ ext u X = x ∧ ext u Y = y
 
-/-- The graph of the exponential function -/
+/-- The graph of the exponential function, `y = 2^x`. -/
 def Exponential (x y : V) : Prop :=
   (x = 0 ∧ y = 1) ∨
   ∃ X ≤ y ^ 4, ∃ Y ≤ y ^ 4, Exponential.Seq₀ X Y ∧ Exponential.Seqₛ y X Y ∧ Exponential.Seqₘ x y X Y
@@ -127,6 +127,7 @@ lemma Exponential.graph_iff (x y : V) :
       · exact Or.inr
           ⟨X, bX, Y, bY, ⟨H₀.1.symm, H₀.2.symm⟩, Hₛ, ⟨u, hu, ne2, ppu, hX.symm, hY.symm⟩⟩⟩
 
+/-- The definition of the relation `y = 2^x`. -/
 def _root_.FFL.FirstOrder.Arithmetic.exponentialDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “x y.
     (x = 0 ∧ y = 1) ∨ ∃ X <⁺ y⁴, ∃ Y <⁺ y⁴,
@@ -134,11 +135,11 @@ def _root_.FFL.FirstOrder.Arithmetic.exponentialDef : 𝚺ᴬ₀.Semisentence 2 
       !Exponential.Seqₛ.def y X Y ∧
       ∃ u <⁺ y², u ≠ 2 ∧ !ppow2Def u ∧ !extDef x u X ∧ !extDef y u Y”
 
-/-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
+/-- The graph of the exponential function can be defined by a $\Delta_0$-formula. -/
 instance Exponential.defined : 𝚺ᴬ₀-Relation[V] Exponential via exponentialDef := .mk fun v ↦ by
   simp [Exponential.graph_iff, exponentialDef, pow_four, sq]
 
-/-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
+/-- The graph of the exponential function can be defined by a $\Delta_0$-formula. -/
 instance exponential_definable : 𝚺ᴬ₀-Relation (Exponential : V → V → Prop) :=
   Exponential.defined.to_definable
 

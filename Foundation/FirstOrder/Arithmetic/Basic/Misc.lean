@@ -189,8 +189,10 @@ namespace BinderNotation
 
 open Lean PrettyPrinter Delaborator SubExpr
 
+/-- `∀ x <⁺ t, φ` states that `∀ x < t + 1, φ`. -/
 syntax:max "∀ " ident " <⁺ " first_order_term ", " first_order_formula:0 : first_order_formula
 
+/-- `∃ x <⁺ t, φ` states that `∃ x < t + 1, φ`. -/
 syntax:max "∃ " ident " <⁺ " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules

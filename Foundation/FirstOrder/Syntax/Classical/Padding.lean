@@ -1,6 +1,13 @@
 module
 public import Foundation.FirstOrder.Tarski.Basic
 public import Foundation.FirstOrder.LK.Basic
+
+/-!
+# Padding
+
+Padding, as in Craig's interpolation theorem.
+-/
+
 @[expose] public section
 
 namespace FFL.FirstOrder

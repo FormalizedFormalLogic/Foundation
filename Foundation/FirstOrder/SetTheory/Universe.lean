@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.SetTheory.Basic
+public import Foundation.FirstOrder.SetTheory.ZF.Model
 public import Mathlib.Data.QPF.Univariate.Basic
 public import Mathlib.SetTheory.Cardinal.Aleph
 public import Foundation.Vorspiel.Small
@@ -236,53 +236,75 @@ noncomputable def powerset (x : Universe.{u}) : Universe.{u} :=
     refine ⟨equivShrink _ ⟨z, by simpa⟩, ?_⟩
     simp [Universe.ext_iff]; tauto
 
-instance models_zf : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗙 := ⟨by
+instance models_bst : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧 := ⟨by
     intro φ hφ
     rcases hφ
-    case axiom_of_equality h =>
+    case equality h =>
       have : Universe.{u}↓[ℒₛₑₜ] ⊧* (𝗘𝗤 _ : SetTheory) := inferInstance
       simpa [models_iff] using models_theory_iff.mp this _ h
-    case axiom_of_empty_set =>
-      suffices ∃ x, ∀ y, y ∉ x by simpa [models_iff, Axiom.empty]
+    case empty_set =>
+      suffices ∃ x, ∀ y, y ∉ x by simpa [models_iff, BasicSetTheory.empty_set]
       exact ⟨empty, by simp⟩
-    case axiom_of_extentionality =>
-      simp [models_iff, Axiom.extentionality, Universe.ext_iff]
-    case axiom_of_pairing =>
+    case extensionality =>
+      simp [models_iff, Universe.ext_iff]
+    case pairing =>
       suffices
           ∀ x y : Universe.{u}, ∃ z, ∀ v, v ∈ z ↔ v = x ∨ v = y by
-        simpa [models_iff, Axiom.pairing]
+        simpa [models_iff, BasicSetTheory.pairing]
       intro x y
       exact ⟨mk {x, y}, by simp⟩
-    case axiom_of_union =>
+    case union =>
       suffices
           ∀ x : Universe.{u}, ∃ y, ∀ z, z ∈ y ↔ ∃ v ∈ x, z ∈ v by
-        simpa [models_iff, Axiom.union]
+        simpa [models_iff, BasicSetTheory.union]
       intro x
       exact ⟨mk (⋃ i : x, i), by simp⟩
-    case axiom_of_power_set =>
+    case power_set =>
       suffices
           ∀ x : Universe.{u}, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x by
-        simpa [models_iff, Axiom.power]
+        simpa [models_iff, BasicSetTheory.power_set]
       intro x
       exact ⟨x.powerset, by simp⟩
-    case axiom_of_infinity =>
+    case infinity =>
       suffices
           ∃ ω, (empty ∈ ω) ∧
             ∀ x ∈ ω, ∀ y, (∀ z, z ∈ y ↔ z = x ∨ z ∈ x) → y ∈ ω by
-        simpa [models_iff, Axiom.infinity, val_isSucc_iff, isEmpty_iff_eq_empty]
+        simpa [models_iff, BasicSetTheory.infinity, val_isSucc_iff, isEmpty_iff_eq_empty]
       refine ⟨omega, ?_, ?_⟩
       · simp
       · intro x hx y  hy
         have : y = x.insert x := by
           ext; simp_all
         simpa [this] using Universe.omega_succ hx
-    case axiom_of_foundation =>
+    case foundation =>
       suffices
           ∀ x : Universe.{u}, IsNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y by
-        simpa [models_iff, Axiom.foundation]
+        simpa [models_iff, BasicSetTheory.foundation]
       intro x hx
-      exact minimal_exists_of_isNonempty hx
-    case axiom_of_separation φ =>
+      exact minimal_exists_of_isNonempty hx⟩
+
+-- instance models_z : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭 := ⟨by
+--     case separation φ =>
+--       let P (f : ℕ → Universe.{u}) (x : Universe.{u}) : Prop :=
+--         φ.Eval (s := standardStructure Universe.{u}) ![x] f
+--       suffices
+--           ∀ (f : ℕ → Universe.{u}) (x : Universe.{u}),
+--           ∃ y, ∀ z : Universe.{u}, z ∈ y ↔ z ∈ x ∧ P f z by
+--         simpa [models_iff, BasicSetTheory.separationSchema, Matrix.constant_eq_singleton, P]
+--       intro f x
+--       refine ⟨sep x (P f), ?_⟩
+--       intro z; simp⟩
+
+instance models_z : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭 := ⟨by
+    intro φ hφ
+    rcases hφ
+    case inl =>
+      rename_i hφ
+      exact Theory.models _ 𝗕𝗦𝗧 hφ
+    case inr =>
+      rename_i hφ
+      rcases hφ
+      rename_i φ
       let P (f : ℕ → Universe.{u}) (x : Universe.{u}) : Prop :=
         φ.Eval (s := standardStructure Universe.{u}) ![x] f
       suffices
@@ -291,8 +313,18 @@ instance models_zf : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗙 := ⟨by
         simpa [models_iff, Axiom.separationSchema, Matrix.constant_eq_singleton, P]
       intro f x
       refine ⟨sep x (P f), ?_⟩
-      intro z; simp
-    case axiom_of_replacement φ =>
+      intro z; simp⟩
+
+instance models_zf : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗙 := ⟨by
+    intro φ hφ
+    rcases hφ
+    case inl =>
+      rename_i hφ
+      exact Theory.models _ 𝗭 hφ
+    case inr =>
+      rename_i hφ
+      rcases hφ
+      rename_i φ
       let R (f : ℕ → Universe.{u}) (x y : Universe.{u}) : Prop :=
         φ.Eval (s := standardStructure Universe.{u}) ![x, y] f
       suffices
@@ -323,12 +355,9 @@ instance models_ac : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗔𝗖 := ⟨by
     exact 𝓧.choice_existsUnique
       (by intro h; rcases nonempty empty h; simp_all) pairwise_disjoint hX⟩
 
+instance models_zc : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗖 := inferInstance
 
 instance models_zfc : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗙𝗖 := inferInstance
-
-instance models_z : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭 := models_of_ss inferInstance z_subset_zf
-
-instance models_zc : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗭𝗖 := inferInstance
 
 end Universe
 

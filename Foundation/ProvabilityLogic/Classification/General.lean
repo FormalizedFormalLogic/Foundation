@@ -262,6 +262,47 @@ end
 
 section
 
+variable [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+
+lemma trace_provabilityLogic_add_con_self_eq :
+    (T.provabilityLogicRelativeTo (T ∪ T.Con) (α := α)).trace = {0} := by
+  ext n;
+  rw [mem_trace_provabilityLogic_iff, Set.mem_singleton_iff];
+  constructor;
+  · intro h;
+    have h₁ : T ⊢ ∼T.standardProvability ⊥ 🡒
+        T.standardProvability (T.standardProvability^[n] ⊥) 🡒 T.standardProvability^[n] ⊥ := by
+      have := h ⟨fun _ ↦ ⊥⟩;
+      rw [Set.union_singleton] at this;
+      replace := deduction this;
+      simp only [alpha, standardInterpret, interpret, interpret_boxItr,
+        Function.iterate_succ_apply'] at this;
+      exact this;
+    have h₂ : 𝐆𝐋 ⊢ (∼□⊥ 🡒 alpha n : LetterlessFormula) :=
+      Logic.GL.arithmetical_completeness_iff (T := T).mpr fun f ↦ by
+        simp only [alpha, standardInterpret, interpret, interpret_boxItr,
+          Function.iterate_succ_apply'];
+        cl_prover [h₁];
+    have h₃ : ∀ i, n ≤ i := by
+      simpa using Set.eq_univ_iff_forall.mp (Logic.GL.mem_iff_spectrum_eq_univ.mp h₂) n;
+    contrapose! h₃;
+    use 0;
+    omega;
+  · rintro rfl f;
+    have h : T ∪ T.Con ⊢ ∼T.standardProvability ⊥ := by_axm <| Set.mem_union_right _ rfl;
+    simp only [alpha, standardInterpret, interpret, interpret_boxItr];
+    cl_prover [h];
+
+/-- `PL(T, T + Con(T)) = 𝐆𝐋 + ¬□⊥` for a `𝚺₁`-sound `T`. -/
+theorem provabilityLogic_add_con_self_eq_GLAlpha :
+    T.provabilityLogicRelativeTo (T ∪ T.Con) (α := α) = 𝐆𝐋α {0} :=
+  have h := trace_provabilityLogic_add_con_self_eq (T := T) (α := α);
+  h ▸ provabilityLogic_eq_GLAlpha (h ▸ (Set.finite_singleton 0).infinite_compl)
+
+end
+
+section
+
 variable {n : ℕ} [NeZero n] [𝗜𝚺₁ ⪯ T] [𝗕𝚺n ⪯ T]
 
 theorem provabilityLogic_add_localReflectionOn_Sigma_eq_D :

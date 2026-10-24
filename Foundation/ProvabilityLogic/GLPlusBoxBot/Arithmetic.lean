@@ -6,7 +6,8 @@ public import Foundation.ProvabilityLogic.GL.Arithmetic
 /-!
 # Arithmetical completeness of `GL + □^n⊥`
 
-The provability logic of a theory of height `n` is `GL + □^n⊥`.
+The provability logic of a theory of height `n` is `GL + □^n⊥`. In particular, the provability
+logic of `T` relative to `T + ¬Con(T)` is `GL + □⊥`.
 
 ## References
 
@@ -65,6 +66,38 @@ lemma equiv_provabilityLogic : GLPlusBoxBot T.height ≊ T.provabilityLogic (α 
   equiv_iff.mpr eq_provabilityLogic
 
 end Logic.GLPlusBoxBot
+
+variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+
+open FirstOrder.Arithmetic Formula ProvabilityAbstraction.Provability in
+/-- `T + ¬Con(T)` proves every `□`-formula under both `T` and its own provability, so both
+interpretations agree. -/
+lemma provabilityLogicRelativeTo_add_incon_eq :
+    T.provabilityLogicRelativeTo (T ∪ T.Incon) = (T ∪ T.Incon).provabilityLogic (α := α) := by
+  have h₁ : T ∪ T.Incon ⊢ T.standardProvability ⊥ :=
+    of_NN (by_axm (by simp) : T ∪ T.Incon ⊢ ∼T.consistent.val)
+  have h₂ : T ∪ T.Incon ⊢ (T ∪ T.Incon).standardProvability ⊥ :=
+    WeakerThan.pbl (provable_standardProvability_imp_of_Δ₁Class_subset
+      (fun _ _ _ _ hp ↦ Theory.Δ₁Class.mem_union.mpr (.inl hp)) ⊥) ⨀ h₁
+  have key (f : Realization α ℒₒᵣ) (A : Formula α) : T ∪ T.Incon ⊢ f T A 🡘 f (T ∪ T.Incon) A := by
+    induction A with
+    | atom | falsum => simp only [standardInterpret, interpret]; exact E_id
+    | imp A B ihA ihB =>
+      simp only [standardInterpret, interpret] at *; exact ECC_of_E_of_E ihA ihB
+    | box A =>
+      have hT : T ∪ T.Incon ⊢ T.standardProvability (f T A) := WeakerThan.pbl (mono efq) ⨀ h₁
+      have hU : T ∪ T.Incon ⊢ (T ∪ T.Incon).standardProvability (f (T ∪ T.Incon) A) :=
+        WeakerThan.pbl (mono efq) ⨀ h₂
+      simp only [standardInterpret, interpret] at *
+      exact E_intro (C_of_conseq hU) (C_of_conseq hT)
+  ext A
+  exact forall_congr' fun f ↦ ⟨fun h ↦ K_left (key f A) ⨀ h, fun h ↦ K_right (key f A) ⨀ h⟩
+
+open FirstOrder.Arithmetic in
+/-- The provability logic of `T` relative to `T + ¬Con(T)` is `GL + □⊥`. -/
+theorem Logic.GLPlusBoxBot.eq_provabilityLogicRelativeTo_add_incon [Consistent T] :
+    GLPlusBoxBot 1 = T.provabilityLogicRelativeTo (T ∪ T.Incon) (α := α) := by
+  rw [provabilityLogicRelativeTo_add_incon_eq, ← eq_provabilityLogic, height_union_incon_eq_one]
 
 end FFL.ProvabilityLogic
 
