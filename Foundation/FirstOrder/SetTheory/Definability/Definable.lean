@@ -5,20 +5,18 @@ public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Basic
 
 /-!
 # Lévy definability
-
-The closure properties below specialize the general bounded definability results to
-membership. They are routine adaptations of the arithmetical hierarchy results in this library.
 -/
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Bounding.HierarchySymbol.Definable
+namespace FFL.FirstOrder.Bounding.HierarchySymbol
 
-open FFL.FirstOrder.SetTheory
 open FFL.FirstOrder.Semiformula (Operator)
 open scoped FFL.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V]
+
+namespace Definable
 
 section
 
@@ -49,18 +47,6 @@ end
 section
 
 variable {k m : ℕ} {Γ : SigmaPiDelta}
-
-lemma lévy_ball_mem {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴸ_[m + 1].DefinableFunction f)
-    (h : Γᴸ_[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴸ_[m + 1].Definable fun v ↦ ∀ x ∈ f v, P v x :=
-  ball_operator (R := Operator.Mem.mem) (by rfl) hf h
-
-lemma lévy_bexs_mem {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺ᴸ_[m + 1].DefinableFunction f)
-    (h : Γᴸ_[m + 1].Definable fun w ↦ P (w ·.succ) (w 0)) :
-    Γᴸ_[m + 1].Definable fun v ↦ ∃ x ∈ f v, P v x :=
-  bexs_operator (R := Operator.Mem.mem) (by rfl) hf h
 
 @[elab_as_elim]
 theorem lévy_sigma_succ_induction
@@ -94,7 +80,32 @@ theorem lévy_sigma_succ_induction
 
 end
 
-attribute [aesop 8 (rule_sets := [Definability]) safe]
-  lévy_ball_mem lévy_bexs_mem
+end Definable
 
-end FFL.FirstOrder.Bounding.HierarchySymbol.Definable
+abbrev ExtDefinedFunction (ℌ : ℬ[∈, ℒₛₑₜ].HierarchySymbol) {k} (f : (Fin k → V) → V) :=
+  ℌ.Definable fun v ↦ v 0 ∈ f (v ·.succ)
+
+abbrev ExtDefinedFunction₀ (ℌ : ℬ[∈, ℒₛₑₜ].HierarchySymbol) (c : V) : Prop :=
+  ℌ.ExtDefinedFunction (fun _ : Fin 0 → V ↦ c)
+
+abbrev ExtDefinedFunction₁ (ℌ : ℬ[∈, ℒₛₑₜ].HierarchySymbol) (f : V → V) : Prop :=
+  ℌ.ExtDefinedFunction (fun v : Fin 1 → V ↦ f (v 0))
+
+abbrev ExtDefinedFunction₂ (ℌ : ℬ[∈, ℒₛₑₜ].HierarchySymbol) (f : V → V → V) : Prop :=
+  ℌ.ExtDefinedFunction (fun v : Fin 2 → V ↦ f (v 0) (v 1))
+
+abbrev ExtDefinedFunction₃ (ℌ : ℬ[∈, ℒₛₑₜ].HierarchySymbol) (f : V → V → V → V) : Prop :=
+  ℌ.ExtDefinedFunction (fun v : Fin 3 → V ↦ f (v 0) (v 1) (v 2))
+
+namespace ExtDefinedFunction
+
+variable {ℌ : ℬ[∈, ℒₛₑₜ].HierarchySymbol}
+
+@[definability] instance proj {k} (i : Fin k) : ℌ.ExtDefinedFunction (fun v : Fin k → V ↦ v i) := sorry
+
+lemma toDefinableFunction {k} {f : (Fin k → V) → V} (h : ℌ.ExtDefinedFunction f) :
+    ℌ.DefinableFunction f := sorry
+
+end ExtDefinedFunction
+
+end FFL.FirstOrder.Bounding.HierarchySymbol
