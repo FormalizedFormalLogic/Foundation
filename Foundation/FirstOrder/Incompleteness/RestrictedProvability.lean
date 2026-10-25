@@ -152,6 +152,9 @@ theorem two_pow_le_superexp {e : ℕ} (he : 1 ≤ e) : 2 ^ e ≤ Superexp.supere
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
+theorem provable_restrictedGödel_superexp {e : ℕ} : T ⊢ T.restrictedGödel superexpDef e :=
+  provable_restrictedGödel Superexp.superexp
+
 theorem lower_bound_gödelNumber_proof_restrictedGödel_superexp {e : ℕ} :
     ∀ b : T.Proof (T.restrictedGödel superexpDef e), Superexp.superexp e ≤ ⌜b⌝ := by
   simpa [numeral_eq_natCast]
@@ -164,7 +167,7 @@ example :
     T ⊢ T.restrictedGödel superexpDef e ∧
       ∀ b : T.Proof (T.restrictedGödel superexpDef e), Superexp.superexp e ≤ ⌜b⌝ := by
   constructor;
-  · exact provable_restrictedGödel Superexp.superexp
+  · apply provable_restrictedGödel_superexp;
   · apply lower_bound_gödelNumber_proof_restrictedGödel_superexp;
 
 end Arithmetic

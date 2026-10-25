@@ -177,6 +177,9 @@ lemma numeral_succ (hz : z ≠ 0) :
   | zero => simp at hz
   | succ z => rfl
 
+lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z + 1), One.one] :=
+  numeral_succ (by simp)
+
 protected abbrev encode (L : Language) [Operator.Zero L] [Operator.One L] [Operator.Add L]
     {α : Type*} [Encodable α] (a : α) : Semiterm.Const L :=
   Semiterm.Operator.numeral L (Encodable.encode a)

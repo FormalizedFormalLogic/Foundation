@@ -62,6 +62,11 @@ open _root_.FFL.FirstOrder.Entailment Entailment.FiniteContext
 
 variable {T}
 
+open scoped Classical in
+lemma eq_comm_ctx {Γ} {t u : Term V ℒₒᵣ} :
+    Γ ⊢[T.internalize V] t ≐ u → Γ ⊢[T.internalize V] u ≐ t := fun b ↦
+  of' (eq_symm T t u) ⨀ b
+
 lemma eq_trans {t₁ t₂ t₃ : Term V ℒₒᵣ} :
     T.internalize V ⊢ t₁ ≐ t₂ → T.internalize V ⊢ t₂ ≐ t₃ → T.internalize V ⊢ t₁ ≐ t₃ := fun h₁ h₂ ↦
   eq_uniform_trans T t₁ t₂ t₃ ⨀ h₁ ⨀ h₂

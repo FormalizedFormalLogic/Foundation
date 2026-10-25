@@ -155,7 +155,7 @@ variable {L : Language} [Operator.Zero L] [Operator.One L] [Operator.Add L] {M :
     (z : ℕ) → (Semiterm.Operator.numeral L z).val ![] = (ORingStructure.numeral z : M)
   | 0     => by simp [ORingStructure.numeral, Semiterm.Operator.numeral_zero]
   | 1     => by simp [ORingStructure.numeral, Semiterm.Operator.numeral_one]
-  | z + 2 => by simp [ORingStructure.numeral, Semiterm.Operator.numeral_succ (z := z + 1) (by simp),
+  | z + 2 => by simp [ORingStructure.numeral, Semiterm.Operator.numeral_add_two,
                   Semiterm.Operator.val_comp, Matrix.fun_eq_vec_two, numeral_eq_numeral (z + 1)]
 
 end Tarski.Structure

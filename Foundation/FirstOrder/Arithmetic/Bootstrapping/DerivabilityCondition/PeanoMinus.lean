@@ -7,6 +7,14 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 # Bootstrapping theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
 -/
 
+namespace FFL.FirstOrder.Arithmetic
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
+lemma lt_add_self_add_one (a b : V) : a < b + a + 1 := lt_succ_iff_le.mpr <| le_add_self
+
+end FFL.FirstOrder.Arithmetic
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace
@@ -129,7 +137,7 @@ lemma numeral_lt {n m : V} :
     have : T ⊢ “∀ x y, x < y + x + 1” :=
       complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
         have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
-        simp [models_iff, Arithmetic.lt_succ_iff_le]
+        simp [models_iff, Arithmetic.lt_add_self_add_one]
     have := by simpa using internal_provable_of_outer_provable (V := V) this
     simpa using TProof.specialize₂! this (𝕹 d) (𝕹 n)
   have l₂ : T.internalize V ⊢ 𝕹 d + 𝕹 n + 𝕹 1 ≐ 𝕹 (d + n + 1) := by
