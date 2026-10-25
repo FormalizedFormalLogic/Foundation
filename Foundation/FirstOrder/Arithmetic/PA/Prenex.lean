@@ -19,27 +19,14 @@ namespace FFL.FirstOrder.Arithmetic.Peano
 
 variable {Γ : Polarity} {s n : ℕ} {φ : ArithmeticSemisentence n} {σ : ArithmeticSentence}
 
-lemma hasPrenex (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
-    ∃ φ' : ℬ[<, ℒₒᵣ].Prenex Γ s Empty n, 𝗣𝗔 ⊢ ∀¹* (φ 🡘 φ'.val) :=
-  exists_prenex_of_hierarchy 𝗣𝗔 h
-
-lemma exists_matrix_provable (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) :
-    ∃ φ₀ : ℬ[<, ℒₒᵣ].Semisentence (n + s), 𝗣𝗔 ⊢ ∀¹* (φ 🡘 φ₀.val.toPrenex Γ s) := by
-  obtain ⟨φ', hφ'⟩ := hasPrenex h;
-  exact ⟨φ'.matrix, hφ'⟩
-
-lemma exists_matrix_provable_of_sentence (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) :
-    ∃ φ₀ : ℬ[<, ℒₒᵣ].Semisentence (0 + s), 𝗣𝗔 ⊢ σ 🡘 φ₀.val.toPrenex Γ s :=
-  exists_matrix_provable h
-
 lemma exists_hierarchy_provable_of_sentence (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (s + 1) σ) :
     ∃ θ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∃¹ θ := by
-  obtain ⟨φ', hφ'⟩ := hasPrenex h;
+  obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy 𝗣𝗔 h;
   exact ⟨φ'.sigmaInv.val, φ'.sigmaInv.val_hierarchy, Bounding.Prenex.provable_iff_sigmaInv hφ'⟩
 
 lemma exists_hierarchy_provable_of_sentence_pi (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 1) σ) :
     ∃ θ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s θ ∧ 𝗣𝗔 ⊢ σ 🡘 ∀¹ θ := by
-  obtain ⟨φ', hφ'⟩ := hasPrenex h;
+  obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy 𝗣𝗔 h;
   exact ⟨φ'.piInv.val, φ'.piInv.val_hierarchy, Bounding.Prenex.provable_iff_piInv hφ'⟩
 
 end FFL.FirstOrder.Arithmetic.Peano

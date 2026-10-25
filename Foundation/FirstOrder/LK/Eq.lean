@@ -19,18 +19,6 @@ lemma consequence_iff_eq {T : Theory L} [𝗘𝗤 L ⪯ T] {σ : Sentence L} :
         M↓[L] ⊧* T → M↓[L] ⊧ σ) :=
   consequence_iff_eq_of_models_eq (fun _ _ _ hM ↦ models_of_subtheory hM)
 
-lemma consequence_iff_eq' {T : Theory L} [𝗘𝗤 L ⪯ T] {σ : Sentence L} :
-    T ⊨[Tarski.Struc.{v, u} L] σ ↔
-      (∀ (M : Type v) [Nonempty M] [Tarski.Structure L M] [Tarski.Structure.Eq L M]
-        [M↓[L] ⊧* T], M↓[L] ⊧ σ) := by
-  rw [consequence_iff_eq]
-
-lemma satisfiable_iff_eq {T : Theory L} [𝗘𝗤 L ⪯ T] :
-    Semantics.Satisfiable (Tarski.Struc.{v, u} L) T ↔
-      (∃ (M : Type v) (_ : Nonempty M) (_ : Tarski.Structure L M) (_ : Tarski.Structure.Eq L M),
-        M↓[L] ⊧* T) :=
-  satisfiable_iff_eq_of_models_eq (fun _ _ _ hM ↦ models_of_subtheory hM)
-
 instance {T : Theory L} [𝗘𝗤 L ⪯ T] (sat : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) :
     (ModelOfSat sat)↓[L] ⊧* 𝗘𝗤 L := models_of_subtheory (ModelOfSat.models sat)
 

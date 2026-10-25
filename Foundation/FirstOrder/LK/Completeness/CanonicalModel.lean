@@ -44,7 +44,7 @@ instance : OrderTop ℙ where
 
 def ofUnprovable (φ : Proposition L) (h : 𝐋𝐊¹ ⊬ ∼φ) : ℙ := by
   classical
-  exact ⟨⦃φ⦄, by simpa [LK.Proof.unprovable_def] using h⟩
+  exact ⟨⦃φ⦄, by simpa [Entailment.Unprovable, LK.Proof.provable_def] using h⟩
 
 end ConsistentSequent
 
@@ -172,11 +172,11 @@ lemma dn_neg_iff {φ : Proposition L} {p : ℙ} : p ⊩ᶜ ∼φ ↔ p ⊩ ∼φ
   simp [iff_isForced, IsForced.not, ]; grind
 
 @[simp] lemma all {p : ℙ} : p ⊩ᶜ ∀¹ φ ↔ ∀ t, p ⊩ᶜ φ/[t] := by
-  simp [iff_isForced, Semiformula.subst_doubleNegation]
+  simp [iff_isForced, Semiformula.rew_doubleNegation]
 
 @[simp] lemma exs {p : ℙ} :
     p ⊩ᶜ ∃¹ φ ↔ ∀ q ≤ p, ∃ r ≤ q, ∃ t, r ⊩ᶜ φ/[t] := by
-  simp [iff_isForced, IsForced.not, Semiformula.subst_doubleNegation]; grind
+  simp [iff_isForced, IsForced.not, Semiformula.rew_doubleNegation]; grind
 
 lemma monotone {φ : Proposition L} {p q : ℙ} (h : q ≤ p) : p ⊩ᶜ φ → q ⊩ᶜ φ := IsForced.monotone h
 

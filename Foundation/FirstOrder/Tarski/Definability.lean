@@ -3,8 +3,9 @@ module
 public import Foundation.FirstOrder.Tarski.Elementary
 public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 public import Foundation.FirstOrder.Tarski.AesopInit
-public import Foundation.Vorspiel.Finset.Card
 public import Foundation.Vorspiel.Graph
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Algebra.Order.Ring.Nat
 
 @[expose] public section
 set_option autoImplicit true
@@ -307,12 +308,6 @@ lemma fintype_all {ι : Type*} [_root_.Finite ι] {P : ι → (Fin k → M) → 
   have := Fintype.ofFinite ι
   simpa using fconj Finset.univ h
 
-lemma fintype_exs {ι : Type*} [_root_.Finite ι] {P : ι → (Fin k → M) → Prop}
-    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) :
-    L.Definable fun v : Fin k → M ↦ ∃ i, P i v := by
-  have := Fintype.ofFinite ι
-  simpa using fdisj Finset.univ h
-
 lemma retraction (h : L.Definable P) {n} (f : Fin k → Fin n) :
     L.Definable fun v ↦ P (fun i ↦ v (f i)) := by
   rcases h with ⟨φ, hφ⟩
@@ -395,7 +390,7 @@ lemma DefinableRel.comp {P : M → M → Prop} {k} {f g : (Fin k → M) → M}
     (hf : L.DefinableFunction f) (hg : L.DefinableFunction g) :
     L.Definable fun v ↦ P (f v) (g v) :=
   Definable.substitution (f := ![f, g]) hP
-    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf, hg])
+    (by simp [Fin.forall_fin_succ, hf, hg])
 
 lemma DefinableRel₃.comp {k} {P : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) → M}
     [hP : L.DefinableRel₃ P]
@@ -403,7 +398,7 @@ lemma DefinableRel₃.comp {k} {P : M → M → M → Prop} {f₁ f₂ f₃ : (F
     (hf₃ : L.DefinableFunction f₃) :
     L.Definable (fun v ↦ P (f₁ v) (f₂ v) (f₃ v)) :=
   Definable.substitution (f := ![f₁, f₂, f₃]) hP
-    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃])
+    (by simp [Fin.forall_fin_succ, hf₁, hf₂, hf₃])
 
 lemma DefinableRel₄.comp {k} {P : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fin k → M) → M}
     [hP : L.DefinableRel₄ P]
@@ -411,7 +406,7 @@ lemma DefinableRel₄.comp {k} {P : M → M → M → M → Prop} {f₁ f₂ f�
     (hf₃ : L.DefinableFunction f₃) (hf₄ : L.DefinableFunction f₄) :
     L.Definable (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v)) :=
   Definable.substitution (f := ![f₁, f₂, f₃, f₄]) hP
-    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄])
+    (by simp [Fin.forall_fin_succ, hf₁, hf₂, hf₃, hf₄])
 
 lemma DefinableRel₅.comp {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄ f₅ : (Fin k → M) → M}
     [hP : L.DefinableRel₅ P]
@@ -420,7 +415,7 @@ lemma DefinableRel₅.comp {k} {P : M → M → M → M → M → Prop} {f₁ f�
     (hf₅ : L.DefinableFunction f₅) :
     L.Definable (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v) (f₅ v)) :=
   Definable.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hP
-    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄, hf₅])
+    (by simp [Fin.forall_fin_succ, hf₁, hf₂, hf₃, hf₄, hf₅])
 
 lemma DefinablePred.of_iff {P Q : M → Prop}
     (H : L.DefinablePred Q) (h : ∀ x, P x ↔ Q x) : L.DefinablePred P := by
@@ -476,7 +471,7 @@ lemma DefinableFunction₂.comp {k} {F : M → M → M} {f₁ f₂ : (Fin k → 
     (hf₁ : L.DefinableFunction f₁) (hf₂ : L.DefinableFunction f₂) :
     L.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v)) :=
   DefinableFunction.substitution (f := ![f₁, f₂]) hF
-    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+    (by simp [Fin.forall_fin_succ, *])
 
 lemma DefinableFunction₃.comp {k} {F : M → M → M → M} {f₁ f₂ f₃ : (Fin k → M) → M}
     [hF : L.DefinableFunction₃ F]
@@ -484,7 +479,7 @@ lemma DefinableFunction₃.comp {k} {F : M → M → M → M} {f₁ f₂ f₃ : 
     (hf₃ : L.DefinableFunction f₃) :
     L.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
   DefinableFunction.substitution (f := ![f₁, f₂, f₃]) hF
-    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+    (by simp [Fin.forall_fin_succ, *])
 
 lemma DefinableFunction₄.comp {k} {F : M → M → M → M → M} {f₁ f₂ f₃ f₄ : (Fin k → M) → M}
     [hF : L.DefinableFunction₄ F]
@@ -492,7 +487,7 @@ lemma DefinableFunction₄.comp {k} {F : M → M → M → M → M} {f₁ f₂ f
     (hf₃ : L.DefinableFunction f₃) (hf₄ : L.DefinableFunction f₄) :
     L.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v) (f₄ v)) :=
   DefinableFunction.substitution (f := ![f₁, f₂, f₃, f₄]) hF
-    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+    (by simp [Fin.forall_fin_succ, *])
 
 lemma DefinableFunction₅.comp {k} {F : M → M → M → M → M → M} {f₁ f₂ f₃ f₄ f₅ : (Fin k → M) → M}
     [hF : L.DefinableFunction₅ F]
@@ -501,7 +496,7 @@ lemma DefinableFunction₅.comp {k} {F : M → M → M → M → M → M} {f₁ 
     (hf₅ : L.DefinableFunction f₅) :
     L.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v) (f₄ v) (f₅ v)) :=
   DefinableFunction.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hF
-    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+    (by simp [Fin.forall_fin_succ, *])
 
 section aesop
 

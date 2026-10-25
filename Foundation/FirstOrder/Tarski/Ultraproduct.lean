@@ -171,7 +171,7 @@ lemma compactness_aux :
     rcases this with ⟨𝓤, h𝓤⟩
     have : (Tarski.Structure.Uprod A 𝓤)↓[L] ⊧* T :=
       ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 <| Set.mem_image_of_mem (Sentence.domain A) hσ)⟩
-    exact satisfiable_intro (Tarski.Structure.Uprod A 𝓤) this
+    exact ⟨(Tarski.Structure.Uprod A 𝓤)↓[L], this⟩
 
 theorem compact :
     Satisfiable T ↔ ∀ u : Finset (Sentence L), ↑u ⊆ T → Satisfiable (u : Theory L) := by

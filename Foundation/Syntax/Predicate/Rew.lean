@@ -634,10 +634,6 @@ lemma free_comp_subst_eq_subst_comp_shift {n'} (w : Fin n' → SyntacticSemiterm
 @[simp] lemma subst_bShift_app (v : Fin 1 → Semiterm L ξ 0) {t : Semiterm L ξ 0} :
     subst v (bShift t) = t := by simp [←comp_app]
 
-lemma rewrite_comp_fix_eq_subst (t) :
-    ((rewrite (t :>ₙ (&·))).comp free : SyntacticRew L 1 0) = subst ![t] := by
-  ext x <;> simp [comp_app]
-
 lemma bShift_eq_rewrite :
     (Rew.bShift : SyntacticRew L 0 1) = Rew.subst ![] := by
   ext x
@@ -730,9 +726,6 @@ lemma embSubsts_bv {m : ℕ} (t : ClosedSemiterm L n) (v : Fin n → Semiterm L 
     (Rew.embSubsts v t).Positive ↔ ∀ i ∈ t.bv, (v i).Positive := by
   simpa [Semiterm.Positive, embSubsts_bv]
     using ⟨fun H i hi x hx ↦ H x i hi hx, fun H x i hi hx ↦ H i hi x hx⟩
-
-@[simp] lemma bshift_positive (t : Semiterm L ξ n) : Positive (Rew.bShift t) := by
-  induction t <;> simp
 
 lemma emb_comp_bShift_comm {o : Type*} [IsEmpty o] :
     Rew.bShift.comp (Rew.emb : Rew L o n ξ n) = Rew.emb.comp Rew.bShift := by

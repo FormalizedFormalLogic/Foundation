@@ -111,9 +111,6 @@ private lemma computable_quote_speedupProof [L.Primcodable] :
   (hc.comp (Computable.const ⌜σ⌝) Sentence.primrec_quote_natCast.to_comp).of_eq fun π ↦ by
     simp [speedupProof, LK2.Derivation.quote_or, LK2.Derivation.quote_axm, Sentence.quote_def];
 
-private lemma minProof_or_le_speedupProof (π : Sentence L) :
-  (insert σ T).minProof (σ ⋎ π) ≤ ⌜speedupProof T σ π⌝ := minProof_le (speedupProof T σ π)
-
 /-- The Ehrenfeucht–Mycielski speedup theorem.
 
 - [EM71] -/
@@ -125,7 +122,7 @@ theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
   exact computablePred_provable_of_minProof_le
     (Semiformula.primrec₂_or.comp (Primrec.const σ) Primrec.id).to_comp
     ((Nat.computable_boundedMax hf).comp computable_quote_speedupProof)
-    fun π hπ ↦ (hU (σ ⋎ π) hπ).trans (Nat.le_boundedMax (minProof_or_le_speedupProof π));
+    fun π hπ ↦ (hU (σ ⋎ π) hπ).trans (Nat.le_boundedMax (minProof_le (speedupProof T σ π)));
 
 section Arithmetic
 
@@ -135,7 +132,7 @@ open FFL.Entailment in
 theorem ehrenfeucht_mycielski_speedup_arithmetic (hσ : T ⊬ σ) (f : ℕ → ℕ) (hf : Computable f) :
   ∃ π : ArithmeticSentence, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π :=
   have : 𝗜𝚺₁ ⪯ (insert (∼σ) T) :=
-    WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Axiomatized.le_of_subset (Set.subset_insert _ T));
+    WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (WeakerThan.ofSubset (Set.subset_insert _ T));
   have : Consistent (insert (∼σ) T) := unprovable_iff_consistent_adjoin.mp hσ;
   ehrenfeucht_mycielski_speedup uncomputable_theory_of_consistent f hf
 

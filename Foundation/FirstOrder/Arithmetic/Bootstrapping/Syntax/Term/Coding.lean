@@ -148,9 +148,6 @@ lemma quote_eq_encode' {k : ℕ} (v : Fin k → Semiterm L ℕ n) :
       ↑(Matrix.vecToNat fun i ↦ encode (v i)) :=
   quote_eq_encode'_aux _ fun i ↦ quote_eq_encode (v i)
 
-lemma quote_eq_encode_standard (t : SyntacticSemiterm L n) : (⌜t⌝ : ℕ) = encode t := by
-  simp [quote_eq_encode]
-
 lemma coe_quote_eq_quote (t : SyntacticSemiterm L n) : (↑(⌜t⌝ : ℕ) : V) = ⌜t⌝ := by
   simp [quote_eq_encode]
 

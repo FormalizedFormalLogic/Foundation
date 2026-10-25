@@ -126,14 +126,10 @@ lemma R0.model_complete {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Hiera
 
 variable (M)
 
-lemma nat_extention_sigmaOne {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ) :
-    ℕ↓[ℒₒᵣ] ⊧ σ → M↓[ℒₒᵣ] ⊧ σ := fun h ↦ by
-  simpa [Matrix.empty_eq] using R0.model_complete (M := M) hσ h
-
 lemma nat_extention_piOne {σ : ArithmeticSentence} (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 σ) :
     M↓[ℒₒᵣ] ⊧ σ → ℕ↓[ℒₒᵣ] ⊧ σ := by
   contrapose
-  simpa using nat_extention_sigmaOne M (σ := ∼σ) (by simpa using hσ)
+  simpa using R0.model_complete (M := M) (σ := ∼σ) (by simpa using hσ)
 
 variable {M}
 

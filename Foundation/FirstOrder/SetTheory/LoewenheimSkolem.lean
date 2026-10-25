@@ -36,11 +36,6 @@ lemma str_eq :
 
 @[simp] lemma subset : s ⊆ Hull s := Tarski.Structure.SkolemHull.subset
 
-lemma closed {k : ℕ} {v : Fin k → V} (hv : ∀ i, v i ∈ Hull s)
-    {φ : SetTheorySemisentence (k + 1)} (H : ∃ z, V ⊧/(z :> v) φ) :
-    ∃ z ∈ Hull s, V ⊧/(z :> v) φ :=
-  Tarski.Structure.SkolemHull.closed hv H
-
 @[simp] lemma hull_models_iff {n : ℕ} {φ : SetTheorySemisentence n} {b : Fin n → Hull s} :
     (Hull s) ⊧/b φ ↔ V ⊧/(b ·) φ := by
   have :
@@ -50,15 +45,10 @@ lemma closed {k : ℕ} {v : Fin k → V} (hv : ∀ i, v i ∈ Hull s)
   rw [str_eq] at this
   exact this
 
-lemma set_nonempty : (Hull s).Nonempty := Tarski.Structure.SkolemHull.set_nonempty _ _
-
 instance nonempty : Nonempty (Hull s) := Tarski.Structure.SkolemHull.nonempty _ _
 
 instance elementaryEquiv : (Hull s) ≡ₑ[ℒₛₑₜ] V where
   models {φ} := by simp [models_iff, Matrix.empty_eq]
-
-lemma set_countable [hs : Countable s] : (Hull s).Countable :=
-  Tarski.Structure.SkolemHull.set_countable hs
 
 instance countable [hs : Countable s] : Countable (Hull s) :=
   Tarski.Structure.SkolemHull.set_countable hs

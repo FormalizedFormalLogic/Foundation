@@ -268,14 +268,8 @@ lemma Eval.of_eq {b e' : Fin n → M} {f f' : ξ → M}
 @[simp] lemma eval_rel {r : L.Rel k} {v} :
     Eval b f (rel r v) ↔ s.rel r (Semiterm.val b f ∘ v) := of_eq rfl
 
-lemma eval_rel' {r : L.Rel k} {v} :
-    Eval b f (rel r v) ↔ s.rel r fun i ↦ (v i).val b f := of_eq rfl
-
 @[simp] lemma eval_nrel {r : L.Rel k} {v} :
     Eval b f (nrel r v) ↔ ¬s.rel r (Semiterm.val b f ∘ v) := of_eq rfl
-
-lemma eval_nrel' {r : L.Rel k} {v} :
-    Eval b f (nrel r v) ↔ ¬s.rel r fun i ↦ (v i).val b f := of_eq rfl
 
 @[simp] lemma eval_all {φ : Semiformula L ξ (n + 1)} :
     Eval b f (∀¹ φ) ↔ ∀ x : M, Eval (x :> b) f φ := of_eq rfl
@@ -583,18 +577,12 @@ lemma models_iff_proposition {φ : Proposition L} : M↓[L] ⊧ φ.univCl ↔ �
 
 lemma models_theory_iff : M↓[L] ⊧* T ↔ ∀ φ ∈ T, M↓[L] ⊧ φ := Semantics.modelsSet_iff
 
-lemma models_of_mem {T : Theory L} [M↓[L] ⊧* T] {φ} (h : φ ∈ T) : M↓[L] ⊧ φ :=
-  Semantics.ModelsSet.models _ h
-
 variable (M T)
 
 lemma Theory.models [M↓[L] ⊧* T] {σ} (hσ : σ ∈ T) : M↓[L] ⊧ σ :=
   Semantics.modelsSet_iff.mp inferInstance hσ
 
 variable {M T}
-
-lemma models_iff_models {φ} :
-    M↓[L] ⊧ φ ↔ s.toStruc ⊧ φ := of_eq rfl
 
 lemma consequence_iff {φ} :
     T ⊨[Tarski.Struc.{v, u} L] φ ↔
@@ -618,14 +606,6 @@ lemma satisfiable_iff :
   ⟨by rintro ⟨s, hs⟩; exact ⟨s.Dom, s.nonempty, s.struc, hs⟩,
     by rintro ⟨M, i, s, hT⟩; exact ⟨s.toStruc, hT⟩⟩
 
-lemma unsatisfiable_iff :
-    ¬Semantics.Satisfiable (Tarski.Struc.{v, u} L) T ↔
-      ∀ (M : Type v) (_ : Nonempty M) (_ : Tarski.Structure L M), ¬M↓[L] ⊧* T := by
-  simpa using satisfiable_iff.not
-
-lemma satisfiable_intro (M : Type v) [Nonempty M] [s : Tarski.Structure L M] (h : M↓[L] ⊧* T) :
-    Semantics.Satisfiable (Tarski.Struc.{v, u} L) T := ⟨s.toStruc, h⟩
-
 noncomputable def ModelOfSat (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) : Type v :=
   Classical.choose (satisfiable_iff.mp h)
 
@@ -643,23 +623,6 @@ noncomputable instance StructureModelOfSat (h : Semantics.Satisfiable (Tarski.St
 
 lemma ModelOfSat.models (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) :
     (ModelOfSat h)↓[L] ⊧* T := (StructureModelOfSatAux h).prop
-
-lemma consequence_iff_unsatisfiable {σ : Sentence L} :
-    T ⊨[Tarski.Struc.{v, u} L] σ ↔
-      ¬Semantics.Satisfiable (Tarski.Struc.{v, u} L) (insert (∼σ) T) := by
-  constructor
-  · intro h
-    apply unsatisfiable_iff.mpr
-    intro M _ s; simp only [Semantics.ModelsSet.insert_iff, models_iff, not_and']
-    intro hT; simpa using models_iff.mp (h hT)
-  · intro h; apply consequence_iff.mpr
-    intro M _ s hT
-    have : σ.Realize M := by
-      have := by
-        simpa only [Semantics.ModelsSet.insert_iff, not_and', models_iff] using
-          unsatisfiable_iff.mp h M inferInstance s
-      simpa using this hT
-    apply models_iff.mpr (by simpa using this)
 
 end
 
@@ -700,17 +663,11 @@ variable {M}
 lemma models_of_ss {T U : Theory L} (h : M↓[L] ⊧* U) (ss : T ⊆ U) : M↓[L] ⊧* T :=
   Semantics.ModelsSet.of_subset h ss
 
-lemma models_of_le {T₁ T₂ : Theory L} (h : M↓[L] ⊧* T₂) (le : T₁ ⊆ T₂) : M↓[L] ⊧* T₁ :=
-  Semantics.ModelsSet.of_subset h le
-
 instance models_theory_sup (T₁ T₂ : Theory L) [M↓[L] ⊧* T₁] [M↓[L] ⊧* T₂] : M↓[L] ⊧* T₁ ∪ T₂ := by
   simp only [Semantics.ModelsSet.union_iff]
   constructor
   · infer_instance
   · infer_instance
-
-lemma models_of_mem_theory {T : Theory L} [h : M↓[L] ⊧* T] (hf : φ ∈ T) : M↓[L] ⊧ φ :=
-  h.models _ hf
 
 end theory
 
@@ -727,9 +684,6 @@ variable {L} {M : Type v} [Nonempty M] [s : Tarski.Structure L M]
 
 lemma subset_of_models : T ⊆ theory L M ↔ M↓[L] ⊧* T :=
   ⟨fun h ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.models_set hσ⟩
-
-lemma theory_satisfiable : Semantics.Satisfiable (Tarski.Struc.{v} L) (theory L M) :=
-  ⟨s.toStruc, by simp⟩
 
 end Tarski.Structure
 

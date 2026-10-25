@@ -12,18 +12,6 @@ open FFL.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT] {ξ : Type*}
 
-lemma arithmetic_ball {Γ s n} {φ : Semiformula L ξ (n + 1)}
-    {t : Semiterm L ξ (n + 1)} :
-    t.Positive → ℬ[<, L].Hierarchy Γ s φ →
-      ℬ[<, L].Hierarchy Γ s (∀¹[“x. x < !!t”] φ) :=
-  Hierarchy.ball (R := Semiformula.Operator.LT.lt) (by rfl)
-
-lemma arithmetic_bexs {Γ s n} {φ : Semiformula L ξ (n + 1)}
-    {t : Semiterm L ξ (n + 1)} :
-    t.Positive → ℬ[<, L].Hierarchy Γ s φ →
-      ℬ[<, L].Hierarchy Γ s (∃¹[“x. x < !!t”] φ) :=
-  Hierarchy.bexs (R := Semiformula.Operator.LT.lt) (by rfl)
-
 @[simp] lemma arithmetic_ball_iff {Γ s n} {φ : Semiformula L ξ (n + 1)}
     {t : Semiterm L ξ (n + 1)} (ht : t.Positive) :
     ℬ[<, L].Hierarchy Γ s (∀¹[“x. x < !!t”] φ) ↔ ℬ[<, L].Hierarchy Γ s φ :=

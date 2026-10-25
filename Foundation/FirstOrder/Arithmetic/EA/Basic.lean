@@ -44,7 +44,7 @@ namespace ElementaryArithmetic
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
-instance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜𝚺₀ {expAxiom}
+instance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_ss (U := 𝗘𝗔) inferInstance Set.subset_union_left
 
 lemma exponential_total (x : V) : ∃ y, Exponential x y :=
   models_expAxiom_iff.mp (Theory.models _ _ expAxiom_mem_ElementaryArithmetic) x

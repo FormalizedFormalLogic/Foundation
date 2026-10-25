@@ -77,13 +77,8 @@ lemma isOrdinal_lh (s : V) : IsOrdinal (lh s) :=
   by_cases (fun hs : Seq s ↦ exists_eq_left'.mp (hs.domain_eq ▸ hs.2))
   (fun hs ↦ lh_prop_of_not_seq hs ▸ IsOrdinal.zero)
 
-lemma isOrdinal_domain {s : V} (hs : Seq s) : IsOrdinal (domain s) := exists_eq_left'.mp hs.2
-
-lemma Seq.isOrdinal_of_mem_lh {s α : V} (hα : α ∈ lh s) : IsOrdinal α :=
-  IsOrdinal.of_mem (h := isOrdinal_lh s) hα
-
 lemma Seq.isOrdinal_of_mem_domain {s α : V} (hs : Seq s) (hα : α ∈ domain s) : IsOrdinal α :=
-  IsOrdinal.of_mem (h := isOrdinal_domain hs) hα
+  IsOrdinal.of_mem (h := exists_eq_left'.mp hs.2) hα
 
 def _root_.FFL.FirstOrder.SetTheory.lh.dfn : SetTheorySemisentence 2 :=
   f“l s. (!seq.dfn s → l = !domain.dfn s) ∧ (¬!seq.dfn s → !isEmpty l)”
@@ -182,13 +177,6 @@ lemma Seq.isempty_of_lh_eq_zero {s : V} (hs : Seq s) (h : lh s = ∅) : s = ∅ 
     isFunction_iff.mp hs.IsFunction)).1)
 
 @[simp] lemma Seq.subset_seqCons (s x : V) : s ⊆ s ⁀' x := by simp [seqCons]
-
-lemma Seq.subseteq_seqCons {s} (_ : Seq s) (x : V) : s ⊆ s ⁀' x := by
-  intro z hz
-  simp only [seqCons, mem_insert]
-  exact Or.inr hz
-
-@[simp] lemma Seq.mem_seqCons (s x : V) : ⟨lh s, x⟩ₖ ∈ s ⁀' x := by simp [seqCons]
 
 protected lemma Seq.seqCons {s : V} (h : Seq s) (x : V) : Seq (s ⁀' x) := by
   have := h.IsFunction

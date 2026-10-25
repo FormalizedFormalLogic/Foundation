@@ -146,31 +146,17 @@ namespace IsAttempt
 
 variable {c v} {f : V}
 
-lemma seq (h : SetTheory.IsAttempt (c.map v) f) : Seq f := h.1
-
-variable (f) in
-lemma isOrdinal_lh : IsOrdinal (lh f) := SetTheory.isOrdinal_lh f
-
-lemma spec (h : SetTheory.IsAttempt (c.map v) f) :
-    ∀ β ∈ lh f, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = c.map v (f ↾ β) := h.2
-
-lemma domain_eq_lh (hf : SetTheory.IsAttempt (c.map v) f) : domain f = lh f := hf.1.domain_eq
-
-lemma empty (h : SetTheory.IsAttempt (c.map v) f) (hlh : ∅ ∈ lh f) : ⟨∅, c.map v ∅⟩ₖ ∈ f := by
-  have hrestrict {g : V} : g ↾ ∅ = ∅ := restrict_empty_eq
-  exact (h.2 ∅ hlh (c.map v ∅)).mpr (by aesop)
-
 lemma succ (hf : SetTheory.IsAttempt (c.map v) f) : ∀ β, SetTheory.succ β ∈ lh f →
     ∀ y, ⟨β, y⟩ₖ ∈ f → ⟨SetTheory.succ β, c.map v ((f ↾ β) ⁀' y)⟩ₖ ∈ f := by
   intro β hβsucclh y hyf
-  have hlh := isOrdinal_lh f
+  have hlh := SetTheory.isOrdinal_lh f
   have := IsOrdinal.of_mem (h := hlh) hβsucclh
   have hβmemlh : β ∈ lh f :=
     IsTransitive.transitive (self := IsOrdinal.toIsTransitive (self := hlh))
       (SetTheory.succ β) hβsucclh β (mem_succ_self (x := β))
   have := IsOrdinal.of_mem (h := hlh) hβmemlh
   have hβsubsetlh : β ⊆ lh f := (IsOrdinal.subset_iff (hβ := hlh)).mpr (Or.inr hβmemlh)
-  have hy := (spec hf β hβmemlh y).mp hyf
+  have hy := (hf.2 β hβmemlh y).mp hyf
   have hlh : lh (f ↾ β) = β := (hf.1.lh_restrict hβsubsetlh)
   have hrestrict : f ↾ (SetTheory.succ β) = (f ↾ β) ⁀' y := by
     ext w
@@ -192,7 +178,7 @@ lemma succ (hf : SetTheory.IsAttempt (c.map v) f) : ∀ β, SetTheory.succ β �
       · rcases Or.resolve_right (mem_insert.mp h₂) hw with rfl
         exact And.intro (hlh.symm ▸ hyf) ⟨lh (f ↾ β),
           And.intro (hlh.symm ▸ (mem_succ_self β)) ⟨y, by simp⟩⟩
-  exact (spec hf (SetTheory.succ β) hβsucclh _).mpr (by rw [hrestrict.symm])
+  exact (hf.2 (SetTheory.succ β) hβsucclh _).mpr (by rw [hrestrict.symm])
 
 lemma unique {f g : V}
     (h₁ : SetTheory.IsAttempt (c.map v) f)
@@ -305,7 +291,7 @@ attribute [irreducible] Blueprint.result_dfn
 
 @[simp] lemma result_empty : c.result v ∅ = c.map v ∅ := by
   rcases c.result_spec_of_isOrdinal v ∅ with ⟨f, hf, hlhf, hempty⟩
-  exact hf.1.IsFunction.unique hempty (IsAttempt.empty hf (hlhf ▸ mem_succ_self ∅))
+  exact hf.1.IsFunction.unique hempty (SetTheory.IsAttempt.initial hf (hlhf ▸ mem_succ_self ∅))
 
 lemma result_succ (α : V) [hα : IsOrdinal α] :
     c.result v (SetTheory.succ α) = c.map v
@@ -313,7 +299,7 @@ lemma result_succ (α : V) [hα : IsOrdinal α] :
   classical
   let αo : Ordinal V := IsOrdinal.toOrdinal α
   obtain ⟨f, hf, hlhf, hmemf⟩ := c.result_spec_of_isOrdinal v (succ α)
-  rw [(IsAttempt.spec hf (succ α) (by aesop) _).mp hmemf]
+  rw [(hf.2 (succ α) (by aesop) _).mp hmemf]
   refine (?_ : f ↾ (succ α) = _) ▸ rfl
   ext p
   rw [mem_restrict_iff, repl_spec]

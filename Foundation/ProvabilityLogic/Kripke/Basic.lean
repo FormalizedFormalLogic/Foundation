@@ -161,9 +161,6 @@ lemma forces_boxItr_bot_of_le (hmn : m ≤ n) (h : x ⊩ □^[m]⊥) : x ⊩ □
     obtain ⟨n, rfl⟩ := Nat.exists_eq_add_one.mpr (show 0 < n by omega);
     exact forces_boxItr_succ.mpr fun y R ↦ ih (by omega) (forces_boxItr_succ.mp h y R);
 
-lemma not_forces_boxItr_bot_of_le (hmn : m ≤ n) (h : x ⊮ □^[n]⊥) : x ⊮ □^[m]⊥ :=
-  fun h' ↦ h (forces_boxItr_bot_of_le hmn h')
-
 lemma exists_depth_of_forces_boxItr_bot (h : x ⊩ □^[n]⊥) :
     ∃ m, x ⊮ □^[m]⊥ ∧ x ⊩ □^[m + 1]⊥ := by
   induction n with

@@ -84,9 +84,6 @@ infixl:70 " <: " => vecConsLast
 lemma eq_vecCons (s : Fin (n + 1) → C) : s 0 :> s ∘ Fin.succ = s :=
    funext <| Fin.cases (by simp) (by simp)
 
-lemma eq_vecCons' (s : Fin (n + 1) → C) : s 0 :> (s ·.succ) = s :=
-   funext <| Fin.cases (by simp) (by simp)
-
 @[simp] lemma vecCons_ext (a₁ a₂ : α) (s₁ s₂ : Fin n → α) :
     a₁ :> s₁ = a₂ :> s₂ ↔ a₁ = a₂ ∧ s₁ = s₂ :=
   ⟨by intros h
@@ -124,11 +121,6 @@ lemma comp_vecCons' (f : α → β) (a : α) (s : Fin n → α) :
 lemma comp_vecCons'' (f : α → β) (a : α) (s : Fin n → α) : f ∘ (a :> s) = f a :> f ∘ s :=
   comp_vecCons f a s
 
-lemma comp_vecCons₂' (g : β → γ) (f : α → β) (a : α) (s : Fin n → α) :
-    (fun x ↦ g <| f <| (a :> s) x) = (g (f a) :> fun i ↦ g <| f <| s i) := by
-  funext x
-  cases x using Fin.cases <;> simp
-
 @[simp] lemma comp₀ {f : α → β} : f ∘ (![] : Fin 0 → α) = ![] := by simp [Matrix.empty_eq]
 
 @[simp] lemma comp₁ {f : α → β} (a : α) : f ∘ ![a] = ![f a] := by simp [comp_vecCons'']
@@ -164,9 +156,6 @@ lemma constant_eq_singleton {a : α} : (fun _ ↦ a) = ![a] := by funext x; simp
 
 lemma fun_eq_vec_one (v : Fin 1 → α) : v = ![v 0] := by funext x; simp
 
-lemma constant_eq_vec₂ {a : α} : (fun _ ↦ a) = ![a, a] := by
-  funext x; cases x using Fin.cases <;> simp
-
 lemma fun_eq_vec_two (v : Fin 2 → α) : v = ![v 0, v 1] := by
   funext x;
   cases x using Fin.cases <;> simp
@@ -182,25 +171,6 @@ lemma fun_eq_vec_three (v : Fin 3 → α) : v = ![v 0, v 1, v 2] := by
       cases x using Fin.cases with
       | zero => simp
       | succ x => exact x.elim0
-
-lemma fun_eq_vec_four (v : Fin 4 → α) : v = ![v 0, v 1, v 2, v 3] := by
-  funext x
-  cases x using Fin.cases with
-  | zero => simp
-  | succ x =>
-    cases x using Fin.cases with
-    | zero => simp
-    | succ x =>
-      cases x using Fin.cases with
-      | zero => simp
-      | succ x =>
-        cases x using Fin.cases with
-        | zero => simp
-        | succ x => exact x.elim0
-
-lemma fun_eq_vec_four' (f : α → β) (v : Fin 4 → α) :
-    f ∘ v = ![f (v 0), f (v 1), f (v 2), f (v 3)] := by
-  rw [fun_eq_vec_four v]; simp
 
 lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : ∀ i, a ≠ f i) :
     Function.Injective (a :> f) := by
@@ -311,9 +281,6 @@ variable {k : ℕ} {γ : Type*} (f : α → β)
   cases i using Fin.cases <;> { simp [vecMap]; rfl }
 
 @[simp] lemma vecMap_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
-
-lemma vecMap_vecMap_comp (g : β → γ) (f : α → β) (v : Fin k → α) :
-    g⨟ (f⨟ v) = (g ∘ f)⨟ v := by ext x; simp
 
 lemma vecMap_vecMap_comp' (g : β → γ) (f : α → β) (v : Fin k → α) :
     g⨟ (f⨟ v) = (fun x ↦ g (f x))⨟ v := by ext x; simp

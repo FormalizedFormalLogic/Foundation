@@ -269,9 +269,6 @@ alias ⟨case, mk⟩ := case_iff
         exact ⟨hkf, hk, hv⟩,
    by rintro ⟨hkf, hk, hv⟩; apply mk; disj 3; exact ⟨k, f, v, hkf, ⟨hk, hv⟩, rfl⟩⟩
 
-lemma func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
-    IsUTerm L (^func k f v) := func_iff.mpr ⟨hkf, hv⟩
-
 lemma induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hbvar : ∀ z, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsUTermVec L k v → (∀ i < k, P v.[i]) → P (^func k f v)) :
@@ -462,9 +459,6 @@ instance graph_definable₂ (param) : 𝚺ᴬ_[0 + 1]-Relation (c.Graph L param)
   simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 2) (graph_definable
     c) (#0 :> #1 :> fun i ↦ &(param i))
 
-lemma graph_dom_isUTerm {t y} :
-    c.Graph L param t y → IsUTerm L t := fun h ↦ Graph.case_iff.mp h |>.1
-
 lemma graph_bvar_iff {z} :
     c.Graph L param ^#z y ↔ y = c.bvar param z := by
   constructor
@@ -520,7 +514,7 @@ lemma graph_exists {t : V} : IsUTerm L t → ∃ y, c.Graph L param t y := by
 lemma graph_unique {t y₁ y₂ : V} : c.Graph L param t y₁ → c.Graph L param t y₂ → y₁ = y₂ := by
   revert y₁ y₂
   suffices IsUTerm L t → ∀ y₁ y₂, c.Graph L param t y₁ → c.Graph L param t y₂ → y₁ = y₂
-  by intro u₁ u₂ h₁ h₂; exact this (c.graph_dom_isUTerm h₁) u₁ u₂ h₁ h₂
+  by intro u₁ u₂ h₁ h₂; exact this (Graph.case_iff.mp h₁).1 u₁ u₂ h₁ h₂
   intro ht
   apply IsUTerm.induction 𝚷 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -655,10 +649,6 @@ lemma resultVec_defined :
   simpa [Blueprint.resultVec, Bounding.HierarchySymbol.Semiformula.val_sigma,
     IsUTermVec.defined.proper.iff',
     c.eval_graphDef] using c.resultVec_graph
-
-lemma eval_resultVec (v : Fin (arity + 3) → V) :
-    (β.resultVec L).val.Evalb v ↔ v 0 = c.resultVec L (v ·.succ.succ.succ) (v 1) (v 2) :=
-  c.resultVec_defined.iff
 
 end
 
@@ -848,10 +838,6 @@ lemma IsSemitermVec.iff {k n v : V} :
     · simp [ht.bv]
     · simpa using hw.nth (by simpa using hi) |>.bv⟩
 
-lemma SemitermVec.adjoin {n m w t : V} (h : IsSemitermVec L n m w) (ht : IsSemiterm L m t) :
-    IsSemitermVec L (n + 1) m (t ∷ w) :=
-  IsSemitermVec.cons_iff.mpr ⟨ht, h⟩
-
 @[simp] lemma IsSemitermVec.singleton {n t : V} :
     IsSemitermVec L 1 n ?[t] ↔ IsSemiterm L n t := by
   rw [show (1 : V) = 0 + 1 by simp, IsSemitermVec.cons_iff]; simp
@@ -922,8 +908,6 @@ lemma IsSemiterm.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Pred
   · intro k f v hf _ ih h
     have hv : IsSemitermVec L k n v := by simp_all
     exact hfunc k f v hf hv (fun i hi ↦ ih i hi (hv.nth hi))
-
-@[simp] lemma IsSemitermVec.nil (k : V) : IsSemitermVec L 0 k 0 := ⟨by simp, by simp⟩
 
 @[simp] lemma IsSemitermVec.adjoin {k n w t : V} (h : IsSemitermVec L n k w)
     (ht : IsSemiterm L k t) : IsSemitermVec L (n + 1) k (t ∷ w) :=

@@ -101,11 +101,6 @@ lemma ofFn_get_eq_map_cast {n : ℕ} (g : α → β) (as : List α) {h : n = as.
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 
-lemma append_subset_append {l₁ l₂ l : List α} (h : l₁ ⊆ l₂) : l₁ ++ l ⊆ l₂ ++ l :=
-  List.append_subset.mpr ⟨List.subset_append_of_subset_left _ h, subset_append_right l₂ l⟩
-
-lemma subset_of_eq {l₁ l₂ : List α} (e : l₁ = l₂) : l₁ ⊆ l₂ := by simp [e]
-
 section remove
 
 def remove [DecidableEq α] (a : α) : List α → List α := List.filter (· ≠ a)
@@ -202,12 +197,6 @@ instance Nodup.finite [Finite α] : Finite {l : List α // l.Nodup} := by
 
 section suffix
 
-lemma suffix_of_cons_suffix {l₁ l₂ : List α} {a} : a :: l₁ <:+ l₂ → l₁ <:+ l₂ := by
-  rintro ⟨l₂, rfl⟩; exact ⟨l₂ ++ [a], by simp⟩
-
-lemma suffix_cons_of {l₁ l₂ : List α} {a} : l₁ <:+ l₂ → l₁ <:+ a :: l₂ :=
-  fun h ↦ suffix_cons_iff.mpr <| Or.inr h
-
 lemma exists_of_not_suffix (l₁ l₂ : List α) :
     ¬l₁ <:+ l₂ → ∃ l a, a :: l <:+ l₁ ∧ l <:+ l₂ ∧ ¬a :: l <:+ l₂ :=
   match l₁ with
@@ -217,7 +206,7 @@ lemma exists_of_not_suffix (l₁ l₂ : List α) :
     by_cases h₁₂ : l₁ <:+ l₂
     · exact ⟨l₁, a, by simp_all⟩
     · rcases exists_of_not_suffix l₁ l₂ h₁₂ with ⟨l, b, hb, hll₂, nh⟩
-      exact ⟨l, b, suffix_cons_of hb, hll₂, nh⟩
+      exact ⟨l, b, hb.trans (suffix_cons _ _), hll₂, nh⟩
 
 lemma IsSuffix.eq_or_cons_suffix {l₁ l₂ : List α} : l₁ <:+ l₂ → l₁ = l₂ ∨ ∃ a, a :: l₁ <:+ l₂ := by
   rintro ⟨l, rfl⟩
@@ -230,7 +219,7 @@ lemma suffix_trichotomy {l₁ l₂ : List α} (h₁₂ : ¬l₁ <:+ l₂) (h₂�
   rcases exists_of_not_suffix _ _ h₁₂ with ⟨l, a, ha, hkl, _⟩
   have : ∃ b, b :: l <:+ l₂ := by
     rcases hkl.eq_or_cons_suffix with (rfl | h)
-    · have : l <:+ l₁ := suffix_of_cons_suffix ha
+    · have : l <:+ l₁ := (suffix_cons _ _).trans ha
       contradiction
     exact h
   rcases this with ⟨b, hb⟩
@@ -241,9 +230,6 @@ end suffix
 namespace Vector
 
 variable {α : Type*}
-
-lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) :
-    List.Vector.get (⟨l, h⟩ : List.Vector α n) i = l.get (i.cast h.symm) := rfl
 
 lemma get_one {α : Type*} {n} (v : Vector α (n + 2)) : v.get 1 = v.tail.head := by
   have : v.tail.get ⟨0, by omega⟩ = v.get 1 := Vector.get_tail_succ v 0;
@@ -259,22 +245,6 @@ lemma cons_get {k : ℕ} (a : α) (v : List.Vector α k) : (a ::ᵥ v).get = a :
 end Vector
 
 
-
-lemma exists_of_not_nil (hl : l ≠ []) : ∃ a, a ∈ l := by
-  match l with
-  | [] => tauto;
-  | a :: l => use a; simp only [mem_cons, true_or];
-
-lemma iff_nil_forall : (l = []) ↔ (∀ a ∈ l, a ∈ []) := by
-  constructor;
-  · intro h;
-    subst h;
-    tauto;
-  · contrapose!;
-    rintro h;
-    obtain ⟨a, ha⟩ := exists_of_not_nil h;
-    use a;
-    tauto;
 
 /-- getElem version of `List.nodup_iff_getElem?_ne_getElem?` -/
 lemma nodup_iff_get_ne_get : l.Nodup ↔ ∀ i j : Fin l.length, i < j → l[i] ≠ l[j] := by
@@ -292,14 +262,6 @@ lemma Nodup.infinite_of_infinite : Infinite {l : List α // l.Nodup} → Infinit
   contrapose!;
   intro _;
   exact List.Nodup.finite;
-
-lemma exists_of_range {a : α} {f : ℕ → α} {n : ℕ} (h : a ∈ List.map f (List.range n)) :
-    ∃ i < n, a = f i := by
-  obtain ⟨i, ⟨hi, rfl⟩⟩ := List.exists_of_mem_map h;
-  use i;
-  constructor;
-  · simpa using hi;
-  · simp;
 
 lemma single_suffix_uniq {a b : α} {l : List α} (ha : [a] <:+ l) (hb : [b] <:+ l) : a = b := by
   rcases ha with ⟨la, rfl⟩

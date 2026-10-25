@@ -60,9 +60,6 @@ lemma mem_imageOfFinset_iff [DecidableEq β] {s : Finset α} {f : (a : α) → a
     (f : (a : α) → a ∈ s → β) (a : α) (ha : a ∈ s) :
     f a ha ∈ imageOfFinset s f := by simpa [mem_imageOfFinset_iff] using ⟨a, ha, rfl⟩
 
-lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
-  (s ∪ t).erase a = (s.erase a) ∪ (t.erase a) := by ext; simp [and_or_left]
-
 @[simp] lemma equiv_univ {α α'} [Fintype α] [Fintype α'] [DecidableEq α'] (e : α ≃ α') :
     (Finset.univ : Finset α).image e = Finset.univ := by ext x; simp
 

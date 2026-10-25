@@ -128,20 +128,12 @@ lemma pred_lt_self_of_pos (h : 0 < a) : a - 1 < a := by
   · simp_all
   · simp
 
-protected lemma tsub_lt_iff_left (h : b ≤ a) : a - b < c ↔ a < c + b :=
-  AddLECancellable.tsub_lt_iff_right (add_le_cancel b) h
-
 lemma sub_mul (h : b ≤ a) : (a - b) * c = a * c - b * c := by
   have : a = (a - b) + b := (tsub_eq_iff_eq_add_of_le h).mp rfl
   calc
     (a - b) * c = (a - b) * c + b * c - b * c := by simp
     _           = (a - b + b) * c - b * c     := by simp [add_mul]
     _           = a * c - b * c               := by simp [sub_add_self_of_le h]
-
-lemma mul_sub (h : b ≤ a) : c * (a - b) = c * a - c * b := by simp [mul_comm c, sub_mul, h]
-
-lemma add_sub_of_le (h : c ≤ b) (a : V) : a + b - c = a + (b - c) :=
-  add_tsub_assoc_of_le h a
 
 lemma sub_succ_add_succ {x y : V} (h : y < x) (z) : x - (y + 1) + (z + 1) = x - y + z := calc
   x - (y + 1) + (z + 1) = x - (y + 1) + 1 + z := by simp [add_assoc, add_comm]
@@ -163,20 +155,13 @@ end sub
 
 section Dvd
 
-lemma le_mul_self_of_pos_left (hy : 0 < b) : a ≤ b * a := by
-  have : 1 * a ≤ b * a := mul_le_mul_of_nonneg_right (one_le_of_zero_lt b hy) (by simp)
-  simpa using this
-
-lemma le_mul_self_of_pos_right (hy : 0 < b) : a ≤ a * b := by
-  simpa [mul_comm a b] using le_mul_self_of_pos_left hy
-
 lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
   classical
   by_cases hx : a = 0
   · simp [hx, show ∃ x, x ≤ b from ⟨0, by simp⟩]
   · constructor
     · rintro ⟨c, rfl⟩
-      exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
+      exact ⟨c, le_mul_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
 def _root_.FFL.FirstOrder.Arithmetic.dvd : 𝚺ᴬ₀.Semisentence 2 :=
@@ -203,7 +188,7 @@ end Dvd
 
 lemma le_of_dvd (h : 0 < b) : a ∣ b → a ≤ b := by
   rintro ⟨c, rfl⟩
-  exact le_mul_self_of_pos_right
+  exact le_mul_of_pos_right
     (pos_iff_ne_zero.mpr (show c ≠ 0 from by rintro rfl; simp at h))
 
 lemma not_dvd_of_lt (pos : 0 < b) : b < a → ¬a ∣ b := by

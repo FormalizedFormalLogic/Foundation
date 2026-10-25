@@ -7,17 +7,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 # Bootstrapping theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
 -/
 
-namespace FFL.FirstOrder.Arithmetic
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-
-lemma lt_add_self_add_one (a b : V) : a < b + a + 1 := lt_succ_iff_le.mpr <| le_add_self
-
-lemma lt_succ_iff_eq_or_succ {a b : V} : a < b + 1 ↔ a = b ∨ a < b := by
-  simp [lt_succ_iff_le, le_iff_eq_or_lt]
-
-end FFL.FirstOrder.Arithmetic
-
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace
@@ -130,10 +119,6 @@ lemma numeral_mul (n m : V) :
     have e3 : T.internalize V ⊢ 𝕹 (n * (m + 1)) + 𝕹 n ≐ 𝕹 (n * (m + 1) + n) := numeral_add T _ _
     exact eq_trans (eq_trans e1 e2) e3
 
-lemma numeral_eq {n m : V} :
-    n = m → T.internalize V ⊢ 𝕹 n ≐ 𝕹 m := by
-  rintro rfl; exact eq_refl T (𝕹 n)
-
 lemma numeral_lt {n m : V} :
     n < m → T.internalize V ⊢ 𝕹 n <' 𝕹 m := fun h ↦ by
   let d := m - (n + 1)
@@ -144,7 +129,7 @@ lemma numeral_lt {n m : V} :
     have : T ⊢ “∀ x y, x < y + x + 1” :=
       complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
         have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
-        simp [models_iff, Arithmetic.lt_add_self_add_one]
+        simp [models_iff, Arithmetic.lt_succ_iff_le]
     have := by simpa using internal_provable_of_outer_provable (V := V) this
     simpa using TProof.specialize₂! this (𝕹 d) (𝕹 n)
   have l₂ : T.internalize V ⊢ 𝕹 d + 𝕹 n + 𝕹 1 ≐ 𝕹 (d + n + 1) := by
@@ -226,7 +211,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
         have : T ⊢ “∀ m x, x < m + 1 ↔ x = m ∨ x < m” :=
           complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
             have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
-            simp [models_iff, Arithmetic.lt_succ_iff_eq_or_succ]
+            simp [models_iff, Arithmetic.lt_succ_iff_le, le_iff_eq_or_lt]
         simpa using internal_provable_of_outer_provable (V := V) this
       simpa using TProof.specialize₂! this t 𝕹(m + 1)
     cl_prover [ih, this]

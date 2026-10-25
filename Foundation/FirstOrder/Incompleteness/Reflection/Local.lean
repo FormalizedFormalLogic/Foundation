@@ -98,7 +98,7 @@ variable [T.SoundOnHierarchy 𝚺 1]
   · exact by_axm (by simp [hψT]);
   obtain ⟨σ, hσt, rfl⟩ : ψ ∈ T.standardProvability.refl '' t := ht ▸ ⟨hψ, hψT⟩;
   by_cases hσ : T ⊢ σ;
-  · have h₁ : adjoin (∼D) T ⊢ σ := Axiomatized.to_adjoin hσ;
+  · have h₁ : adjoin (∼D) T ⊢ σ := Axiomatized.weakening (by simp) hσ;
     cl_prover [h₁];
   · have h₁ : adjoin (∼D) T ⊢ T.standardProvability σ 🡒 D :=
       right_Fdisj'_intro _ _ (Finset.mem_filter.mpr ⟨htfin.mem_toFinset.mpr hσt, hσ⟩);
@@ -136,18 +136,6 @@ theorem inconsistent_of_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
     (fun _ hσ ↦ by simpa using hσ) hπ
     (provable_localReflectionOn_hierarchy_of_prenexHierarchy
       (WeakerThan.ofSubset (Set.subset_insert _ _)) h)
-
-theorem not_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
-    (hπ : ℬ[<, ℒₒᵣ].Hierarchy Γ n π) [Consistent (insert π T)] :
-    ¬insert π T ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy Γ.alt n] T :=
-  fun h ↦ (inconsistent_of_provable_localReflectionOn_insert hπ h).not_con
-    inferInstance
-
-theorem not_provable_localReflectionOn_univ_insert {π : ArithmeticSentence}
-    (hC : Consistent (insert π T)) :
-    ¬ insert π T ⊢* 𝗥𝗳𝗻[Set.univ] T := fun h ↦
-  (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
-    (Γ := fun _ ↦ True) (fun _ _ ↦ trivial) trivial h).not_con hC
 
 theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n ⪯ T]
     {U U' : ArithmeticTheory} (e : U ≊ U') (hU' : U'.Finite)

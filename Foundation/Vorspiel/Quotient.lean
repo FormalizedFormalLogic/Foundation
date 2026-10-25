@@ -8,11 +8,6 @@ namespace Quotient
 open Matrix
 variable {α : Type*} [s : Setoid α] {β : Sort*}
 
-@[elab_as_elim]
-lemma inductionOnVec {n : ℕ} {φ : (Fin n → Quotient s) → Prop} (v : Fin n → Quotient s)
-  (h : ∀ v : Fin n → α, φ (fun i => Quotient.mk s (v i))) : φ v :=
-  Quotient.induction_on_pi v h
-
 def liftVec : ∀ {n} (f : (Fin n → α) → β),
   (∀ v₁ v₂ : Fin n → α, (∀ n, v₁ n ≈ v₂ n) → f v₁ = f v₂) → (Fin n → Quotient s) → β
 | 0,     f, _, _ => f ![]

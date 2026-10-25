@@ -29,7 +29,7 @@ lemma models_IDelta_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure 
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   have h₀ : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n :=
-    have : 𝗕𝚷 n ⪯ 𝗕𝚺 (n + 1) := CollectionOnPrenexHierarchy_weakerThan_BSigma_succ 𝚷 n
+    have : 𝗕𝚷 n ⪯ 𝗕𝚺 (n + 1) := CollectionOnPrenexHierarchy_weakerThan_of_lt (Nat.lt_succ_self n)
     models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   apply Semantics.ModelsSet.union_iff.mpr
   and_intros
@@ -60,7 +60,7 @@ theorem ISigma_weakerThan_IDelta_succ (n : ℕ) : 𝗜𝚺n ⪯ 𝗜𝚫 (n + 1)
     obtain ⟨φ', hφ', Hφ⟩ := hφ.exists_eval_iff_of_lt 𝚺 (Nat.lt_succ_self n)
     obtain ⟨ψ, hψ, Hψ⟩ := hφ.neg.exists_eval_iff_of_lt 𝚺 (Nat.lt_succ_self n)
     have hax : V↓[ℒₒᵣ] ⊧ (.univCl (deltaInd φ' ψ) : ArithmeticSentence) :=
-      models_of_mem (T := 𝗜𝚫 (n + 1)) (Set.mem_union_right _
+      Semantics.ModelsSet.models _ (T := 𝗜𝚫 (n + 1)) (Set.mem_union_right _
         (mem_DeltaInductionScheme_of_mem hφ' hψ))
     suffices ∀ f : ℕ → V, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
         ∀ x, φ.Eval ![x] f by

@@ -47,9 +47,9 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ �
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
-instance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜𝚺₀ 𝝮₁
+instance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_ss (U := 𝗜𝚺₀ ∪ 𝝮₁) inferInstance Set.subset_union_left
 
-instance : V↓[ℒₒᵣ] ⊧* 𝝮₁ := ModelsTheory.of_add_right V 𝗜𝚺₀ 𝝮₁
+instance : V↓[ℒₒᵣ] ⊧* 𝝮₁ := models_of_ss (U := 𝗜𝚺₀ ∪ 𝝮₁) inferInstance Set.subset_union_right
 
 lemma exists_exponential_sq_length (x : V) : ∃ y, Exponential (‖x‖^2) y :=
   models_Omega1_iff.mp (Theory.models _ _ Omega1.omega) x
@@ -63,7 +63,8 @@ lemma smash_exists_unique (x y : V) : ∃! z, Exponential (‖x‖ * ‖y‖) z 
   · simpa [mul_comm] using this y x (le_of_not_ge le)
   rcases exists_exponential_sq_length y with ⟨z, h⟩
   have : ‖x‖ * ‖y‖ < ‖z‖ :=
-    lt_of_le_of_lt (by simpa [sq] using mul_le_mul_right (length_monotone le)) h.lt_length
+    lt_of_le_of_lt (by simpa [sq] using mul_le_mul_right (length_monotone le))
+      ((le_iff_lt_length_of_exp h).mp le_rfl)
   have : Exponential (‖x‖ * ‖y‖) (bexp z (‖x‖ * ‖y‖)) :=
     exp_bexp_of_lt (a := z) (x := ‖x‖ * ‖y‖) this
   exact ExistsUnique.intro (bexp z (‖x‖ * ‖y‖)) this (fun z' H' ↦ H'.uniq this)
@@ -118,9 +119,6 @@ lemma smash_comm (a b : V) : a ⨳ b = b ⨳ a :=
 
 lemma lt_smash_iff {a b c : V} : a < b ⨳ c ↔ ‖a‖ ≤ ‖b‖ * ‖c‖ :=
   (exponential_smash b c).lt_iff_len_le
-
-lemma smash_le_iff {a b c : V} : b ⨳ c ≤ a ↔ ‖b‖ * ‖c‖ < ‖a‖ :=
-  not_iff_not.mp <| by simp [lt_smash_iff]
 
 lemma lt_smash_one_iff {a b : V} : a < b ⨳ 1 ↔ ‖a‖ ≤ ‖b‖ := by
   simpa using lt_smash_iff (a := a) (b := b) (c := 1)

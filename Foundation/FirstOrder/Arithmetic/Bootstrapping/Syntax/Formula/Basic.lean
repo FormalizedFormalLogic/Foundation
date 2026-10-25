@@ -845,9 +845,6 @@ instance graph_definable : 𝚺ᴬ_[0 + 1]-Relation₃ c.Graph L := c.graph_defi
 
 variable {β}
 
-lemma graph_dom_uformula {p r} :
-    c.Graph L param p r → IsUFormula L p := fun h ↦ Graph.case_iff.mp h |>.1
-
 lemma graph_rel_iff {k r v y} (hkr : L.IsRel k r) (hv : IsUTermVec L k v) :
     c.Graph L param (^rel k r v) y ↔ y = c.rel param k r v := by
   constructor
@@ -1113,7 +1110,7 @@ lemma result_prop_not {p : V} (hp : ¬IsUFormula L p) : c.result L param p = 0 :
 variable {param}
 
 lemma result_eq_of_graph {p r} (h : c.Graph L param p r) : c.result L param p = r := Eq.symm <|
-  Classical.choose_uniq (c.exists_unique_all L param p) (by simp [c.graph_dom_uformula h, h])
+  Classical.choose_uniq (c.exists_unique_all L param p) (by simp [(Graph.case_iff.mp h).1, h])
 
 @[simp] lemma result_rel {k R v} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     c.result L param (^rel k R v) = c.rel param k R v :=
@@ -1304,9 +1301,6 @@ end
 
 @[simp] lemma bv_ex {p : V} (hp : IsUFormula L p) : bv L (^∃ p) = bv L p - 1 := by simp [bv, hp,
   construction]
-
-lemma bv_eq_of_not_isUFormula {p : V} (h : ¬IsUFormula L p) : bv L p = 0 := (construction
-  L).result_prop_not _ h
 
 end bv
 
@@ -1564,10 +1558,8 @@ lemma IsSemiformula.induction1 (Γ) {P : V → V → Prop} (hP : Γᴬ_[1]-Relat
     hall hexs
 
 
-lemma IsSemiformula.pos {n p : V} (h : IsSemiformula L n p) : 0 < p := h.isUFormula.pos
-
 @[simp] lemma IsSemiformula.not_zero (m : V) : ¬IsSemiformula L m (0 : V) := by intro h; simpa
-  using h.pos
+  using h.isUFormula.pos
 
 end isSemiformula
 

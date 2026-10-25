@@ -219,7 +219,7 @@ instance sdiff.definable : ℒₛₑₜ-function₂[V] SDiff.sdiff := sdiff.defi
 
 lemma isNonempty_sdiff_of_ssubset {x y : V} : x ⊊ y → IsNonempty (y \ x) := by
   intro h
-  rcases h.exists_not_mem with ⟨z, hzy, hzx⟩
+  rcases (SSubset.iff.mp h).2 with ⟨z, hzy, hzx⟩
   exact ⟨z, by simp_all⟩
 
 /-! ### Kuratowski's ordered pair -/
@@ -443,8 +443,6 @@ lemma num_succ_def (n : ℕ) : ((n + 1 : ℕ) : V) = succ ↑n := rfl
 lemma one_def : (1 : V) = {0} := calc
   (1 : V) = succ ∅ := rfl
   _       = {∅} := by simp [succ]
-
-lemma one_def' : (1 : V) = {∅} := one_def
 
 lemma two_def : (2 : V) = {0, 1} := calc
   (2 : V) = succ 1     := rfl

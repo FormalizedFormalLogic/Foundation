@@ -39,12 +39,6 @@ lemma rotate_right (hφ : Γ ⟹ Δ ++ [φ]) : Γ ⟹ φ :: Δ := weakening hφ
 omit [DecidableEq F] in
 lemma rotate_left (hφ : (Γ ++ [φ]) ⟹ Δ) : (φ :: Γ) ⟹ Δ := weakening hφ
 
-omit [DecidableEq F] in
-lemma rotate_right_inv (hφ : Γ ⟹ φ :: Δ) : Γ ⟹ Δ ++ [φ] := weakening hφ
-
-omit [DecidableEq F] in
-lemma rotate_left_inv (hφ : (φ :: Γ) ⟹ Δ) : (Γ ++ [φ]) ⟹ Δ := weakening hφ
-
 -- `DecidableEq F` is not referenced in the proof term itself, but the ambient
 -- instance is needed for elaboration to disambiguate the overloaded `⨀`
 -- notation; omitting it (as the `unusedSectionVars` linter suggests) breaks
@@ -195,12 +189,8 @@ omit [DecidableEq F] [Entailment.Int 𝓢] in
 lemma iff_right_cl [Entailment.Cl 𝓢] (hr : Γ ++ [φ] ⟹ Δ ++ [ψ]) (hl : Γ ++ [ψ] ⟹ Δ ++ [φ]) :
     Γ ⟹ (φ 🡘 ψ) :: Δ := by
   apply and_right
-  · apply rotate_right_inv
-    apply imply_right_cl
-    assumption
-  · apply rotate_right_inv
-    apply imply_right_cl
-    assumption
+  · exact weakening (imply_right_cl hr)
+  · exact weakening (imply_right_cl hl)
 
 omit [DecidableEq F] in
 lemma iff_left (hr : Γ ⟹ Δ ++ [φ, ψ]) (hl : Γ ++ [φ, ψ] ⟹ Δ) : (φ 🡘 ψ) :: Γ ⟹ Δ := by
@@ -285,15 +275,7 @@ lemma of_double_uppercedent (H : (Γ₁ ⟹ Δ₁) → (Γ₂ ⟹ Δ₂) → (Ξ
     · exact h₂.tail
   · exact h₁.tail
 
-lemma remove : Valid 𝓢 T → Valid 𝓢 ((Γ ⟶ Δ) :: T) :=
-  of_subset
-
 variable [Entailment.Int 𝓢]
-
-lemma to_provable (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢ φ := by
-  rcases h
-  · exact TwoSided.to_provable <| by assumption
-  · simp_all
 
 lemma right_closed (h : φ ∈ Γ) : Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := head <| TwoSided.right_closed h
 

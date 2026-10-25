@@ -33,10 +33,6 @@ variable
 
 lemma R1 {𝔚 : Refutability T₀ T} {σ : Sentence L} : T ⊢ ∼σ → T₀ ⊢ 𝔚 σ := fun h ↦ 𝔚.refu_def h
 
-lemma R1' {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
-  {𝔚 : Refutability T₀ T} {σ : Sentence L} [T₀ ⪯ T] : T ⊢ ∼σ → T ⊢ 𝔚 σ := fun h ↦
-  WeakerThan.pbl <| R1 h
-
 end
 
 
@@ -126,7 +122,7 @@ lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] :
     simpa [safe] using! FirstOrder.Theory.Proof.specialize _ _ ⨀ consis;
   have h₂ : T ⊢ ∼𝐉 := (contra jeroslow_not_safe) ⨀ h₁;
   have h₃ : T ⊢ 𝐉 🡘 𝔚 𝐉 := jeroslow_def';
-  have h₄ : T ⊢ 𝔚 𝐉 := R1' h₂;
+  have h₄ : T ⊢ 𝔚 𝐉 := WeakerThan.pbl (R1 h₂);
   have h₅ : T ⊢ 𝔚 𝐉 🡒 𝐉 := by cl_prover [h₃];
   have h₆ : T ⊢ 𝐉 := h₅ ⨀ h₄;
   exact not_consistent_iff_inconsistent.mpr <|

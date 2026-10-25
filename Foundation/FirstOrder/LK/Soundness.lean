@@ -105,8 +105,6 @@ theorem Proof.sound {φ : Sentence L} :
   simpa [struc_models_iff_models (s := s), models_iff]
     using Proof.sound_proposition b hS
 
-theorem Proof.sound_small {φ : Sentence L} : T ⊢ φ → T ⊨ φ := Proof.sound
-
 instance (T : Theory L) : Sound T (Semantics.models (Tarski.Struc.{v, u} L) T) :=
   ⟨Theory.Proof.sound⟩
 

@@ -149,7 +149,7 @@ private lemma allClosure_eq_univCl' {m : ℕ} (β : ArithmeticSemiproposition m)
     have : (Rew.fixitr 0 m ▹ χ : ArithmeticSemiproposition (0 + m))
         = Rew.castLE (by omega : 0 + χ.fvSup ≤ 0 + m) ▹ (Rew.fixitr 0 χ.fvSup ▹ χ) := by
       rw [← TransitiveRewriting.comp_app];
-      apply Semiformula.rew_eq_of_funEqOn₀;
+      apply Semiformula.rew_eq_of_funEqOn (fun x ↦ Fin.elim0 x);
       intro x hx;
       have := Semiformula.lt_fvSup_of_fvar? hx;
       simp [Rew.comp_app, Rew.fixitr_fvar, this, show x < m by omega];
@@ -182,7 +182,7 @@ lemma inductionR_quote_iff {S : ℕ → Prop} {C : ArithmeticSemiproposition 1 �
     have hs : subst ℒₒᵣ (fvarVec (0 + χ.fvSup : ℕ))
         (⌜(Rew.fixitr 0 χ.fvSup ▹ χ : ArithmeticSemiproposition (0 + χ.fvSup))⌝ : ℕ)
           = indBodyVal (⌜ψ⌝ : ℕ) := by
-      simpa [quote_subst_fvar_fixitr, indBodyVal_quote]
+      simpa [Semiformula.subst_comp_fixitr, indBodyVal_quote]
         using subst_fvarVec_quote' (V := ℕ) (Rew.fixitr 0 χ.fvSup ▹ χ);
     rw [Semiformula.coe_univCl_eq_univCl', quote_univCl', natCast_nat];
     exact ⟨_, index_le_qqAlls _ _, _, le_qqAlls _ _, rfl,

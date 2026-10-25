@@ -340,9 +340,6 @@ lemma sound {T : Theoryᵢ L} {φ : Sentenceᵢ L} (b : T ⊢ φ) : 𝓚 ⊧* T 
 instance (T : Theoryᵢ L) : Sound T (Semantics.models (Kripke.Mod L) T) :=
   ⟨fun b _ H ↦ sound b H⟩
 
-lemma sound_empty {φ : Sentenceᵢ L} (b : (∅ : Theoryᵢ L) ⊢ φ) : 𝓚 ⊧ φ :=
-  𝓚.sound b (by simp)
-
 instance : Semantics.Top (Kripke.Mod L) :=
   ⟨fun 𝓚 ↦ by simpa [models_def] using ForcingRelation.AllForces.verum⟩
 

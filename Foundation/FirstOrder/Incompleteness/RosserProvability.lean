@@ -53,14 +53,6 @@ lemma rosser_quote₀ {φ : Sentence L} :
     T.RosserProvable (V := V) ⌜φ⌝ ↔ T.ProvabilityComparisonLE (V := V) ⌜φ⌝ ⌜∼φ⌝ := by
   simpa [Sentence.quote_def] using rosser_quote
 
-lemma rosser_quote_def {φ : Proposition L} :
-    T.RosserProvable (V := V) ⌜φ⌝ ↔ ∃ b : V, Proof T b ⌜φ⌝ ∧ ∀ b' < b, ¬Proof T b' ⌜∼φ⌝ :=
-  rosser_quote
-
-lemma rosser_quote_def₀ {φ : Sentence L} :
-    T.RosserProvable (V := V) ⌜φ⌝ ↔ ∃ b : V, Proof T b ⌜φ⌝ ∧ ∀ b' < b, ¬Proof T b' ⌜∼φ⌝ := by
-  simpa [Sentence.quote_def] using! rosser_quote
-
 theorem RosserProvable.to_provable {φ : V} : T.RosserProvable φ → Provable T φ :=
   ProvabilityComparison.le_to_provable
 
@@ -81,15 +73,11 @@ theorem rosser_internalize [Consistent T] {φ : Sentence L} :
   have ⟨d⟩ := h
   let n : ℕ := ⌜d⌝
   have hn : Proof T (↑n : V) ⌜φ⌝ := by simp [n, coe_quote_proof_eq]
-  refine rosser_quote_def₀.mpr ⟨n, hn, ?_⟩
+  refine rosser_quote₀.mpr ⟨n, hn, ?_⟩
   intro b hb Hb
   rcases eq_nat_of_lt_nat hb with ⟨b, rfl⟩
   have : T ⊢ ∼φ := provable_of_standard_proof (V := V) Hb
   exact Consistent.not_inc inferInstance (inconsistent_of_provable_of_unprovable h this)
-
-theorem rosser_internalize_sentence [Consistent T] {σ : Sentence L} :
-    T ⊢ σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
-  simpa [Sentence.quote_def] using! rosser_internalize h
 
 open Classical in
 theorem not_rosserProvable [Consistent T] {φ : Sentence L} :
@@ -103,10 +91,6 @@ theorem not_rosserProvable [Consistent T] {φ : Sentence L} :
   rcases eq_nat_of_le_nat this with ⟨b, rfl⟩
   have : T ⊢ φ := provable_of_standard_proof hb
   exact Consistent.not_inc inferInstance (inconsistent_of_provable_of_unprovable this h)
-
-theorem not_rosserProvable_sentence [Consistent T] {σ : Sentence L} :
-    T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
-  simpa [Sentence.quote_def] using! not_rosserProvable h
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -125,11 +109,11 @@ local prefix:90 "𝗥" => T.rosserPred
 
 theorem rosserProvable_D1 {σ} : T ⊢ σ → 𝗜𝚺₁ ⊢ 𝗥σ := fun h ↦
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff] using rosser_internalize_sentence h
+    simpa [models_iff, Sentence.quote_def] using! rosser_internalize h
 
 theorem rosserProvable_rosser {σ} : T ⊢ ∼σ → 𝗜𝚺₁ ⊢ ∼𝗥σ := fun h ↦
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff] using not_rosserProvable_sentence h
+    simpa [models_iff, Sentence.quote_def] using! not_rosserProvable h
 
 end
 

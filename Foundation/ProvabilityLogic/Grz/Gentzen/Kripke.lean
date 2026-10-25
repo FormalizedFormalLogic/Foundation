@@ -127,7 +127,7 @@ namespace SaturatedSequent
 variable {S : SaturatedSequent BS}
 
 @[grind .]
-lemma not_mem_both : ¬(A ∈ S.ant ∧ A ∈ S.suc) := fun h ↦ S.unprovable (Gentzen.union' _ h.1 h.2)
+lemma not_mem_both : ¬(A ∈ S.ant ∧ A ∈ S.suc) := fun h ↦ S.unprovable (Gentzen.union _ h.1 h.2)
 
 @[grind .]
 lemma bot_not_mem_ant : ⊥ ∉ S.ant := fun h ↦ S.unprovable (Gentzen.botL_mem h)
@@ -147,7 +147,7 @@ instance : Finite (SaturatedSequent BS) :=
 lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐆𝐫𝐳] S₀) (hant : S₀.ant ⊆ closure BS)
     (hsuc : S₀.suc ⊆ BS.subfmls) : ∃ S : SaturatedSequent BS, S₀ ⊆ S.toSequent := by
   obtain ⟨S, h₁, h₂, h₃, h₄, h₅, h₆⟩ := Sequent.exists_saturated_within
-    ⟨fun h₁ h₂ ↦ Gentzen.union' _ h₁ h₂, Gentzen.impL, Gentzen.impR⟩
+    ⟨fun h₁ h₂ ↦ Gentzen.union _ h₁ h₂, Gentzen.impL, Gentzen.impR⟩
     (fun h ↦ (mem_subfmls_of_imp_mem_closure h).imp_right (subfmls_subset_closure ·))
     (fun h ↦ (mem_subfmls_of_imp_mem_closure (subfmls_subset_closure h)).imp_left
       (subfmls_subset_closure ·))
@@ -238,10 +238,6 @@ theorem complete
     lindenbaum (BS := S) hS (fun _ h ↦ subfmls_subset_closure (by grind)) (by grind);
   obtain ⟨D, hD, hxD⟩ := h (countermodel S) x (fun C hC ↦ countermodel.truthlemma.1 (hS₀.ant hC));
   exact countermodel.truthlemma.2 (hS₀.suc hD) hxD;
-
-lemma iff_valid : ⊢ᴳ[𝐆𝐫𝐳] S ↔
-    ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGrz] → M ⊧ S :=
-  ⟨fun h _ _ M _ ↦ sound M h, complete⟩
 
 variable {Γ₁ Γ₂ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 

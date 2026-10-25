@@ -743,26 +743,6 @@ lemma models_ofΔ₀ (φ : ℬ.Semiformula ξ n) (e : Fin n → M) :
     · exact (models_altUp (ofΔ₀ φ 𝚷 s) e).trans ih;
     · exact (models_altUp (ofΔ₀ φ 𝚺 s) e).trans ih;
 
-lemma models_verum (e : Fin n → M) :
-    Semiformula.Eval e f (verum : ℬ.Prenex Γ s ξ n).val ↔
-      Semiformula.Eval e f (⊤ : Semiformula L ξ n) :=
-  models_ofΔ₀ ⟨⊤, .verum n⟩ e
-
-lemma models_falsum (e : Fin n → M) :
-    Semiformula.Eval e f (falsum : ℬ.Prenex Γ s ξ n).val ↔
-      Semiformula.Eval e f (⊥ : Semiformula L ξ n) :=
-  models_ofΔ₀ ⟨⊥, .falsum n⟩ e
-
-lemma models_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) (e : Fin n → M) :
-    Semiformula.Eval e f (rel r v : ℬ.Prenex Γ s ξ n).val ↔
-      Semiformula.Eval e f (Semiformula.rel r v) :=
-  models_ofΔ₀ ⟨.rel r v, .rel r v⟩ e
-
-lemma models_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) (e : Fin n → M) :
-    Semiformula.Eval e f (nrel r v : ℬ.Prenex Γ s ξ n).val ↔
-      Semiformula.Eval e f (Semiformula.nrel r v) :=
-  models_ofΔ₀ ⟨.nrel r v, .nrel r v⟩ e
-
 lemma models_succ (φ : ℬ.Prenex Γ s ξ n) (e : Fin n → M) :
     Semiformula.Eval e f φ.succ.val ↔ Semiformula.Eval e f φ.val := by
   induction s generalizing Γ n with

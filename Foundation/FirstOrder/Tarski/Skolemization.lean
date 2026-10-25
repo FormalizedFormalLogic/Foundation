@@ -184,13 +184,11 @@ lemma set_countable (hs : s.Countable) : (SkolemHull L s).Countable := by
   have : Countable (Term L.skolemFunction₁ s) := Semiterm.countable
   exact Set.countable_range _
 
-lemma countable (hs : s.Countable) : Countable (SkolemHull L s) := set_countable hs
-
 instance countable₀ : Countable (SkolemHull₀ L M) := set_countable (by simp)
 
 /-- Downward Löwenheim-Skolem theorem for countable language (2) -/
 lemma card_le_aleph0 (hs : s.Countable) : #(SkolemHull L s) ≤ ℵ₀ :=
-  have : Countable (SkolemHull L s) := countable hs
+  have : Countable (SkolemHull L s) := set_countable hs
   Set.Countable.le_aleph0 this
 
 end SkolemHull

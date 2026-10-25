@@ -31,7 +31,7 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
       Rewriting.emb_subst_eq_subst_coe₁, Semiformula.quote_def]
   let δ : ArithmeticSemisentence 1 := codeOfREPred D
   have (n : ℕ) : D n ↔ T ⊢ δ/[↑n] := by
-    simpa [Semiformula.coe_subst_eq_subst_coe₁] using rePred_weak_representation D_re
+    simpa [Rewriting.emb_subst_eq_subst_coe₁] using rePred_weak_representation D_re
   let π : ArithmeticSentence := δ/[⌜δ⌝]
   have : T ⊢ π ↔ T ⊢ ∼π := calc
     T ⊢ π ↔ T ⊢ δ/[⌜δ⌝]  := by rfl

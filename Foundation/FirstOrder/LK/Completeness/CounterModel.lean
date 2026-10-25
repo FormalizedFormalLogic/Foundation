@@ -267,7 +267,7 @@ lemma satisfiable_iff_satisfiable :
   simp [satisfiable_iff_consistent.{u, w}, satisfiable_iff_consistent.{u, u}]
 
 lemma consequence_iff_consequence : T ⊨[Tarski.Struc.{max u w} L] φ ↔ T ⊨ φ := by
-  simp [consequence_iff_unsatisfiable, satisfiable_iff_satisfiable.{u, w}]
+  simp [Semantics.consequence_iff_not_satisfiable, satisfiable_iff_satisfiable.{u, w}]
 
 end Theory
 
@@ -280,12 +280,6 @@ variable {L : Language.{u}} (M : Type w) [Nonempty M] [Tarski.Structure L M] (T 
 lemma of_provably_subtheory [le : T ⪯ U] (h : M↓[L] ⊧* U) : M↓[L] ⊧* T := ⟨fun φ hφ ↦
   have : U ⊢ φ := le.pbl (Entailment.by_axm hφ)
   consequence_iff'.{u, w}.mp (Theory.Proof.sound this) M⟩
-
-lemma of_add_left [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* T :=
-  models_of_ss inferInstance (show T ⊆ T ∪ U from by simp)
-
-lemma of_add_right [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* U :=
-  models_of_ss inferInstance (show U ⊆ T ∪ U from by simp)
 
 end ModelsTheory
 

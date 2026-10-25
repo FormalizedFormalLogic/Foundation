@@ -234,13 +234,6 @@ lemma lt_exponential_log_self {a b : V} (h : Exponential (log a) b) : a < 2 * b 
   rcases log_pos pos with ⟨_, _, H, _⟩; rcases H.uniq h
   assumption
 
-lemma lt_exp_len_self {a b : V} (h : Exponential ‖a‖ b) : a < b := by
-  rcases Arithmetic.zero_le a with (rfl | pos)
-  · simp at h; simp [h]
-  have : Exponential (log a + 1) b := by simpa [length_of_pos pos] using h
-  rcases Exponential.exponential_succ.mp this with ⟨b, rfl, H⟩
-  exact lt_exponential_log_self H
-
 lemma le_iff_le_log_of_exp {x y a : V} (H : Exponential x y) (pos : 0 < a) : y ≤ a ↔ x ≤ log a :=
   ⟨by rcases H.log_eq_of_exp; exact log_monotone,
    fun h ↦ by
@@ -252,21 +245,8 @@ lemma le_iff_lt_length_of_exp {x y a : V} (H : Exponential x y) : y ≤ a ↔ x 
   · simpa using pos_iff_ne_zero.mp H.range_pos
   simp [le_iff_le_log_of_exp H pos, length_of_pos pos, ←le_iff_lt_succ]
 
-lemma Exponential.lt_iff_log_lt {x y a : V} (H : Exponential x y) (pos : 0 < a) :
-    a < y ↔ log a < x :=
-  not_iff_not.mp (by simpa using le_iff_le_log_of_exp H pos)
-
 lemma Exponential.lt_iff_len_le {x y a : V} (H : Exponential x y) : a < y ↔ ‖a‖ ≤ x :=
   not_iff_not.mp (by simpa using le_iff_lt_length_of_exp H)
-
-lemma Exponential.le_of_lt_length {x y a : V} (H : Exponential x y) : x < ‖a‖ → y ≤ a := fun h ↦
-  (le_iff_lt_length_of_exp H).mpr h
-
-lemma Exponential.le_log {x y : V} (H : Exponential x y) : x ≤ log y :=
-  (le_iff_le_log_of_exp H H.range_pos).mp (by rfl)
-
-lemma Exponential.lt_length {x y : V} (H : Exponential x y) : x < ‖y‖ :=
-  (le_iff_lt_length_of_exp H).mp (by rfl)
 
 lemma lt_exponential_length {a b : V} (h : Exponential ‖a‖ b) : a < b := by
   rcases Arithmetic.zero_le a with (rfl | pos)
@@ -367,13 +347,6 @@ instance bexp_definable : 𝚺ᴬ₀-Function₂[V] bexp := bexp_defined.to_defi
 
 instance : Bounded₂ (bexp : V → V → V) := ⟨#0, fun _ ↦ by simp⟩
 
-lemma bexp_monotone_iff {a i j : V} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexp a i < bexp a j ↔ i < j :=
-  Iff.symm <| Exponential.monotone_iff (by simp [hi]) (by simp [hj])
-
-lemma bexp_monotone_le_iff {a i j : V} (hi : i < ‖a‖) (hj : j < ‖a‖) :
-    bexp a i ≤ bexp a j ↔ i ≤ j :=
-  Iff.symm <| Exponential.monotone_le_iff (by simp [hi]) (by simp [hj])
-
 lemma bexp_eq_of_lt_length {i a a' : V} (ha : i < ‖a‖) (ha' : i < ‖a'‖) : bexp a i = bexp a' i := by
   have H : Exponential i (bexp a i) := by simp [ha]
   have H' : Exponential i (bexp a' i) := by simp [ha']
@@ -385,16 +358,11 @@ lemma bexp_eq_of_lt_length {i a a' : V} (ha : i < ‖a‖) (ha' : i < ‖a'‖) 
 
 @[simp] lemma bexp_pos {a x : V} (h : x < ‖a‖) : 0 < bexp a x := (exp_bexp_of_lt h).range_pos
 
-lemma lt_bexp_len {a x : V} (h : ‖x‖ < ‖a‖) : x < bexp a ‖x‖ := lt_exp_len_self (exp_bexp_of_lt h)
-
 lemma bexp_eq_of_exp {a x y : V} (h : x < ‖a‖) (H : Exponential x y) : bexp a x = y :=
   (exp_bexp_of_lt h).uniq H
 
-lemma log_bexp {a x : V} (h : x < ‖a‖) : log (bexp a x) = x :=
-  Exponential.log_eq_of_exp (exp_bexp_of_lt h)
-
 lemma len_bexp {a x : V} (h : x < ‖a‖) : ‖bexp a x‖ = x + 1 := by
-  rw [length_of_pos (bexp_pos h), log_bexp h]
+  rw [length_of_pos (bexp_pos h), Exponential.log_eq_of_exp (exp_bexp_of_lt h)]
 
 @[simp] lemma bexp_zero_zero : bexp (0 : V) 0 = 0 := bexp_eq_zero_of_le (by simp)
 
@@ -478,39 +446,11 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 @[simp] lemma log_exponential (a : V) : log (Exp.exp a) = a := (exponential_exp a).log_eq_of_exp
 
-lemma exp_log_le_self {a : V} (pos : 0 < a) : Exp.exp (log a) ≤ a := by
-  rcases log_pos pos with ⟨_, _, H, _⟩
-  rcases H.uniq (exponential_exp (log a))
-  assumption
-
-lemma lt_two_mul_exponential_log {a : V} (pos : 0 < a) : a < 2 * Exp.exp (log a) := by
-  rcases log_pos pos with ⟨_, _, H, _⟩
-  rcases H.uniq (exponential_exp (log a))
-  assumption
-
 @[simp] lemma length_exponential (a : V) : ‖Exp.exp a‖ = a + 1 := by
   simp [length_of_pos (exp_pos a)]
 
 lemma exp_add (a b : V) : Exp.exp (a + b) = Exp.exp a * Exp.exp b :=
   exp_of_exponential (Exponential.add_mul (exponential_exp a) (exponential_exp b))
-
-lemma log_mul_exp_add_of_lt {a b : V} (pos : 0 < a) (i : V) (hb : b < Exp.exp i) :
-    log (a * Exp.exp i + b) = log a + i := by
-  simp [log_mul_pow2_add_of_lt pos (exp_pow2 i) hb]
-
-lemma log_mul_exp {a : V} (pos : 0 < a) (i : V) : log (a * Exp.exp i) = log a + i := by
-  simp [log_mul_pow2 pos (exp_pow2 i)]
-
-lemma length_mul_exp_add_of_lt {a b : V} (pos : 0 < a) (i : V) (hb : b < Exp.exp i) :
-    ‖a * Exp.exp i + b‖ = ‖a‖ + i := by
-  simp [length_mul_pow2_add_of_lt pos (exp_pow2 i) hb]
-
-lemma length_mul_exp {a : V} (pos : 0 < a) (i : V) : ‖a * Exp.exp i‖ = ‖a‖ + i := by
-  simp [length_mul_pow2 pos (exp_pow2 i)]
-
-lemma exp_le_iff_le_log {i a : V} (pos : 0 < a) : Exp.exp i ≤ a ↔ i ≤ log a :=
-  ⟨by intro h; simpa using log_monotone h,
-    fun h ↦ le_trans (exp_monotone_le.mpr h) (exp_log_le_self pos)⟩
 
 end ISigma1
 

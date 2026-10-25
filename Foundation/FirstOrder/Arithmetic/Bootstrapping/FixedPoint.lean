@@ -36,12 +36,6 @@ lemma substNumerals_app_quote (σ : ArithmeticSemisentence k) (v : Fin k → ℕ
     Rewriting.emb_subst_eq_subst_emb]
   rfl
 
-lemma substNumerals_app_quote_quote
-    (σ : ArithmeticSemisentence k) (π : Fin k → ArithmeticSemisentence k) :
-    substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) =
-      ⌜((Rew.subst (fun i ↦ ⌜π i⌝)) ▹ σ : ArithmeticSentence)⌝ := by
-  simpa [Sentence.coe_quote_eq_quote] using substNumerals_app_quote (V := V) σ (fun i ↦ ⌜π i⌝)
-
 noncomputable def substNumeralParams (k : ℕ) (φ x : V) : V :=
   subst ℒₒᵣ (matrixToVec (numeral x :> fun i : Fin k ↦ qqBvar i)) φ
 
@@ -234,7 +228,9 @@ theorem multidiagonal (θ : Fin k → ArithmeticSemisentence k) :
       simpa [models_iff, Function.comp_def, Matrix.empty_eq]
     let t : Fin k → V := fun i ↦ ⌜multidiag (θ i)⌝
     have ht : ∀ i, substNumerals (t i) t = ⌜multifixedpoint θ i⌝ := by
-      intro i; simp [t, multifixedpoint, substNumerals_app_quote_quote]
+      intro i
+      simpa [t, multifixedpoint, Sentence.coe_quote_eq_quote] using
+        substNumerals_app_quote (V := V) (multidiag (θ i)) (fun j ↦ ⌜multidiag (θ j)⌝)
     calc
       V ⊧/![] (multifixedpoint θ i)
         ↔ V ⊧/t (multidiag (θ i))                   := by
@@ -272,11 +268,6 @@ lemma multifixedpoint_pi
   simpa [multifixedpoint, multidiag, h] using fun _ ↦
     Bounding.Hierarchy.mono (ℬ := ℬ[<, ℒₒᵣ]) (s := 1) (by simp) (by simp)
 
-lemma exclusiveMultifixedpoint_pi
-    {θ : Fin k → ArithmeticSemisentence k} (h : ∀ i, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (θ i)) :
-    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (exclusiveMultifixedpoint θ i) := by
-  apply multifixedpoint_pi; simp [h]
-
 end Multidiagonalization
 
 section ParameterizedDiagonalization
@@ -311,11 +302,6 @@ theorem parameterized_diagonal (θ : ArithmeticSemisentence (k + 1)) :
           simp [parameterizedDiag, Matrix.comp_vecCons', BinderNotation.finSuccItr,
             Function.comp_def]
       _ ↔ V ⊧/(⌜parameterizedFixedpoint θ⌝ :> params) θ := by simp [ht]
-
-theorem parameterized_diagonal₁ (θ : ArithmeticSemisentence 2) :
-    T ⊢ ∀¹ (parameterizedFixedpoint θ 🡘 θ/[⌜parameterizedFixedpoint θ⌝, #0]) := by
-  simpa [allClosure, BinderNotation.finSuccItr, Matrix.fun_eq_vec_one] using
-    parameterized_diagonal (T := T) θ
 
 end ParameterizedDiagonalization
 

@@ -107,9 +107,6 @@ lemma C_of_N (h : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ φ 🡒 ψ := by
   exact of_O (dnp ⨀ FiniteContext.id);
 
 omit [DecidableEq F] in
-lemma CN_of_ (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ∼φ 🡒 ψ := CCN ⨀ h
-
-omit [DecidableEq F] in
 open scoped Classical in
 @[simp] lemma CANC : 𝓢 ⊢ (∼φ ⋎ ψ) 🡒 (φ 🡒 ψ) := left_A_intro (by
     apply emptyPrf;
@@ -117,10 +114,6 @@ open scoped Classical in
     apply deduct;
     exact efq_of_mem_either (φ := φ) (by simp) (by simp)
   ) implyK
-
-omit [DecidableEq F] in
-open scoped Classical in
-lemma C_of_AN (b : 𝓢 ⊢ ∼φ ⋎ ψ) : 𝓢 ⊢ φ 🡒 ψ := CANC ⨀ b
 
 omit [DecidableEq F] in
 open scoped Classical in
@@ -139,10 +132,6 @@ open scoped Classical in
       exact K_intro (K_right d₂) (d₁ ⨀ (K_left d₂))
     )
     (CKNO (φ := ∼ψ));
-
-omit [DecidableEq F] in
-open scoped Classical in
-lemma NNC_of_CNNNN (b : 𝓢 ⊢ ∼∼φ 🡒 ∼∼ψ) : 𝓢 ⊢ ∼∼(φ 🡒 ψ) := CCNNNNNNC ⨀ b
 
 section Conjunction
 
@@ -234,12 +223,6 @@ lemma EDisj₂AppendADisj₂Disj₂ : 𝓢 ⊢ ⋁(Γ ++ Δ) 🡘 ⋁Γ ⋎ ⋁�
     ) EAAAA;
 
 omit [DecidableEq F] in
-lemma Disj₂Append_iff_ADisj₂Disj₂ : 𝓢 ⊢ ⋁(Γ ++ Δ) ↔ 𝓢 ⊢ ⋁Γ ⋎ ⋁Δ := by
-  constructor;
-  · intro h; exact (K_left EDisj₂AppendADisj₂Disj₂) ⨀ h;
-  · intro h; exact (K_right EDisj₂AppendADisj₂Disj₂) ⨀ h;
-
-omit [DecidableEq F] in
 lemma CDisj₂_iff_CADisj₂ : 𝓢 ⊢ φ 🡒 ⋁(ψ :: Γ) ↔ 𝓢 ⊢ φ 🡒 ψ ⋎ ⋁Γ := by
   induction Γ with
   | nil =>
@@ -283,9 +266,6 @@ lemma left_Disj₂_intro' (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢ ⋁Γ 🡒 φ
   | _ => simp_all;
 
 omit [DecidableEq F] in
-lemma of_Disj₂_of_mem_eq (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 ⊢ ⋁Γ) : 𝓢 ⊢ φ := (left_Disj₂_intro' hd) ⨀ h
-
-omit [DecidableEq F] in
 open scoped Classical in
 @[simp] lemma CDisj₂FDisj {Γ : Finset F} : 𝓢 ⊢ ⋁Γ.toList 🡒 Γ.disj := by
   apply left_Disj₂_intro;
@@ -305,7 +285,7 @@ omit [DecidableEq F] in
 lemma CDisj₂Disj₂_of_subset {Γ Δ : List F} (h : ∀ φ ∈ Γ, φ ∈ Δ) : 𝓢 ⊢ ⋁Γ 🡒 ⋁Δ := by
   match Δ with
   | [] =>
-    have : Γ = [] := List.iff_nil_forall.mpr h;
+    have : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr fun a ha ↦ by simpa using h a ha;
     subst this;
     simp;
   | [φ] =>
@@ -350,11 +330,6 @@ lemma EDisj₂FDisj {Γ : List F} : 𝓢 ⊢ ⋁Γ 🡘 Γ.toFinset.disj := by
 lemma EDisj₂FDisj_doubleton : 𝓢 ⊢ ⋁[φ, ψ] 🡘 Finset.disj {φ, ψ} := by
   convert EDisj₂FDisj (𝓢 := 𝓢) (Γ := [φ, ψ]);
   simp;
-
-lemma EConj₂FConj_doubleton : 𝓢 ⊢ ⋁[φ, ψ] ↔ 𝓢 ⊢ Finset.disj {φ, ψ} := by
-  constructor;
-  · intro h; exact (C_of_E_mp <| EDisj₂FDisj_doubleton) ⨀ h;
-  · intro h; exact (C_of_E_mpr <| EDisj₂FDisj_doubleton) ⨀ h;
 
 @[simp]
 lemma CAFDisjinsertFDisj {Γ : Finset F} : 𝓢 ⊢ φ ⋎ Γ.disj 🡒 (insert φ Γ).disj := by
@@ -402,7 +377,7 @@ lemma CFConjFDisj_of_A (hφψ : φ ⋎ ψ ∈ Γ) (hφ : φ ∈ Δ) (hψ : ψ �
   apply C_trans (ψ := Finset.disj {φ, ψ});
   · apply C_trans (ψ := Finset.conj {φ ⋎ ψ}) ?_;
     · apply FConj_DT.mpr;
-      suffices ↑{φ ⋎ ψ} *⊢[𝓢] [φ, ψ].disj₂ by simpa using EConj₂FConj_doubleton.mp this;
+      suffices ↑{φ ⋎ ψ} *⊢[𝓢] [φ, ψ].disj₂ by simpa using (iff_of_E EDisj₂FDisj_doubleton).mp this;
       apply Context.by_axm;
       simp;
     · apply CFConjFConj_of_subset;

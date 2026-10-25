@@ -100,9 +100,6 @@ lemma Pow2.two_mul_div_two {p : V} (h : Pow2 p) (ne : p ≠ 1) : 2 * (p / 2) = p
   · simp at ne
   simp
 
-lemma Pow2.div_two_mul_two {p : V} (h : Pow2 p) (ne : p ≠ 1) : (p / 2) * 2 = p := by
-  simp [mul_comm, h.two_mul_div_two ne]
-
 lemma Pow2.elim' {p : V} : Pow2 p ↔ p = 1 ∨ 1 < p ∧ ∃ q, p = 2 * q ∧ Pow2 q := by
   by_cases hp : 1 < p
   · simpa [hp] using Pow2.elim
@@ -124,9 +121,6 @@ instance lenbit_definable : 𝚺ᴬ₀-Relation (LenBit : V → V → Prop) := l
 
 lemma LenBit.le {i a : V} (h : LenBit i a) : i ≤ a := by
   by_contra A; simp [LenBit, show a < i from by simpa using A] at h
-
-lemma not_lenbit_of_lt {i a : V} (h : a < i) : ¬LenBit i a := by
-  intro A; exact not_le.mpr h A.le
 
 @[simp] lemma LenBit.zero (a : V) : ¬LenBit 0 a := by simp [LenBit]
 
@@ -277,7 +271,8 @@ lemma le_iff_lt_two {a b : V} (ha : Pow2 a) (hb : Pow2 b) : a ≤ b ↔ a < 2 * 
       have hb' : Pow2 b' := (show Pow2 (a / 2) ∧ Pow2 b' by simpa using hb).2
       have : 2 ∣ b' := hb'.two_dvd' (by rintro rfl; simp [ha.two_mul_div_two ea] at h)
       rcases this with ⟨b'', rfl⟩
-      simp [←mul_assoc, ha.div_two_mul_two ea]
+      simp [←mul_assoc,
+        (show a / 2 * 2 = a by rw [mul_comm]; exact ha.two_mul_div_two ea)]
 
 lemma lt_iff_two_mul_le {a b : V} (ha : Pow2 a) (hb : Pow2 b) : a < b ↔ 2 * a ≤ b := by
   by_cases eb : b = 1
@@ -320,7 +315,7 @@ lemma mul_add_lt_of_mul_lt_of_pos {a b p q : V} (hp : Pow2 p) (hq : Pow2 q)
   have : p ∣ q :=
     dvd_of_le hp hq (le_of_lt <| lt_of_le_of_lt (le_mul_of_pos_left pos) h)
   rcases this with ⟨q, rfl⟩
-  have : a < q := lt_of_mul_lt_mul_right (a := p) (by simpa [mul_comm] using h)
+  have : a < q := lt_of_mul_lt_mul_right (a := p) (by simpa [mul_comm] using h) (by simp)
   calc
     a * p + b < (a + 1) * p := by simp [add_mul, hb]
     _         ≤ p * q       := by
@@ -344,7 +339,7 @@ lemma LenBit.add_pow2_iff_of_lt {a i j : V} (pi : Pow2 i) (pj : Pow2 j) (h : a <
   · have : a + j < i := calc
       a + j < 2 * j  := by simp [two_mul, h]
       _     ≤ i      := (pj.lt_iff_two_mul_le pi).mp hij
-    simp [not_lenbit_of_lt this, not_lenbit_of_lt (show a < i from lt_trans h hij), hij.ne.symm]
+    simp [mt LenBit.le (not_le.mpr this), mt LenBit.le (not_le.mpr (lt_trans h hij)), hij.ne.symm]
 
 lemma lenbit_iff_add_mul {i a : V} (hi : Pow2 i) :
     LenBit i a ↔ ∃ k, ∃ r < i, a = k * (2 * i) + i + r := by

@@ -101,19 +101,15 @@ lemma models_restrictedGödel (f : V → V) [𝚺ᴬ₁-Function₁[V] f via fDe
     models_of_provable (T := 𝗜𝚺₁) inferInstance <| def_restrictedGödel;
   simp [models_iff, Theory.RestrictedProvable]
 
-private lemma models_neg_restrictedGödel (f : V → V) [𝚺ᴬ₁-Function₁[V] f via fDef] :
-    ¬V↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e ↔
-      ∃ x : V, x < f (ORingStructure.numeral e) ∧
-        Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel fDef e⌝) := by
-  simpa using (models_restrictedGödel f).not;
-
 variable [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 /- Gödel sentence by restricted provability is true. -/
 theorem true_restrictedGödel (f : ℕ → ℕ) [𝚺ᴬ₁-Function₁ f via fDef] :
     ℕ↓[ℒₒᵣ] ⊧ T.restrictedGödel fDef e := by
   by_contra hC;
-  obtain ⟨e, _, he⟩ := models_neg_restrictedGödel f (e := e) |>.mp hC;
+  obtain ⟨e, _, he⟩ : ∃ x : ℕ, x < f (ORingStructure.numeral e) ∧
+      Arithmetic.Bootstrapping.Proof T x (⌜T.restrictedGödel fDef e⌝) := by
+    simpa using (models_restrictedGödel f).not.mp hC
   apply hC;
   apply iff_true_restrictedGödel_true_restrictedGödel'.mpr;
   apply ArithmeticTheory.soundOnHierarchy T _ _ ?_ T.restrictedGödel'_sigmaOne;
@@ -156,9 +152,6 @@ theorem two_pow_le_superexp {e : ℕ} (he : 1 ≤ e) : 2 ^ e ≤ Superexp.supere
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-theorem provable_restrictedGödel_superexp {e : ℕ} : T ⊢ T.restrictedGödel superexpDef e :=
-  provable_restrictedGödel Superexp.superexp
-
 theorem lower_bound_gödelNumber_proof_restrictedGödel_superexp {e : ℕ} :
     ∀ b : T.Proof (T.restrictedGödel superexpDef e), Superexp.superexp e ≤ ⌜b⌝ := by
   simpa [numeral_eq_natCast]
@@ -171,7 +164,7 @@ example :
     T ⊢ T.restrictedGödel superexpDef e ∧
       ∀ b : T.Proof (T.restrictedGödel superexpDef e), Superexp.superexp e ≤ ⌜b⌝ := by
   constructor;
-  · apply provable_restrictedGödel_superexp;
+  · exact provable_restrictedGödel Superexp.superexp
   · apply lower_bound_gödelNumber_proof_restrictedGödel_superexp;
 
 end Arithmetic

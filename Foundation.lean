@@ -286,7 +286,6 @@ public import Foundation.Vorspiel.ExistsUnique
 public import Foundation.Vorspiel.Fin.Basic
 public import Foundation.Vorspiel.Fin.Matrix
 public import Foundation.Vorspiel.Finset.Basic
-public import Foundation.Vorspiel.Finset.Card
 public import Foundation.Vorspiel.Function
 public import Foundation.Vorspiel.Graph
 public import Foundation.Vorspiel.IsEmpty

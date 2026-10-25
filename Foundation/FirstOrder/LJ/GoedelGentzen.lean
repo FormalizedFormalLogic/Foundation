@@ -41,9 +41,6 @@ scoped[FFL.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
 @[simp] lemma doubleNegation_ex (φ : Semiformula L ξ (n + 1)) : (∃¹ φ)ᴺ = ∼(∀¹ ∼φᴺ) := rfl
 
-lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ)ᴺ = ∼(∼(∼φ)ᴺ ⋏ ∼ψᴺ) := by
-  simp [imp_eq]
-
 @[simp] lemma doubleNegation_isNegative (φ : Semiformula L ξ n) : φᴺ.IsNegative := by
   induction φ using rec' <;> simp [*]
 
@@ -54,17 +51,8 @@ lemma doubleNegation_imply (φ ψ : Semiformula L ξ n) : (φ 🡒 ψ)ᴺ = ∼(
   |         [φ] => by simp
   | φ :: ψ :: Γ => by simp [doubleNegation_conj₂ (ψ :: Γ)]
 
-lemma doubleNegation_fconj (s : Finset (Semiformula L ξ n)) :
-    (s.conj)ᴺ = (s.toList.map Semiformula.doubleNegation).conj₂ := doubleNegation_conj₂ _
-
 lemma rew_doubleNegation (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : ω ▹ φᴺ = (ω ▹ φ)ᴺ := by
   induction φ using rec' generalizing n₂ <;> simp [Semiformulaᵢ.rew_rel, *, Function.comp_def]
-
-lemma subst_doubleNegation (φ : Semiformula L ξ n₁) (v : Fin n₁ → Semiterm L ξ n₂) :
-    φᴺ ⇜ v = (φ ⇜ v)ᴺ := rew_doubleNegation _ _
-
-lemma emb_doubleNegation (φ : Semisentence L n₁) :
-    Rewriting.emb (φᴺ) = (Rewriting.emb φ : Semiformula L ξ n₁)ᴺ := rew_doubleNegation _ _
 
 end Semiformula
 

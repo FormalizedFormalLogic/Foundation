@@ -53,9 +53,6 @@ lemma rewAux_neg (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n�
     rewAux ω (∼φ) = ∼rewAux ω φ :=
   by induction φ using Semiformula.rec' generalizing n₂ <;> simp [*, rewAux]
 
-lemma ext_rewAux' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) (φ : Semiformula L ξ₁ n₁) :
-    rewAux ω₁ φ = rewAux ω₂ φ := by simp [h]
-
 def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ →ˡᶜ Semiformula L ξ₂ n₂ where
   toTr := rewAux ω
   map_top' := by rfl
@@ -261,15 +258,6 @@ lemma coe_rel {ο : Type*} [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → S
 lemma coe_nrel {ο : Type*} [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
     (Rewriting.emb (nrel R v) : Semiformula L ξ n) = (nrel R fun i ↦ Rew.emb (v i)) := by rfl
 
-lemma coe_subst_eq_subst_coe {k : ℕ} (φ : Semisentence L k) (v : Fin k → ClosedSemiterm L n) :
-    (↑(φ ⇜ v) : Semiproposition L n) =
-        (↑φ : Semiproposition L k)⇜(fun i ↦ (↑(v i) : Semiterm L ℕ n)) :=
-  Rewriting.emb_subst_eq_subst_emb φ v
-
-lemma coe_subst_eq_subst_coe₁ (φ : Semisentence L 1) (t : ClosedSemiterm L n) :
-    (↑(φ/[t]) : Semiproposition L n) = (↑φ : Semiproposition L 1)/[(↑t : Semiterm L ℕ n)] :=
-  Rewriting.emb_subst_eq_subst_coe₁ φ t
-
 @[elab_as_elim]
 def formulaRec {C : Proposition L → Sort _}
   (verum : C ⊤)
@@ -405,10 +393,6 @@ lemma rew_eq_of_funEqOn [DecidableEq ξ₁] {ω₁ ω₂ : Rew L ξ₁ n₁ ξ�
     exact ih (fun x ↦ by cases x using Fin.cases <;> simp [hb])
         (fun x hx ↦ by simpa using congr_arg _ (hf x hx))
 
-lemma rew_eq_of_funEqOn₀ [DecidableEq ξ₁] {ω₁ ω₂ : Rew L ξ₁ 0 ξ₂ n₂} {φ : Semiformula L ξ₁ 0}
-    (hf : Function.funEqOn (φ.FVar?) (ω₁ ∘ Semiterm.fvar) (ω₂ ∘ Semiterm.fvar)) : ω₁ ▹ φ = ω₂ ▹ φ :=
-  rew_eq_of_funEqOn (fun x ↦ Fin.elim0 x) hf
-
 lemma rew_eq_self_of [DecidableEq ξ] {ω : Rew L ξ n ξ n} {φ : Semiformula L ξ n}
   (hb : ∀ x, ω #x = #x) (hf : ∀ x, φ.FVar? x → ω &x = &x) :
     ω ▹ φ = φ := by
@@ -418,7 +402,7 @@ lemma rew_eq_self_of [DecidableEq ξ] {ω : Rew L ξ n ξ n} {φ : Semiformula L
   · intro x hx; simp [hf x hx]
 
 @[simp] lemma ex_ne_subst (φ : Semiformula L ξ 1) (t) : φ/[t] ≠ ∃¹ φ :=
-  ne_of_ne_complexity (by simp)
+  ne_of_apply_ne complexity (by simp)
 
 section univCl
 
@@ -556,9 +540,6 @@ lemma lMap_bind (b : Fin n₁ → Semiterm L₁ ξ₂ n₂) (e : ξ₁ → Semit
   induction φ using rec' generalizing ξ₂ n₂ <;>
   simp [*, lMap_rel, lMap_nrel, Semiterm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons',
       Semiterm.lMap_bShift, Function.comp_def]
-
-lemma lMap_map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (φ : Semiformula L₁ ξ₁ n₁) :
-    lMap Φ (Rew.map (L := L₁) b e ▹ φ) = Rew.map (L := L₂) b e ▹ lMap Φ φ := lMap_bind _ _ _
 
 lemma lMap_rewrite (f : ξ₁ → Semiterm L₁ ξ₂ n) (φ : Semiformula L₁ ξ₁ n) :
     lMap Φ (Rew.rewrite f ▹ φ) = Rew.rewrite (Semiterm.lMap Φ ∘ f) ▹ lMap Φ φ := by

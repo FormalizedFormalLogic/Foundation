@@ -516,27 +516,11 @@ lemma not_fvar?_of_lt_fvSup (φ : Semiproposition L n) (h : φ.fvSup ≤ m) : ¬
 
 end FreeVariables
 
-section
+@[simp] lemma ne_or_left (φ ψ : Semiformula L ξ n) : φ ≠ φ ⋎ ψ :=
+  ne_of_apply_ne complexity (by simp)
 
-variable {α : Type*} [LinearOrder α]
-
-lemma List.maximam?_some_of_not_nil {l : List α} (h : l ≠ []) : l.max?.isSome := by
-  cases l
-  case nil => simp at h
-  case cons l => simp [List.max?_cons]
-
-lemma List.maximam?_eq_some [Std.LawfulOrderSup α] {l : List α} {a} (h : l.max? = some a) :
-    ∀ x ∈ l, x ≤ a :=
-  List.max?_le_iff h (x := a) |>.mp (by rfl)
-
-end
-
-lemma ne_of_ne_complexity {φ ψ : Semiformula L ξ n} (h : φ.complexity ≠ ψ.complexity) : φ ≠ ψ :=
-  by rintro rfl; contradiction
-
-@[simp] lemma ne_or_left (φ ψ : Semiformula L ξ n) : φ ≠ φ ⋎ ψ := ne_of_ne_complexity (by simp)
-
-@[simp] lemma ne_or_right (φ ψ : Semiformula L ξ n) : ψ ≠ φ ⋎ ψ := ne_of_ne_complexity (by simp)
+@[simp] lemma ne_or_right (φ ψ : Semiformula L ξ n) : ψ ≠ φ ⋎ ψ :=
+  ne_of_apply_ne complexity (by simp)
 
 variable {L : Language} {L₁ : Language} {L₂ : Language} {L₃ : Language} {ξ : Type*} {Φ : L₁ →ᵥ L₂}
 

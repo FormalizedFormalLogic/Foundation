@@ -21,7 +21,7 @@ lemma sub_succ_lt_selfs {a b : V} (h : b < a) : a - (a - (b + 1) + 1) = b := by
   rw [←Arithmetic.sub_sub]
   apply sub_remove_left
   apply sub_remove_left
-  rw [←add_sub_of_le (succ_le_iff_lt.mpr h)]
+  rw [←add_tsub_assoc_of_le (succ_le_iff_lt.mpr h)]
   simp
 
 section typed_formula

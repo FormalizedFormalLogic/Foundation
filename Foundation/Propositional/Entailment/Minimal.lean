@@ -719,16 +719,11 @@ lemma right_K_intro (hq : 𝓢 ⊢ φ 🡒 ψ) (hr : 𝓢 ⊢ φ 🡒 χ) : 𝓢
   replace hr : [] ⊢[𝓢] φ 🡒 χ := of hr;
   exact K_intro (mdp' hq FiniteContext.id) (mdp' hr FiniteContext.id)
 
-lemma left_K_symm (d : 𝓢 ⊢ φ ⋏ ψ 🡒 χ) : 𝓢 ⊢ ψ ⋏ φ 🡒 χ := C_trans CKK d
-
 open scoped Classical in
 lemma left_K_intro_right (h : 𝓢 ⊢ φ 🡒 χ) : 𝓢 ⊢ (ψ ⋏ φ) 🡒 χ := by
   apply CK_iff_CC.mpr;
   apply deduct';
   exact FiniteContext.of' (Γ := [ψ]) h;
-
-open scoped Classical in
-lemma left_K_intro_left (h : 𝓢 ⊢ φ 🡒 χ) : 𝓢 ⊢ (φ ⋏ ψ) 🡒 χ := C_trans CKK (left_K_intro_right h)
 
 open scoped Classical in
 lemma cut {c : F} (d₁ : 𝓢 ⊢ φ₁ ⋏ c 🡒 ψ₁) (d₂ : 𝓢 ⊢ φ₂ 🡒 c ⋎ ψ₂) :
@@ -740,8 +735,6 @@ lemma cut {c : F} (d₁ : 𝓢 ⊢ φ₁ ⋏ c 🡒 ψ₁) (d₂ : 𝓢 ⊢ φ�
 lemma CAA : 𝓢 ⊢ φ ⋎ ψ 🡒 ψ ⋎ φ := by
   apply deduct';
   exact of_C_of_C_of_A or₂ or₁ <| FiniteContext.id
-
-lemma A_symm (h : 𝓢 ⊢ φ ⋎ ψ) : 𝓢 ⊢ ψ ⋎ φ := CAA ⨀ h
 
 lemma A_assoc : 𝓢 ⊢ φ ⋎ (ψ ⋎ χ) ↔ 𝓢 ⊢ (φ ⋎ ψ) ⋎ χ := by
   constructor;
@@ -780,9 +773,6 @@ lemma K_assoc : 𝓢 ⊢ (φ ⋏ ψ) ⋏ χ 🡘 φ ⋏ (ψ ⋏ χ) := by
     apply K_intro;
     · exact K_intro hp hq;
     · exact hr;
-
-lemma K_assoc_mp (h : 𝓢 ⊢ (φ ⋏ ψ) ⋏ χ) : 𝓢 ⊢ φ ⋏ (ψ ⋏ χ) := C_of_E_mp K_assoc ⨀ h
-lemma K_assoc_mpr (h : 𝓢 ⊢ φ ⋏ (ψ ⋏ χ)) : 𝓢 ⊢ (φ ⋏ ψ) ⋏ χ := C_of_E_mpr K_assoc ⨀ h
 
 lemma K_replace_left (hc : 𝓢 ⊢ φ ⋏ ψ) (h : 𝓢 ⊢ φ 🡒 χ) :
     𝓢 ⊢ χ ⋏ ψ := K_intro (h ⨀ K_left hc) (K_right hc)
@@ -857,25 +847,11 @@ lemma ECC_of_E_of_E (hp : 𝓢 ⊢ φ₁ 🡘 φ₂) (hq : 𝓢 ⊢ ψ₁ 🡘 �
   · apply deduct'; exact C_trans (of <| K_left hp) <| C_trans (FiniteContext.id) (of <| K_right hq);
 
 open scoped Classical in
-lemma C_iff_C_of_E_of_E (hp : 𝓢 ⊢ φ₁ 🡘 φ₂) (hq : 𝓢 ⊢ ψ₁ 🡘 ψ₂) : 𝓢 ⊢ φ₁ 🡒 ψ₁ ↔ 𝓢 ⊢ φ₂ 🡒 ψ₂ :=
-  iff_of_E (ECC_of_E_of_E hp hq)
-
-open scoped Classical in
 @[simp] lemma dni : 𝓢 ⊢ φ 🡒 ∼∼φ := by
   apply deduct';
   apply N_of_CO;
   apply deduct;
   exact bot_of_mem_either (φ := φ) (by simp) (by simp);
-
-open scoped Classical in
-lemma dni' (b : 𝓢 ⊢ φ) : 𝓢 ⊢ ∼∼φ := dni ⨀ b
-
-open scoped Classical in
-lemma ANNNN_of_A (d : 𝓢 ⊢ φ ⋎ ψ) :
-    𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ := of_C_of_C_of_A (C_trans dni or₁) (C_trans dni or₂) d
-
-open scoped Classical in
-lemma KNNNN_of_K (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ∼∼φ ⋏ ∼∼ψ := K_intro (dni' <| K_left d) (dni' <| K_right d)
 
 lemma CNNOO : 𝓢 ⊢ ∼∼⊥ 🡒 ⊥ := by
   apply deduct'
@@ -934,9 +910,6 @@ open scoped Classical in
 @[simp] lemma tne : 𝓢 ⊢ ∼(∼∼φ) 🡒 ∼φ := contra dni
 
 open scoped Classical in
-lemma tne' (b : 𝓢 ⊢ ∼(∼∼φ)) : 𝓢 ⊢ ∼φ := tne ⨀ b
-
-open scoped Classical in
 lemma tneIff : 𝓢 ⊢ ∼∼∼φ 🡘 ∼φ := K_intro tne dni
 
 lemma CCC_of_C_left (h : 𝓢 ⊢ ψ 🡒 φ) : 𝓢 ⊢ (φ 🡒 χ) 🡒 (ψ 🡒 χ) := by
@@ -970,9 +943,6 @@ lemma C_of_CC (h : 𝓢 ⊢ φ 🡒 φ 🡒 ψ) : 𝓢 ⊢ φ 🡒 ψ := by
   have := of (Γ := [φ]) h;
   exact this ⨀ (FiniteContext.by_axm) ⨀ (FiniteContext.by_axm);
 
-open scoped Classical in
-lemma CCC : 𝓢 ⊢ φ 🡒 (φ 🡒 ψ) 🡒 ψ := C_swap <| C_id
-
 lemma CCC_of_C_right (h : 𝓢 ⊢ φ 🡒 ψ) : 𝓢 ⊢ (χ 🡒 φ) 🡒 (χ 🡒 ψ) := implyS ⨀ (C_of_conseq h)
 
 open scoped Classical in
@@ -980,9 +950,6 @@ open scoped Classical in
   apply C_swap;
   apply deduct';
   exact C_trans (CNNNN_of_C <| deductInv <| of <| C_swap <| CCCNNNN) tne;
-
-open scoped Classical in
-lemma CNNNN_of_NNC (b : 𝓢 ⊢ ∼∼(φ 🡒 ψ)) : 𝓢 ⊢ ∼∼φ 🡒 ∼∼ψ := CNNCCNNNN ⨀ b
 
 lemma O_intro_of_KN (h : 𝓢 ⊢ φ ⋏ ∼φ) : 𝓢 ⊢ ⊥ := (CO_of_N <| K_right h) ⨀ (K_left h)
 /-- Law of contradiction -/
@@ -998,9 +965,6 @@ open scoped Classical in
 @[simp] lemma CANNNK : 𝓢 ⊢ (∼φ ⋎ ∼ψ) 🡒 ∼(φ ⋏ ψ) := left_A_intro (contra and₁) (contra and₂)
 
 open scoped Classical in
-lemma NK_of_ANN (d : 𝓢 ⊢ ∼φ ⋎ ∼ψ) : 𝓢 ⊢ ∼(φ ⋏ ψ)  := CANNNK ⨀ d
-
-open scoped Classical in
 @[simp] lemma CKNNNA : 𝓢 ⊢ (∼φ ⋏ ∼ψ) 🡒 ∼(φ ⋎ ψ) := by
   apply CK_of_CC;
   apply deduct';
@@ -1009,9 +973,6 @@ open scoped Classical in
   apply deduct;
   exact of_C_of_C_of_A (CO_of_N FiniteContext.by_axm) (CO_of_N FiniteContext.by_axm)
     (FiniteContext.by_axm (φ := φ ⋎ ψ));
-
-open scoped Classical in
-lemma NA_of_KNN (d : 𝓢 ⊢ ∼φ ⋏ ∼ψ) : 𝓢 ⊢ ∼(φ ⋎ ψ) := CKNNNA ⨀ d
 
 open scoped Classical in
 @[simp] lemma CNAKNN : 𝓢 ⊢ ∼(φ ⋎ ψ) 🡒 (∼φ ⋏ ∼ψ) := by
@@ -1029,8 +990,6 @@ variable {ι : Type*}
   | []          => E_id
   | [_]         => E_intro (deduct' <| K_intro FiniteContext.id verum) and₁
   | _ :: _ :: _ => EKK_of_E_of_E E_id EConj₂Conj
-
-lemma CConj_iff_CConj₂ : 𝓢 ⊢ Γ.conj 🡒 φ ↔ 𝓢 ⊢ ⋀Γ 🡒 φ := C_iff_C_of_iff_left <| E_symm EConj₂Conj
 
 open scoped Classical in
 /-- Note: It may be easier to handle define `List.conj` based on `List.conj' (?)` -/
@@ -1107,10 +1066,6 @@ lemma CConj₂Conj₂_of_provable (h : ∀ φ, φ ∈ Γ → Δ ⊢[𝓢] φ) : 
     exact right_K_intro (provable_iff.mp h.1) ih;
 
 open scoped Classical in
-lemma CConj₂_of_forall_provable (h : ∀ φ, φ ∈ Γ → Δ ⊢[𝓢] φ) :
-    Δ ⊢[𝓢] ⋀Γ := provable_iff.mpr <| CConj₂Conj₂_of_provable h
-
-open scoped Classical in
 lemma CConj₂_of_unique (he : ∀ g ∈ Γ, g = φ) : 𝓢 ⊢ φ 🡒 ⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hcons χ Γ h ih =>
@@ -1119,10 +1074,6 @@ lemma CConj₂_of_unique (he : ∀ g ∈ Γ, g = φ) : 𝓢 ⊢ φ 🡒 ⋀Γ :=
     have ⟨he₁, he₂⟩ := he; subst he₁;
     exact right_K_intro C_id ih;
   | _ => simp_all;
-
-open scoped Classical in
-lemma C_of_CConj₂_of_unique (he : ∀ g ∈ Γ, g = φ) (hd : 𝓢 ⊢ ⋀Γ 🡒 ψ) :
-    𝓢 ⊢ φ 🡒 ψ := C_trans (CConj₂_of_unique he) hd
 
 open scoped Classical in
 lemma CConj₂_iff_CKConj₂ : 𝓢 ⊢ ⋀(φ :: Γ) 🡒 ψ ↔ 𝓢 ⊢ φ ⋏ ⋀Γ 🡒 ψ := by
@@ -1156,9 +1107,6 @@ lemma CKConj₂RemoveConj₂ [DecidableEq F] : 𝓢 ⊢ ⋀(Γ.remove φ) ⋏ φ
   · subst e; exact K_right id;
   · exact Conj₂_iff_forall_provable.mp (K_left id) ψ (by apply List.mem_remove_iff.mpr; simp_all);
 
-lemma CKConj₂Remove_of_CConj₂ [DecidableEq F] (b : 𝓢 ⊢ ⋀Γ 🡒 ψ) :
-    𝓢 ⊢ ⋀(Γ.remove φ) ⋏ φ 🡒 ψ := C_trans CKConj₂RemoveConj₂ b
-
 open scoped Classical in
 lemma Conj₂Append_iff_KConj₂Conj₂ : 𝓢 ⊢ ⋀(Γ ++ Δ) ↔ 𝓢 ⊢ ⋀Γ ⋏ ⋀Δ := by
   constructor;
@@ -1181,12 +1129,6 @@ open scoped Classical in
   apply E_intro;
   · apply deduct'; apply Conj₂Append_iff_KConj₂Conj₂.mp; exact id;
   · apply deduct'; apply Conj₂Append_iff_KConj₂Conj₂.mpr; exact id;
-
-open scoped Classical in
-lemma CConj₂Append_iff_CKConj₂Conj₂ : 𝓢 ⊢ ⋀(Γ ++ Δ) 🡒 φ ↔ 𝓢 ⊢ (⋀Γ ⋏ ⋀Δ) 🡒 φ := by
-  constructor;
-  · intro h; exact C_trans (K_right EConj₂AppendKConj₂Conj₂) h;
-  · intro h; exact C_trans (K_left EConj₂AppendKConj₂Conj₂) h;
 
 open scoped Classical in
 @[simp] lemma CConj₂FConj {Γ : Finset F} : 𝓢 ⊢ ⋀Γ.toList 🡒 Γ.conj := by
@@ -1263,8 +1205,7 @@ lemma CFConjFConj_of_subset {Γ Δ : Finset F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.con
   apply right_Fconj_intro;
   simp only [Finset.mem_union];
   rintro φ (hφ | hφ);
-  · apply left_K_intro_left
-    apply left_Fconj_intro hφ;
+  · exact C_trans CKK (left_K_intro_right (left_Fconj_intro hφ));
   · apply left_K_intro_right;
     apply left_Fconj_intro hφ;
 

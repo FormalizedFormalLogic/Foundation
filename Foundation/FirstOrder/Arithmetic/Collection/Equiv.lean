@@ -243,7 +243,7 @@ theorem BSigma_succ_weakerThan_BPi : 𝗕𝚺 (s + 1) ⪯ 𝗕𝚷 s :=
 
 @[instance]
 theorem BSigma_succ_equiv_BPi : 𝗕𝚺 (s + 1) ≊ 𝗕𝚷 s :=
-  Equiv.antisymm ⟨inferInstance, CollectionOnPrenexHierarchy_weakerThan_BSigma_succ 𝚷 s⟩
+  Equiv.antisymm ⟨inferInstance, CollectionOnPrenexHierarchy_weakerThan_of_lt (Nat.lt_succ_self s)⟩
 
 end BSigma_succ_BPi
 
@@ -337,7 +337,7 @@ lemma succ_induction_of_complementary_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s + 1))
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := models_IBroadSigma_of_models_BSigma_succ
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s :=
-    have : 𝗕𝚷 s ⪯ 𝗕𝚺 (s + 1) := CollectionOnPrenexHierarchy_weakerThan_BSigma_succ 𝚷 s
+    have : 𝗕𝚷 s ⪯ 𝗕𝚺 (s + 1) := CollectionOnPrenexHierarchy_weakerThan_of_lt (Nat.lt_succ_self s)
     models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(s + 1))
   intro a
   by_contra ha

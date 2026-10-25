@@ -46,9 +46,6 @@ instance mem_definable'' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Relation[V] Membership.mem := by
   simpa using (mem_definable' ℌ).retraction ![1, 0]
 
-lemma mem_absolute (i a : ℕ) : i ∈ a ↔ (i : V) ∈ (a : V) := by
-  simpa using Defined.sigmaZero_absolute V bit_defined bit_defined ![i, a]
-
 lemma mem_iff_bit {i a : V} : i ∈ a ↔ Bit i a := iff_of_eq rfl
 
 lemma exp_le_of_mem {i a : V} (h : i ∈ a) : Exp.exp i ≤ a := LenBit.le h
@@ -363,12 +360,12 @@ lemma insert_eq_self_of_mem {i a : V} (h : i ∈ a) : insert i a = a := by
 lemma log_mem_of_pos {a : V} (h : 0 < a) : log a ∈ a :=
   mem_iff_mul_exp_add_exp_add.mpr
     ⟨0, a - Exp.exp (log a),
-      (tsub_lt_iff_left (exp_log_le_self h)).mpr
-        (by rw [←two_mul]; exact lt_two_mul_exponential_log h),
-      by simpa using Eq.symm <| add_tsub_self_of_le (exp_log_le_self h)⟩
+      (tsub_lt_iff_left (exponential_log_le_self h (exponential_exp _))).mpr
+        (by rw [←two_mul]; exact lt_exponential_log_self (exponential_exp _)),
+      by simpa using Eq.symm <| add_tsub_self_of_le (exponential_log_le_self h (exponential_exp _))⟩
 
 lemma le_log_of_mem {i a : V} (h : i ∈ a) : i ≤ log a :=
-  (exp_le_iff_le_log (pos_of_nonempty h)).mp (exp_le_of_mem h)
+  (le_iff_le_log_of_exp (exponential_exp _) (pos_of_nonempty h)).mp (exp_le_of_mem h)
 
 lemma succ_mem_iff_mem_div_two {i a : V} : i + 1 ∈ a ↔ i ∈ a / 2 := by
   simp [mem_iff_bit, Bit, LenBit.iff_rem, exp_succ, Arithmetic.div_mul]
@@ -381,7 +378,7 @@ lemma lt_exp_iff {a i : V} : a < Exp.exp i ↔ ∀ j ∈ a, j < i :=
    by suffices Exp.exp i ≤ a → ∃ x ∈ a, i ≤ x by contrapose; simpa
       intro h
       have pos : 0 < a := lt_of_lt_of_le (by simp) h
-      exact ⟨log a, log_mem_of_pos pos, (exp_le_iff_le_log pos).mp h⟩⟩
+      exact ⟨log a, log_mem_of_pos pos, (le_iff_le_log_of_exp (exponential_exp _) pos).mp h⟩⟩
 
 instance : HasSubset V := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
@@ -500,15 +497,14 @@ lemma le_of_subset {a b : V} (h : a ⊆ b) : a ≤ b := by
       mul_div_self_of_dvd.mpr (zero_mem_iff.mp <| by intro ha; have : 0 ∈ 2 * b := h ha; simp_all)
     simpa [this] using mul_le_mul_left (a := 2) IH
   case odd b IH =>
-    have IH : a / 2 ≤ b := IH (by simpa [div_mul_add' b 2 one_lt_two] using subset_div_two h)
+    have h₂ : (2 * b + 1) / 2 = b := by rw [mul_comm]; exact div_mul_add b 2 one_lt_two
+    have IH : a / 2 ≤ b := IH (by simpa [h₂] using subset_div_two h)
     exact le_trans (le_two_mul_div_two_add_one a) (by simpa using IH)
 
 lemma mem_ext {a b : V} (h : ∀ i, i ∈ a ↔ i ∈ b) : a = b :=
   le_antisymm (le_of_subset fun i hi ↦ (h i).mp hi) (le_of_subset fun i hi ↦ (h i).mpr hi)
 
 lemma mem_ext_iff {a b : V} : a = b ↔ ∀ i, i ∈ a ↔ i ∈ b := ⟨by rintro rfl; simp, mem_ext⟩
-
-lemma pos_iff_nonempty {s : V} : 0 < s ↔ s ≠ ∅ := pos_iff_ne_zero
 
 lemma nonempty_of_pos {a : V} (h : 0 < a) : ∃ i, i ∈ a := by
   by_contra A
@@ -629,31 +625,11 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 instance : Fact (1 ≤ 1) := ⟨by rfl⟩
 
-theorem finset_comprehension₁ {P : V → Prop} (hP : Γᴬ_[1]-Predicate P) (a : V) :
-    ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i :=
-  finset_comprehension hP a
-
-theorem finset_comprehension₁! {P : V → Prop} (hP : Γᴬ_[1]-Predicate P) (a : V) :
-    ∃! s, s < Exp.exp a ∧ (∀ i < a, i ∈ s ↔ P i) := by
-  rcases finset_comprehension₁ hP a with ⟨s, hs, Ha⟩
-  exact ExistsUnique.intro s ⟨hs, Ha⟩
-    (by
-      rintro b ⟨hb, Hb⟩
-      apply mem_ext
-      intro x
-      constructor
-      · intro hx
-        have : x < a := exp_monotone.mp <| LE.le.trans_lt (exp_le_of_mem hx) hb
-        exact (Ha x this).mpr <| (Hb x this).mp hx
-      · intro hx
-        have : x < a := exp_monotone.mp <| LE.le.trans_lt (exp_le_of_mem hx) hs
-        exact (Hb x this).mpr <| (Ha x this).mp hx)
-
 theorem finite_comprehension₁! {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (fin : ∃ m, ∀ i, P i → i < m) :
     ∃! s : V, ∀ i, i ∈ s ↔ P i := by
   rcases fin with ⟨m, mh⟩
-  rcases finset_comprehension₁ hP m with ⟨s, hs, Hs⟩
+  rcases finset_comprehension (m := 1) hP m with ⟨s, hs, Hs⟩
   have H : ∀ i, i ∈ s ↔ P i :=
     fun i ↦ ⟨
       fun h ↦ (Hs i (exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem h) hs))).mp h,

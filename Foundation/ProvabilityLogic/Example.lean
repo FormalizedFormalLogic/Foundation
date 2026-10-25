@@ -32,7 +32,7 @@ instance : (𝐆𝐋 : Logic α) ⪱ Logic.GLPlusBoxBot 1 :=
 theorem provabilityLogic_add_incon_equiv_GLPlusBoxBot_one_peano :
     PL(𝗣𝗔 ∪ 𝗣𝗔.Incon) ≊ Logic.GLPlusBoxBot 1 := by
   simpa [height_union_incon_eq_one] using
-    (Logic.GLPlusBoxBot.equiv_provabilityLogic (T := 𝗣𝗔 ∪ 𝗣𝗔.Incon)).symm
+    (Logic.equiv_of_eq (Logic.GLPlusBoxBot.eq_provabilityLogic (T := 𝗣𝗔 ∪ 𝗣𝗔.Incon))).symm
 
 theorem provabilityLogicRelativeTo_add_incon_equiv_GLPlusBoxBot_one_peano :
     PL(𝗣𝗔, 𝗣𝗔 ∪ 𝗣𝗔.Incon) ≊ Logic.GLPlusBoxBot 1 :=

@@ -182,16 +182,12 @@ theorem provability_TFAE : [
     exact axiomD_disj;
   tfae_finish;
 
-lemma iff_provable_gentzen : 𝐃 ⊢ A ↔ ⊢ᴳ[𝐃] ∅ ⟹[2] {A} := provability_TFAE.out 1 2
-
 omit [DecidableEq α] in
 lemma iff_forces_pseudoTail : 𝐃 ⊢ A ↔
     ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α) [M.IsFiniteGL] (o : α → Prop),
       Sum.inr ⊤ ⊩[(M.toPseudoTail o).toModel] A := by
   classical
   exact provability_TFAE.out 1 4
-
-lemma iff_provable_GL : 𝐃 ⊢ A ↔ 𝐆𝐋 ⊢ A.dSubfmls.conj 🡒 A := provability_TFAE.out 1 6
 
 omit [DecidableEq α] in
 lemma iff_box_provable_GL : 𝐃 ⊢ □A ↔ 𝐆𝐋 ⊢ A :=

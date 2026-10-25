@@ -253,11 +253,6 @@ lemma nth_succ (v i : V) : v.[i + 1] = (sndIdx v).[i] :=
 @[simp] lemma nth_adjoin_two (x v : V) : (x ∷ v).[2] = v.[1] := by
   simpa [-nth_adjoin_succ, one_add_one_eq_two] using nth_adjoin_succ x v 1
 
-lemma adjoin_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
-  rcases zero_or_succ x with (rfl | ⟨z, rfl⟩)
-  · simp
-  · right; exact ⟨π₁ z, π₂ z, by simp [adjoin]⟩
-
 lemma adjoin_induction (Γ) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   ISigma1.order_induction Γ hP (by
@@ -914,9 +909,6 @@ lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] :=
   · definability
   case nil => simp
   case adjoin x v ih => simp [ih]
-
-lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := by
-  rcases hi; simp
 
 end concat
 

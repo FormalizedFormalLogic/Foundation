@@ -41,12 +41,9 @@ namespace LindenbaumAlgebra
 
 variable [Entailment.Minimal 𝓢]
 
-lemma of_eq_of {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦ψ⟧ ↔ φ ≡ ψ :=
-  Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
-
 instance [DecidableEq F] : LE (LindenbaumAlgebra 𝓢) :=
   ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢ φ 🡒 ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
-    simp only [C_iff_C_of_E_of_E hp hq]⟩
+    simp only [iff_of_E (ECC_of_E_of_E hp hq)]⟩
 
 lemma le_def [DecidableEq F] {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦ψ⟧ ↔ 𝓢 ⊢ φ 🡒 ψ :=
   iff_of_eq rfl
@@ -100,7 +97,7 @@ instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) wh
     induction φ using Quotient.ind with
     | _ φ => induction ψ using Quotient.ind with
       | _ ψ =>
-        simp only [le_def, of_eq_of]
+        simp only [le_def, Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)]
         intro hp hq; exact E_intro hp hq
   inf_le_left φ ψ := by
     induction φ using Quotient.ind with

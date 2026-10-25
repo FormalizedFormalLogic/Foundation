@@ -1,7 +1,8 @@
 module
 
 public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
-public import Foundation.Vorspiel.Finset.Card
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Algebra.Order.Ring.Nat
 
 @[expose] public section
 

@@ -73,19 +73,10 @@ theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : ArithmeticSentence} :
 
 open FFL.Entailment FFL.Entailment.FiniteContext
 
-lemma provable_D2_context [𝗜𝚺₁ ⪯ U] {Γ σ π} (hσπ : Γ ⊢[U] □(σ 🡒 π)) (hσ : Γ ⊢[U] □σ) :
-    Γ ⊢[U] □π := FiniteContext.of' (weakening inferInstance provable_D2) ⨀ hσπ ⨀ hσ
-
-lemma provable_D3_context [𝗣𝗔⁻ ⪯ T] [𝗜𝚺₁ ⪯ U] {Γ σ} (hσπ : Γ ⊢[U] □σ) :
-  Γ ⊢[U] □□σ := FiniteContext.of' (weakening inferInstance provable_D3) ⨀ hσπ
-
 lemma provable_sound [U.SoundOnHierarchy 𝚺 1] {σ} : U ⊢ □σ → T ⊢ σ := fun h ↦ by
   have : ℕ↓[ℒₒᵣ] ⊧ provabilityPred T σ :=
     ArithmeticTheory.SoundOn.sound (F := ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1) h (by simp)
   simpa [models_iff] using this
-
-lemma provable_complete [U.SoundOnHierarchy 𝚺 1] [𝗜𝚺₁ ⪯ U] {σ} : T ⊢ σ ↔ U ⊢ □σ :=
-  ⟨fun h ↦ weakening inferInstance (provable_D1 h), provable_sound⟩
 
 instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨provable_D3⟩
 

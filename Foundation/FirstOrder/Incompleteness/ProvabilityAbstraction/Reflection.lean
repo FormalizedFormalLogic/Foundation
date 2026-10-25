@@ -58,7 +58,8 @@ theorem inconsistent_of_localReflection_provable [Diagonalization T₀] [T₀ �
     (h : insert π T ⊢ 𝔅.refl (∼π)) : Inconsistent (insert π T) := by
   have h₁ : T ⊢ π 🡒 𝔅.refl (∼π) := deduction_iff.mp h;
   have h₂ : T ⊢ ∼π := löb_theorem (by cl_prover [h₁]);
-  exact inconsistent_of_provable <| by cl_prover [Axiomatized.adjoin π T, to_adjoin (φ := π) h₂];
+  have h₃ : adjoin π T ⊢ ∼π := Axiomatized.weakening (by simp) h₂;
+  exact inconsistent_of_provable <| by cl_prover [Axiomatized.adjoin π T, h₃];
 
 theorem inconsistent_of_provable_localReflectionOn_insert
     [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL] {Γ Γ' : Sentence L → Prop}

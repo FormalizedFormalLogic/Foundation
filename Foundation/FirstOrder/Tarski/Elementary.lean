@@ -84,15 +84,9 @@ variable {F : Type*} [FunLike F M₁ M₂] [HomClass F L M₁ M₂] (φ : F)
 
 @[ext] lemma ext (φ ψ : F) (h : ∀ x, φ x = ψ x) : φ = ψ := DFunLike.ext φ ψ h
 
-protected lemma func {k} (f : L.Func k) (v : Fin k → M₁) :
-    φ (s₁.func f v) = s₂.func f (φ ∘ v) := map_func φ f v
-
-protected lemma rel {k} (r : L.Rel k) (v : Fin k → M₁) :
-    s₁.rel r v → s₂.rel r (φ ∘ v) := map_rel φ r v
-
 lemma val_term (e : Fin n → M₁) (ε : ξ → M₁) (t : Semiterm L ξ n) :
     φ (t.val e ε) = t.val (φ ∘ e) (φ ∘ ε) := by
-  induction t <;> simp [*, HomClass.func, Function.comp_def]
+  induction t <;> simp [*, HomClass.map_func, Function.comp_def]
 
 end HomClass
 
@@ -117,11 +111,8 @@ def toEmbedding : M₁ ↪ M₂ where
   toFun := φ
   inj'  := map_inj φ
 
-protected lemma func {k} (f : L.Func k) (v : Fin k → M₁) :
-    φ (s₁.func f v) = s₂.func f (φ ∘ v) := map_func φ f v
-
 protected lemma rel {k} (r : L.Rel k) (v : Fin k → M₁) :
-    s₂.rel r (φ ∘ v) ↔ s₁.rel r v := ⟨map_rel_inv φ r v, HomClass.rel φ r v⟩
+    s₂.rel r (φ ∘ v) ↔ s₁.rel r v := ⟨map_rel_inv φ r v, map_rel φ r v⟩
 
 end EmbeddingClass
 
@@ -228,13 +219,6 @@ namespace ElementaryEquiv
 
 lemma modelsTheory [h : M₁ ≡ₑ[L] M₂] {T : Theory L} :
     M₁↓[L] ⊧* T ↔ M₂↓[L] ⊧* T := by simp [models_theory_iff, h.models]
-
-variable (M₁ M₂)
-
-lemma modelsTheory' [M₁ ≡ₑ[L] M₂] (T : Theory L) [h : M₂↓[L] ⊧* T] :
-    M₁↓[L] ⊧* T := modelsTheory.mpr h
-
-variable {M₁ M₂}
 
 lemma ofEquiv [Nonempty N] (Θ : M ≃ N) :
     letI : Tarski.Structure L N := Tarski.Structure.ofEquiv Θ

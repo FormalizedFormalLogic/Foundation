@@ -203,9 +203,6 @@ instance : DecidableEq (NNFormula α) := hasDecEq
 
 end Decidable
 
-lemma ne_of_ne_complexity {φ ψ : NNFormula α} (h : φ.complexity ≠ ψ.complexity) : φ ≠ ψ :=
-  by rintro rfl; contradiction
-
 end NNFormula
 
 abbrev Theory (α : Type*) := Set (NNFormula α)

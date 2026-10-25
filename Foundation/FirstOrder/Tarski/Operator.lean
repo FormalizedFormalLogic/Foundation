@@ -27,9 +27,6 @@ variable {M : Type w} {s : Tarski.Structure L M}
     val b f (o.operator v) = o.val (Semiterm.val b f ∘ v) := by
   simp [Operator.operator, val_substs, Empty.eq_elim]; congr
 
-lemma val_operator' {k} (b : Fin k → M) (f : ξ → M) (o : Operator L k) (v) :
-    val b f (o.operator v) = o.val fun i ↦ (v i).val b f := val_operator b f o v
-
 lemma Operator.val_comp (o₁ : Operator L k) (o₂ : Fin k → Operator L m) (v : Fin m → M) :
   (o₁.comp o₂).val v = o₁.val (val v ∘ o₂) := by
   simp [comp, val, Function.comp_def]
@@ -147,11 +144,6 @@ variable {L M}
     {v : Fin 2 → M} :
     (@Operator.Mem.mem L _).val v ↔ v 0 ∈ v 1 := by
   rw [Matrix.fun_eq_vec_two v]; simp
-
-lemma le_iff_of_eq_of_lt [Operator.Eq L] [Operator.LT L] [LT M]
-    [Tarski.Structure.Eq L M] [Tarski.Structure.LT L M] {a b : M} :
-    (@Operator.LE.le L _).val ![a, b] ↔ a = b ∨ a < b := by
-  simp [Operator.LE.def_of_Eq_of_LT]
 
 @[simp] lemma eq_lang [L.Eq] [Tarski.Structure.Eq L M] {v : Fin 2 → M} :
     Tarski.Structure.rel (L := L) Language.Eq.eq v ↔ v 0 = v 1 := by
