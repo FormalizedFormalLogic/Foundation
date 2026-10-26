@@ -281,6 +281,12 @@ lemma of_provably_subtheory [le : T ⪯ U] (h : M↓[L] ⊧* U) : M↓[L] ⊧* T
   have : U ⊢ φ := le.pbl (Entailment.by_axm hφ)
   consequence_iff'.{u, w}.mp (Theory.Proof.sound this) M⟩
 
+lemma of_add_left [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* T :=
+  models_of_ss inferInstance (show T ⊆ T ∪ U from by simp)
+
+lemma of_add_right [M↓[L] ⊧* T ∪ U] : M↓[L] ⊧* U :=
+  models_of_ss inferInstance (show U ⊆ T ∪ U from by simp)
+
 end ModelsTheory
 
 variable {L : Language.{u}} [L.Eq] {T : Theory L} [𝗘𝗤 L ⪯ T]

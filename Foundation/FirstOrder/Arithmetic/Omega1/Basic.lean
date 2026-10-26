@@ -47,9 +47,9 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ �
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
-instance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_ss (U := 𝗜𝚺₀ ∪ 𝝮₁) inferInstance Set.subset_union_left
+instance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜𝚺₀ 𝝮₁
 
-instance : V↓[ℒₒᵣ] ⊧* 𝝮₁ := models_of_ss (U := 𝗜𝚺₀ ∪ 𝝮₁) inferInstance Set.subset_union_right
+instance : V↓[ℒₒᵣ] ⊧* 𝝮₁ := ModelsTheory.of_add_right V 𝗜𝚺₀ 𝝮₁
 
 lemma exists_exponential_sq_length (x : V) : ∃ y, Exponential (‖x‖^2) y :=
   models_Omega1_iff.mp (Theory.models _ _ Omega1.omega) x
