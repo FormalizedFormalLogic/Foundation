@@ -410,6 +410,15 @@ instance range_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 @[simp] lemma range_empty : range (∅ : V) = ∅ := mem_ext (by simp [mem_range_iff])
 
+@[simp] lemma range_bound (s : V) : range s ≤ 2 * s := le_iff_lt_succ.mpr
+  <| lt_of_lt_log (by simp) (by
+    simp only [mem_range_iff, forall_exists_index]
+    intro i x hix
+    exact lt_of_le_of_lt (le_trans (le_pair_right x i) (le_log_of_mem hix))
+      (by simp [log_two_mul_add_one_of_pos (pos_of_nonempty hix)]))
+
+instance : Bounded₁ (range : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp⟩
+
 end range
 
 /-! ### Disjoint -/
@@ -520,51 +529,64 @@ lemma IsMapping.uniq {m x y₁ y₂ : V} (h : IsMapping m) :
 
 def IsMapping.Injective (m : V) : Prop := ∀ x x' y, ⟪x, y⟫ ∈ m → ⟪x', y⟫ ∈ m → x = x'
 
-def _root_.FFL.FirstOrder.Arithmetic.IsMapping.injectiveDef : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
-  (.mkSigma “m. ∃ d r, !domainDef d m ∧ !rangeDef r m ∧
-    ∀ x < m, ∀ x' < m, ∀ y < m, x ∼[m] y → x' ∼[m] y → x = x'”)
-  (.mkPi    “m. ∀ x x' y, x ∼[m] y → x' ∼[m] y → x = x'”)
+def _root_.FFL.FirstOrder.Arithmetic.IsMapping.injectiveDef : 𝚺ᴬ₀.Semisentence 1 :=
+  .mkSigma “m. ∀ x < m, ∀ x' < m, ∀ y < m, x ∼[m] y → x' ∼[m] y → x = x'”
 
-lemma injective_of_bounded {m : V}
-    (h : ∀ x < m, ∀ x_1 < m, ∀ x_2 < m, ⟪x, x_2⟫ ∈ m → ⟪x_1, x_2⟫ ∈ m → x = x_1) :
-    IsMapping.Injective m := by
-  intro x x' y hxy hx'y
-  have hxlt : x < m := lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hxy)
-  have hx'lt : x' < m := lt_of_le_of_lt (le_pair_left x' y) (lt_of_mem hx'y)
-  have hylt : y < m := lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hxy)
-  exact h x hxlt x' hx'lt y hylt hxy hx'y
+/-- An equivalent formulation of injectivity in which all quantifiers are bounded. -/
+lemma IsMapping.injective_iff_bounded {m : V} :
+    IsMapping.Injective m ↔
+    ∀ x < m, ∀ x_1 < m, ∀ x_2 < m, ⟪x, x_2⟫ ∈ m → ⟪x_1, x_2⟫ ∈ m → x = x_1 := by
+  constructor <;> intro h
+  · aesop
+  · intro x x' y hxy hx'y
+    have hxlt : x < m := lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hxy)
+    have hx'lt : x' < m := lt_of_le_of_lt (le_pair_left x' y) (lt_of_mem hx'y)
+    have hylt : y < m := lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hxy)
+    exact h x hxlt x' hx'lt y hylt hxy hx'y
 
-set_option linter.flexible false in
-instance injective_defined :
-    𝚫ᴬ₁-Predicate[V] IsMapping.Injective via IsMapping.injectiveDef :=
-  -- .mk fun v ↦ by simp [IsMapping.injectiveDef]; rfl
-  .mk ⟨
-    fun v ↦ by
-      simp [IsMapping.injectiveDef]
-      constructor <;> intro h
-      · exact injective_of_bounded h
-      · aesop,
-    fun v ↦ by
-      simp [IsMapping.injectiveDef]
-      constructor <;> intro h
-      · intro x x' y hxy hx'y
-        have hxlt : x < v 0 := lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hxy)
-        have hx'lt : x' < v 0 := lt_of_le_of_lt (le_pair_left x' y) (lt_of_mem hx'y)
-        have hylt : y < v 0 := lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hxy)
-        exact h x hxlt x' hx'lt y hylt hxy hx'y
-      · sorry⟩
+instance IsMapping.injective_defined :
+    𝚺ᴬ₀-Predicate[V] IsMapping.Injective via IsMapping.injectiveDef :=
+  .mk fun v ↦ by simp [IsMapping.injectiveDef, injective_iff_bounded]
 
-instance injective_definable : 𝚷ᴬ₁-Predicate[V] IsMapping.Injective :=
+instance IsMapping.injective_definable : 𝚺ᴬ₀-Predicate[V] IsMapping.Injective :=
   injective_defined.to_definable
 
--- TODO: Add an assumption that ℌ has rank greater than `0`.
-instance Injective_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₁ (range : V → V) :=
-  injective_definable.of_sigma_of_pi
+instance IsMapping.injective_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Predicate[V] IsMapping.Injective :=
+  injective_definable.of_zero
 
 @[simp] lemma IsMapping.injective_empty : IsMapping.Injective (∅ : V) := by intro x x' y; simp
 
 def IsMapping.Surjective (m : V) : Prop := ∀ y ∈ range m, ∃ x, ⟪x, y⟫ ∈ m
+
+def _root_.FFL.FirstOrder.Arithmetic.IsMapping.surjectiveDef : 𝚺ᴬ₀.Semisentence 1 :=
+  .mkSigma “m. ∃ r <⁺ 2 * m, !rangeDef r m ∧ ∀ y < m, y ∈ r → ∃ x < m, x ∼[m] y”
+
+/-- An equivalent formulation of surjectivity in which all quantifiers are bounded. -/
+lemma IsMapping.surjective_iff_bounded {m : V} :
+    IsMapping.Surjective m ↔
+    ∀ y < m, y ∈ range m → ∃ x < m, ⟪x, y⟫ ∈ m := by
+  constructor <;> intro h
+  · intro y _ hy
+    obtain ⟨x, hx⟩ := h y hy
+    have hxlt : x < m := lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hx)
+    exact ⟨x, hxlt, hx⟩
+  · intro y hy
+    have hylt : y < m :=
+      lt_of_le_of_lt (le_pair_right _ y) (lt_of_mem (Classical.choose_spec (mem_range_iff.mp hy)))
+    obtain ⟨x, _, hx⟩ := h y hylt hy
+    exact ⟨x, hx⟩
+
+instance IsMapping.surjective_defined :
+    𝚺ᴬ₀-Predicate[V] IsMapping.Surjective via IsMapping.surjectiveDef :=
+  .mk fun v ↦ by simp [IsMapping.surjectiveDef, surjective_iff_bounded]
+
+instance IsMapping.surjective_definable : 𝚺ᴬ₀-Predicate[V] IsMapping.Surjective :=
+  IsMapping.surjective_defined.to_definable
+
+instance IsMapping.surjective_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Predicate[V] IsMapping.Surjective :=
+  IsMapping.surjective_definable.of_zero
 
 @[simp] lemma IsMapping.surjective_empty : IsMapping.Surjective (∅ : V) := by intro y; simp
 
