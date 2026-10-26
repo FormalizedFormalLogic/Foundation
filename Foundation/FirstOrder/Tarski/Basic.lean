@@ -694,6 +694,9 @@ instance models_theory_sup (T₁ T₂ : Theory L) [M↓[L] ⊧* T₁] [M↓[L] �
   · infer_instance
   · infer_instance
 
+lemma models_of_mem_theory {T : Theory L} [h : M↓[L] ⊧* T] (hf : φ ∈ T) : M↓[L] ⊧ φ :=
+  h.models _ hf
+
 end theory
 
 namespace Tarski.Structure
@@ -709,6 +712,9 @@ variable {L} {M : Type v} [Nonempty M] [s : Tarski.Structure L M]
 
 lemma subset_of_models : T ⊆ theory L M ↔ M↓[L] ⊧* T :=
   ⟨fun h ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.models_set hσ⟩
+
+lemma theory_satisfiable : Semantics.Satisfiable (Tarski.Struc.{v} L) (theory L M) :=
+  ⟨s.toStruc, by simp⟩
 
 end Tarski.Structure
 
