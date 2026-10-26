@@ -126,9 +126,11 @@ public import Foundation.FirstOrder.SetTheory.BST.BST
 public import Foundation.FirstOrder.SetTheory.BST.Basic
 public import Foundation.FirstOrder.SetTheory.BST.Model
 public import Foundation.FirstOrder.SetTheory.Basic
+public import Foundation.FirstOrder.SetTheory.Basic.Bounded
 public import Foundation.FirstOrder.SetTheory.Basic.Hierarchy
 public import Foundation.FirstOrder.SetTheory.Basic.Misc
 public import Foundation.FirstOrder.SetTheory.Basic.Model
+public import Foundation.FirstOrder.SetTheory.Definability.Bounded
 public import Foundation.FirstOrder.SetTheory.Definability.Definable
 public import Foundation.FirstOrder.SetTheory.Definability.Hierarchy
 public import Foundation.FirstOrder.SetTheory.FunctionSet
