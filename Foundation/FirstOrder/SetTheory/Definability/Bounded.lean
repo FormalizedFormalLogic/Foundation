@@ -4,6 +4,9 @@ public import Foundation.FirstOrder.SetTheory.Definability.Definable
 
 /-!
 # Bounded definability in a bounding hierarchy
+
+These routine closure properties adapt the arithmetic bounded-definability API to
+subset-bounded functions with bounded membership predicates.
 -/
 
 @[expose] public section
@@ -17,7 +20,7 @@ namespace SetTheory
 variable {k l : ℕ}
 
 class Bounded (f : (Fin k → V) → V) : Prop where
-  bounded : ∃ i : Fin k, ∀ v, f v ⊆ v i
+  bounded : ∃ t : SetTheorySemiterm V k, ∀ v, f v ⊆ t.val v id
 
 abbrev Bounded₁ (f : V → V) : Prop :=
   Bounded (fun v : Fin 1 → V ↦ f (v 0))
@@ -27,6 +30,33 @@ abbrev Bounded₂ (f : V → V → V) : Prop :=
 
 abbrev Bounded₃ (f : V → V → V → V) : Prop :=
   Bounded (fun v : Fin 3 → V ↦ f (v 0) (v 1) (v 2))
+
+namespace Bounded
+
+@[simp] lemma var (i : Fin k) : Bounded (fun v : Fin k → V ↦ v i) :=
+  ⟨#i, by simp⟩
+
+@[simp] lemma const (c : V) : Bounded (fun _ : Fin k → V ↦ c) :=
+  ⟨&c, by simp⟩
+
+lemma retraction {f : (Fin k → V) → V} (hf : Bounded f) (e : Fin k → Fin l) :
+    Bounded (fun v ↦ f (fun i ↦ v (e i))) := by
+  obtain ⟨t, ht⟩ := hf.bounded
+  exact ⟨Rew.subst (fun i ↦ #(e i)) t,
+    by intro v; simpa [Semiterm.val_substs, Function.comp_def] using ht (fun i ↦ v (e i))⟩
+
+lemma comp {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V}
+    (hf : Bounded f) (hg : ∀ i, Bounded (g i)) :
+    Bounded (fun v ↦ f (g · v)) := by
+  obtain ⟨t, ht⟩ := hf.bounded
+  cases t with
+  | bvar i =>
+    obtain ⟨s, hs⟩ := (hg i).bounded
+    exact ⟨s, fun v ↦ subset_trans (ht (g · v)) (hs v)⟩
+  | fvar c => exact ⟨&c, fun v ↦ by simpa using ht (g · v)⟩
+  | func r ts => exact r.elim
+
+end Bounded
 
 def DefinableBoundedFunction {k} (f : (Fin k → V) → V) :=
   Bounded f ∧ 𝚺ᴸ₀.ExtDefinedFunction f
@@ -66,6 +96,37 @@ lemma DefinableBoundedFunction₂.definable {f : V → V → V} (h : DefinableBo
 lemma DefinableBoundedFunction₃.definable {f : V → V → V → V} (h : DefinableBoundedFunction₃ f) :
     ℌ.ExtDefinedFunction (fun v : Fin 3 → V ↦ f (v 0) (v 1) (v 2)) := .of_zero h.2
 
+namespace DefinableBoundedFunction
+
+@[simp, definability] lemma var (i : Fin k) :
+    DefinableBoundedFunction (fun v : Fin k → V ↦ v i) :=
+  ⟨Bounded.var i, inferInstance⟩
+
+@[simp, definability] lemma const (c : V) :
+    DefinableBoundedFunction (fun _ : Fin k → V ↦ c) :=
+  ⟨Bounded.const c,
+    ⟨.mkSigma “#0 ∈ &c” (.of_open (by simp)), by intro v; simp⟩⟩
+
+lemma retraction {f : (Fin k → V) → V} (hf : DefinableBoundedFunction f)
+    (e : Fin k → Fin l) : DefinableBoundedFunction (fun v ↦ f (fun i ↦ v (e i))) :=
+  ⟨hf.1.retraction e, hf.2.retraction e⟩
+
+lemma term {n} (t : SetTheorySemiterm V n) {f : Fin n → (Fin k → V) → V}
+    (hf : ∀ i, DefinableBoundedFunction (f i)) :
+    DefinableBoundedFunction (fun v ↦ t.val (f · v) id) := by
+  cases t with
+  | bvar i => exact hf i
+  | fvar c => exact const c
+  | func r ts => exact r.elim
+
+lemma toDefinableFunction [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧]
+    {f : (Fin k → V) → V} (hf : DefinableBoundedFunction f) :
+    𝚺ᴸ₀.DefinableFunction f := by
+  obtain ⟨t, ht⟩ := hf.1.bounded
+  exact hf.2.toDefinableFunction t ht
+
+end DefinableBoundedFunction
+
 end SetTheory
 
 namespace Bounding.HierarchySymbol
@@ -76,68 +137,198 @@ variable {ℌ : ℬ[∈, ℒₛₑₜ].HierarchySymbol}
 
 namespace Definable
 
-/-- refer to the proof of `arithmetic_ball_blt` in Arithmetic/Definability/BoundedDefinable.lean -/
 lemma lévy_ball_mem {k} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
-    ℌ.Definable fun v ↦ ∀ x ∈ f v, P v x := sorry
+    ℌ.Definable fun v ↦ ∀ x ∈ f v, P v x := by
+  obtain ⟨t, hi⟩ := hf.1.bounded
+  have h₁ : ℌ.Definable fun v ↦ ∀ x ∈ t.val v id, x ∈ f v → P v x := by
+    simpa using (Definable.imp (.of_zero hf.2) h).lévy_ball t
+  exact h₁.of_iff fun v ↦ by
+    constructor
+    · intro h x _ hx; exact h x hx
+    · intro h x hx; exact h x (hi v x hx) hx
 
 lemma lévy_bexs_mem {k} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
-    ℌ.Definable fun v ↦ ∃ x ∈ f v, P v x := sorry
+    ℌ.Definable fun v ↦ ∃ x ∈ f v, P v x := by
+  obtain ⟨t, hi⟩ := hf.1.bounded
+  have h₁ : ℌ.Definable fun v ↦ ∃ x ∈ t.val v id, x ∈ f v ∧ P v x := by
+    simpa using (Definable.and (.of_zero hf.2) h).lévy_bexs t
+  exact h₁.of_iff fun v ↦ by
+    constructor
+    · rintro ⟨x, hx, hP⟩; exact ⟨x, hi v x hx, hx, hP⟩
+    · rintro ⟨x, _, hx, hP⟩; exact ⟨x, hx, hP⟩
 
-variable {k} {P : (Fin k → V) → Prop}
-/-- refer to the proof of `arithmetic_bounded_substitution` -/
+variable {k n : ℕ}
+variable [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧]
+
+private lemma bounded_eq {f g : (Fin k → V) → V}
+    (hf : DefinableBoundedFunction f) (hg : DefinableBoundedFunction g) :
+    𝚺ᴸ₀.Definable fun v ↦ f v = g v :=
+  ((lévy_ball_mem (ℌ := 𝚺ᴸ₀) hf (P := fun v x ↦ x ∈ g v) hg.2).and
+    (lévy_ball_mem (ℌ := 𝚺ᴸ₀) hg (P := fun v x ↦ x ∈ f v) hf.2)).of_iff
+    fun _ ↦ subset_antisymm_iff.symm
+
+private lemma bounded_mem {f g : (Fin k → V) → V}
+    (hf : DefinableBoundedFunction f) (hg : DefinableBoundedFunction g) :
+    𝚺ᴸ₀.Definable fun v ↦ f v ∈ g v :=
+  (lévy_bexs_mem (ℌ := 𝚺ᴸ₀) hg (P := fun v x ↦ x = f v)
+    hf.toDefinableFunction).of_iff fun _ ↦ by simp
+
+private lemma bounded_rel {a : ℕ} (r : (ℒₛₑₜ).Rel a)
+    (ts : Fin a → SetTheorySemiterm V n)
+    {f : Fin n → (Fin k → V) → V} (hf : ∀ i, DefinableBoundedFunction (f i)) :
+    𝚺ᴸ₀.Definable fun v ↦ (Semiformula.rel r ts).Eval (f · v) id := by
+  cases r with
+  | eq =>
+    exact bounded_eq (DefinableBoundedFunction.term (ts 0) hf)
+      (DefinableBoundedFunction.term (ts 1) hf)
+  | mem =>
+    exact bounded_mem (DefinableBoundedFunction.term (ts 0) hf)
+      (DefinableBoundedFunction.term (ts 1) hf)
+
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧] in
+private lemma bounded_cons {n} {f : Fin n → (Fin k → V) → V}
+    (hf : ∀ i, DefinableBoundedFunction (f i)) :
+    ∀ i, DefinableBoundedFunction (((· 0) :> fun j w ↦ f j (w ·.succ)) i) := by
+  intro i
+  cases i using Fin.cases with
+  | zero => exact DefinableBoundedFunction.var 0
+  | succ i => exact DefinableBoundedFunction.retraction (hf i) Fin.succ
+
+private lemma zero_eval_cons (φ : SetTheorySemiformula V (n + 1))
+    (f : Fin n → (Fin k → V) → V) (v : Fin (k + 1) → V) :
+    φ.Eval (((· 0) :> fun j w ↦ f j (w ·.succ)) · v) id =
+      φ.Eval (v 0 :> fun i ↦ f i (v ·.succ)) id := by
+  apply congrArg (fun e ↦ φ.Eval e id)
+  ext i
+  cases i using Fin.cases <;> rfl
+
+private lemma zero_substitution_closure {n} {φ : SetTheorySemiformula V n}
+    (hφ : ℬ[∈, ℒₛₑₜ].Closure φ) {f : Fin n → (Fin k → V) → V}
+    (hf : ∀ i, DefinableBoundedFunction (f i)) :
+    𝚺ᴸ₀.Definable fun v ↦ φ.Eval (f · v) id := by
+  induction hφ generalizing k with
+  | verum | falsum => simp
+  | rel r ts => exact bounded_rel r ts hf
+  | nrel r ts =>
+    simpa using (bounded_rel r ts hf).notSigma.of_zero (ℌ := 𝚺ᴸ₀)
+  | and _ _ ihp ihq => exact (ihp hf).and (ihq hf)
+  | or _ _ ihp ihq => exact (ihp hf).or (ihq hf)
+  | @ball n₁ R φ t hR ht hφ ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht
+    simpa using lévy_ball_mem (ℌ := 𝚺ᴸ₀)
+      (DefinableBoundedFunction.term (k := k) (n := n₁) t (f := f) hf)
+      (P := fun v x ↦ φ.Eval (x :> fun i ↦ f i v) id)
+      ((ih (bounded_cons hf)).of_iff fun v ↦
+        iff_of_eq (zero_eval_cons φ f v).symm)
+  | @bexs n₁ R φ t hR ht hφ ih =>
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp ht
+    simpa using lévy_bexs_mem (ℌ := 𝚺ᴸ₀)
+      (DefinableBoundedFunction.term (k := k) (n := n₁) t (f := f) hf)
+      (P := fun v x ↦ φ.Eval (x :> fun i ↦ f i v) id)
+      ((ih (bounded_cons hf)).of_iff fun v ↦
+        iff_of_eq (zero_eval_cons φ f v).symm)
+
+private lemma lévy_zero_substitution {P : (Fin n → V) → Prop}
+    {f : Fin n → (Fin k → V) → V} (hP : 𝚺ᴸ₀.Definable P)
+    (hf : ∀ i, DefinableBoundedFunction (f i)) :
+    𝚺ᴸ₀.Definable fun v ↦ P (f · v) := by
+  obtain ⟨φ, hφ⟩ := hP
+  exact (zero_substitution_closure (Hierarchy.zero_iff_bounded.mp φ.sigma_prop) hf).of_iff
+    fun v ↦ hφ.iff.symm
+
+variable {P : (Fin k → V) → Prop}
 lemma lévy_bounded_substitution {l} {f : Fin k → (Fin l → V) → V}
     (hP : ℌ.Definable P) (hf : ∀ i, DefinableBoundedFunction (f i)) :
-    ℌ.Definable fun z ↦ P (f · z) := sorry
+    ℌ.Definable fun z ↦ P (f · z) := by
+  obtain ⟨Γ, m⟩ := ℌ
+  cases m with
+  | zero =>
+    exact .of_zero <| lévy_zero_substitution (.of_zero hP) hf
+  | succ m => exact hP.substitution fun i ↦ .of_zero (hf i).toDefinableFunction
 
 lemma lévy_bounded_comp₁ {k} {P : V → Prop} {f : (Fin k → V) → V}
     [hP : ℌ.DefinablePred P]
     (hf : DefinableBoundedFunction f) :
-    ℌ.Definable fun v ↦ P (f v) := sorry
+    ℌ.Definable fun v ↦ P (f v) :=
+  hP.lévy_bounded_substitution (f := ![f]) (by simp [*])
 
 lemma lévy_bounded_comp₂ {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V}
     [hR : ℌ.DefinableRel R]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂) :
-    ℌ.Definable fun v ↦ R (f₁ v) (f₂ v) := sorry
+    ℌ.Definable fun v ↦ R (f₁ v) (f₂ v) :=
+  hR.lévy_bounded_substitution (f := ![f₁, f₂])
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma lévy_bounded_comp₃ {k} {R : V → V → V → Prop}
     {f₁ f₂ f₃ : (Fin k → V) → V}
     [hR : ℌ.DefinableRel₃ R]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) :
-    ℌ.Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) := sorry
+    ℌ.Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
+  hR.lévy_bounded_substitution (f := ![f₁, f₂, f₃])
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma lévy_bounded_comp₄ {k} {R : V → V → V → V → Prop}
     {f₁ f₂ f₃ f₄ : (Fin k → V) → V} [hR : ℌ.DefinableRel₄ R]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) (hf₄ : DefinableBoundedFunction f₄) :
-    ℌ.Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) := sorry
+    ℌ.Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
+  hR.lévy_bounded_substitution (f := ![f₁, f₂, f₃, f₄])
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 end Definable
 
 variable {k l : ℕ}
+variable [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧]
 
 lemma DefinableFunction.lévy_bounded_comp {k} {F : (Fin l → V) → V}
     {f : Fin l → (Fin k → V) → V}
     (hF : ℌ.DefinableFunction F) (hf : ∀ i, DefinableBoundedFunction (f i)) :
-    ℌ.DefinableFunction (fun v ↦ F (f · v)) := sorry
+    ℌ.DefinableFunction (fun v ↦ F (f · v)) := by
+  simpa using
+    hF.lévy_bounded_substitution
+      (f := (· 0) :> fun i w ↦ f i (w ·.succ)) <| by
+    intro i
+    cases i using Fin.cases with
+    | zero => simp
+    | succ i => simpa using DefinableBoundedFunction.retraction (hf i) Fin.succ
 
 lemma DefinableFunction₁.lévy_bounded_comp {k} {F : V → V} {f : (Fin k → V) → V}
     (hF : ℌ.DefinableFunction₁ F) (hf : DefinableBoundedFunction f) :
-    ℌ.DefinableFunction (fun v ↦ F (f v)) := sorry
+    ℌ.DefinableFunction (fun v ↦ F (f v)) :=
+  DefinableFunction.lévy_bounded_comp hF (f := ![f]) (by simp [*])
 
 lemma DefinableFunction₂.lévy_bounded_comp {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
     (hF : ℌ.DefinableFunction₂ F)
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂) :
-    ℌ.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v)) := sorry
+    ℌ.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v)) :=
+  DefinableFunction.lévy_bounded_comp hF (f := ![f₁, f₂])
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma DefinableFunction₃.lévy_bounded_comp {k} {F : V → V → V → V}
     {f₁ f₂ f₃ : (Fin k → V) → V}
     (hF : ℌ.DefinableFunction₃ F)
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) :
-    ℌ.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) := sorry
+    ℌ.DefinableFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
+  DefinableFunction.lévy_bounded_comp hF (f := ![f₁, f₂, f₃])
+    (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
+
+lemma ExtDefinedFunction.lévy_bounded_comp {F : (Fin l → V) → V}
+    {f : Fin l → (Fin k → V) → V}
+    (hF : ℌ.ExtDefinedFunction F) (hf : ∀ i, DefinableBoundedFunction (f i)) :
+    ℌ.ExtDefinedFunction (fun v ↦ F (f · v)) := by
+  simpa using
+    hF.lévy_bounded_substitution
+      (f := (· 0) :> fun i w ↦ f i (w ·.succ)) <| by
+    intro i
+    cases i using Fin.cases with
+    | zero => simp
+    | succ i => simpa using DefinableBoundedFunction.retraction (hf i) Fin.succ
 
 end Bounding.HierarchySymbol
 
@@ -145,34 +336,45 @@ namespace SetTheory
 
 open Bounding.HierarchySymbol
 
+variable [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧]
+
 lemma DefinableBoundedFunction₁.comp {k} {F : V → V} {f : (Fin k → V) → V}
     (hF : DefinableBoundedFunction₁ F) (hf : DefinableBoundedFunction f) :
-    DefinableBoundedFunction (fun v ↦ F (f v)) := sorry
+    DefinableBoundedFunction (fun v ↦ F (f v)) := by
+  have hs : ∀ i, DefinableBoundedFunction (![f] i) := by
+    simp [hf]
+  exact ⟨hF.1.comp (fun i ↦ (hs i).1), hF.2.lévy_bounded_comp hs⟩
 
 lemma DefinableBoundedFunction₂.comp {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
     (hF : DefinableBoundedFunction₂ F)
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂) :
-    DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v)) := sorry
+    DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v)) := by
+  have hs : ∀ i, DefinableBoundedFunction (![f₁, f₂] i) := by
+    simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂]
+  exact ⟨hF.1.comp (fun i ↦ (hs i).1), hF.2.lévy_bounded_comp hs⟩
 
 lemma DefinableBoundedFunction₃.comp {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
     (hF : DefinableBoundedFunction₃ F)
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) :
-    DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) := sorry
+    DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) := by
+  have hs : ∀ i, DefinableBoundedFunction (![f₁, f₂, f₃] i) := by
+    simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃]
+  exact ⟨hF.1.comp (fun i ↦ (hs i).1), hF.2.lévy_bounded_comp hs⟩
 
 lemma DefinableBoundedFunction.comp₁ {k} {F : V → V} {f : (Fin k → V) → V}
-    [hFb : Bounded₁ F] [hFd : 𝚺ᴸ₀.DefinableFunction₁ F]
+    [hFb : Bounded₁ F] [hFd : 𝚺ᴸ₀.ExtDefinedFunction₁ F]
     (hf : DefinableBoundedFunction f) :
     DefinableBoundedFunction (fun v ↦ F (f v)) := DefinableBoundedFunction₁.comp ⟨hFb, hFd⟩ hf
 
 lemma DefinableBoundedFunction.comp₂ {k} {F : V → V → V} {f₁ f₂ : (Fin k → V) → V}
-    [hFb : Bounded₂ F] [hFd : 𝚺ᴸ₀.DefinableFunction₂ F]
+    [hFb : Bounded₂ F] [hFd : 𝚺ᴸ₀.ExtDefinedFunction₂ F]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂) :
     DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v)) :=
   DefinableBoundedFunction₂.comp ⟨hFb, hFd⟩ hf₁ hf₂
 
 lemma DefinableBoundedFunction.comp₃ {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
-    [hFb : Bounded₃ F] [hFd : 𝚺ᴸ₀.DefinableFunction₃ F]
+    [hFb : Bounded₃ F] [hFd : 𝚺ᴸ₀.ExtDefinedFunction₃ F]
     (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
     (hf₃ : DefinableBoundedFunction f₃) :
     DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
@@ -197,7 +399,10 @@ attribute [aesop 8 (rule_sets := [Definability]) safe]
 
 section test
 
-example (c : V) : DefinableBoundedFunction₂ (fun x y : V ↦ x) := by definability
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧] in
+example (c : V) : DefinableBoundedFunction (fun _ : Fin 0 → V ↦ c) := by definability
+
+example : DefinableBoundedFunction₂ (fun x _ : V ↦ x) := by definability
 
 example {ex : V → V} [h : 𝚫ᴸ₁.DefinableFunction₁ ex] :
     𝚺ᴸ₁.DefinableRel (fun x y : V ↦ ∃ z, x ∈ y ↔ ex (ex (ex (ex x))) = z) := by
