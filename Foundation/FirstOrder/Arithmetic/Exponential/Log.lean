@@ -234,13 +234,6 @@ lemma lt_exponential_log_self {a b : V} (h : Exponential (log a) b) : a < 2 * b 
   rcases log_pos pos with ⟨_, _, H, _⟩; rcases H.uniq h
   assumption
 
-lemma lt_exp_len_self {a b : V} (h : Exponential ‖a‖ b) : a < b := by
-  rcases Arithmetic.zero_le a with (rfl | pos)
-  · simp at h; simp [h]
-  have : Exponential (log a + 1) b := by simpa [length_of_pos pos] using h
-  rcases Exponential.exponential_succ.mp this with ⟨b, rfl, H⟩
-  exact lt_exponential_log_self H
-
 lemma le_iff_le_log_of_exp {x y a : V} (H : Exponential x y) (pos : 0 < a) : y ≤ a ↔ x ≤ log a :=
   ⟨by rcases H.log_eq_of_exp; exact log_monotone,
    fun h ↦ by
@@ -367,13 +360,6 @@ instance bexp_definable : 𝚺ᴬ₀-Function₂[V] bexp := bexp_defined.to_defi
 
 instance : Bounded₂ (bexp : V → V → V) := ⟨#0, fun _ ↦ by simp⟩
 
-lemma bexp_monotone_iff {a i j : V} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexp a i < bexp a j ↔ i < j :=
-  Iff.symm <| Exponential.monotone_iff (by simp [hi]) (by simp [hj])
-
-lemma bexp_monotone_le_iff {a i j : V} (hi : i < ‖a‖) (hj : j < ‖a‖) :
-    bexp a i ≤ bexp a j ↔ i ≤ j :=
-  Iff.symm <| Exponential.monotone_le_iff (by simp [hi]) (by simp [hj])
-
 lemma bexp_eq_of_lt_length {i a a' : V} (ha : i < ‖a‖) (ha' : i < ‖a'‖) : bexp a i = bexp a' i := by
   have H : Exponential i (bexp a i) := by simp [ha]
   have H' : Exponential i (bexp a' i) := by simp [ha']
@@ -385,7 +371,8 @@ lemma bexp_eq_of_lt_length {i a a' : V} (ha : i < ‖a‖) (ha' : i < ‖a'‖) 
 
 @[simp] lemma bexp_pos {a x : V} (h : x < ‖a‖) : 0 < bexp a x := (exp_bexp_of_lt h).range_pos
 
-lemma lt_bexp_len {a x : V} (h : ‖x‖ < ‖a‖) : x < bexp a ‖x‖ := lt_exp_len_self (exp_bexp_of_lt h)
+lemma lt_bexp_len {a x : V} (h : ‖x‖ < ‖a‖) : x < bexp a ‖x‖ :=
+  lt_exponential_length (exp_bexp_of_lt h)
 
 lemma bexp_eq_of_exp {a x y : V} (h : x < ‖a‖) (H : Exponential x y) : bexp a x = y :=
   (exp_bexp_of_lt h).uniq H
@@ -394,7 +381,7 @@ lemma log_bexp {a x : V} (h : x < ‖a‖) : log (bexp a x) = x :=
   Exponential.log_eq_of_exp (exp_bexp_of_lt h)
 
 lemma len_bexp {a x : V} (h : x < ‖a‖) : ‖bexp a x‖ = x + 1 := by
-  rw [length_of_pos (bexp_pos h), log_bexp h]
+  rw [length_of_pos (bexp_pos h), Exponential.log_eq_of_exp (exp_bexp_of_lt h)]
 
 @[simp] lemma bexp_zero_zero : bexp (0 : V) 0 = 0 := bexp_eq_zero_of_le (by simp)
 

@@ -58,7 +58,7 @@ lemma FirstOrder.Arithmetic.dense (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.
   intro σ con
   have : 𝗜𝚺₁ ⪯ T := inferInstance
   have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans this
-      (Axiomatized.le_of_subset (Set.subset_insert _ _))
+      (WeakerThan.ofSubset (Set.subset_insert _ _))
   simpa using! Arithmetic.incomplete_GR (insert σ T)
 
 instance (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where

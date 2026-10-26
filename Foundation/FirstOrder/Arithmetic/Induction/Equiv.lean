@@ -237,7 +237,7 @@ theorem IPi_equiv_IBroadPi (s : ℕ) : 𝗜𝚷 s ≊ 𝗜𝚷⁺ s :=
 
 theorem ISigma_equiv_IPi (s : ℕ) : 𝗜𝚺 s ≊ 𝗜𝚷 s :=
   ((ISigma_equiv_IBroadSigma s).trans (IBroadSigma_equiv_IBroadPi s)).trans
-    (IPi_equiv_IBroadPi s).symm
+    (InductionOnPrenexHierarchy_equiv_InductionOnHierarchy 𝚷 s).symm
 
 instance models_InductionOnPrenexHierarchy_of_models_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 𝚺 s] :
     V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s :=

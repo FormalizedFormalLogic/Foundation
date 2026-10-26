@@ -305,7 +305,7 @@ omit [DecidableEq F] in
 lemma CDisj₂Disj₂_of_subset {Γ Δ : List F} (h : ∀ φ ∈ Γ, φ ∈ Δ) : 𝓢 ⊢ ⋁Γ 🡒 ⋁Δ := by
   match Δ with
   | [] =>
-    have : Γ = [] := List.iff_nil_forall.mpr h;
+    have : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr fun a ha ↦ by simpa using h a ha;
     subst this;
     simp;
   | [φ] =>
@@ -402,7 +402,7 @@ lemma CFConjFDisj_of_A (hφψ : φ ⋎ ψ ∈ Γ) (hφ : φ ∈ Δ) (hψ : ψ �
   apply C_trans (ψ := Finset.disj {φ, ψ});
   · apply C_trans (ψ := Finset.conj {φ ⋎ ψ}) ?_;
     · apply FConj_DT.mpr;
-      suffices ↑{φ ⋎ ψ} *⊢[𝓢] [φ, ψ].disj₂ by simpa using EConj₂FConj_doubleton.mp this;
+      suffices ↑{φ ⋎ ψ} *⊢[𝓢] [φ, ψ].disj₂ by simpa using (iff_of_E EDisj₂FDisj_doubleton).mp this;
       apply Context.by_axm;
       simp;
     · apply CFConjFConj_of_subset;

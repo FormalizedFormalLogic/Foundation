@@ -404,15 +404,9 @@ Homomorphisms commute with `k`-ary disjunctions (vector version).
     (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
   induction n <;> simp [*, conj]
 
-lemma hom_conj₂ {F : Type*} {n : ℕ} [FunLike F α β] [LogicalConnective.HomClass F α β]
-    (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
-
 @[simp] lemma hom_disj {F : Type*} {n : ℕ} [FunLike F α β] [LogicalConnective.HomClass F α β]
     (f : F) (v : Fin n → α) : f (disj v) = disj (f ∘ v) := by
   induction n <;> simp [*, disj]
-
-lemma hom_disj' {F : Type*} {n : ℕ} [FunLike F α β] [LogicalConnective.HomClass F α β]
-    (f : F) (v : Fin n → α) : f (disj v) = disj fun i => f (v i) := hom_disj f v
 
 end Matrix
 

@@ -202,7 +202,7 @@ lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
    by rintro ⟨s, Hs, h⟩
       rcases c.result_spec v u with ⟨s', Hs', hu, h'⟩
       exact Eq.symm <| Hs'.unique Hs
-        (by simpa [←hu, succ_le_iff_lt] using Hs.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
+        (by simpa [←hu, succ_le_iff_lt] using Hs.seq.lt_lh_iff.mpr (mem_domain_iff.mpr ⟨_, h⟩))
         (by simp [←hu]) h' h⟩
 
 set_option linter.flexible false in

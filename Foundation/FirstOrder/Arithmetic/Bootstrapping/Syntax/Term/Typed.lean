@@ -325,9 +325,11 @@ lemma nth_fvarVec (k : V) : ∀ i < k, (fvarVec k).[i] = ^&i := by
   case zero => simp
   case succ k ih =>
     intro i hi
-    rcases (lt_succ_iff_le.mp hi).lt_or_eq with hlt | rfl
+    rcases (lt_succ_iff_le.mp hi).lt_or_eq with hlt | heq
     · rw [fvarVec_succ, concat_nth_lt _ _ (by simpa using hlt)]; exact ih i hlt
-    · rw [fvarVec_succ, concat_nth_len' _ _ (by simp)]
+    · rw [fvarVec_succ, heq]
+      have := concat_nth_len (fvarVec k) (^&k)
+      rwa [len_fvarVec] at this
 
 lemma fvarVec_val_eq (m : ℕ) :
     fvarVec ((m : ℕ) : V)

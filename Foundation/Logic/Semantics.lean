@@ -299,8 +299,6 @@ end Semantics
 /-- A cumulative sequence of sets. -/
 def Cumulative (T : ℕ → Set F) : Prop := ∀ s, T s ⊆ T (s + 1)
 
-namespace Cumulative
-
 lemma subset_of_le {T : ℕ → Set F} (H : Cumulative T)
     {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) : T s₁ ⊆ T s₂ := by
   suffices ∀ s d, T s ⊆ T (s + d) by
@@ -309,6 +307,8 @@ lemma subset_of_le {T : ℕ → Set F} (H : Cumulative T)
   induction d with
   | zero => simp
   | succ d ih => simpa only [Nat.add_succ, add_zero] using subset_trans ih (H (s + d))
+
+namespace Cumulative
 
 lemma finset_mem {T : ℕ → Set F}
     (H : Cumulative T) {u : Finset F} (hu : ↑u ⊆ ⋃ s, T s) : ∃ s, ↑u ⊆ T s := by
@@ -323,8 +323,8 @@ lemma finset_mem {T : ℕ → Set F}
     rcases this with ⟨s', hs'⟩
     exact ⟨max s s', by
       simpa using Set.insert_subset
-        (subset_of_le H (Nat.le_max_right s s') hs')
-        (subset_trans hs (subset_of_le H <| Nat.le_max_left s s'))⟩
+        (monotone_nat_of_le_succ H (Nat.le_max_right s s') hs')
+        (subset_trans hs (monotone_nat_of_le_succ H <| Nat.le_max_left s s'))⟩
 
 end Cumulative
 

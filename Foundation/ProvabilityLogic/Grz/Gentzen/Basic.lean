@@ -43,8 +43,6 @@ variable {Γ Γ' Δ Δ' : FormulaFinset α} {A : Formula α} {S : Sequent α}
 lemma union (A) (hΓ : A ∈ Γ := by grind) (hΔ : A ∈ Δ := by grind) : ⊢ᴳ[𝐆𝐫𝐳] Γ ⟹ Δ :=
   wkR (wkL (axm A) (by simpa)) (by simpa)
 
-lemma union' (A) (hΓ : A ∈ S.ant) (hΔ : A ∈ S.suc) : ⊢ᴳ[𝐆𝐫𝐳] S := union A hΓ hΔ
-
 lemma botL_mem (h : ⊥ ∈ Γ := by grind) : ⊢ᴳ[𝐆𝐫𝐳] Γ ⟹ Δ := wkR (wkL botL (by simpa)) (by simp)
 
 lemma wk (h : ⊢ᴳ[𝐆𝐫𝐳] Γ ⟹ Δ) (hΓ : Γ ⊆ Γ') (hΔ : Δ ⊆ Δ') : ⊢ᴳ[𝐆𝐫𝐳] Γ' ⟹ Δ' := wkR (wkL h hΓ) hΔ

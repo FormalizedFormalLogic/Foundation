@@ -115,7 +115,8 @@ theorem provability_TFAE : [
   tfae_have 3 → 2 := fun h ↦ Gentzen.complete fun M _ x _ ↦ ⟨A, by simp, h M x⟩;
   tfae_have 2 → 1 := fun h ↦ by simpa using of_gentzen h ⨀ (by simp [Finset.conj]);
   tfae_have 3 → 5 := fun h _ _ M _ _ ↦ h M.toModel M.root;
-  tfae_have 5 → 4 := fun h _ _ M _ ↦ RootedModel.unravelling.forces_root_iff.mp <| h M.unravelling;
+  tfae_have 5 → 4 := fun h _ _ M _ ↦
+    RootedModel.unravelling.tipMap.forces_iff.mp <| h M.unravelling;
   tfae_have 4 → 3 := fun h _ _ M _ x ↦ Model.forces_cone.mp <| h (M.cone x);
   tfae_finish;
 

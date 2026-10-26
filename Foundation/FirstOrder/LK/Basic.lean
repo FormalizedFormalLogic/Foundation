@@ -294,7 +294,7 @@ private lemma map_rewriteMap_eq_shifts (Δ : LK.Sequent L) (h : ∀ φ ∈ Δ, �
       (fun x ↦ if x = m then 0 else x + 1) ▹ φ) = Δ⁺ := by
   apply Multiset.map_congr rfl
   intro φ hp
-  exact Semiformula.rew_eq_of_funEqOn₀
+  exact Semiformula.rew_eq_of_funEqOn (fun x ↦ Fin.elim0 x)
     (by intro x hx; simp [ne_of_mem_of_not_mem hx (h φ hp)])
 
 def generalizeByNewVar {φ : Semiproposition L 1} (hp : ¬φ.FVar? m)
@@ -432,12 +432,9 @@ instance : Entailment.DeductiveExplosion (Theory L) where
     exact ((OneSidedLK.removeBot db).weakening (φ := Rewriting.emb φ)).cast (by
       simp [LK.Sequent.embed, add_comm, Multiset.map_tilde_comm])
 
-lemma weakerThan_of_le {T U : Theory L} (h : T ⊆ U) : T ⪯ U :=
-  Entailment.Axiomatized.weakerThanOfSubset h
+instance (T U : Theory L) : T ⪯ T ∪ U := Entailment.WeakerThan.ofSubset Set.subset_union_left
 
-instance (T U : Theory L) : T ⪯ T ∪ U := weakerThan_of_le (by simp)
-
-instance (T U : Theory L) : U ⪯ T ∪ U := weakerThan_of_le (by simp)
+instance (T U : Theory L) : U ⪯ T ∪ U := Entailment.WeakerThan.ofSubset Set.subset_union_right
 
 lemma provable_iff :
     T ⊢ φ ↔ ∃ Γ : Multiset (Sentence L), (∀ ψ ∈ Γ, ψ ∈ T) ∧
@@ -494,7 +491,7 @@ lemma specialize {T : Theory L} (φ : Semisentence L 1) (t : ClosedTerm L) :
   let φt : Sentence L := Semiformula.subst φ ![t]
   have d : ⊢ᴸᴷ¹ ⦃(φt : Proposition L)⦄ +
       ⦃(∼(φ : Semiproposition L 1))/[Rew.emb t]⦄ := by
-    simpa [φt, Semiformula.coe_subst_eq_subst_coe₁] using
+    simpa [φt, Rewriting.emb_subst_eq_subst_coe₁] using
       LK.Derivation.eta (φt : Proposition L)
   exact (LK.Derivation.or (Γ := 0) (φ := ∃¹ ∼(φ : Semiproposition L 1))
     (ψ := (φt : Proposition L)) (LK.Derivation.cast (LK.Derivation.exs

@@ -329,8 +329,6 @@ lemma numeral_eq_natCast_app : (n : ℕ) → (ORingStructure.numeral n : M) = n
 lemma numeral_eq_natCast : (ORingStructure.numeral : ℕ → M) = Nat.cast := by
   ext x; exact numeral_eq_natCast_app x
 
-lemma not_neg (x : M) : ¬x < 0 := by simp
-
 lemma eq_succ_of_pos {x : M} (h : 0 < x) : ∃ y, x = y + 1 := by
   rcases le_iff_exists_add.mp (one_le_of_zero_lt x h) with ⟨y, rfl⟩
   exact ⟨y, add_comm 1 y⟩
@@ -479,8 +477,6 @@ lemma two_mul_two_eq_four : 2 * 2 = (4 : M) := by
 lemma two_pow_two_eq_four : 2 ^ 2 = (4 : M) := by
   simp [sq, two_mul_two_eq_four]
 
-lemma two_pos : (0 : M) < 2 := by exact _root_.two_pos
-
 @[simp] lemma le_mul_self (a : M) : a ≤ a * a := by
   have : 0 ≤ a := Arithmetic.zero_le a
   rcases this with (rfl | pos) <;> simp [*, ←pos_iff_one_le]
@@ -500,9 +496,6 @@ lemma le_mul_of_pos_left (h : 0 < b) : a ≤ b * a :=
   le_mul_of_one_le_left (by simp) (pos_iff_one_le.mp h)
 
 @[simp] lemma le_two_mul_left : a ≤ 2 * a := le_mul_of_pos_left (by simp)
-
-lemma lt_mul_of_pos_of_one_lt_right (pos : 0 < a) (h : 1 < b) : a < a * b :=
-  _root_.lt_mul_of_one_lt_right pos h
 
 lemma lt_mul_of_pos_of_one_lt_left (pos : 0 < a) (h : 1 < b) : a < b * a :=
   _root_.lt_mul_of_one_lt_left pos h
@@ -568,8 +561,6 @@ lemma two_mul_add_one_lt_two_mul_of_lt (h : a < b) : 2 * a + 1 < 2 * b := calc
 @[simp] lemma le_add_add_left (a b c : M) : a ≤ a + b + c := by simp [add_assoc]
 
 @[simp] lemma le_add_add_right (a b c : M) : b ≤ a + b + c := by simp [add_right_comm a b c]
-
-lemma add_le_cancel (a : M) : AddLECancellable a := by intro b c; simp
 
 open FirstOrder FirstOrder.Semiterm
 

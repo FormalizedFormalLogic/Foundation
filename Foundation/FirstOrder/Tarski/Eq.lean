@@ -164,11 +164,6 @@ lemma eval_mk {n : ℕ} {bv fv} {φ : Semiformula L ξ n} :
   case _ => simp [*]
   case _ => simp [*]
 
-lemma evalf_mk {fv} {φ : Formula L ξ} :
-    φ.Evalf (M := QuotEq L M) (⟦fv ·⟧) ↔ φ.Evalf fv := by
-  have h := eval_mk (bv := ![]) (fv := fv) (φ := φ)
-  simp only [Matrix.empty_eq] at h; exact h
-
 lemma models_iff {σ : Sentence L} : (QuotEq L M)↓[L] ⊧ σ ↔ M↓[L] ⊧ σ := by
   have h := eval_mk (M := M) (ξ := Empty) (φ := σ) (bv := ![]) (fv := Empty.elim)
   simp only [Empty.eq_elim, Matrix.empty_eq] at h; exact h

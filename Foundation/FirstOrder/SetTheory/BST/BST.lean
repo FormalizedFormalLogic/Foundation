@@ -50,12 +50,6 @@ lemma SSubset.iff {x y : V} : x ⊊ y ↔ x ⊆ y ∧ ∃ z ∈ y, z ∉ x := by
     rintro rfl
     contradiction
 
-lemma SSubset.exists_not_mem {x y : V} (hxy : x ⊊ y) : ∃ z ∈ y, z ∉ x := (SSubset.iff.mp hxy).2
-
-lemma SSubset.of_subset_of_not_mem_of_mem {x y z : V} (ss : x ⊆ y) (hzx : z ∉ x) (hzy : z ∈ y) :
-    x ⊊ y :=
-  SSubset.iff.mpr ⟨ss, z, hzy, hzx⟩
-
 /-! ## Axiom of empty set -/
 
 lemma empty_exists : ∃ e : V, IsEmpty e := by

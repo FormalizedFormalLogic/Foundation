@@ -148,11 +148,8 @@ abbrev logic (H : Hilbert α) : Logic α where
 
 variable {H : Hilbert α} {φ : Formula α}
 
-lemma mem_logic_of_provable (h : H ⊢ φ) : φ ∈ H.logic := by exact h
-lemma provable_of_mem_logic (h : φ ∈ H.logic) : H ⊢ φ := by exact h
-
 @[grind =]
-lemma iff_mem_logic_provable : H ⊢ φ ↔ φ ∈ H.logic := ⟨mem_logic_of_provable, provable_of_mem_logic⟩
+lemma iff_mem_logic_provable : H ⊢ φ ↔ φ ∈ H.logic := Iff.rfl
 
 end Hilbert
 

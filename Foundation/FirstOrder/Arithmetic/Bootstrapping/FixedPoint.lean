@@ -234,7 +234,9 @@ theorem multidiagonal (θ : Fin k → ArithmeticSemisentence k) :
       simpa [models_iff, Function.comp_def, Matrix.empty_eq]
     let t : Fin k → V := fun i ↦ ⌜multidiag (θ i)⌝
     have ht : ∀ i, substNumerals (t i) t = ⌜multifixedpoint θ i⌝ := by
-      intro i; simp [t, multifixedpoint, substNumerals_app_quote_quote]
+      intro i
+      simpa [t, multifixedpoint, Sentence.coe_quote_eq_quote] using
+        substNumerals_app_quote (V := V) (multidiag (θ i)) (fun j ↦ ⌜multidiag (θ j)⌝)
     calc
       V ⊧/![] (multifixedpoint θ i)
         ↔ V ⊧/t (multidiag (θ i))                   := by

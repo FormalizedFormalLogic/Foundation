@@ -226,7 +226,7 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
         have : T ⊢ “∀ m x, x < m + 1 ↔ x = m ∨ x < m” :=
           complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
             have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
-            simp [models_iff, Arithmetic.lt_succ_iff_eq_or_succ]
+            simp [models_iff, Arithmetic.lt_succ_iff_le, le_iff_eq_or_lt]
         simpa using internal_provable_of_outer_provable (V := V) this
       simpa using TProof.specialize₂! this t 𝕹(m + 1)
     cl_prover [ih, this]

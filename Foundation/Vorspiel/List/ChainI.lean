@@ -164,7 +164,7 @@ lemma prefix_suffix {a b : α} {l : List α} : ChainI R a b l → [a] <+: l ∧ 
   | x :: y :: l₁ =>
     rintro ⟨⟩;
     case cons z hR h =>
-      simpa using List.suffix_cons_of h.prefix_suffix.2;
+      simpa using h.prefix_suffix.2.trans (List.suffix_cons _ _);
 
 end ChainI
 

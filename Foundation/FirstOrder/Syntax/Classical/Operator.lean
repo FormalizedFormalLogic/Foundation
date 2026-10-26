@@ -219,7 +219,7 @@ end npow
     simp [positive_operator_iff, operator_comp, npow_zero]
   case succ k n =>
     simp [positive_operator_iff, operator_comp, npow_succ, Mul.term_eq,
-      bv_func, Fin.forall_fin_iff_zero_and_forall_succ, bvar]
+      bv_func, Fin.forall_fin_succ, bvar]
     tauto
 
 namespace GödelNumber
@@ -509,7 +509,7 @@ lemma eq_equal_iff [L.Eq] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ�
     case neg => simp [Operator.operator, Operator.Eq.sentence_eq, hr]
     rcases hr
     simp [Operator.operator, Operator.Eq.sentence_eq,
-      funext_iff, Fin.forall_fin_iff_zero_and_forall_succ]
+      funext_iff, Fin.forall_fin_succ]
   | .nrel _ _ => simp [Operator.operator, Operator.Eq.sentence_eq]
   |         ⊤ => simp [Operator.operator, Operator.Eq.sentence_eq]
   |         ⊥ => simp [Operator.operator, Operator.Eq.sentence_eq]
@@ -530,7 +530,7 @@ lemma eq_lt_iff [L.LT] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n
     case neg => simp [Operator.operator, Operator.LT.sentence_eq, hr]
     rcases hr
     simp [Operator.operator, Operator.LT.sentence_eq,
-      funext_iff, Fin.forall_fin_iff_zero_and_forall_succ]
+      funext_iff, Fin.forall_fin_succ]
   | .nrel _ _ => simp [Operator.operator, Operator.LT.sentence_eq]
   |         ⊤ => simp [Operator.operator, Operator.LT.sentence_eq]
   |         ⊥ => simp [Operator.operator, Operator.LT.sentence_eq]
@@ -551,7 +551,7 @@ lemma eq_mem_iff [L.Mem] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂
     case neg => simp [Operator.operator, Operator.Mem.sentence_eq, hr]
     rcases hr
     simp [Operator.operator, Operator.Mem.sentence_eq,
-      funext_iff, Fin.forall_fin_iff_zero_and_forall_succ]
+      funext_iff, Fin.forall_fin_succ]
   | .nrel _ _ => simp [Operator.operator, Operator.Mem.sentence_eq]
   |         ⊤ => simp [Operator.operator, Operator.Mem.sentence_eq]
   |         ⊥ => simp [Operator.operator, Operator.Mem.sentence_eq]

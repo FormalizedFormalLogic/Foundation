@@ -15,24 +15,16 @@ def toQList {u : Level} {α : Q(Type u)} : List Q($α) → Q(List $α)
   |     [] => q([])
   | a :: v => q($a :: $(toQList v))
 
-variable {α : Type*}
-
-lemma List.mem_of_eq {a b : α} {l : List α} (h : a = b) : a ∈ b :: l := by simp [h]
-
-lemma List.mem_of_mem {a b : α} {l : List α} (h : a ∈ l) : a ∈ b :: l := by simp [h]
-
-lemma List.mem_singleton_of_eq (a b : α) (h : a = b) : a ∈ [b] := by simp [h]
-
 def memQList? {u : Level} {α : Q(Type u)} (a : Q($α)) :
     (l : List Q($α)) → MetaM <| Option Q($a ∈ $(toQList l))
   |     [] => return none
   | b :: l => do
     if (← isDefEq (← whnf a) (← whnf b)) then
       let e : Q($a = $b) := rflQ a
-      return some q(List.mem_of_eq $e)
+      return some q(List.mem_cons.mpr (Or.inl $e))
     else
       let some h ← memQList? a l | return none
-      return some q(List.mem_of_mem $h)
+      return some q(List.mem_cons_of_mem $b $h)
 
 def memQList?' (a : Expr) (l : List Expr) : MetaM (Option Expr) := do
   let ⟨u, _, a⟩ ← inferTypeQ' a

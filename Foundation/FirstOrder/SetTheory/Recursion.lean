@@ -348,7 +348,7 @@ lemma replAttemptOrEmpty_aux
     · obtain ⟨γ, hγβ, hγ⟩ := h
       refine And.intro ?_ ?_
       · use γ
-        exact And.intro (IsTransitive.mem_trans IsOrdinal.toIsTransitive hγβ hβα) hγ
+        exact And.intro (hα.toIsTransitive.transitive β hβα γ hγβ) hγ
       · exact ⟨γ, hγβ, F (attemptOrEmpty F γ), hγ⟩
   refine And.intro ?_ ?_
   · exact seq_replAttemptOrEmpty F hF α
@@ -410,7 +410,8 @@ lemma attemptOrEmpty_eq_replAttemptOrEmpty
     (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
     attemptOrEmpty F α = replAttemptOrEmpty F hF α := by
   have h₁ : IsAttempt F (attemptOrEmpty F α) ∧ lh (attemptOrEmpty F α) = α :=
-    ⟨isAttempt_attemptOrEmpty F hF α, lh_attemptOrEmpty_eq F hF α⟩
+    ⟨isAttempt_attemptOrEmpty_of_exists F α (attempt_function_exists F hF α),
+      lh_attemptOrEmpty_eq F hF α⟩
   have h₂ := replAttemptOrEmpty_aux F hF α
   have : IsFunction (attemptOrEmpty F α) := h₁.1.1.IsFunction
   have : IsFunction (replAttemptOrEmpty F hF α) := h₂.1.IsFunction

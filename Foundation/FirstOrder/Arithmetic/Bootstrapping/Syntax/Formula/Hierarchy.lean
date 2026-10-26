@@ -544,8 +544,8 @@ private lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
       · exact (ihs (∀¹ φ) (by rwa [Semiformula.quote_all])).accum Γ;
       · exact (ih hφ).all;
       · obtain ⟨u, χ, rfl⟩ := exists_ball_of_quote_eq ht e;
-        exact Bounding.Hierarchy.arithmetic_ball (Rew.positive_iff.mpr ⟨u, rfl⟩)
-          (Bounding.Hierarchy.imp_iff.mp (ih hφ)).2;
+        exact Bounding.Hierarchy.ball (R := Semiformula.Operator.LT.lt) (by rfl)
+          (Rew.positive_iff.mpr ⟨u, rfl⟩) (Bounding.Hierarchy.imp_iff.mp (ih hφ)).2;
     | hexs φ ih =>
       intro h;
       rw [Semiformula.quote_ex] at h;
@@ -553,8 +553,8 @@ private lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
       · exact (ihs (∃¹ φ) (by rwa [Semiformula.quote_ex])).accum Γ;
       · exact (ih hφ).exs;
       · obtain ⟨u, χ, rfl⟩ := exists_bex_of_quote_eq ht e;
-        exact Bounding.Hierarchy.arithmetic_bexs (Rew.positive_iff.mpr ⟨u, rfl⟩)
-          (Bounding.Hierarchy.and_iff.mp (ih hφ)).2;
+        exact Bounding.Hierarchy.bexs (R := Semiformula.Operator.LT.lt) (by rfl)
+          (Rew.positive_iff.mpr ⟨u, rfl⟩) (Bounding.Hierarchy.and_iff.mp (ih hφ)).2;
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 

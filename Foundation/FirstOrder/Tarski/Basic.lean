@@ -268,14 +268,8 @@ lemma Eval.of_eq {b e' : Fin n → M} {f f' : ξ → M}
 @[simp] lemma eval_rel {r : L.Rel k} {v} :
     Eval b f (rel r v) ↔ s.rel r (Semiterm.val b f ∘ v) := of_eq rfl
 
-lemma eval_rel' {r : L.Rel k} {v} :
-    Eval b f (rel r v) ↔ s.rel r fun i ↦ (v i).val b f := of_eq rfl
-
 @[simp] lemma eval_nrel {r : L.Rel k} {v} :
     Eval b f (nrel r v) ↔ ¬s.rel r (Semiterm.val b f ∘ v) := of_eq rfl
-
-lemma eval_nrel' {r : L.Rel k} {v} :
-    Eval b f (nrel r v) ↔ ¬s.rel r fun i ↦ (v i).val b f := of_eq rfl
 
 @[simp] lemma eval_all {φ : Semiformula L ξ (n + 1)} :
     Eval b f (∀¹ φ) ↔ ∀ x : M, Eval (x :> b) f φ := of_eq rfl
@@ -583,18 +577,12 @@ lemma models_iff_proposition {φ : Proposition L} : M↓[L] ⊧ φ.univCl ↔ �
 
 lemma models_theory_iff : M↓[L] ⊧* T ↔ ∀ φ ∈ T, M↓[L] ⊧ φ := Semantics.modelsSet_iff
 
-lemma models_of_mem {T : Theory L} [M↓[L] ⊧* T] {φ} (h : φ ∈ T) : M↓[L] ⊧ φ :=
-  Semantics.ModelsSet.models _ h
-
 variable (M T)
 
 lemma Theory.models [M↓[L] ⊧* T] {σ} (hσ : σ ∈ T) : M↓[L] ⊧ σ :=
   Semantics.modelsSet_iff.mp inferInstance hσ
 
 variable {M T}
-
-lemma models_iff_models {φ} :
-    M↓[L] ⊧ φ ↔ s.toStruc ⊧ φ := of_eq rfl
 
 lemma consequence_iff {φ} :
     T ⊨[Tarski.Struc.{v, u} L] φ ↔
@@ -699,9 +687,6 @@ variable {M}
 
 lemma models_of_ss {T U : Theory L} (h : M↓[L] ⊧* U) (ss : T ⊆ U) : M↓[L] ⊧* T :=
   Semantics.ModelsSet.of_subset h ss
-
-lemma models_of_le {T₁ T₂ : Theory L} (h : M↓[L] ⊧* T₂) (le : T₁ ⊆ T₂) : M↓[L] ⊧* T₁ :=
-  Semantics.ModelsSet.of_subset h le
 
 instance models_theory_sup (T₁ T₂ : Theory L) [M↓[L] ⊧* T₁] [M↓[L] ⊧* T₂] : M↓[L] ⊧* T₁ ∪ T₂ := by
   simp only [Semantics.ModelsSet.union_iff]

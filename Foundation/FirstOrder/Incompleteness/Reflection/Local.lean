@@ -98,7 +98,7 @@ variable [T.SoundOnHierarchy 𝚺 1]
   · exact by_axm (by simp [hψT]);
   obtain ⟨σ, hσt, rfl⟩ : ψ ∈ T.standardProvability.refl '' t := ht ▸ ⟨hψ, hψT⟩;
   by_cases hσ : T ⊢ σ;
-  · have h₁ : adjoin (∼D) T ⊢ σ := Axiomatized.to_adjoin hσ;
+  · have h₁ : adjoin (∼D) T ⊢ σ := Axiomatized.weakening (by simp) hσ;
     cl_prover [h₁];
   · have h₁ : adjoin (∼D) T ⊢ T.standardProvability σ 🡒 D :=
       right_Fdisj'_intro _ _ (Finset.mem_filter.mpr ⟨htfin.mem_toFinset.mpr hσt, hσ⟩);

@@ -915,9 +915,6 @@ lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] :=
   case nil => simp
   case adjoin x v ih => simp [ih]
 
-lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := by
-  rcases hi; simp
-
 end concat
 
 /-!

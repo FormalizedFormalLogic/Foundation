@@ -94,7 +94,7 @@ namespace Arithmetic
 @[grind =]
 lemma height_eq_top_of_sigma1_sound (T : ArithmeticTheory) [T.Δ₁]
     [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.height = ⊤ :=
-  T.standardProvability.height_eq_top_of_sound_and_consistent
+  ProvabilityAbstraction.Provability.height_eq_top_iff.mpr iIncon_unprovable_of_sigma1_sound
 
 section
 

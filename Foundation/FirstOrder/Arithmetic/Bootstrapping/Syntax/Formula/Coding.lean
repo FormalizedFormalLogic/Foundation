@@ -204,7 +204,8 @@ lemma typed_quote_inj {n} {φ₁ φ₂ : Semiproposition L n} :
     | ∀¹ _, ∃¹ _
   | ∃¹ _, rel _ _ | ∃¹ _, nrel _ _ | ∃¹ _, ⊤ | ∃¹ _, ⊥ | ∃¹ _, _ ⋏ _ | ∃¹ _, _ ⋎ _
     | ∃¹ _, ∀¹ _ => by
-    simp [ne_iff_val_ne, qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
+    simp [Bootstrapping.Semiformula.ext_iff, qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll,
+      qqExs]
 
 @[simp] lemma typed_quote_inj_iff {φ₁ φ₂ : Semiproposition L n} :
     (⌜φ₁⌝ : Bootstrapping.Semiformula V L n) = ⌜φ₂⌝ ↔ φ₁ = φ₂ :=

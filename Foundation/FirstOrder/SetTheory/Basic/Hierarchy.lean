@@ -60,29 +60,6 @@ lemma setTheory_sigma₁_induction
       simpa [Semiformula.Operator.mem_def] using hMem (n + 1) #0 (Rew.bShift t))
     n φ
 
-lemma setTheory_sigma₁_induction' {n φ}
-    (hp : ℬ[∈, ℒₛₑₜ].Hierarchy 𝚺 1 φ)
-    {P : (n : ℕ) → SetTheorySemiformula ξ n → Prop}
-    (hVerum : ∀ n, P n ⊤)
-    (hFalsum : ∀ n, P n ⊥)
-    (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))
-    (hNEQ : ∀ n t₁ t₂, P n (.nrel Language.Eq.eq ![t₁, t₂]))
-    (hMem : ∀ n t₁ t₂, P n (.rel Language.Mem.mem ![t₁, t₂]))
-    (hNMem : ∀ n t₁ t₂, P n (.nrel Language.Mem.mem ![t₁, t₂]))
-    (hAnd : ∀ n φ ψ,
-      ℬ[∈, ℒₛₑₜ].Hierarchy 𝚺 1 φ → ℬ[∈, ℒₛₑₜ].Hierarchy 𝚺 1 ψ →
-      P n φ → P n ψ → P n (φ ⋏ ψ))
-    (hOr : ∀ n φ ψ,
-      ℬ[∈, ℒₛₑₜ].Hierarchy 𝚺 1 φ → ℬ[∈, ℒₛₑₜ].Hierarchy 𝚺 1 ψ →
-      P n φ → P n ψ → P n (φ ⋎ ψ))
-    (hBall : ∀ n t φ, ℬ[∈, ℒₛₑₜ].Hierarchy 𝚺 1 φ → P (n + 1) φ →
-      P n (∀¹[“#0 ∈ !!(Rew.bShift t)”] φ))
-    (hExs : ∀ n φ, ℬ[∈, ℒₛₑₜ].Hierarchy 𝚺 1 φ →
-      P (n + 1) φ → P n (∃¹ φ)) :
-    P n φ :=
-  setTheory_sigma₁_induction hVerum hFalsum hEQ hNEQ hMem hNMem hAnd hOr hBall hExs
-    n φ hp
-
 end FFL.FirstOrder.Bounding.Hierarchy
 
 end

@@ -282,9 +282,6 @@ lemma monotone {p : ℙ} : p ⊩ᶜ φ → ∀ q ≤ p, q ⊩ᶜ φ := WeaklyFor
 lemma generic {p : ℙ} :
     (∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ) → p ⊩ᶜ φ := WeaklyForces.generic
 
-lemma generic_iff {p : ℙ} :
-    p ⊩ᶜ φ ↔ ∀ q ≤ p, ∃ r ≤ q, r ⊩ᶜ φ := WeaklyForces.generic_iff
-
 instance : WeakForcingRelation.ClassicalKripke ℙ (· ≥ ·) where
   verum w := by simp [weaklyForces₀_def]
   falsum w := by simp [weaklyForces₀_def]

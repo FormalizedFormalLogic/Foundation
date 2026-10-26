@@ -63,7 +63,8 @@ lemma smash_exists_unique (x y : V) : ∃! z, Exponential (‖x‖ * ‖y‖) z 
   · simpa [mul_comm] using this y x (le_of_not_ge le)
   rcases exists_exponential_sq_length y with ⟨z, h⟩
   have : ‖x‖ * ‖y‖ < ‖z‖ :=
-    lt_of_le_of_lt (by simpa [sq] using mul_le_mul_right (length_monotone le)) h.lt_length
+    lt_of_le_of_lt (by simpa [sq] using mul_le_mul_right (length_monotone le))
+      ((le_iff_lt_length_of_exp h).mp le_rfl)
   have : Exponential (‖x‖ * ‖y‖) (bexp z (‖x‖ * ‖y‖)) :=
     exp_bexp_of_lt (a := z) (x := ‖x‖ * ‖y‖) this
   exact ExistsUnique.intro (bexp z (‖x‖ * ‖y‖)) this (fun z' H' ↦ H'.uniq this)

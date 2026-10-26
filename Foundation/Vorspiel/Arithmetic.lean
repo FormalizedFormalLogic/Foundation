@@ -186,10 +186,6 @@ lemma comp₂ (f : ℕ → ℕ →. ℕ) (hf : @ArithPart₁ 2 fun v => f (v.get
           funext j; cases j using Fin.cases <;> simp
         simp [this])
 
-lemma rfind' {n} {f : ℕ → List.Vector ℕ n → ℕ}
-    (h : Arithmetic₁ (n := n + 1) (fun v => f v.head v.tail)) :
-    ArithPart₁ (fun v => Nat.rfind fun n => Part.some (f n v = 0)) := rfind h
-
 lemma rfind'₁ {n} (i : Fin n) {f : ℕ → ℕ → ℕ}
     (h : Arithmetic₁ (n := 2) (fun v => f (v.get 0) (v.get 1))) :
     ArithPart₁ (fun v => Nat.rfind fun n => Part.some (f n (v.get i) = 0)) :=
@@ -284,9 +280,6 @@ lemma if_pos {n} {f g h : List.Vector ℕ n → ℕ} (hf : Arithmetic₁ f) (hg 
       ((mul 0 1).comp₂ _ ((inv 0).comp₁ _ hf) hh)
   exact this.of_eq <| by
     intro i; by_cases hf : f i = 0 <;> simp [hf, zero_lt_iff]
-
-lemma to_arith₁ {n : ℕ} {f : List.Vector ℕ n → ℕ} (h : Arithmetic₁ f) :
-    @ArithPart₁ n (fun x => f x) := h
 
 end Nat.Arithmetic₁
 

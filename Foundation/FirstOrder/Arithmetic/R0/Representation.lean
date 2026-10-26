@@ -208,8 +208,6 @@ private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) :
 @[simp] lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (code c) :=
   (codeAux_sigma_one c).rew _
 
-@[simp] lemma natCast_nat' (n : ℕ) : Nat.cast n = n := by rfl
-
 private lemma models_codeAux {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ)
     (v : Fin k → ℕ) :
     (codeAux c).Evalf (y :> v) ↔ f (List.Vector.ofFn v) = Part.some y := by

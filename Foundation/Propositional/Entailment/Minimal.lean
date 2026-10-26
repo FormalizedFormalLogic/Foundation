@@ -1263,8 +1263,7 @@ lemma CFConjFConj_of_subset {Γ Δ : Finset F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.con
   apply right_Fconj_intro;
   simp only [Finset.mem_union];
   rintro φ (hφ | hφ);
-  · apply left_K_intro_left
-    apply left_Fconj_intro hφ;
+  · exact C_trans CKK (left_K_intro_right (left_Fconj_intro hφ));
   · apply left_K_intro_right;
     apply left_Fconj_intro hφ;
 

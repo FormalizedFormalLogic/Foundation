@@ -221,7 +221,7 @@ omit [DecidableEq F] in
 open scoped Classical in
 lemma CNC_of_C_of_CN (hpq : 𝓢 ⊢ φ 🡒 ψ) (hpnr : 𝓢 ⊢ φ 🡒 ∼ξ) : 𝓢 ⊢ φ 🡒 ∼(ψ 🡒 ξ) :=
   deduct' <| (contra <| CCAN) ⨀
-    (NA_of_KNN <| K_intro (dni' <| of' hpq ⨀ FiniteContext.by_axm)
+    (CKNNNA ⨀ K_intro (dni ⨀ (of' hpq ⨀ FiniteContext.by_axm))
       (of' hpnr ⨀ FiniteContext.by_axm))
 
 omit [DecidableEq F] in
@@ -278,7 +278,7 @@ lemma provable_iff_inconsistent_adjoin {φ : F} :
   constructor
   · intro h
     apply inconsistent_of_provable_of_unprovable (φ := φ)
-    · exact Axiomatized.to_adjoin h
+    · exact Axiomatized.weakening (by simp) h
     · exact Axiomatized.adjoin _ _
   · intro h
     have : 𝓢 ⊢ ∼φ 🡒 ⊥ := Deduction.ofInsert (h _)

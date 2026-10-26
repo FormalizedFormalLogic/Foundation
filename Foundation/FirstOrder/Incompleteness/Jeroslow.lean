@@ -78,15 +78,6 @@ private lemma jeroslow'_sigmaOne : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (T.jeroslo
 
 lemma def_jeroslow [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 (T.refutable)/[⌜T.jeroslow⌝] := diagonal _
 
-private lemma def_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow' 🡘 (T.refutable)/[⌜T.jeroslow⌝] := by simp;
-
-private lemma provable_E_jeroslow_jeroslow' [𝗜𝚺₁ ⪯ U] : U ⊢ T.jeroslow 🡘 T.jeroslow' :=
-  Entailment.E_trans def_jeroslow def_jeroslow'
-
-private lemma iff_provable_jeroslow_provable_jeroslow' [𝗜𝚺₁ ⪯ U] :
-    U ⊢ (T.jeroslow) ↔ U ⊢ (T.jeroslow') := by
-  apply Entailment.iff_of_E provable_E_jeroslow_jeroslow';
-
 open FFL.Entailment in
 instance [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     T.standardRefutability.SoundOn (ProvabilityAbstraction.jeroslow T.standardRefutability) := by
@@ -110,7 +101,7 @@ instance [𝗜𝚺₁ ⪯ T] :
   constructor;
   rw [jeroslow_eq_standard];
   exact provable_sigma_one_complete_of_E jeroslow'_sigmaOne
-    (Entailment.E_symm provable_E_jeroslow_jeroslow');
+    (Entailment.E_symm def_jeroslow);
 
 end
 

@@ -37,7 +37,7 @@ lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) :
     simp [starUnbounded, models_iff, this]
   have : ℕ↓[ℒₒᵣ⋆] ⊧* trueArithWithStarUnbounded c := by
     simpa [trueArithWithStarUnbounded, models_iff] using this
-  exact satisfiable_intro ℕ this
+  exact ⟨ℕ↓[ℒₒᵣ⋆], this⟩
 
 lemma satisfiable_union_trueArithWithStarUnbounded :
     Satisfiable (⋃ c, trueArithWithStarUnbounded c) :=

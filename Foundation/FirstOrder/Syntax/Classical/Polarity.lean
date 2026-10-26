@@ -108,10 +108,6 @@ abbrev Negative (φ : Semiformula L ξ n) : Prop := φ.polarity = false
 @[simp] lemma neg_negative_iff {n} (φ : Semiformula L ξ n) : (∼φ).Negative ↔ φ.Positive := by
   simp [Positive, Negative]
 
-lemma Positive.eq_true {n} {φ : Semiformula L ξ n} (h : φ.Positive) : φ.polarity = true := h
-
-lemma Negative.eq_false {n} {φ : Semiformula L ξ n} (h : φ.Negative) : φ.polarity = false := h
-
 @[simp] lemma polarity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) :
     (ω ▹ φ).polarity = φ.polarity := by
   induction φ using rec' <;> simp [polarity, *]

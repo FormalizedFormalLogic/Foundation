@@ -30,11 +30,11 @@ instance IsTransitive.defined : ℒₛₑₜ-predicate[V] IsTransitive via IsTra
 instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive :=
   IsTransitive.defined.to_definable
 
-namespace IsTransitive
-
 omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
 lemma mem_trans {x y z : V} (H : IsTransitive z) (hxy : x ∈ y) (hyz : y ∈ z) : x ∈ z :=
   H.transitive y hyz x hxy
+
+namespace IsTransitive
 
 @[simp] protected instance empty : IsTransitive (∅ : V) := ⟨fun x ↦ by simp⟩
 
@@ -372,8 +372,6 @@ noncomputable instance : OrderBot (Ordinal V) where
 
 lemma pos_iff_nonempty : ⊥ < α ↔ IsNonempty α.val := IsOrdinal.empty_mem_iff_nonempty
 
-lemma eq_bot_or_pos : α = ⊥ ∨ α > ⊥ := by exact eq_bot_or_bot_lt α
-
 protected noncomputable def succ (α : Ordinal V) : Ordinal V where
   val := succ α
   ordinal := inferInstance
@@ -429,13 +427,10 @@ lemma minimal_lt_of_exists (H : ∃ β < α, P β) : α.minimal P < α :=
 lemma minimal_prop_of_exists (H : ∃ β < α, P β) : P (α.minimal P) :=
   (minimal_prop_of_exists_aux H).2.1
 
-lemma minimal_le_of_exists_aux (H : ∃ β < α, P β) : ∀ ξ < α, P ξ → α.minimal P ≤ ξ :=
-  (minimal_prop_of_exists_aux H).2.2
-
 lemma minimal_le_of_exists (H : ∃ β < α, P β) : ∀ ξ : Ordinal V, P ξ → α.minimal P ≤ ξ := by
   intro ξ Pξ
   rcases show ξ < α ∨ α ≤ ξ from lt_or_ge ξ α with (lt | le)
-  · exact minimal_le_of_exists_aux H ξ lt Pξ
+  · exact (minimal_prop_of_exists_aux H).2.2 ξ lt Pξ
   · calc
       α.minimal P hP ≤ α := le_of_lt <| minimal_lt_of_exists H
       _              ≤ ξ := le

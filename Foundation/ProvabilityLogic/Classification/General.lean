@@ -55,7 +55,7 @@ theorem provabilityLogic_eq_A_or_eq_D_or_eq_S :
     · grind;
     · simp [Logic.weakerThan_antisymm hS <| S_weakerThan_provabilityLogic hT h₂];
 
-lemma provabilityLogic_equiv_A_or_equiv_D_or_equiv_S :
+theorem provabilityLogic_equiv_A_or_equiv_D_or_equiv_S :
     letI L := T.provabilityLogicRelativeTo U (α := α);
     L.trace = .univ → L ⪯ 𝐒 → L ≊ 𝐀 ∨ L ≊ 𝐃 ∨ L ≊ 𝐒 := by
   intro hT hS;
@@ -134,7 +134,7 @@ theorem provabilityLogic_classification :
     · grind [provabilityLogic_eq_GLBeta h];
   · grind [provabilityLogic_eq_GLAlpha hL];
 
-lemma provabilityLogic_classification_equiv :
+theorem provabilityLogic_classification_equiv :
     letI L := T.provabilityLogicRelativeTo U (α := α);
     L ≊ 𝐆𝐋α L.trace ∨
     ∃ hL : L.traceᶜ.Finite, L ≊ 𝐆𝐋β _ hL ∨ L ≊ 𝐃 ∩ 𝐆𝐋β _ hL ∨ L ≊ 𝐒 ∩ 𝐆𝐋β _ hL := by
@@ -210,7 +210,7 @@ theorem provabilityLogic_add_con_eq_A (hC : Consistent (T ∪ U.Con)) :
       (by simp : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 _) h₁).not_con hC;
   · exact A_weakerThan_provabilityLogic_add_con hTU hU;
 
-lemma provabilityLogic_add_con_equiv_A (hC : Consistent (T ∪ U.Con)) :
+theorem provabilityLogic_add_con_equiv_A (hC : Consistent (T ∪ U.Con)) :
     T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) ≊ 𝐀 :=
   Logic.equiv_of_eq <| provabilityLogic_add_con_eq_A hTU hU hC
 
@@ -244,7 +244,7 @@ theorem provabilityLogic_turingOmega_eq_A (hC : Consistent (T ∪ T.Conω)) :
       provable_localReflectionOn_sigma1_of_mem_of_not_A hT hAL hAA).not_con hC;
   · exact A_weakerThan_provabilityLogic hT;
 
-lemma provabilityLogic_turingOmega_equiv_A (hC : Consistent (T ∪ T.Conω)) :
+theorem provabilityLogic_turingOmega_equiv_A (hC : Consistent (T ∪ T.Conω)) :
     T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α) ≊ 𝐀 :=
   Logic.equiv_of_eq <| provabilityLogic_turingOmega_eq_A hC
 
@@ -328,7 +328,7 @@ theorem provabilityLogic_add_localReflectionOn_Sigma_eq_D :
     exact (inconsistent_of_provable_localReflectionOn_union hU e hrfn).not_con hC;
   · exact hD;
 
-lemma provabilityLogic_add_localReflectionOn_Sigma_equiv_D :
+theorem provabilityLogic_add_localReflectionOn_Sigma_equiv_D :
     letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
     Consistent T' → T.provabilityLogicRelativeTo T' (α := α) ≊ 𝐃 :=
   fun hC ↦ Logic.equiv_of_eq <| provabilityLogic_add_localReflectionOn_Sigma_eq_D hC

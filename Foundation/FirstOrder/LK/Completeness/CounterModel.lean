@@ -267,7 +267,7 @@ lemma satisfiable_iff_satisfiable :
   simp [satisfiable_iff_consistent.{u, w}, satisfiable_iff_consistent.{u, u}]
 
 lemma consequence_iff_consequence : T ⊨[Tarski.Struc.{max u w} L] φ ↔ T ⊨ φ := by
-  simp [consequence_iff_unsatisfiable, satisfiable_iff_satisfiable.{u, w}]
+  simp [Semantics.consequence_iff_not_satisfiable, satisfiable_iff_satisfiable.{u, w}]
 
 end Theory
 

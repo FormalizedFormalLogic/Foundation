@@ -231,9 +231,6 @@ lemma mem_product_iff' {x a b : V} : x ∈ a ×ʰᶠ b ↔ π₁ x ∈ a ∧ π�
 @[simp] lemma pair_mem_product_iff {x y a b : V} : ⟪x, y⟫ ∈ a ×ʰᶠ b ↔ x ∈ a ∧ y ∈ b := by
   simp [mem_product_iff']
 
-lemma pair_mem_product {x y a b : V} (hx : x ∈ a) (hy : y ∈ b) : ⟪x, y⟫ ∈ a ×ʰᶠ b := by
-  simpa [mem_product_iff] using ⟨hx, hy⟩
-
 private lemma product_graph {u a b : V} : u = a ×ʰᶠ b ↔
     ∀ x < u + (a + b + 1) ^ 2, (x ∈ u ↔ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫) :=
   ⟨by rintro rfl x _; simp [mem_product_iff], by
@@ -334,9 +331,6 @@ instance domain_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
       (by simp [log_two_mul_add_one_of_pos (pos_of_nonempty hix)]))
 
 instance : Bounded₁ (domain : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp⟩
-
-lemma mem_domain_of_pair_mem {x y s : V} (h : ⟪x, y⟫ ∈ s) : x ∈ domain s :=
-  mem_domain_iff.mpr ⟨y, h⟩
 
 lemma domain_subset_domain_of_subset {s t : V} (h : s ⊆ t) : domain s ⊆ domain t := by
   intro x hx
@@ -491,11 +485,11 @@ lemma IsMapping.union_of_disjoint_domain {m₁ m₂ : V}
       intro y
       rintro (hy | hy)
       · exact h₁.get_uniq hx hy
-      · by_contra; exact Disjoint.not_of_mem hx (mem_domain_of_pair_mem hy) disjoint)
+      · by_contra; exact Disjoint.not_of_mem hx (mem_domain_iff.mpr ⟨_, hy⟩) disjoint)
   · exact ExistsUnique.intro (h₂.get hx) (by simp) (by
       intro y
       rintro (hy | hy)
-      · by_contra; exact Disjoint.not_of_mem hx (mem_domain_of_pair_mem hy) disjoint.symm
+      · by_contra; exact Disjoint.not_of_mem hx (mem_domain_iff.mpr ⟨_, hy⟩) disjoint.symm
       · exact h₂.get_uniq hx hy)
 
 @[simp] lemma IsMapping.singleton (x y : V) : IsMapping ({⟪x, y⟫} : V) := by

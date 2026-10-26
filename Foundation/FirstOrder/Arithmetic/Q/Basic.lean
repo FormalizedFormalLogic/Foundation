@@ -87,10 +87,6 @@ lemma exists_succ_of_ne_zero {a : M} (ha : a ≠ 0) : ∃ b : M, a = b + 1 := by
   have := zero_or_succ (a := a);
   tauto;
 
-lemma exists_succ_of_ne_zero' {a : M} (ha : a ≠ 0) : ∃ b : M, b + 1 = a := by
-  obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero ha;
-  use b;
-
 protected lemma lt_def {a b : M} : a < b ↔ ∃ c : M, a + (c + 1) = b := by
   have := by simpa [models_iff] using Theory.models M _ RobinsonQ.ltDef
   exact this a b
@@ -103,14 +99,12 @@ lemma one_ne_zero : (1 : M) ≠ 0 := by
   apply Arithmetic.add_zero;
 
 @[simp]
-lemma one_add_zero : (1 : M) + 0 = 1 := by simp;
-
-@[simp]
 lemma zero_add_one : (0 : M) + 1 = 1 := by
-  obtain ⟨a, ha⟩ := exists_succ_of_ne_zero' (M := M) one_ne_zero;
+  obtain ⟨a, ha⟩ := exists_succ_of_ne_zero (M := M) one_ne_zero;
+  replace ha := ha.symm;
   convert ha;
   by_contra;
-  obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero' (M := M) (a := a) (by tauto);
+  obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero (M := M) (a := a) (by tauto);
   apply Arithmetic.succ_ne_zero (M := M) (a := (0 + b));
   apply succ_inj;
   calc
@@ -131,7 +125,7 @@ lemma eq_zero_of_eq_add_zero {a b : M} (h : a + b = 0) : a = 0 ∧ b = 0 := by
     · obtain ⟨d, rfl⟩ := exists_succ_of_ne_zero (M := M) hb0;
       rw [Arithmetic.add_succ (a := c + 1) (b := d)];
       apply Arithmetic.succ_ne_zero;
-  · obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero' (M := M) hb;
+  · obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero (M := M) hb;
     rw [Arithmetic.add_succ];
     simp;
 

@@ -22,7 +22,7 @@ instance : 𝗕𝚺 1 ⪯ 𝗜𝚺 1 := BSigma_weakerThan_ISigma (s := 0)
 instance : 𝗕𝚺 2 ⪯ 𝗜𝚺 2 := BSigma_weakerThan_ISigma (s := 1)
 
 instance : 𝗕𝚺 0 ≊ 𝗕𝚺 1 := by
-  rw [BSigmaZero_eq_BPiZero]
+  rw [show 𝗕𝚺 0 = 𝗕𝚷 0 from CollectionOnPrenexHierarchy_zero_eq 𝚺 𝚷]
   exact (BSigma_succ_equiv_BPi (s := 0)).symm
 
 instance : 𝗕𝚺 1 ≊ 𝗕𝚷 0 := BSigma_succ_equiv_BPi (s := 0)

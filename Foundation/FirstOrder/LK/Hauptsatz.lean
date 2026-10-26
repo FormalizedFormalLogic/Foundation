@@ -394,7 +394,7 @@ protected def refl.exs {φ : Semiproposition L 1}
     (d : ∀ x, ⦃φ/[&x]⦄ ⊩ (φ/[&x])ᴺ) : ⦃∃¹ φ⦄ ⊩ (∃¹ φ)ᴺ :=
   implyOf (.atom _) fun q tq f ↦
     let x := LK.Sequent.newVar (∼q + ⦃∀¹ ∼φ⦄)
-    let ih : ⦃φ/[&x]⦄ ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.subst_doubleNegation])
+    let ih : ⦃φ/[&x]⦄ ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.rew_doubleNegation])
     let b : ⦃φ/[&x]⦄ ⊓ q ⊩ ⊥ :=
       let tφ : (∼(⦃φ/[&x]⦄ : LK.Sequent L)).Traversal := .atom _
       (f.allEquiv &x).implyEquiv (⦃φ/[&x]⦄ ⊓ q)

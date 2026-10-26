@@ -138,8 +138,6 @@ instance : Trans (α := S) (β := T) (γ := U) (· ⪯ ·) (· ⪱ ·) (· ⪱ �
 instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ⪱ ·) (· ⪱ ·) where
   trans := StrictlyWeakerThan.trans
 
-lemma weakening (h : 𝓢 ⪯ 𝓣) {φ} : 𝓢 ⊢ φ → 𝓣 ⊢ φ := weakerThan_iff.mp h
-
 lemma StrictlyWeakerThan.of_unprovable_provable {𝓢 : S} {𝓣 : T} [𝓢 ⪯ 𝓣] {φ : F}
     (hS : 𝓢 ⊬ φ) (hT : 𝓣 ⊢ φ) : 𝓢 ⪱ 𝓣 := ⟨inferInstance, fun h ↦ hS (h.wk hT)⟩
 
@@ -214,10 +212,6 @@ class Consistent (𝓢 : S) : Prop where
 
 lemma inconsistent_def {𝓢 : S} :
     Inconsistent 𝓢 ↔ ∀ φ, 𝓢 ⊢ φ := by simp [Inconsistent]
-
-lemma inconsistent_iff_theory_eq {𝓢 : S} :
-    Inconsistent 𝓢 ↔ theory 𝓢 = Set.univ := by
-  simp [Inconsistent, Set.ext_iff, theory]
 
 @[simp] lemma not_inconsistent_iff_consistent {𝓢 : S} :
     ¬Inconsistent 𝓢 ↔ Consistent 𝓢 :=
@@ -352,13 +346,12 @@ lemma axm_subset (𝓢 : S) : AdjunctiveSet.set 𝓢 ⊆ theory 𝓢 := fun _ hp
 
 @[simp] protected lemma adjoin (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢ φ := prfAxm (by simp)
 
-lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening h⟩
-
-abbrev weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening h⟩
-
 theorem to_adjoin {𝓢 : S} : 𝓢 ⊢ ψ → adjoin φ 𝓢 ⊢ ψ := weakening
 
 end Axiomatized
+
+abbrev WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 :=
+  ⟨fun _ ↦ Axiomatized.weakening h⟩
 
 alias by_axm := Axiomatized.by_axm
 
@@ -369,18 +362,15 @@ variable [AdjunctiveSet F S] [AdjunctiveSet F T] [Axiomatized S]
 def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, AdjunctiveSet.Finite 𝓕 ∧ 𝓕 ≊ 𝓢
 
 lemma Consistent.of_subset {𝓢 𝓣 : S} (h𝓢 : Consistent 𝓢) (h : 𝓣 ⊆ 𝓢) : Consistent 𝓣 :=
-  h𝓢.of_le (Axiomatized.le_of_subset h)
+  h𝓢.of_le (WeakerThan.ofSubset h)
 
 lemma Inconsistent.of_supset {𝓢 𝓣 : S} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ⊆ 𝓣) : Inconsistent 𝓣 :=
-  h𝓢.of_ge (Axiomatized.le_of_subset h)
+  h𝓢.of_ge (WeakerThan.ofSubset h)
 
 end axiomatized
 
 abbrev WeakerThan.ofAxm! [AdjunctiveSet F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S}
     (B : 𝓢₂ ⊢* AdjunctiveSet.set 𝓢₁) : 𝓢₁ ⪯ 𝓢₂ := ⟨fun _ b ↦ StrongCut.cut B b⟩
-
-abbrev WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 :=
-  ⟨fun _ ↦ Axiomatized.weakening h⟩
 
 /-! ### Compactness -/
 
@@ -477,8 +467,6 @@ section
 
 variable {𝓢 : S} {T : Set F} [Sound 𝓢 (Semantics.models M T)]
 
-lemma consequence_of_provable {φ : F} : 𝓢 ⊢ φ → T ⊨[M] φ := sound
-
 lemma consistent_of_satisfiable [∀ 𝓜 : M, Semantics.Meaningful 𝓜] :
     Semantics.Satisfiable M T → Entailment.Consistent 𝓢 :=
   fun H ↦ consistent_of_meaningful (Semantics.meaningful_iff_satisfiableSet.mp H)
@@ -509,11 +497,8 @@ section
 
 variable {𝓢 : S} {s : Set F} [Complete 𝓢 (Semantics.models M s)]
 
-lemma provable_of_consequence {φ : F} : s ⊨[M] φ → 𝓢 ⊢ φ := complete
-
 lemma provable_iff_consequence [Sound 𝓢 (Semantics.models M s)] {φ : F} : s ⊨[M] φ ↔ 𝓢 ⊢ φ :=
   ⟨complete, Sound.sound⟩
-
 
 section
 
@@ -535,8 +520,8 @@ end
 
 lemma weakerthan_of_models {𝓣 : S} {t : Set F} [Sound 𝓣 (Semantics.models M t)]
     (H : ∀ 𝓜 : M, 𝓜 ⊧* s → 𝓜 ⊧* t) : 𝓣 ⪯ 𝓢 :=
-  Entailment.weakerThan_iff.mpr <| fun h ↦ provable_of_consequence <|
-    fun 𝓜 h𝓜 ↦ Sound.consequence_of_provable (M := M) (T := t) h (H 𝓜 h𝓜)
+  Entailment.weakerThan_iff.mpr <| fun h ↦ complete (𝓜 := Semantics.models M s) <|
+    fun 𝓜 h𝓜 ↦ Sound.sound (𝓜 := Semantics.models M t) h (H 𝓜 h𝓜)
 
 end
 

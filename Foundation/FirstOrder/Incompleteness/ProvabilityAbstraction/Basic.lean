@@ -129,18 +129,13 @@ variable
   {𝔅 : Provability T₀ T}
   {σ τ : Sentence L}
 
-lemma bew_distribute_imply [𝔅.HBL2] (h : T₀ ⊢ 𝔅 (σ 🡒 τ)) : T₀ ⊢ 𝔅 σ 🡒 𝔅 τ := D2 ⨀ h
-
-instance [𝔅.HBL2] : 𝔅.Mono := ⟨fun h => bew_distribute_imply <| D1 h⟩
+instance [𝔅.HBL2] : 𝔅.Mono := ⟨fun h => D2 ⨀ (D1 h)⟩
 instance [𝔅.HBL2] : 𝔅.Ext := ⟨fun h => E_intro (mono (K_left h)) (mono (K_right h))⟩
 
 lemma bew_distribute_and [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 σ ⋏ 𝔅 τ := by
-  have h₁ : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 σ := bew_distribute_imply <| D1 and₁;
-  have h₂ : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 τ := bew_distribute_imply <| D1 and₂;
+  have h₁ : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 σ := D2 ⨀ (D1 and₁);
+  have h₂ : T₀ ⊢ 𝔅 (σ ⋏ τ) 🡒 𝔅 τ := D2 ⨀ (D1 and₂);
   cl_prover [h₁, h₂];
-
-lemma bew_distribute_and' [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢ 𝔅 (σ ⋏ τ) → T₀ ⊢ 𝔅 σ ⋏ 𝔅 τ :=
-  fun h => bew_distribute_and ⨀ h
 
 lemma bew_collect_and [𝔅.HBL2] [L₀.DecidableEq] [L.DecidableEq] : T₀ ⊢ 𝔅 σ ⋏ 𝔅 τ 🡒 𝔅 (σ ⋏ τ) := by
   have h₁ : T₀ ⊢ 𝔅 σ 🡒 𝔅 (τ 🡒 σ ⋏ τ) := 𝔅.mono <| by cl_prover
@@ -289,8 +284,6 @@ lemma kreisel_spec : T₀ ⊢ (𝐊 σ) 🡘 (𝔅 (𝐊 σ) 🡒 σ) := by
   have := diag (T := T₀) “x. !𝔅.prov x → !σ”
   simpa [kreisel, Provability.pr, Rew.subst_comp_subst, ←TransitiveRewriting.comp_app] using this;
 
-private lemma kreisel_specAux₂ : T₀ ⊢ (𝔅 (𝐊 σ) 🡒 σ) 🡒 (𝐊 σ) := K_right kreisel_spec
-
 variable [𝔅.HBL]
 
 private lemma kreisel_specAux₁ [L.DecidableEq] [T₀ ⪯ T] : T₀ ⊢ 𝔅 (𝐊 σ) 🡒 𝔅 σ :=
@@ -300,13 +293,14 @@ variable [L.DecidableEq] [T₀ ⪯ T]
 
 theorem löb_theorem (H : T ⊢ 𝔅 σ 🡒 σ) : T ⊢ σ := by
   have d₁ : T ⊢ 𝔅 (𝐊 σ) 🡒 σ := C_trans (WeakerThan.pbl kreisel_specAux₁) H;
-  have d₂ : T ⊢ 𝔅 (𝐊 σ)     := WeakerThan.pbl <| D1 <| WeakerThan.pbl kreisel_specAux₂ ⨀ d₁;
+  have d₂ : T ⊢ 𝔅 (𝐊 σ)     := WeakerThan.pbl <| D1 <| WeakerThan.pbl (K_right kreisel_spec) ⨀ d₁;
   exact d₁ ⨀ d₂;
 
 theorem formalized_löb_theorem : T₀ ⊢ 𝔅 (𝔅 σ 🡒 σ) 🡒 𝔅 σ := by
   have h₁ : T₀ ⊢ 𝔅 (𝐊 σ) 🡒 𝔅 σ := kreisel_specAux₁;
   have h₂ : T₀ ⊢ (𝔅 σ 🡒 σ) 🡒 (𝔅 (𝐊 σ) 🡒 σ) := CCC_of_C_left h₁;
-  have h₃ : T ⊢ (𝔅 σ 🡒 σ) 🡒 𝐊 σ := WeakerThan.pbl <| C_trans (CCC_of_C_left h₁) kreisel_specAux₂;
+  have h₃ : T ⊢ (𝔅 σ 🡒 σ) 🡒 𝐊 σ :=
+    WeakerThan.pbl <| C_trans (CCC_of_C_left h₁) (K_right kreisel_spec);
   exact C_trans (D2 ⨀ (D1 h₃)) h₁;
 
 lemma formalized_unprovable_not_con [Consistent T] [𝔅.Kreisel] : T ⊬ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con) := by

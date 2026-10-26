@@ -77,7 +77,7 @@ namespace SaturatedSequent
 variable {BS : Sequent α} {S : SaturatedSequent BS} {A : Formula α}
 
 @[grind .]
-lemma not_mem_both : ¬(A ∈ S.ant ∧ A ∈ S.suc) := fun h ↦ S.unprovable (Gentzen.union' _ h.1 h.2)
+lemma not_mem_both : ¬(A ∈ S.ant ∧ A ∈ S.suc) := fun h ↦ S.unprovable (Gentzen.union _ h.1 h.2)
 
 @[grind .]
 lemma bot_not_mem_ant : ⊥ ∉ S.ant := fun h ↦ S.unprovable (Gentzen.botL_mem h)
@@ -97,7 +97,7 @@ instance : Finite (SaturatedSequent BS) :=
 lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐆𝐋] S₀) (hS₀ : S₀.ant ∪ S₀.suc ⊆ BS.subfmls) :
     ∃ S : SaturatedSequent BS, S₀ ⊆ S.toSequent := by
   obtain ⟨S, h₁, h₂, h₃, h₄, -⟩ := Sequent.exists_saturated
-    ⟨fun h₁ h₂ ↦ Gentzen.union' _ h₁ h₂, Gentzen.impL, Gentzen.impR⟩ h₀ hS₀;
+    ⟨fun h₁ h₂ ↦ Gentzen.union _ h₁ h₂, Gentzen.impL, Gentzen.impR⟩ h₀ hS₀;
   exact ⟨⟨S, h₃, h₄, h₂⟩, h₁⟩
 
 instance [Fact (⊬ᴳ[𝐆𝐋] BS)] : Nonempty (SaturatedSequent BS) :=

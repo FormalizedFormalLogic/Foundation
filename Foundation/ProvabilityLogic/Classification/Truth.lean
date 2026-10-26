@@ -87,7 +87,7 @@ theorem provabilityLogic_TA_eq_GLBeta_iff :
     exact (provabilityLogic_eq_GLBeta hS).trans <| by
       congr 1; exact trace_provabilityLogic_TA_eq_compl_singleton_iff.mpr hn;
 
-lemma provabilityLogic_TA_equiv_GLBeta_iff :
+theorem provabilityLogic_TA_equiv_GLBeta_iff :
     T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐆𝐋β {n}ᶜ (by simp) ↔ T.height = n :=
   Logic.equiv_iff.trans provabilityLogic_TA_eq_GLBeta_iff
 
@@ -106,7 +106,7 @@ theorem provabilityLogic_TA_eq_S_iff :
       Arithmetic.models_standardProvability_iff.mpr <| by_axm hφ;
   · exact fun _ ↦ Logic.S.eq_provabilityLogicRelativeTo_TA.symm;
 
-lemma provabilityLogic_TA_equiv_S_iff :
+theorem provabilityLogic_TA_equiv_S_iff :
     T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐒 ↔ ℕ↓[ℒₒᵣ] ⊧* T :=
   Logic.equiv_iff.trans provabilityLogic_TA_eq_S_iff
 
@@ -133,7 +133,7 @@ theorem provabilityLogic_TA_eq_D_iff :
     · exact h;
     · exact absurd (provabilityLogic_TA_eq_S_iff.mp h) hs;
 
-lemma provabilityLogic_TA_equiv_D_iff :
+theorem provabilityLogic_TA_equiv_D_iff :
     T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐃 ↔
       T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T :=
   Logic.equiv_iff.trans provabilityLogic_TA_eq_D_iff
@@ -159,7 +159,7 @@ theorem provabilityLogic_TA_eq_A_iff :
     · have := provabilityLogic_TA_eq_S_iff.mp h;
       exact (hs₁ inferInstance).elim;
 
-lemma provabilityLogic_TA_equiv_A_iff :
+theorem provabilityLogic_TA_equiv_A_iff :
     T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐀 ↔
       ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ :=
   Logic.equiv_iff.trans provabilityLogic_TA_eq_A_iff
@@ -193,7 +193,7 @@ theorem provabilityLogic_TA_classification : [
       disj 4; exact ⟨n, hn.symm, provabilityLogic_TA_eq_GLBeta_iff.mpr hn.symm⟩;
   all_goals simp +contextual [h₁, h₂];
 
-lemma provabilityLogic_TA_classification_equiv : [
+theorem provabilityLogic_TA_classification_equiv : [
     ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐒,
     T.SoundOnHierarchy 𝚺 1 ∧ ¬ℕ↓[ℒₒᵣ] ⊧* T ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐃,
     ¬T.SoundOnHierarchy 𝚺 1 ∧ T.height = ⊤ ∧ T.provabilityLogicRelativeTo 𝗧𝗔 (α := α) ≊ 𝐀,

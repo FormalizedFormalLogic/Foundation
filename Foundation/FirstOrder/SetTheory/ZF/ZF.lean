@@ -123,11 +123,6 @@ noncomputable def replRelOverSet (X : V) (R : V → V → Prop) (h : ∀ x ∈ X
 
 /-! ## Various lemmas -/
 
-@[simp] lemma replRel_spec {X y : V} {R : V → V → Prop} {h : ∀ x ∈ X, ∃! y, R x y}
-    (hR : ℒₛₑₜ-relation R) :
-    y ∈ replRelOverSet X R h hR ↔ ∃ x ∈ X, R x y :=
-  Classical.choose!_spec (replacement_rel_existsUnique_of_mem_existsUnique X R h hR) y
-
 @[simp] lemma repl_spec {X y : V} {F : V → V} (hF : ℒₛₑₜ-function₁ F) :
     y ∈ repl F hF X ↔ ∃ x ∈ X, y = F x :=
   Classical.choose!_spec (replacement_existsUnique X F hF) y

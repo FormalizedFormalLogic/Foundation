@@ -22,9 +22,6 @@ namespace Nuon
 lemma mul_len_lt_len_smash {i I L : V} (hi : i ≤ ‖I‖) : i * ‖L‖ < ‖I ⨳ L‖ := by
   simpa [length_smash, lt_succ_iff_le] using _root_.mul_le_mul_left hi ‖L‖
 
-lemma mul_len_lt_len_smash' {i K z : V} (hi : i ≤ ‖z‖) : i * ‖‖K‖‖ < ‖z ⨳ ‖K‖‖ := by
-  simpa [length_smash, lt_succ_iff_le] using _root_.mul_le_mul_left hi ‖‖K‖‖
-
 noncomputable def ext (L S i : V) : V := S / bexp S (i * ‖L‖) % (L ⨳ 1)
 
 local notation S "{" L "}[" i "]" => ext L S i
@@ -143,7 +140,7 @@ lemma ext_add₁_pow2 {L i S₁ S₂ p : V} (pp : Pow2 p) (h : (i + 1) * ‖L‖
     _ = (S₁ + bexp (S₁ + S₂ * p) (i * ‖L‖) * (L ⨳ 1 * q * S₂)) /
           bexp (S₁ + S₂ * p) (i * ‖L‖) % L ⨳ 1 := by simp [←mul_assoc, ←hq]
     _ = (S₁ / bexp (S₁ + S₂ * p) (i * ‖L‖) + L ⨳ 1 * q * S₂) % L ⨳ 1 := by
-          rw [div_add_mul_self' _ _ (bexp_pos lt_len)]
+          rw [mul_comm (bexp (S₁ + S₂ * p) (i * ‖L‖)), div_add_mul_self _ _ (bexp_pos lt_len)]
     _ = S₁ / bexp (S₁ + S₂ * p) (i * ‖L‖) % L ⨳ 1 := by simp [mul_assoc]
     _ = S₁{L}[i] := ext_eq_of_ge le_self_add
 
@@ -160,7 +157,7 @@ lemma ext_add₂_bexp {I L i j S₁ S₂ : V} (hij : i + j ≤ ‖I‖) (hS₁ :
   calc
     (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)){L}[i + j]
         = (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)) / bexp (I ⨳ L) ((i + j) * ‖L‖) % (L ⨳ 1) := by
-      rw [ext_eq_smash_of_le hij]
+      rw [ext_eq_of_gt (mul_len_lt_len_smash hij)]
     _ = (S₁ + S₂ * bexp (I ⨳ L) (i * ‖L‖)) / bexp (I ⨳ L) (i * ‖L‖) /
           bexp (I ⨳ L) (j * ‖L‖) % (L ⨳ 1) := by
       simp only [add_mul, ← Arithmetic.div_mul]
@@ -168,7 +165,7 @@ lemma ext_add₂_bexp {I L i j S₁ S₂ : V} (hij : i + j ≤ ‖I‖) (hS₁ :
     _ = S₂ / bexp (I ⨳ L) (j * ‖L‖) % (L ⨳ 1) := by
       congr 2
       rw [div_add_mul_self, div_eq_zero_of_lt] <;> simp [hie.lt_iff_len_le.mpr hS₁, hie.range_pos]
-    _ = S₂{L}[j] := ext_eq_smash_of_le (le_trans le_add_self hij)
+    _ = S₂{L}[j] := ext_eq_of_gt (mul_len_lt_len_smash (le_trans le_add_self hij))
 
 noncomputable def append (I L S i X : V) : V :=
   S % bexp (I ⨳ L) (i * ‖L‖) + X * bexp (I ⨳ L) (i * ‖L‖)
@@ -184,7 +181,7 @@ lemma len_append (I L S : V) {i X} (hi : i ≤ ‖I‖) (hX : 0 < X) :
       (bexp_pow2 <| mul_len_lt_len_smash hi)
       (mod_lt _ <| bexp_pos <| mul_len_lt_len_smash hi)
   _                  = ‖X‖ + i * ‖L‖                                             := by
-    simp [log_bexp (mul_len_lt_len_smash hi)]
+    simp [Exponential.log_eq_of_exp (exp_bexp_of_lt (mul_len_lt_len_smash hi))]
 
 lemma append_lt_smash (I L S : V) {i X} (hi : i < ‖I‖) (hX : ‖X‖ ≤ ‖L‖) :
     append I L S i X < I ⨳ L := by
@@ -492,9 +489,6 @@ lemma len_polyI {A : V} (pos : 0 < A) : ‖polyI A‖ = √‖A‖ + 1 :=
 
 lemma polyI_le {A : V} (pos : 0 < A) : ‖A‖ < ‖polyI A‖ ^ 2 := by simp [len_polyI pos]
 
-lemma two_add_two_eq_four : 2 + 2 = (4 : V) := by
-  simp [←three_add_one_eq_four, ←two_add_one_eq_three, ←one_add_one_eq_two, add_assoc]
-
 lemma four_mul_eq_two_mul_two_mul (a : V) : 4 * a = 2 * (2 * a) := by
   simp [←two_add_two_eq_four, add_mul, two_mul]
 
@@ -608,16 +602,6 @@ def isSeriesDef : 𝚺ᴬ₀.Semisentence 6 := .mkSigma
       ∃ y <⁺ T, !extDef y L T (l + 1) ∧
         !segmentDef U L A (lI * l) lI x y”
 
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] in
-lemma bexs_eq_le_iff {p : V → Prop} {z b : V} :
-    (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
-  ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
-
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] in
-lemma bexs_eq_lt_iff {p : V → Prop} {z b : V} :
-    (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
-  ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
-
 instance isSerieDef_defined :
     𝚺ᴬ₀.Defined (V := V) (fun v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef :=
     .mk fun v ↦ by
@@ -665,8 +649,6 @@ instance nuonAux_defined : 𝚺ᴬ₀-Relation₃ (NuonAux : V → V → V → P
 
 instance nuonAux_definable : 𝚺ᴬ₀-Relation₃ (NuonAux : V → V → V → Prop) :=
   nuonAux_defined.to_definable
-
-instance : Bounded₃ (ext : V → V → V → V) := ⟨#1, fun _ ↦ by simp⟩
 
 @[simp] lemma NuonAux.initial (A : V) : NuonAux A 0 0 := SeriesSegment.initial (by simp [polyU])
 

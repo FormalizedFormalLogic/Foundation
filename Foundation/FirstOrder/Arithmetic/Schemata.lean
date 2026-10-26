@@ -186,11 +186,6 @@ lemma IBroadSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺⁺ s₁
 lemma IBroadSigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺⁺ s₁ ⪯ 𝗜𝚺⁺ s₂ :=
   Entailment.WeakerThan.ofSubset (IBroadSigma_subset_mono h)
 
-lemma IBroadSigma_weakerThan_of_le_trans {T : ArithmeticTheory} {s₁ s₂} (h : s₁ ≤ s₂)
-    (hT : 𝗜𝚺⁺s₂ ⪯ T) :
-    𝗜𝚺⁺ s₁ ⪯ T :=
-  Entailment.WeakerThan.trans (IBroadSigma_weakerThan_of_le h) hT
-
 lemma InductionOnPrenexHierarchy_subset_InductionOnHierarchy {Γ : Polarity} {s : ℕ} :
     𝗜𝗡𝗗 Γ s ⊆ 𝗜𝗡𝗗⁺ Γ s :=
   Set.union_subset_union_right _ (InductionScheme_subset (·.hierarchy))
@@ -211,7 +206,7 @@ lemma ISigmaZero_subset_IBroadSigma {s : ℕ} : 𝗜𝚺₀ ⊆ 𝗜𝚺⁺ s :=
     (InductionScheme_subset fun H ↦ (Bounding.PrenexHierarchy.zero_iff.mp H).of_zero)
 
 lemma IBroadSigmaZero_subset_ISigmaZero : 𝗜𝚺⁺₀ ⊆ 𝗜𝚺₀ :=
-  le_of_eq ISigmaZero_eq_IBroadSigmaZero.symm
+  le_of_eq (InductionOnPrenexHierarchy_zero_eq_InductionOnHierarchy_zero 𝚺 𝚺).symm
 
 end
 
@@ -344,7 +339,7 @@ lemma eq_weakerThan_of_ISigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺s ⪯ T]
 -- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
 lemma eq_weakerThan_of_IBroadSigma {T : ArithmeticTheory} {s : ℕ} [𝗜𝚺⁺s ⪯ T] : 𝗘𝗤 ℒₒᵣ ⪯ T :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺⁺₀)
-    (IBroadSigma_weakerThan_of_le_trans (by omega) ‹𝗜𝚺⁺ s ⪯ T›)
+    (Entailment.WeakerThan.trans (IBroadSigma_weakerThan_of_le (by omega)) ‹𝗜𝚺⁺ s ⪯ T›)
 
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `𝗘𝗤 ℒₒᵣ ⪯ T`, so instance search cannot infer it.
@@ -678,9 +673,6 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ 𝚷 s] : V↓[ℒₒᵣ] ⊧* �
   · exact models_alt 𝚷 s
   · infer_instance
 
-lemma mod_IBroadSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s₁ :=
-  models_of_ss inferInstance (IBroadSigma_subset_mono h)
-
 instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
   models_of_ss inferInstance (ISigmaZero_subset_IBroadSigma (s := 1))
 
@@ -789,10 +781,6 @@ variable {Γ Γ' : Polarity} {s s' : ℕ}
 
 lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⪯ 𝗜𝚺 s₂ :=
   weakerThan_of_models.{0} _ _ fun _ _ _ ↦ mod_ISigma_of_le h
-
-lemma ISigma_weakerThan_of_le_trans {T : ArithmeticTheory} {s₁ s₂} (h : s₁ ≤ s₂) (hT : 𝗜𝚺s₂ ⪯ T) :
-    𝗜𝚺 s₁ ⪯ T :=
-  Entailment.WeakerThan.trans (ISigma_weakerThan_of_le h) hT
 
 lemma InductionOnPrenexHierarchy_weakerThan_of_lt (h : s < s') : 𝗜𝗡𝗗 Γ s ⪯ 𝗜𝗡𝗗 Γ' s' :=
   weakerThan_of_models.{0} _ _ fun _ _ _ ↦ models_InductionOnPrenexHierarchy_of_lt (Γ' := Γ') h

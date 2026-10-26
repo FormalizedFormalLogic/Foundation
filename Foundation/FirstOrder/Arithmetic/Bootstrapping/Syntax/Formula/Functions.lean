@@ -861,7 +861,7 @@ variable {L}
 @[simp] lemma IsSemiformula.free1 {p : V} (hp : IsSemiformula L 2 p) :
     IsSemiformula L 1 (free1 L p) :=
   IsSemiformula.subst (m := 1) hp.shift
-      (SemitermVec.adjoin (SemitermVec.adjoin (IsSemitermVec.empty _) (by simp)) (by simp))
+      (IsSemitermVec.adjoin (IsSemitermVec.adjoin (IsSemitermVec.empty _) (by simp)) (by simp))
 
 end free1
 
@@ -1043,7 +1043,7 @@ lemma fomulaComplexity_free1 {p : V} (hp : IsSemiformula L 2 p) :
   · rw [formulaComplexity_shift hp.isUFormula]
   · apply IsSemitermVec.adjoin ?_ (by simp)
     apply IsSemitermVec.adjoin ?_ (by simp)
-    exact IsSemitermVec.nil _
+    exact IsSemitermVec.empty _
 
 end complexity
 

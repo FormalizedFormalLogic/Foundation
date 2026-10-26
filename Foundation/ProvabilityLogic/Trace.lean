@@ -353,7 +353,7 @@ theorem provabilityLogic_eq_GLAlpha
     rintro _ ⟨n, hn, rfl⟩;
     exact alpha_mem_provabilityLogic_of_mem_trace hn
 
-lemma provabilityLogic_equiv_GLAlpha
+theorem provabilityLogic_equiv_GLAlpha
     (h : (T.provabilityLogicRelativeTo U (α := α)).traceᶜ.Infinite) :
     T.provabilityLogicRelativeTo U (α := α) ≊
       𝐆𝐋α (T.provabilityLogicRelativeTo U (α := α)).trace :=
@@ -404,7 +404,7 @@ theorem provabilityLogic_eq_GLBeta (h : ¬T.provabilityLogicRelativeTo U (α := 
       Finset.forall_mem_image.mpr fun _ hi ↦
         alpha_mem_provabilityLogic_of_mem_trace (Finset.mem_filter.mp hi).2⟩;
 
-lemma provabilityLogic_equiv_GLBeta (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
+theorem provabilityLogic_equiv_GLBeta (h : ¬T.provabilityLogicRelativeTo U (α := α) ⪯ 𝐒) :
     T.provabilityLogicRelativeTo U (α := α) ≊
       𝐆𝐋β (T.provabilityLogicRelativeTo U).trace (provabilityLogic_trace_compl_finite h) :=
   Logic.equiv_iff.mpr <| provabilityLogic_eq_GLBeta h
