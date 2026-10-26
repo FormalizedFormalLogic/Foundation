@@ -55,6 +55,12 @@ theorem provabilityLogic_eq_A_or_eq_D_or_eq_S :
     · grind;
     · simp [Logic.weakerThan_antisymm hS <| S_weakerThan_provabilityLogic hT h₂];
 
+theorem provabilityLogic_equiv_A_or_equiv_D_or_equiv_S :
+    letI L := T.provabilityLogicRelativeTo U (α := α);
+    L.trace = .univ → L ⪯ 𝐒 → L ≊ 𝐀 ∨ L ≊ 𝐃 ∨ L ≊ 𝐒 := by
+  intro hT hS;
+  simpa only [Logic.equiv_iff] using provabilityLogic_eq_A_or_eq_D_or_eq_S hT hS
+
 lemma imp_mem_provabilityLogic_of_mem_add_localReflectionOn (hN : N.Finite)
     (h : A ∈ T.provabilityLogicRelativeTo (U ∪ 𝗥𝗳𝗻[(T.standardProvability^[·] ⊥) '' N] T)) :
     (⩕ n ∈ hN.toFinset, alpha n : LetterlessFormula).lift 🡒 A ∈ T.provabilityLogicRelativeTo U := by
@@ -128,6 +134,12 @@ theorem provabilityLogic_classification :
     · grind [provabilityLogic_eq_GLBeta h];
   · grind [provabilityLogic_eq_GLAlpha hL];
 
+theorem provabilityLogic_classification_equiv :
+    letI L := T.provabilityLogicRelativeTo U (α := α);
+    L ≊ 𝐆𝐋α L.trace ∨
+    ∃ hL : L.traceᶜ.Finite, L ≊ 𝐆𝐋β _ hL ∨ L ≊ 𝐃 ∩ 𝐆𝐋β _ hL ∨ L ≊ 𝐒 ∩ 𝐆𝐋β _ hL := by
+  simpa only [Logic.equiv_iff] using provabilityLogic_classification
+
 lemma trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1
     (h : U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) :
     (T.provabilityLogicRelativeTo U (α := α)).trace = .univ := by
@@ -198,6 +210,10 @@ theorem provabilityLogic_add_con_eq_A (hC : Consistent (T ∪ U.Con)) :
       (by simp : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 _) h₁).not_con hC;
   · exact A_weakerThan_provabilityLogic_add_con hTU hU;
 
+theorem provabilityLogic_add_con_equiv_A (hC : Consistent (T ∪ U.Con)) :
+    T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) ≊ 𝐀 :=
+  Logic.equiv_of_eq <| provabilityLogic_add_con_eq_A hTU hU hC
+
 end
 
 section
@@ -227,6 +243,10 @@ theorem provabilityLogic_turingOmega_eq_A (hC : Consistent (T ∪ T.Conω)) :
     exact (inconsistent_of_provable_localReflectionOn_union (n := 0) hU e <|
       provable_localReflectionOn_sigma1_of_mem_of_not_A hT hAL hAA).not_con hC;
   · exact A_weakerThan_provabilityLogic hT;
+
+theorem provabilityLogic_turingOmega_equiv_A (hC : Consistent (T ∪ T.Conω)) :
+    T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α) ≊ 𝐀 :=
+  Logic.equiv_of_eq <| provabilityLogic_turingOmega_eq_A hC
 
 lemma provabilityLogic_turingOmega_eq_A_of_sigma1Sound [T.SoundOnHierarchy 𝚺 1] :
     T.provabilityLogicRelativeTo (T ∪ T.Conω) (α := α) = 𝐀 := by
@@ -307,6 +327,11 @@ theorem provabilityLogic_add_localReflectionOn_Sigma_eq_D :
         (trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1 hR) hA hAD;
     exact (inconsistent_of_provable_localReflectionOn_union hU e hrfn).not_con hC;
   · exact hD;
+
+theorem provabilityLogic_add_localReflectionOn_Sigma_equiv_D :
+    letI T' := T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n] T;
+    Consistent T' → T.provabilityLogicRelativeTo T' (α := α) ≊ 𝐃 :=
+  fun hC ↦ Logic.equiv_of_eq <| provabilityLogic_add_localReflectionOn_Sigma_eq_D hC
 
 lemma provabilityLogic_add_localReflectionOn_Sigma_eq_D_of_sigma1Sound
     [T.SoundOnHierarchy 𝚺 1] :

@@ -346,6 +346,8 @@ lemma axm_subset (𝓢 : S) : AdjunctiveSet.set 𝓢 ⊆ theory 𝓢 := fun _ hp
 
 @[simp] protected lemma adjoin (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢ φ := prfAxm (by simp)
 
+theorem to_adjoin {𝓢 : S} : 𝓢 ⊢ ψ → adjoin φ 𝓢 ⊢ ψ := weakening
+
 end Axiomatized
 
 abbrev WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 :=
@@ -447,8 +449,14 @@ section
 
 variable {𝓢 𝓣 : S} {𝓜 𝓝 : M} [Sound 𝓢 𝓜] [Sound 𝓣 𝓝]
 
+lemma not_provable_of_countermodel {φ : F} (hp : 𝓜 ⊭ φ) : 𝓢 ⊬ φ :=
+  fun b ↦ hp (Sound.sound b)
+
 lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → Entailment.Consistent 𝓢 :=
   fun H ↦ ⟨fun h ↦ by rcases H with ⟨φ, hf⟩; exact hf (Sound.sound (h φ))⟩
+
+lemma consistent_of_model [LogicalNeutral F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] :
+    Entailment.Consistent 𝓢 := consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
 lemma modelsSet_of_prfSet {T : Set F} (b : 𝓢 ⊢* T) : 𝓜 ⊧* T :=
   ⟨fun _ hf ↦ sound (b hf)⟩
@@ -473,6 +481,10 @@ section
 
 variable {𝓢 : S} {𝓜 : M} [Complete 𝓢 𝓜]
 
+lemma exists_countermodel_of_not_provable {φ : F} (h : 𝓢 ⊬ φ) : 𝓜 ⊭ φ := by
+  contrapose! h;
+  simpa using Complete.complete (𝓢 := 𝓢) h;
+
 lemma meaningful_of_consistent : Entailment.Consistent 𝓢 → Semantics.Meaningful 𝓜 := by
   contrapose
   suffices (∀ (φ : F), 𝓜 ⊧ φ) → Entailment.Inconsistent 𝓢 by
@@ -484,6 +496,9 @@ end
 section
 
 variable {𝓢 : S} {s : Set F} [Complete 𝓢 (Semantics.models M s)]
+
+lemma provable_iff_consequence [Sound 𝓢 (Semantics.models M s)] {φ : F} : s ⊨[M] φ ↔ 𝓢 ⊢ φ :=
+  ⟨complete, Sound.sound⟩
 
 section
 

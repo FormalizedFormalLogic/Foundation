@@ -504,6 +504,12 @@ lemma mul_le_mul_left (h : b ≤ c) : a * b ≤ a * c := mul_le_mul_of_nonneg_le
 
 lemma mul_le_mul_right (h : b ≤ c) : b * a ≤ c * a := mul_le_mul_of_nonneg_right h (by simp)
 
+theorem lt_of_mul_lt_mul_left (h : a * b < a * c) : b < c :=
+  lt_of_mul_lt_mul_of_nonneg_left h (by simp)
+
+theorem lt_of_mul_lt_mul_right (h : b * a < c * a) : b < c :=
+  lt_of_mul_lt_mul_of_nonneg_right h (by simp)
+
 lemma pow_three (x : M) : x^3 = x * x * x := by rw [← two_add_one_eq_three, pow_add, sq]; simp
 
 lemma pow_four (x : M) : x^4 = x * x * x * x := by

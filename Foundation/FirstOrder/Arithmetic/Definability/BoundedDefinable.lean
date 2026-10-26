@@ -323,6 +323,23 @@ lemma arithmetic_bounded_comp₂ {k} {R : V → V → Prop} {f₁ f₂ : (Fin k 
   hR.arithmetic_bounded_substitution (f := ![f₁, f₂])
     (by simp [Fin.forall_fin_succ, *])
 
+lemma arithmetic_bounded_comp₃ {k} {R : V → V → V → Prop}
+    {f₁ f₂ f₃ : (Fin k → V) → V}
+    [hR : ℌ.DefinableRel₃ R]
+    (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
+    (hf₃ : DefinableBoundedFunction f₃) :
+    ℌ.Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
+  hR.arithmetic_bounded_substitution (f := ![f₁, f₂, f₃])
+    (by simp [Fin.forall_fin_succ, *])
+
+lemma arithmetic_bounded_comp₄ {k} {R : V → V → V → V → Prop}
+    {f₁ f₂ f₃ f₄ : (Fin k → V) → V} [hR : ℌ.DefinableRel₄ R]
+    (hf₁ : DefinableBoundedFunction f₁) (hf₂ : DefinableBoundedFunction f₂)
+    (hf₃ : DefinableBoundedFunction f₃) (hf₄ : DefinableBoundedFunction f₄) :
+    ℌ.Definable fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
+  hR.arithmetic_bounded_substitution (f := ![f₁, f₂, f₃, f₄])
+    (by simp [Fin.forall_fin_succ, *])
+
 lemma arithmetic_bounded_comp₁_zero {k} {P : V → Prop} {f : (Fin k → V) → V}
     [hP : Γᴬ_[0].DefinablePred P]
     (hf : DefinableBoundedFunction f) :

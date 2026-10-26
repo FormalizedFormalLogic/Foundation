@@ -146,6 +146,20 @@ namespace IsAttempt
 
 variable {c v} {f : V}
 
+lemma seq (h : SetTheory.IsAttempt (c.map v) f) : Seq f := h.1
+
+variable (f) in
+lemma isOrdinal_lh : IsOrdinal (lh f) := SetTheory.isOrdinal_lh f
+
+lemma spec (h : SetTheory.IsAttempt (c.map v) f) :
+    ∀ β ∈ lh f, ∀ y, ⟨β, y⟩ₖ ∈ f ↔ y = c.map v (f ↾ β) := h.2
+
+lemma domain_eq_lh (hf : SetTheory.IsAttempt (c.map v) f) : domain f = lh f := hf.1.domain_eq
+
+lemma empty (h : SetTheory.IsAttempt (c.map v) f) (hlh : ∅ ∈ lh f) : ⟨∅, c.map v ∅⟩ₖ ∈ f := by
+  have hrestrict {g : V} : g ↾ ∅ = ∅ := restrict_empty_eq
+  exact (h.2 ∅ hlh (c.map v ∅)).mpr (by aesop)
+
 lemma succ (hf : SetTheory.IsAttempt (c.map v) f) : ∀ β, SetTheory.succ β ∈ lh f →
     ∀ y, ⟨β, y⟩ₖ ∈ f → ⟨SetTheory.succ β, c.map v ((f ↾ β) ⁀' y)⟩ₖ ∈ f := by
   intro β hβsucclh y hyf

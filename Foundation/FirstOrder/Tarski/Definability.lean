@@ -308,6 +308,12 @@ lemma fintype_all {ι : Type*} [_root_.Finite ι] {P : ι → (Fin k → M) → 
   have := Fintype.ofFinite ι
   simpa using fconj Finset.univ h
 
+lemma fintype_exs {ι : Type*} [_root_.Finite ι] {P : ι → (Fin k → M) → Prop}
+    (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) :
+    L.Definable fun v : Fin k → M ↦ ∃ i, P i v := by
+  have := Fintype.ofFinite ι
+  simpa using fdisj Finset.univ h
+
 lemma retraction (h : L.Definable P) {n} (f : Fin k → Fin n) :
     L.Definable fun v ↦ P (fun i ↦ v (f i)) := by
   rcases h with ⟨φ, hφ⟩

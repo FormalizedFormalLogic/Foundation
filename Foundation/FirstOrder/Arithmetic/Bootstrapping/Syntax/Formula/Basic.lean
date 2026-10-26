@@ -1302,6 +1302,9 @@ end
 @[simp] lemma bv_ex {p : V} (hp : IsUFormula L p) : bv L (^∃ p) = bv L p - 1 := by simp [bv, hp,
   construction]
 
+lemma bv_eq_of_not_isUFormula {p : V} (h : ¬IsUFormula L p) : bv L p = 0 := (construction
+  L).result_prop_not _ h
+
 end bv
 
 section isSemiformula

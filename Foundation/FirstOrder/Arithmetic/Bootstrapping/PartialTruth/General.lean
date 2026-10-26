@@ -198,6 +198,14 @@ theorem provable_partialTrue_iff_of_hierarchy (T : ArithmeticTheory) [𝗕𝚺s 
     Entailment.WeakerThan.pbl (ISigma1.provable_partialTrue_iff h.prenex);
   cl_prover [h₁, h₂]
 
+lemma _root_.FFL.FirstOrder.Arithmetic.Peano.provable_partialTrue_iff_of_hierarchy
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s σ) : 𝗣𝗔 ⊢ (partialTrue Γ s).val/[⌜h.prenex.val⌝] 🡘 σ :=
+  Bootstrapping.provable_partialTrue_iff_of_hierarchy 𝗣𝗔 h
+
+lemma _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_partialTrue_iff_of_hierarchy
+    (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 1 σ) : 𝗜𝚺₁ ⊢ (partialTrue Γ 1).val/[⌜h.prenex.val⌝] 🡘 σ :=
+  Bootstrapping.provable_partialTrue_iff_of_hierarchy 𝗜𝚺₁ h
+
 theorem provable_boundedTrue_iff_of_hierarchy (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T]
     (h : ℬ[<, ℒₒᵣ].Hierarchy Γ 0 σ) : T ⊢ boundedTrue.val/[⌜σ⌝] 🡘 σ :=
   Entailment.WeakerThan.pbl <|

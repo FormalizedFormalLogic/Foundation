@@ -606,6 +606,14 @@ lemma satisfiable_iff :
   ⟨by rintro ⟨s, hs⟩; exact ⟨s.Dom, s.nonempty, s.struc, hs⟩,
     by rintro ⟨M, i, s, hT⟩; exact ⟨s.toStruc, hT⟩⟩
 
+lemma unsatisfiable_iff :
+    ¬Semantics.Satisfiable (Tarski.Struc.{v, u} L) T ↔
+      ∀ (M : Type v) (_ : Nonempty M) (_ : Tarski.Structure L M), ¬M↓[L] ⊧* T := by
+  simpa using satisfiable_iff.not
+
+lemma satisfiable_intro (M : Type v) [Nonempty M] [s : Tarski.Structure L M] (h : M↓[L] ⊧* T) :
+    Semantics.Satisfiable (Tarski.Struc.{v, u} L) T := ⟨s.toStruc, h⟩
+
 noncomputable def ModelOfSat (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) : Type v :=
   Classical.choose (satisfiable_iff.mp h)
 
@@ -623,6 +631,23 @@ noncomputable instance StructureModelOfSat (h : Semantics.Satisfiable (Tarski.St
 
 lemma ModelOfSat.models (h : Semantics.Satisfiable (Tarski.Struc.{v, u} L) T) :
     (ModelOfSat h)↓[L] ⊧* T := (StructureModelOfSatAux h).prop
+
+lemma consequence_iff_unsatisfiable {σ : Sentence L} :
+    T ⊨[Tarski.Struc.{v, u} L] σ ↔
+      ¬Semantics.Satisfiable (Tarski.Struc.{v, u} L) (insert (∼σ) T) := by
+  constructor
+  · intro h
+    apply unsatisfiable_iff.mpr
+    intro M _ s; simp only [Semantics.ModelsSet.insert_iff, models_iff, not_and']
+    intro hT; simpa using models_iff.mp (h hT)
+  · intro h; apply consequence_iff.mpr
+    intro M _ s hT
+    have : σ.Realize M := by
+      have := by
+        simpa only [Semantics.ModelsSet.insert_iff, not_and', models_iff] using
+          unsatisfiable_iff.mp h M inferInstance s
+      simpa using this hT
+    apply models_iff.mpr (by simpa using this)
 
 end
 

@@ -71,6 +71,9 @@ lemma height_le_iff_boxBot [T₀ ⪯ T] [𝔅.HBL] {n : ℕ} :
     exact boxBot_monotone hmn ⨀ hm
   · exact height_le_of_boxBot
 
+lemma height_eq_top_of_sound_and_consistent [𝔅.Kreisel] [Entailment.Consistent T] : 𝔅.height = ⊤ :=
+  height_eq_top_iff.mpr iIncon_unprovable_of_sigma1_sound
+
 @[grind =>]
 lemma height_eq_zero_of_inconsistent (h : Entailment.Inconsistent T) : 𝔅.height = 0 := by
   suffices 𝔅.height ≤ 0 from le_bot_iff.mp this

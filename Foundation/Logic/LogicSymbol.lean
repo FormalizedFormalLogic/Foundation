@@ -628,6 +628,10 @@ variable {ι G : Type*} [LogicalConnective α] [LogicalNeutral α] [FunLike G α
 @[simp] lemma map_conj₂_prop {f : G} {l : List α} : f l.conj₂ ↔ ∀ a ∈ l, f a := by
   induction l using List.induction_with_singleton' <;> simp [*]
 
+lemma map_conj_append_prop
+    (f : G) (l₁ l₂ : List α) : f (l₁ ++ l₂).conj ↔ f (l₁.conj ⋏ l₂.conj) := by
+  induction l₁ <;> induction l₂ <;> aesop;
+
 @[simp] lemma map_conj'_prop
     {F : G} {l : List ι} {f : ι → α} : F (l.conj' f) ↔ ∀ i ∈ l, F (f i) := by
   induction l using List.induction_with_singleton' <;> simp [*]
@@ -638,6 +642,10 @@ variable {ι G : Type*} [LogicalConnective α] [LogicalNeutral α] [FunLike G α
 
 @[simp] lemma map_disj₂_prop {f : G} {l : List α} : f l.disj₂ ↔ ∃ a ∈ l, f a := by
   induction l using List.induction_with_singleton' <;> simp [*]
+
+lemma map_disj_append_prop (f : G) (l₁ l₂ : List α) :
+    f (l₁ ++ l₂).disj ↔ f (l₁.disj ⋎ l₂.disj) := by
+  induction l₁ <;> induction l₂ <;> aesop;
 
 @[simp] lemma map_disj'_prop
     {F : G} {l : List ι} {f : ι → α} : F (l.disj' f) ↔ ∃ i ∈ l, F (f i) := by
@@ -831,6 +839,11 @@ variable {F β : Type*}
     {f : F} {s : Finset α} : f s.conj ↔ ∀ a ∈ s, f a := by
   simp [conj]
 
+lemma map_conj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
+    (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).conj ↔ f (s₁.conj ⋏ s₂.conj) := by
+  suffices (∀ (a : α), a ∈ s₁ ∨ a ∈ s₂ → f a) ↔ (∀ a ∈ s₁, f a) ∧ ∀ a ∈ s₂, f a by simpa
+  grind
+
 lemma map_conj' [FunLike F α β] [LogicalConnective.HomClass F α β]
     (Φ : F) (s : Finset ι) (f : ι → α) : Φ (⩕ i ∈ s, f i) = ⩕ i ∈ s, Φ (f i) := by
   simp [conj', Function.comp_def, List.map_conj']
@@ -848,6 +861,11 @@ lemma map_uconj [FunLike F α β] [LogicalConnective.HomClass F α β]
 @[simp] lemma map_disj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
     (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
   simp [disj]
+
+lemma map_disj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
+    (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).disj ↔ f (s₁.disj ⋎ s₂.disj) := by
+  suffices (∃ a, (a ∈ s₁ ∨ a ∈ s₂) ∧ f a) ↔ (∃ a ∈ s₁, f a) ∨ ∃ a ∈ s₂, f a by simpa [map_disj_prop]
+  grind
 
 lemma map_disj' [FunLike F α β] [LogicalConnective.HomClass F α β]
     (Φ : F) (s : Finset ι) (f : ι → α) : Φ (⩖ i ∈ s, f i) = ⩖ i ∈ s, Φ (f i) := by

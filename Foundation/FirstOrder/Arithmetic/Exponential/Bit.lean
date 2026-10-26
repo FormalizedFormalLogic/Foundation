@@ -46,6 +46,9 @@ instance mem_definable'' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Relation[V] Membership.mem := by
   simpa using (mem_definable' ℌ).retraction ![1, 0]
 
+lemma mem_absolute (i a : ℕ) : i ∈ a ↔ (i : V) ∈ (a : V) := by
+  simpa using Defined.sigmaZero_absolute V bit_defined bit_defined ![i, a]
+
 lemma mem_iff_bit {i a : V} : i ∈ a ↔ Bit i a := iff_of_eq rfl
 
 lemma exp_le_of_mem {i a : V} (h : i ∈ a) : Exp.exp i ≤ a := LenBit.le h
@@ -506,6 +509,8 @@ lemma mem_ext {a b : V} (h : ∀ i, i ∈ a ↔ i ∈ b) : a = b :=
 
 lemma mem_ext_iff {a b : V} : a = b ↔ ∀ i, i ∈ a ↔ i ∈ b := ⟨by rintro rfl; simp, mem_ext⟩
 
+lemma pos_iff_nonempty {s : V} : 0 < s ↔ s ≠ ∅ := pos_iff_ne_zero
+
 lemma nonempty_of_pos {a : V} (h : 0 < a) : ∃ i, i ∈ a := by
   by_contra A
   have : a = 0 := mem_ext (by simpa using A)
@@ -624,6 +629,26 @@ section
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 instance : Fact (1 ≤ 1) := ⟨by rfl⟩
+
+theorem finset_comprehension₁ {P : V → Prop} (hP : Γᴬ_[1]-Predicate P) (a : V) :
+    ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i :=
+  finset_comprehension hP a
+
+theorem finset_comprehension₁! {P : V → Prop} (hP : Γᴬ_[1]-Predicate P) (a : V) :
+    ∃! s, s < Exp.exp a ∧ (∀ i < a, i ∈ s ↔ P i) := by
+  rcases finset_comprehension₁ hP a with ⟨s, hs, Ha⟩
+  exact ExistsUnique.intro s ⟨hs, Ha⟩
+    (by
+      rintro b ⟨hb, Hb⟩
+      apply mem_ext
+      intro x
+      constructor
+      · intro hx
+        have : x < a := exp_monotone.mp <| LE.le.trans_lt (exp_le_of_mem hx) hb
+        exact (Ha x this).mpr <| (Hb x this).mp hx
+      · intro hx
+        have : x < a := exp_monotone.mp <| LE.le.trans_lt (exp_le_of_mem hx) hs
+        exact (Hb x this).mpr <| (Ha x this).mp hx)
 
 theorem finite_comprehension₁! {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (fin : ∃ m, ∀ i, P i → i < m) :

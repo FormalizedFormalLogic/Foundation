@@ -326,6 +326,10 @@ namespace LK.Proof
 lemma provable_def (φ : Proposition L) :
     𝐋𝐊¹ ⊢ φ ↔ Nonempty (⊢ᴸᴷ¹ ⦃φ⦄) := by rfl
 
+lemma unprovable_def (φ : Proposition L) :
+    𝐋𝐊¹ ⊬ φ ↔ IsEmpty (⊢ᴸᴷ¹ ⦃φ⦄) := by
+  unfold Entailment.Unprovable; simp [provable_def]
+
 instance : OneSidedLK.PrincipalEntailment (LK.Derivation (L := L)) (𝐋𝐊¹ : LK L) where
   iff := Iff.rfl
 
@@ -341,6 +345,9 @@ lemma allClosure_fixitr {φ : Proposition L} (dp : 𝐋𝐊¹ ⊢ φ) :
   | m + 1 => by
     simp only [LawfulSyntacticRewriting.allClosure_fixitr]
     apply all; simpa using allClosure_fixitr dp m
+
+lemma univCl' {φ : Proposition L} (b : 𝐋𝐊¹ ⊢ φ) : 𝐋𝐊¹ ⊢ φ.univCl' :=
+  allClosure_fixitr b φ.fvSup
 
 lemma lMap (Φ : L₁ →ᵥ L₂) {φ : Proposition L₁} :
     𝐋𝐊¹ ⊢ φ → 𝐋𝐊¹ ⊢ φ.lMap Φ := by

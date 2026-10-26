@@ -120,6 +120,9 @@ lemma smash_comm (a b : V) : a ⨳ b = b ⨳ a :=
 lemma lt_smash_iff {a b c : V} : a < b ⨳ c ↔ ‖a‖ ≤ ‖b‖ * ‖c‖ :=
   (exponential_smash b c).lt_iff_len_le
 
+lemma smash_le_iff {a b c : V} : b ⨳ c ≤ a ↔ ‖b‖ * ‖c‖ < ‖a‖ :=
+  not_iff_not.mp <| by simp [lt_smash_iff]
+
 lemma lt_smash_one_iff {a b : V} : a < b ⨳ 1 ↔ ‖a‖ ≤ ‖b‖ := by
   simpa using lt_smash_iff (a := a) (b := b) (c := 1)
 

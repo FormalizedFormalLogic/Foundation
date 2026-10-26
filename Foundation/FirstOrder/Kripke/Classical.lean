@@ -236,6 +236,9 @@ lemma generic_iff_not {φ : Semiformula L ξ n} :
       have : ¬s ⊩ᶜ[x :> bv|fv] φ := H s (by rfl) x (domain_antimonotone (le_trans hsr hrq) hx)
       exact this (Hr.monotone _ hsr)
 
+lemma generic_iff_not' {φ : Semiformula L ξ n} :
+    ¬p ⊩ᶜ[bv|fv] φ ↔ ∃ q ≤ p, q ⊩ᶜ[bv|fv] ∼φ := by simpa using generic_iff.not
+
 @[simp] lemma imply {φ ψ : Semiformula L ξ n} :
     p ⊩ᶜ[bv|fv] φ 🡒 ψ ↔ ∀ q ≤ p, q ⊩ᶜ[bv|fv] φ → q ⊩ᶜ[bv|fv] ψ := by
   suffices

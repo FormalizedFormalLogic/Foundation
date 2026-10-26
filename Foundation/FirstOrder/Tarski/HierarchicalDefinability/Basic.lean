@@ -363,6 +363,10 @@ lemma not (h : Γ.alt-[ℬ, m].Definable P) :
   | 𝚷 => h.notSigma
   | 𝚫 => h.notDelta
 
+lemma impDelta (hp : 𝚫-[ℬ, m].Definable P) (hq : 𝚫-[ℬ, m].Definable Q) :
+    𝚫-[ℬ, m].Definable fun x ↦ P x → Q x := (hp.notDelta.or hq).of_iff (by intro x; simp
+      [imp_iff_not_or])
+
 lemma imp (h₁ : Γ.alt-[ℬ, m].Definable P) (h₂ : Γ-[ℬ, m].Definable Q) :
     Γ-[ℬ, m].Definable (fun v ↦ P v → Q v) :=
   (h₁.not.or h₂).of_iff fun _ ↦ imp_iff_not_or

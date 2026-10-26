@@ -171,6 +171,11 @@ instance div_definable : 𝚺ᴬ₀-Function₂ ((· / ·) : V → V → V) := d
 
 @[simp] lemma div_mul_le (a b : V) : a / b * b ≤ a := by rw [mul_comm]; exact mul_div_le _ _
 
+lemma lt_mul_div (a : V) {b} (pos : 0 < b) : a < b * (a / b + 1) := by
+  rcases eq_mul_div_add_of_pos a pos with ⟨v, hv, e⟩
+  calc a = b * (a / b) + v := e
+       _ < b * (a / b + 1) := by simp [mul_add, hv]
+
 @[simp] lemma div_one (a : V) : a / 1 = a :=
   le_antisymm (by simp) (le_iff_lt_succ.mpr <| by simpa using lt_mul_div_succ a one_pos)
 
@@ -446,6 +451,9 @@ instance sqrt_definable : 𝚺ᴬ₀-Function₁[V] sqrt := sqrt_defined.to_defi
 
 lemma eq_sqrt (x a : V) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a :=
   Classical.choose_uniq (sqrt_exists_unique a)
+
+lemma sqrt_eq_of_le_of_lt {x a : V} (le : x * x ≤ a) (lt : a < (x + 1) * (x + 1)) : √a = x :=
+  Eq.symm <| eq_sqrt x a ⟨le, lt⟩
 
 lemma sqrt_eq_of_le_of_le {x a : V} (le : x * x ≤ a) (h : a ≤ x * x + 2 * x) : √a = x :=
   (eq_sqrt x a ⟨le, by simpa [add_mul_self_eq] using le_iff_lt_succ.mp h⟩).symm

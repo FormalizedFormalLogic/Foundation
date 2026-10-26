@@ -159,10 +159,22 @@ lemma EN_of_EN_right (h : 𝓢 ⊢ φ 🡘 ∼ψ) : 𝓢 ⊢ ∼φ 🡘 ψ := by
 
 omit [DecidableEq F] in
 open scoped Classical in
+lemma EN_of_EN_left (h : 𝓢 ⊢ ∼φ 🡘 ψ) : 𝓢 ⊢ φ 🡘 ∼ψ := E_symm <| EN_of_EN_right <| E_symm h
+
+omit [DecidableEq F] in
+open scoped Classical in
+lemma ECCOO : 𝓢 ⊢ φ 🡘 ((φ 🡒 ⊥) 🡒 ⊥) := E_trans dn ENNCCOO
+
+omit [DecidableEq F] in
+open scoped Classical in
 @[simp] lemma CNKANN : 𝓢 ⊢ ∼(φ ⋏ ψ) 🡒 (∼φ ⋎ ∼ψ) := by
   apply CN_of_CN_left;
   apply deduct';
   exact K_replace (KNN_of_NA <| FiniteContext.id) dne dne;
+
+omit [DecidableEq F] in
+open scoped Classical in
+lemma ANN_of_NK (b : 𝓢 ⊢ ∼(φ ⋏ ψ)) : 𝓢 ⊢ ∼φ ⋎ ∼ψ := CNKANN ⨀ b
 
 omit [DecidableEq F] in
 open scoped Classical in

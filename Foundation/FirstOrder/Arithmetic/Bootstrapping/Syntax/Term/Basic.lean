@@ -269,6 +269,9 @@ alias ⟨case, mk⟩ := case_iff
         exact ⟨hkf, hk, hv⟩,
    by rintro ⟨hkf, hk, hv⟩; apply mk; disj 3; exact ⟨k, f, v, hkf, ⟨hk, hv⟩, rfl⟩⟩
 
+lemma func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+    IsUTerm L (^func k f v) := func_iff.mpr ⟨hkf, hv⟩
+
 lemma induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hbvar : ∀ z, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.IsFunc k f → IsUTermVec L k v → (∀ i < k, P v.[i]) → P (^func k f v)) :
@@ -649,6 +652,10 @@ lemma resultVec_defined :
   simpa [Blueprint.resultVec, Bounding.HierarchySymbol.Semiformula.val_sigma,
     IsUTermVec.defined.proper.iff',
     c.eval_graphDef] using c.resultVec_graph
+
+lemma eval_resultVec (v : Fin (arity + 3) → V) :
+    (β.resultVec L).val.Evalb v ↔ v 0 = c.resultVec L (v ·.succ.succ.succ) (v 1) (v 2) :=
+  c.resultVec_defined.iff
 
 end
 

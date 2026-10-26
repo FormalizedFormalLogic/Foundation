@@ -22,6 +22,22 @@ variable {V : Type*} [SetStructure V]
 
 section
 
+variable {k : ℕ} {ℌ : ℬ[∈, ℒₛₑₜ].HierarchySymbol}
+
+lemma lévy_ball {P : (Fin k → V) → V → Prop}
+    (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : SetTheorySemiterm V k) :
+    ℌ.Definable fun v ↦ ∀ x ∈ t.val v id, P v x :=
+  ball (R := Operator.Mem.mem) (by rfl) h t
+
+lemma lévy_bexs {P : (Fin k → V) → V → Prop}
+    (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) (t : SetTheorySemiterm V k) :
+    ℌ.Definable fun v ↦ ∃ x ∈ t.val v id, P v x :=
+  bexs (R := Operator.Mem.mem) (by rfl) h t
+
+end
+
+section
+
 variable {k m : ℕ} {Γ : SigmaPiDelta}
 
 lemma lévy_ball_mem {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}

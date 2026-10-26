@@ -202,7 +202,7 @@ protected lemma sq {i : V} (ppi : PPow2 i) : PPow2 (i^2) := by
                                     rw [ej]; exact lt_trans one_lt_two lt2)
           _      ≤ j       := by simp
           _      ≤ m + i^2 := hj
-          _      < 2 * i^2 := by simp [two_mul, hmi]) (by simp)
+          _      < 2 * i^2 := by simp [two_mul, hmi])
         have hsqj : LenBit (√j) m := (LenBit.add_pow2 (pj.sqrt ej) ppi.pow2.sq hsqj).mp lb
         by_cases hjm : j ≤ m
         · exact Or.inr <| sppm.of_sqrt pj hjm ej hsqj

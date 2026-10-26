@@ -18,9 +18,13 @@ namespace FFL.FirstOrder.Arithmetic.ISigma1
 
 variable {n : ℕ} {φ : ArithmeticSemisentence n} {σ : ArithmeticSentence}
 
+lemma hasPrenex (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) :
+    ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 1 Empty n, 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 φ'.val) :=
+  exists_prenex_of_hierarchy 𝗜𝚺₁ h
+
 lemma exists_matrix_provable (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) :
     ∃ θ : ℬ[<, ℒₒᵣ].Semisentence (n + 1), 𝗜𝚺₁ ⊢ ∀¹* (φ 🡘 ∃¹ θ.val) := by
-  obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy 𝗜𝚺₁ h;
+  obtain ⟨φ', hφ'⟩ := hasPrenex h;
   exact ⟨φ'.sigmaInv.matrix, Bounding.Prenex.provable_iff_sigmaInv hφ'⟩
 
 lemma exists_matrix_provable_pi (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 φ) :

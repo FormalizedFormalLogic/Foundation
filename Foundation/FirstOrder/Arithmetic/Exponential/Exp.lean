@@ -438,7 +438,7 @@ lemma bit_one {x y : V} : Exponential x y → Exponential (2 * x + 1) (2 * y ^ 2
     _         ≤ i ^ 2     := lt_iff_succ_le.mp (two_mul_lt_sq <| ppi.two_lt ne2)
   have hysqi : 2 * y ^ 2 < i ^ 2 := by
     have : 2 * ext i Y ≤ i := two_mul_ext_le_of_seq₀_of_seqₛ hseq₀ hseqₛ ne2 hi ppi
-    suffices 2 * (2 * y ^ 2) < 2 * i ^ 2 from lt_of_mul_lt_mul_left this (by simp)
+    suffices 2 * (2 * y ^ 2) < 2 * i ^ 2 from lt_of_mul_lt_mul_left this
     calc
       2 * (2 * y ^ 2) = (2 * y) ^ 2 := by simp [sq, mul_assoc, mul_left_comm y 2]
       _               ≤ i ^ 2       := sq_le_sq.mpr (by simpa [hYy] using this)
@@ -556,6 +556,9 @@ lemma lt {x y : V} (h : Exponential x y) : x < y := by
   · simp
   · exact ext_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
 
+lemma not_exponential_of_le {x y : V} (h : x ≤ y) : ¬Exponential y x := by
+  intro hxy; exact not_le.mpr (lt hxy) h
+
 @[simp] lemma one_not_even (a : V) : 1 ≠ 2 * a := by
   intro h
   have : (2 : V) ∣ 1 := by rw [h]; simp
@@ -572,10 +575,9 @@ lemma exponential_succ {x y : V} : Exponential (x + 1) y ↔ ∃ z, y = 2 * z �
       exact ⟨by rintro ⟨z, _, rfl, hz⟩; exact ⟨z, rfl, hz⟩,
              by rintro ⟨z, rfl, hz⟩; exact ⟨z, by simpa using hz⟩⟩
     · suffices ∀ z, y = 2 * z → ¬Exponential x z by
-        simpa [show ¬Exponential (x + 1) y from fun h ↦
-          not_le.mpr h.lt (le_add_right (by simpa using hxy))]
+        simpa [not_exponential_of_le (show y ≤ x + 1 from le_add_right (by simpa using hxy))]
       rintro z rfl
-      exact fun h ↦ not_le.mpr h.lt (le_trans le_two_mul_left <| by simpa using hxy)
+      exact not_exponential_of_le (le_trans le_two_mul_left <| by simpa using hxy)
   · revert x
     induction y using ISigma0.order_induction
     · definability

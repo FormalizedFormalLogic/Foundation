@@ -77,6 +77,11 @@ lemma isOrdinal_lh (s : V) : IsOrdinal (lh s) :=
   by_cases (fun hs : Seq s ↦ exists_eq_left'.mp (hs.domain_eq ▸ hs.2))
   (fun hs ↦ lh_prop_of_not_seq hs ▸ IsOrdinal.zero)
 
+lemma isOrdinal_domain {s : V} (hs : Seq s) : IsOrdinal (domain s) := exists_eq_left'.mp hs.2
+
+lemma Seq.isOrdinal_of_mem_lh {s α : V} (hα : α ∈ lh s) : IsOrdinal α :=
+  IsOrdinal.of_mem (h := isOrdinal_lh s) hα
+
 lemma Seq.isOrdinal_of_mem_domain {s α : V} (hs : Seq s) (hα : α ∈ domain s) : IsOrdinal α :=
   IsOrdinal.of_mem (h := exists_eq_left'.mp hs.2) hα
 

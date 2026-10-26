@@ -115,6 +115,10 @@ lemma ext_eq_of_gt {L S S' i : V} (h : i * ‖L‖ < ‖S'‖) :
     have : S < bexp S' (i * ‖L‖) := ((exp_bexp_of_lt h).lt_iff_len_le).mpr le
     simp [this]
 
+lemma ext_eq_smash_of_le {I L S i : V} (h : i ≤ ‖I‖) :
+    S / bexp (I ⨳ L) (i * ‖L‖) % (L ⨳ 1) = S{L}[i] :=
+  ext_eq_of_gt (mul_len_lt_len_smash h)
+
 lemma ext_add₁_pow2 {L i S₁ S₂ p : V} (pp : Pow2 p) (h : (i + 1) * ‖L‖ < ‖p‖) :
     (S₁ + S₂ * p){L}[i] = S₁{L}[i] := by
   rcases Arithmetic.zero_le S₂ with (rfl | pos₂)

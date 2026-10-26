@@ -172,6 +172,25 @@ lemma fun_eq_vec_three (v : Fin 3 → α) : v = ![v 0, v 1, v 2] := by
       | zero => simp
       | succ x => exact x.elim0
 
+lemma fun_eq_vec_four (v : Fin 4 → α) : v = ![v 0, v 1, v 2, v 3] := by
+  funext x
+  cases x using Fin.cases with
+  | zero => simp
+  | succ x =>
+    cases x using Fin.cases with
+    | zero => simp
+    | succ x =>
+      cases x using Fin.cases with
+      | zero => simp
+      | succ x =>
+        cases x using Fin.cases with
+        | zero => simp
+        | succ x => exact x.elim0
+
+lemma fun_eq_vec_four' (f : α → β) (v : Fin 4 → α) :
+    f ∘ v = ![f (v 0), f (v 1), f (v 2), f (v 3)] := by
+  rw [fun_eq_vec_four v]; simp
+
 lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : ∀ i, a ≠ f i) :
     Function.Injective (a :> f) := by
   have : ∀ i, f i ≠ a := fun i => (ha i).symm

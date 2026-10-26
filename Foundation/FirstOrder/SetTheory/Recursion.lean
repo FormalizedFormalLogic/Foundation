@@ -396,6 +396,11 @@ lemma attempt_function_exists
   fun α ↦ ⟨replAttemptOrEmpty F hF α,
     replAttemptOrEmpty_aux F hF α, lh_replAttemptOrEmpty_eq F hF α⟩
 
+lemma isAttempt_attemptOrEmpty
+    (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
+    IsAttempt F (attemptOrEmpty F α) := by
+  exact isAttempt_attemptOrEmpty_of_exists F α (attempt_function_exists F hF α)
+
 @[simp] lemma lh_attemptOrEmpty_eq
     (F : V → V) (hF : ℒₛₑₜ-function₁ F) (α : Ordinal V) :
     lh (attemptOrEmpty F α) = α := by

@@ -33,6 +33,10 @@ variable
 
 lemma R1 {𝔚 : Refutability T₀ T} {σ : Sentence L} : T ⊢ ∼σ → T₀ ⊢ 𝔚 σ := fun h ↦ 𝔚.refu_def h
 
+lemma R1' {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
+  {𝔚 : Refutability T₀ T} {σ : Sentence L} [T₀ ⪯ T] : T ⊢ ∼σ → T ⊢ 𝔚 σ := fun h ↦
+  WeakerThan.pbl <| R1 h
+
 end
 
 

@@ -176,6 +176,10 @@ lemma mem_InductionScheme_of_mem {φ : ArithmeticSemiformula ℕ 1} (hp : C φ) 
     .univCl (succInd φ) ∈ InductionScheme ℒₒᵣ C := by
   simpa [InductionScheme] using ⟨φ, hp, rfl⟩
 
+lemma mem_IOpen_of_qfree {φ : ArithmeticSemiformula ℕ 1} (hp : φ.Open) :
+    .univCl (succInd φ) ∈ InductionScheme ℒₒᵣ Semiformula.Open := by
+  exact ⟨φ, hp, rfl⟩
+
 lemma IBroadSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺⁺ s₁ ⊆ 𝗜𝚺⁺ s₂ :=
   Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.mono h))
 
@@ -193,6 +197,9 @@ lemma InductionOnPrenexHierarchy_zero_eq_InductionOnHierarchy_zero (Γ Γ' : Pol
       (InductionScheme_subset fun H ↦ (Bounding.PrenexHierarchy.zero_iff.mp H).of_zero))
     (Set.union_subset_union_right _
       (InductionScheme_subset fun H ↦ Bounding.PrenexHierarchy.zero_iff.mpr H.of_zero))
+
+lemma ISigmaZero_eq_IBroadSigmaZero : 𝗜𝚺₀ = 𝗜𝚺⁺₀ :=
+  InductionOnPrenexHierarchy_zero_eq_InductionOnHierarchy_zero 𝚺 𝚺
 
 lemma ISigmaZero_subset_IBroadSigma {s : ℕ} : 𝗜𝚺₀ ⊆ 𝗜𝚺⁺ s :=
   Set.union_subset_union_right _
@@ -673,6 +680,9 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚷⁺s
 
 instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚷⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s := inferInstance
 
+lemma models_IBroadSigma_iff_models_IBroadPi {s} : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s ↔ V↓[ℒₒᵣ] ⊧* 𝗜𝚷⁺ s :=
+  ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+
 instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s :=
   match Γ with
   | 𝚺 => inferInstance
@@ -737,6 +747,9 @@ instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :
 abbrev mod_IBroadSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺s₂] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s₁ :=
   models_of_ss inferInstance (IBroadSigma_subset_mono h)
 
+abbrev mod_BSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [V↓[ℒₒᵣ] ⊧* 𝗕𝚺s₂] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺s₁ :=
+  models_CollectionOnPrenexHierarchy_of_le h
+
 -- This is stated as a `lemma`, not an `instance`, since `s` does not occur in the conclusion
 -- `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻`, so instance search cannot infer it.
 lemma mod_paMinus_of_ISigma {s} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺s] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
@@ -786,6 +799,13 @@ lemma CollectionOnPrenexHierarchy_zero_eq (Γ Γ' : Polarity) : 𝗕 Γ 0 = 𝗕
     funext fun _ ↦ propext <|
       Bounding.PrenexHierarchy.zero_iff_bounded.trans Bounding.PrenexHierarchy.zero_iff_bounded.symm
   simp [CollectionOnPrenexHierarchy, this]
+
+lemma BSigmaZero_eq_BPiZero : 𝗕𝚺 0 = 𝗕𝚷 0 :=
+  CollectionOnPrenexHierarchy_zero_eq 𝚺 𝚷
+
+lemma CollectionOnPrenexHierarchy_weakerThan_BSigma_succ (Γ : Polarity) (s : ℕ) :
+    𝗕 Γ s ⪯ 𝗕𝚺 (s + 1) :=
+  CollectionOnPrenexHierarchy_weakerThan_of_lt (Nat.lt_succ_self s)
 
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗 Γ s :=
   weakerThan_of_models.{0} _ _ fun _ _ _ ↦

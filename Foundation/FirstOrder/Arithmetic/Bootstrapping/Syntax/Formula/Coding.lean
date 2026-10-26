@@ -146,6 +146,9 @@ open Bootstrapping.Arithmetic
     (⌜(“!!t ≮ !!u” : ArithmeticSemiproposition n)⌝ : Bootstrapping.Semiformula V ℒₒᵣ n) =
       (⌜t⌝ ≮' ⌜u⌝) := rfl
 
+lemma ne_iff_val_ne (φ ψ : Bootstrapping.Semiformula V L n) : φ ≠ ψ ↔ φ.val ≠ ψ.val :=
+  Iff.ne Semiformula.ext_iff
+
 lemma typed_quote_inj {n} {φ₁ φ₂ : Semiproposition L n} :
     (⌜φ₁⌝ : Bootstrapping.Semiformula V L n) = ⌜φ₂⌝ → φ₁ = φ₂ :=
   match φ₁, φ₂ with
@@ -542,6 +545,11 @@ lemma quote_univCl' (ψ : Semiproposition L 0) :
       = qqAlls (⌜(Rew.fixitr 0 ψ.fvSup ▹ ψ : Semiproposition L (0 + ψ.fvSup))⌝ : V)
           ((0 + ψ.fvSup : ℕ) : V) :=
   quote_allClosure _
+
+lemma quote_subst_fvar_fixitr (φ : Semiproposition L 0) :
+    (⌜(Rew.fixitr 0 φ.fvSup ▹ φ : Semiproposition L (0 + φ.fvSup))
+        ⇜ (fun x : Fin (0 + φ.fvSup) ↦ (&↑x : SyntacticTerm L))⌝ : V) = ⌜φ⌝ := by
+  rw [Semiformula.subst_comp_fixitr]
 
 /-! ### Pinning `bv` of the `fixitr`-image -/
 

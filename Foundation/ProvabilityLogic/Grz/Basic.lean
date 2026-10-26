@@ -112,11 +112,19 @@ theorem provability_TFAE : [
   tfae_have 4 → 3 := fun h _ _ M _ x ↦ Model.forces_cone.mp <| h (M.cone x);
   tfae_finish;
 
+lemma iff_provable_gentzen : 𝐆𝐫𝐳 ⊢ A ↔ ⊢ᴳ[𝐆𝐫𝐳] ∅ ⟹ {A} := provability_TFAE.out 1 2
+
 omit [DecidableEq α] in
 lemma iff_valid_finite :
     𝐆𝐫𝐳 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Model κ α), [M.IsFiniteGrz] → M ⊧ A := by
   classical
   exact provability_TFAE.out 1 3
+
+omit [DecidableEq α] in
+lemma iff_root_forces : 𝐆𝐫𝐳 ⊢ A ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : RootedModel κ α), [M.IsFiniteGrz] → M.root ⊩ A := by
+  classical
+  exact provability_TFAE.out 1 4
 
 end Logic.Grz
 

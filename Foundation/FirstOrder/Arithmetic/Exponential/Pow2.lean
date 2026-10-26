@@ -100,6 +100,9 @@ lemma Pow2.two_mul_div_two {p : V} (h : Pow2 p) (ne : p ≠ 1) : 2 * (p / 2) = p
   · simp at ne
   simp
 
+lemma Pow2.div_two_mul_two {p : V} (h : Pow2 p) (ne : p ≠ 1) : (p / 2) * 2 = p := by
+  simp [mul_comm, h.two_mul_div_two ne]
+
 lemma Pow2.elim' {p : V} : Pow2 p ↔ p = 1 ∨ 1 < p ∧ ∃ q, p = 2 * q ∧ Pow2 q := by
   by_cases hp : 1 < p
   · simpa [hp] using Pow2.elim
@@ -315,7 +318,7 @@ lemma mul_add_lt_of_mul_lt_of_pos {a b p q : V} (hp : Pow2 p) (hq : Pow2 q)
   have : p ∣ q :=
     dvd_of_le hp hq (le_of_lt <| lt_of_le_of_lt (le_mul_of_pos_left pos) h)
   rcases this with ⟨q, rfl⟩
-  have : a < q := lt_of_mul_lt_mul_right (a := p) (by simpa [mul_comm] using h) (by simp)
+  have : a < q := lt_of_mul_lt_mul_right (a := p) (by simpa [mul_comm] using h)
   calc
     a * p + b < (a + 1) * p := by simp [add_mul, hb]
     _         ≤ p * q       := by

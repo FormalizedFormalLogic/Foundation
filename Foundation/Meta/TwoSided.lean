@@ -39,6 +39,12 @@ lemma rotate_right (hφ : Γ ⟹ Δ ++ [φ]) : Γ ⟹ φ :: Δ := weakening hφ
 omit [DecidableEq F] in
 lemma rotate_left (hφ : (Γ ++ [φ]) ⟹ Δ) : (φ :: Γ) ⟹ Δ := weakening hφ
 
+omit [DecidableEq F] in
+lemma rotate_right_inv (hφ : Γ ⟹ φ :: Δ) : Γ ⟹ Δ ++ [φ] := weakening hφ
+
+omit [DecidableEq F] in
+lemma rotate_left_inv (hφ : (φ :: Γ) ⟹ Δ) : (Γ ++ [φ]) ⟹ Δ := weakening hφ
+
 -- `DecidableEq F` is not referenced in the proof term itself, but the ambient
 -- instance is needed for elaboration to disambiguate the overloaded `⨀`
 -- notation; omitting it (as the `unusedSectionVars` linter suggests) breaks

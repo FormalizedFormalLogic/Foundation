@@ -188,6 +188,10 @@ theorem complete
   obtain ⟨D, hD, hxD⟩ := h (countermodel S) x (fun C hC ↦ countermodel.truthlemma.1 (hS₀.ant hC));
   exact countermodel.truthlemma.2 (hS₀.suc hD) hxD;
 
+lemma iff_valid : ⊢ᴳ[𝐆𝐋] S ↔
+    ∀ {κ : Type u} [Nonempty κ] (M : Kripke.Model κ α), [M.IsFiniteGL] → M ⊧ S :=
+  ⟨fun h _ _ M _ ↦ sound M h, complete⟩
+
 variable {Γ Γ₁ Γ₂ Δ Δ₁ Δ₂ : FormulaFinset α} {A : Formula α}
 
 theorem cut (h₁ : ⊢ᴳ[𝐆𝐋] Γ₁ ⟹ insert A Δ₁) (h₂ : ⊢ᴳ[𝐆𝐋] insert A Γ₂ ⟹ Δ₂) :

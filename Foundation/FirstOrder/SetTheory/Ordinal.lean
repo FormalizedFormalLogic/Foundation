@@ -30,6 +30,10 @@ instance IsTransitive.defined : ℒₛₑₜ-predicate[V] IsTransitive via IsTra
 instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive :=
   IsTransitive.defined.to_definable
 
+omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗭] in
+lemma mem_trans {x y z : V} (H : IsTransitive z) (hxy : x ∈ y) (hyz : y ∈ z) : x ∈ z :=
+  H.transitive y hyz x hxy
+
 namespace IsTransitive
 
 @[simp] protected instance empty : IsTransitive (∅ : V) := ⟨fun x ↦ by simp⟩

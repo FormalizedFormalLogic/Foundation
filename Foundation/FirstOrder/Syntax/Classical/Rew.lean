@@ -541,6 +541,9 @@ lemma lMap_bind (b : Fin n₁ → Semiterm L₁ ξ₂ n₂) (e : ξ₁ → Semit
   simp [*, lMap_rel, lMap_nrel, Semiterm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons',
       Semiterm.lMap_bShift, Function.comp_def]
 
+lemma lMap_map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (φ : Semiformula L₁ ξ₁ n₁) :
+    lMap Φ (Rew.map (L := L₁) b e ▹ φ) = Rew.map (L := L₂) b e ▹ lMap Φ φ := lMap_bind _ _ _
+
 lemma lMap_rewrite (f : ξ₁ → Semiterm L₁ ξ₂ n) (φ : Semiformula L₁ ξ₁ n) :
     lMap Φ (Rew.rewrite f ▹ φ) = Rew.rewrite (Semiterm.lMap Φ ∘ f) ▹ lMap Φ φ := by
   simp [Rew.rewrite, lMap_bind, Function.comp_def]

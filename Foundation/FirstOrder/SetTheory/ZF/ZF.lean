@@ -65,6 +65,12 @@ lemma replacement_existsUnique (X : V) (F : V → V) (hF : ℒₛₑₜ-function
   exact replacement_rel_existsUnique X R h (by definability)
 
 /--
+Replacement exists for a function.
+-/
+lemma replacement_exists (X : V) (F : V → V) (hF : ℒₛₑₜ-function₁ F) :
+    ∃ Y : V, ∀ y, y ∈ Y ↔ ∃ x ∈ X, y = F x := (replacement_existsUnique X F hF).exists
+
+/--
 The axiom of replacement for a relation.
 -/
 noncomputable def replRel (R : V → V → Prop) (h : ∀ x, ∃! y, R x y)
@@ -98,6 +104,15 @@ lemma replacement_rel_existsUnique_of_mem_existsUnique (X : V) (R : V → V → 
   obtain ⟨Y, hY⟩ := replacement_rel_exists X R' cond (by definability)
   use Y
   aesop
+
+/--
+A stronger variant of replacement, which only requires uniqueness on `X`.
+The statement of this lemma is thanks to tosiaki.
+-/
+lemma replacement_rel_exists_of_mem_existsUnique (X : V) (R : V → V → Prop)
+    (h : ∀ x ∈ X, ∃! y, R x y) (hR : ℒₛₑₜ-relation R) :
+    ∃ Y : V, ∀ y, y ∈ Y ↔ ∃ x ∈ X, R x y :=
+  (replacement_rel_existsUnique_of_mem_existsUnique X R h hR).exists
 
 /--
 The axiom of replacement, only assuming uniqueness on `X`.

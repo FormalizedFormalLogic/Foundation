@@ -142,6 +142,9 @@ lemma subset_prod_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : f ⊆ X ×ˢ Y
 lemma mem_of_mem_functions {f X Y x y : V} (h : f ∈ Y ^ X) (hx : ⟨x, y⟩ₖ ∈ f) : x ∈ X ∧ y ∈ Y := by
   simpa using subset_prod_of_mem_function h _ hx
 
+lemma function_subset_power_prod (X Y : V) : Y ^ X ⊆ ℘ (X ×ˢ Y) :=
+  fun f hf ↦ by simpa using subset_prod_of_mem_function hf
+
 lemma exists_unique_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) :
     ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f := mem_function_iff.mp h |>.2
 

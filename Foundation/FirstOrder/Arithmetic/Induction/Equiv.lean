@@ -232,6 +232,9 @@ theorem InductionOnPrenexHierarchy_equiv_InductionOnHierarchy (Γ : Polarity) (s
 theorem ISigma_equiv_IBroadSigma (s : ℕ) : 𝗜𝚺 s ≊ 𝗜𝚺⁺ s :=
   InductionOnPrenexHierarchy_equiv_InductionOnHierarchy 𝚺 s
 
+theorem IPi_equiv_IBroadPi (s : ℕ) : 𝗜𝚷 s ≊ 𝗜𝚷⁺ s :=
+  InductionOnPrenexHierarchy_equiv_InductionOnHierarchy 𝚷 s
+
 theorem ISigma_equiv_IPi (s : ℕ) : 𝗜𝚺 s ≊ 𝗜𝚷 s :=
   ((ISigma_equiv_IBroadSigma s).trans (IBroadSigma_equiv_IBroadPi s)).trans
     (InductionOnPrenexHierarchy_equiv_InductionOnHierarchy 𝚷 s).symm

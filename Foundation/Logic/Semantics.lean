@@ -299,6 +299,15 @@ end Semantics
 /-- A cumulative sequence of sets. -/
 def Cumulative (T : ℕ → Set F) : Prop := ∀ s, T s ⊆ T (s + 1)
 
+lemma subset_of_le {T : ℕ → Set F} (H : Cumulative T)
+    {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) : T s₁ ⊆ T s₂ := by
+  suffices ∀ s d, T s ⊆ T (s + d) by
+    simpa [Nat.add_sub_of_le h] using this s₁ (s₂ - s₁)
+  intro s d
+  induction d with
+  | zero => simp
+  | succ d ih => simpa only [Nat.add_succ, add_zero] using subset_trans ih (H (s + d))
+
 namespace Cumulative
 
 lemma finset_mem {T : ℕ → Set F}

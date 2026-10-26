@@ -79,6 +79,10 @@ theorem rosser_internalize [Consistent T] {φ : Sentence L} :
   have : T ⊢ ∼φ := provable_of_standard_proof (V := V) Hb
   exact Consistent.not_inc inferInstance (inconsistent_of_provable_of_unprovable h this)
 
+theorem rosser_internalize_sentence [Consistent T] {σ : Sentence L} :
+    T ⊢ σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+  simpa [Sentence.quote_def] using! rosser_internalize h
+
 open Classical in
 theorem not_rosserProvable [Consistent T] {φ : Sentence L} :
     T ⊢ ∼φ → ¬T.RosserProvable (⌜φ⌝ : V) := by
@@ -91,6 +95,10 @@ theorem not_rosserProvable [Consistent T] {φ : Sentence L} :
   rcases eq_nat_of_le_nat this with ⟨b, rfl⟩
   have : T ⊢ φ := provable_of_standard_proof hb
   exact Consistent.not_inc inferInstance (inconsistent_of_provable_of_unprovable this h)
+
+theorem not_rosserProvable_sentence [Consistent T] {σ : Sentence L} :
+    T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+  simpa [Sentence.quote_def] using! not_rosserProvable h
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
 

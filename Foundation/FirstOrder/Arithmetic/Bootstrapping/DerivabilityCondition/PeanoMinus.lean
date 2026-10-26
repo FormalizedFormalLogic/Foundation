@@ -13,6 +13,9 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 lemma lt_add_self_add_one (a b : V) : a < b + a + 1 := lt_succ_iff_le.mpr <| le_add_self
 
+lemma lt_succ_iff_eq_or_succ {a b : V} : a < b + 1 ↔ a = b ∨ a < b := by
+  simp [lt_succ_iff_le, le_iff_eq_or_lt]
+
 end FFL.FirstOrder.Arithmetic
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
@@ -126,6 +129,10 @@ lemma numeral_mul (n m : V) :
       subst_add_eq_add T _ _ _ _ ⨀ ih ⨀ (eq_refl T (𝕹 n))
     have e3 : T.internalize V ⊢ 𝕹 (n * (m + 1)) + 𝕹 n ≐ 𝕹 (n * (m + 1) + n) := numeral_add T _ _
     exact eq_trans (eq_trans e1 e2) e3
+
+lemma numeral_eq {n m : V} :
+    n = m → T.internalize V ⊢ 𝕹 n ≐ 𝕹 m := by
+  rintro rfl; exact eq_refl T (𝕹 n)
 
 lemma numeral_lt {n m : V} :
     n < m → T.internalize V ⊢ 𝕹 n <' 𝕹 m := fun h ↦ by
