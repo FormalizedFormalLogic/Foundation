@@ -258,6 +258,29 @@ instance product_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₂[V] (· ×ʰᶠ ·) :=
   product_definable.of_zero
 
+-- lemma product_bound {a b : V} : a ×ʰᶠ b < Exp.exp (a * b) := by
+--   unfold product
+--   have : 𝚺ᴬ₁-Predicate fun x ↦ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫ := by definability
+--   refine finite_comprehension₁!_bound (m := a * b) this ?_
+--   rintro i ⟨y, hymem, z, hzmem, rfl⟩
+--   refine lt_of_le_of_lt (pair_polybound y z) ?_
+--   apply le_log_of_mem at hymem
+--   apply le_log_of_mem at hzmem
+--   #check add_le_add hymem hzmem
+--   sorry
+
+lemma product_bound {a b : V} : a ×ʰᶠ b < a * b := by
+  unfold product
+  have : 𝚺ᴬ₁-Predicate fun x ↦ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫ := by definability
+  rw [← log_exponential (a * b)]
+  refine finite_comprehension₁!_bound (m := a * b) this ?_
+  rintro i ⟨y, hymem, z, hzmem, rfl⟩
+  refine lt_of_le_of_lt (pair_polybound y z) ?_
+  apply le_log_of_mem at hymem
+  apply le_log_of_mem at hzmem
+  #check add_le_add hymem hzmem
+  sorry
+
 end product
 
 section domain
@@ -525,7 +548,7 @@ lemma IsMapping.uniq {m x y₁ y₂ : V} (h : IsMapping m) :
     ⟪x, y₁⟫ ∈ m → ⟪x, y₂⟫ ∈ m → y₁ = y₂ := fun h₁ h₂ ↦
   h x (mem_domain_iff.mpr ⟨y₁, h₁⟩) |>.unique h₁ h₂
 
-/-! ### Properties of mappings -/
+/-! #### Properties of mappings -/
 
 def IsMapping.Injective (m : V) : Prop := ∀ x x' y, ⟪x, y⟫ ∈ m → ⟪x', y⟫ ∈ m → x = x'
 
@@ -627,6 +650,43 @@ lemma domain_restr_of_subset_domain {f s : V} (h : s ⊆ domain f) : domain (f �
   simp [domain_restr, inter_comm, inter_eq_self_of_subset h]
 
 end restriction
+
+section function
+
+def IsMapping.IsFunction (f : V) : Prop := IsMapping f ∧ f ⊆ domain f ×ʰᶠ range f
+
+def _root_.FFL.FirstOrder.Arithmetic.IsMapping.isFunctionDef : 𝚺ᴬ₀.Semisentence 1 :=
+  .mkSigma “f. !isMappingDef f ∧ ∀ p < f, p ∈ f → ∃ x < f, ∃ y < f, !pairDef p x y”
+
+set_option linter.flexible false in
+instance IsMapping.isFunction_defined :
+    𝚺ᴬ₀-Predicate[V] IsMapping.IsFunction via IsMapping.isFunctionDef :=
+  .mk fun v ↦ by
+    simp [IsMapping.isFunctionDef]
+    constructor <;> intro h
+    · refine ⟨h.1, ?_⟩
+      intro p hpmem
+      have hplt : p < v 0 := lt_of_mem hpmem
+      obtain ⟨x, hxlt, y, hylt, rfl⟩ := h.2 p hplt hpmem
+      refine mem_product_iff.mpr ?_
+      have hxmem : x ∈ domain (v 0) := mem_domain_iff.mpr ⟨y, hpmem⟩
+      have hymem : y ∈ range (v 0) := mem_range_iff.mpr ⟨x, hpmem⟩
+      refine ⟨x, hxmem, y, hymem, rfl⟩
+    · refine ⟨h.1, ?_⟩
+      intro p hplt hpmem
+      obtain ⟨x, hx, y, hy, rfl⟩ := mem_product_iff.mp (h.2 hpmem)
+      have hxlt : x < v 0 := lt_of_le_of_lt (le_pair_left x y) hplt
+      have hylt : y < v 0 := lt_of_le_of_lt (le_pair_right x y) hplt
+      exact ⟨x, hxlt, y, hylt, rfl⟩
+
+instance IsMapping.isFunction_definable : 𝚺ᴬ₀-Predicate[V] IsMapping.IsFunction :=
+  IsMapping.isFunction_defined.to_definable
+
+instance IsMapping.isFunction_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Predicate[V] IsMapping.IsFunction :=
+  IsMapping.isFunction_definable.of_zero
+
+end function
 
 theorem insert_induction {Γ} {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=

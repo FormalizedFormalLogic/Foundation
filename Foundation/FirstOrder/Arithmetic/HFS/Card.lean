@@ -15,25 +15,74 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-def CardLE (a b : V) : Prop := ∃ f, domain f = a ∧ range f = b ∧ IsMapping.Injective f
+def CardLE (a b : V) : Prop :=
+  ∃ f, IsMapping.IsFunction f ∧ IsMapping.Injective f ∧ domain f = a ∧ range f ⊆ b
+
+scoped infix:50 " ≤# " => CardLE
 
 #check IsMapping.injectiveDef
 
-def CardLE.dfn : 𝚺ᴬ₁.Semisentence 2 :=
-  .mkSigma “a b. ∃ f, !domainDef a f ∧ !rangeDef b f ∧ !IsMapping.InjectiveDef f”
+def CardLE.dfn : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
+  -- (.mkSigma “a b. ∃ p, !exponentialDef (a + b) p ∧ ∃ f < p, ∃ r <⁺ 2 * f,
+  --   !IsMapping.isFunctionDef f ∧ !IsMapping.injectiveDef f ∧
+  --   !domainDef a f ∧ !rangeDef r f ∧ !bitSubsetDef r b”)
+  -- (.mkPi “a b. ∀ p, !exponentialDef (a + b) p → ∃ f < p, ∃ r <⁺ 2 * f,
+  --   !IsMapping.isFunctionDef f ∧ !IsMapping.injectiveDef f ∧
+  --   !domainDef a f ∧ !rangeDef r f ∧ !bitSubsetDef r b”)
+  (.mkSigma “a b. ∃ p, !exponentialDef (a + b) p ∧ ∃ f < p, ∃ r <⁺ 2 * f,
+    !IsMapping.isFunctionDef f ∧ !IsMapping.injectiveDef f ∧
+    !domainDef a f ∧ !rangeDef r f ∧ !bitSubsetDef r b”)
+  (.mkPi “a b. ∀ p, !exponentialDef (a + b) p → ∃ f < p, ∃ r <⁺ 2 * f,
+    !IsMapping.isFunctionDef f ∧ !IsMapping.injectiveDef f ∧
+    !domainDef a f ∧ !rangeDef r f ∧ !bitSubsetDef r b”)
 
-infix:50 " ≤# " => CardLE
+set_option linter.flexible false in
+lemma CardLE.defined : 𝚫ᴬ₁-Relation[V] CardLE via CardLE.dfn :=
+  ⟨fun v ↦ by
+    simp [dfn]
+    constructor <;> intro h
+    · intro p' hp'
+      obtain ⟨p, hp⟩ := h
+      exact Exponential.uniq hp.1 hp' ▸ hp.2
+    · let p := Exp.exp (v 0 + v 1)
+      have hp := exponential_exp (v 0 + v 1)
+      exact ⟨p, hp, (h p) hp⟩,
+   fun v ↦ by
+    simp [dfn]
+    constructor <;> intro h
+    · obtain ⟨p, hp, f, hf⟩ := h
+      use f
+      aesop
+    · obtain ⟨f, hf⟩ := h
+      let p := Exp.exp (v 0 + v 1)
+      have hp := exponential_exp (v 0 + v 1)
+      refine ⟨p, hp, f, ?_, by aesop⟩
+      · have hsubset := hf.1.2
+        have hdomainle : domain f ≤ 2 * f := domain_bound f
+        have hrangele : range f ≤ 2 * f := range_bound f
+        apply Arithmetic.le_of_subset at hsubset
+        -- TODO: This goal might be wrong, can weaken it if necessary
 
-lemma CardLE.defined : 𝚺ᴬ₁-Relation[V] CardLE via CardLE.dfn := sorry
+        sorry⟩
 
-lemma CardLE.definable : 𝚺ᴬ₁-Relation[V] CardLE := CardLE.defined.to_definable
+lemma CardLE.definable : 𝚫ᴬ₁-Relation[V] CardLE := CardLE.defined.to_definable
 
 def CardEQ (a b : V) : Prop := CardLE a b ∧ CardLE b a
 
-infix:60 " ≋ " => CardEQ
+scoped infix:60 " ≋ " => CardEQ
 
-lemma CardEQ.defined : 𝚺ᴬ₁-Relation[V] CardEQ via CardEQ.dfn := sorry
+def CardEQ.dfn : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
+  (.mkSigma “a b. !CardLE.dfn.sigma a b ∧ !CardLE.dfn.sigma b a”)
+  (.mkPi “a b. !CardLE.dfn.pi a b ∧ !CardLE.dfn.pi b a”)
 
-lemma CardEQ.definable : 𝚺ᴬ₁-Relation[V] CardEQ := CardEQ.defined.to_definable
+lemma CardEQ.defined : 𝚫ᴬ₁-Relation[V] CardEQ via CardEQ.dfn :=
+  ⟨fun v ↦ by
+    #check CardLE.defined.iff
+    sorry,
+   fun v ↦ by
+    #check CardLE.defined.iff
+    sorry⟩
+
+lemma CardEQ.definable : 𝚫ᴬ₁-Relation[V] CardEQ := CardEQ.defined.to_definable
 
 end FFL.FirstOrder.Arithmetic

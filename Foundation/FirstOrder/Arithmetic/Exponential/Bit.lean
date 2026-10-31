@@ -652,13 +652,24 @@ theorem finset_comprehension₁! {P : V → Prop} (hP : Γᴬ_[1]-Predicate P) (
 theorem finite_comprehension₁! {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (fin : ∃ m, ∀ i, P i → i < m) :
     ∃! s : V, ∀ i, i ∈ s ↔ P i := by
-  rcases fin with ⟨m, mh⟩
+  rcases fin with ⟨m, hm⟩
   rcases finset_comprehension₁ hP m with ⟨s, hs, Hs⟩
   have H : ∀ i, i ∈ s ↔ P i :=
     fun i ↦ ⟨
       fun h ↦ (Hs i (exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem h) hs))).mp h,
-      fun h ↦ (Hs i (mh i h)).mpr h⟩
+      fun h ↦ (Hs i (hm i h)).mpr h⟩
   exact ExistsUnique.intro s H (fun s' H' ↦ mem_ext <| fun i ↦ by simp [H, H'])
+
+/-- A version of `finite_comprehension₁!` with an upper bound, given an explicit bound on
+the predicate. -/
+theorem finite_comprehension₁!_bound {m} {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
+    (hm : ∀ i, P i → i < m) :
+    Classical.choose! (finite_comprehension₁! hP ⟨m, hm⟩) < Exp.exp m := by
+  rcases finset_comprehension₁ hP m with ⟨s, hs, Hs⟩
+  refine lt_of_lt_log (exp_pos m) ?_
+  intro i himem
+  exact (log_exponential m).symm ▸
+    hm i ((Classical.choose!_spec (finite_comprehension₁! hP ⟨m, hm⟩) i).mp himem)
 
 end
 
