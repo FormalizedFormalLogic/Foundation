@@ -29,10 +29,10 @@ def CardLE.dfn : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   -- (.mkPi “a b. ∀ p, !exponentialDef (a + b) p → ∃ f < p, ∃ r <⁺ 2 * f,
   --   !IsMapping.isFunctionDef f ∧ !IsMapping.injectiveDef f ∧
   --   !domainDef a f ∧ !rangeDef r f ∧ !bitSubsetDef r b”)
-  (.mkSigma “a b. ∃ p, !exponentialDef (a + b) p ∧ ∃ f < p, ∃ r <⁺ 2 * f,
+  (.mkSigma “a b. ∃ p, !exponentialDef (a + b + 1)² p ∧ ∃ f < p, ∃ r <⁺ 2 * f,
     !IsMapping.isFunctionDef f ∧ !IsMapping.injectiveDef f ∧
     !domainDef a f ∧ !rangeDef r f ∧ !bitSubsetDef r b”)
-  (.mkPi “a b. ∀ p, !exponentialDef (a + b) p → ∃ f < p, ∃ r <⁺ 2 * f,
+  (.mkPi “a b. ∀ p, !exponentialDef (a + b + 1)² p → ∃ f < p, ∃ r <⁺ 2 * f,
     !IsMapping.isFunctionDef f ∧ !IsMapping.injectiveDef f ∧
     !domainDef a f ∧ !rangeDef r f ∧ !bitSubsetDef r b”)
 
@@ -44,8 +44,8 @@ lemma CardLE.defined : 𝚫ᴬ₁-Relation[V] CardLE via CardLE.dfn :=
     · intro p' hp'
       obtain ⟨p, hp⟩ := h
       exact Exponential.uniq hp.1 hp' ▸ hp.2
-    · let p := Exp.exp (v 0 + v 1)
-      have hp := exponential_exp (v 0 + v 1)
+    · let p := Exp.exp ((v 0 + v 1 + 1) ^ 2)
+      have hp := exponential_exp ((v 0 + v 1 + 1) ^ 2)
       exact ⟨p, hp, (h p) hp⟩,
    fun v ↦ by
     simp [dfn]
@@ -54,16 +54,17 @@ lemma CardLE.defined : 𝚫ᴬ₁-Relation[V] CardLE via CardLE.dfn :=
       use f
       aesop
     · obtain ⟨f, hf⟩ := h
-      let p := Exp.exp (v 0 + v 1)
-      have hp := exponential_exp (v 0 + v 1)
+      let p := Exp.exp ((v 0 + v 1 + 1) ^ 2)
+      have hp := exponential_exp ((v 0 + v 1 + 1) ^ 2)
       refine ⟨p, hp, f, ?_, by aesop⟩
       · have hsubset := hf.1.2
-        have hdomainle : domain f ≤ 2 * f := domain_bound f
-        have hrangele : range f ≤ 2 * f := range_bound f
-        apply Arithmetic.le_of_subset at hsubset
-        -- TODO: This goal might be wrong, can weaken it if necessary
-
-        sorry⟩
+        have hexponent : v 0 + range f + 1 ≤ v 0 + v 1 + 1 :=
+          add_le_add_three le_rfl (le_of_subset hf.2.2.2) le_rfl
+        apply le_of_subset at hsubset
+        calc
+          f < Exp.exp ((domain f + range f + 1) ^ 2) := lt_of_le_of_lt hsubset product_bound'
+          _ = Exp.exp ((v 0 + range f + 1) ^ 2) := by aesop
+          _ ≤ Exp.exp ((v 0 + v 1 + 1) ^ 2) := exp_monotone_le.mpr (sq_le_sq.mpr hexponent)⟩
 
 lemma CardLE.definable : 𝚫ᴬ₁-Relation[V] CardLE := CardLE.defined.to_definable
 
@@ -77,7 +78,7 @@ def CardEQ.dfn : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
 
 lemma CardEQ.defined : 𝚫ᴬ₁-Relation[V] CardEQ via CardEQ.dfn :=
   ⟨fun v ↦ by
-    #check CardLE.defined.iff
+    simp [CardLE.defined.iff]
     sorry,
    fun v ↦ by
     #check CardLE.defined.iff

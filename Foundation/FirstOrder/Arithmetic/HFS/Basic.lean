@@ -258,28 +258,37 @@ instance product_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₂[V] (· ×ʰᶠ ·) :=
   product_definable.of_zero
 
--- lemma product_bound {a b : V} : a ×ʰᶠ b < Exp.exp (a * b) := by
---   unfold product
---   have : 𝚺ᴬ₁-Predicate fun x ↦ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫ := by definability
---   refine finite_comprehension₁!_bound (m := a * b) this ?_
---   rintro i ⟨y, hymem, z, hzmem, rfl⟩
---   refine lt_of_le_of_lt (pair_polybound y z) ?_
---   apply le_log_of_mem at hymem
---   apply le_log_of_mem at hzmem
---   #check add_le_add hymem hzmem
---   sorry
+@[simp] lemma zero_product {b : V} : ∅ ×ʰᶠ b = ∅ := by
+  refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
 
-lemma product_bound {a b : V} : a ×ʰᶠ b < a * b := by
+@[simp] lemma product_zero {a : V} : a ×ʰᶠ ∅ = ∅ := by
+  refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
+
+lemma product_bound {a b : V} : a ×ʰᶠ b < Exp.exp ((log a + log b + 1) ^ 2 + 1) := by
   unfold product
   have : 𝚺ᴬ₁-Predicate fun x ↦ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫ := by definability
-  rw [← log_exponential (a * b)]
-  refine finite_comprehension₁!_bound (m := a * b) this ?_
+  refine finite_comprehension₁!_bound (m := (log a + log b + 1) ^ 2 + 1) this ?_
   rintro i ⟨y, hymem, z, hzmem, rfl⟩
-  refine lt_of_le_of_lt (pair_polybound y z) ?_
   apply le_log_of_mem at hymem
   apply le_log_of_mem at hzmem
-  #check add_le_add hymem hzmem
-  sorry
+  calc
+    ⟪y, z⟫ ≤ (y + z + 1) ^ 2 := pair_polybound y z
+    _ ≤ (log a + log b + 1) ^ 2 := sq_le_sq.mpr (add_le_add (add_le_add hymem hzmem) (le_refl 1))
+    _ < (log a + log b + 1) ^ 2 + 1 := by aesop
+
+/-- A weaker upper bound than `product_bound`. -/
+lemma product_bound' {a b : V} : a ×ʰᶠ b < Exp.exp ((a + b + 1) ^ 2) := by
+  by_cases hpos : 0 < a ∧ 0 < b
+  · have : (log a + log b + 1) ^ 2 + 1 ≤ (a + b + 1) ^ 2 :=
+      lt_iff_succ_le.mp (sq_lt_sq.mpr (add_lt_add_left (add_lt_add_of_lt_of_lt
+        (log_lt_self_of_pos hpos.1) (log_lt_self_of_pos hpos.2)) 1))
+    exact lt_of_lt_of_le (product_bound) (exp_monotone_le.mpr this)
+  · apply not_and_or.mp at hpos
+    rcases hpos with (ha | hb)
+    · simp only [(by aesop : a = 0), ← emptyset_def, zero_product]
+      exact exp_pos ((∅ + b + 1) ^ 2)
+    · simp only [(by aesop : b = 0), ← emptyset_def, product_zero]
+      exact exp_pos ((a + ∅ + 1) ^ 2)
 
 end product
 
