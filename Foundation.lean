@@ -49,6 +49,7 @@ public import Foundation.FirstOrder.Arithmetic.Exponential.PPow2
 public import Foundation.FirstOrder.Arithmetic.Exponential.Pow2
 public import Foundation.FirstOrder.Arithmetic.HFS
 public import Foundation.FirstOrder.Arithmetic.HFS.Basic
+public import Foundation.FirstOrder.Arithmetic.HFS.Card
 public import Foundation.FirstOrder.Arithmetic.HFS.Coding
 public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 public import Foundation.FirstOrder.Arithmetic.HFS.PRF
