@@ -162,7 +162,7 @@ Register a new function with `@[primrec]`, stating the lemma pointwise — `Prim
 
 ## No `sorry`
 
-`sorry` is never acceptable in submitted proofs. CI runs `just forgive`, which fails the build on any remaining `sorry` (as well as on axioms outside the allowlist) — a proof left in a skeleton state cannot land. If a proof is incomplete, keep it out of the PR rather than submitting it with `sorry` placeholders.
+`sorry` is never acceptable in submitted proofs. CI runs `lake check` (`just kernel-check`), which fails the build on any remaining `sorry` (as well as on axioms outside the allowlist) — a proof left in a skeleton state cannot land. If a proof is incomplete, keep it out of the PR rather than submitting it with `sorry` placeholders.
 
 ## `set_option`
 

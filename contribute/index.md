@@ -36,7 +36,7 @@ PRs (title and body) are written in English.
 ## Before submitting
 
 - The affected modules build with `lake build --wfail`, which turns every warning (including a remaining `sorry`) into an error.
-- 🤖 Run `just forgive` and confirm it passes before submitting a PR. This checks sorry-freeness and the axiom allowlist across the project, and CI re-runs it on every PR — a failing audit blocks the merge.
+- 🤖 Run `just kernel-check` (`lake check`) and confirm it passes before submitting a PR. It rebuilds the project in a `bwrap` sandbox, replays it through the kernel, and rejects `sorry` and axioms outside the allowlist (`propext`, `Classical.choice`, `Quot.sound`). It needs `bubblewrap` and takes several minutes. CI re-runs it on every PR — a failing audit blocks the merge.
 - Run import-all to keep `Foundation.lean` up to date:
   ```shell
   just mk-all
