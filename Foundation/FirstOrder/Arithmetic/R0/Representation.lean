@@ -48,6 +48,7 @@ lemma primrecPred_bexs (ε : ξ → ℕ) {n} (t : ArithmeticSemiterm ξ n)
   exact (PrimrecPred.exists_lt' (term_primrec (f := ε) t) hR).of_eq
     fun v ↦ by simp [List.Vector.cons_get];
 
+@[primrec]
 lemma delta0_primrec (ε : ξ → ℕ) {k} {φ : ArithmeticSemiformula ξ k}
     (hp : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ) :
     PrimrecPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε := by
