@@ -169,6 +169,12 @@ set_option linter.flexible false in
 
 instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := Entailment.WeakerThan.ofSubset fun φ hp ↦ PeanoMinus.equal φ hp
 
+lemma hierarchy_pi_one {σ : ArithmeticSentence} (hσ : 𝗣𝗔⁻ σ) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 σ := by
+  rcases hσ with ⟨_, hσ⟩ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _
+  · exact Bounding.Hierarchy.of_eqAxiom hσ
+  all_goals simp [PeanoMinus.Axiom.addZero]
+
 end PeanoMinus
 
 variable {M : Type*} [ORingStructure M]
