@@ -1,0 +1,108 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "FormalizedFormalLogic/Foundation"
+  description: >-
+    Lean4 formalization of mathematical logic.
+  authors:
+    - "Shogo Saitou"
+    - "Mashū Noguchi"
+  responsible_maintainers:
+    - "Shogo Saitou"
+    - "Mashū Noguchi"
+  license: "Apache-2.0"
+  # Not part of the v0.4 schema: the paper that describes this formalization.
+  publications:
+    - title: "Mechanizing Gödel's Incompleteness Theorems and Provability Logic"
+      authors:
+        - "Shogo Saitou"
+        - "Mashū Noguchi"
+      id: "doi:10.48550/arXiv.2609.13780"
+
+sources:
+  - title: "Metamathematics of First-Order Arithmetic"
+    authors:
+      - "Petr Hájek"
+      - "Pavel Pudlák"
+    id: "ISBN 978-3-540-63648-9"
+    relationship: adapts
+  - title: "Algebraic Proofs of Cut Elimination"
+    authors:
+      - "Jeremy Avigad"
+    id: "doi:10.1016/S1567-8326(01)00009-1"
+    relationship: adapts
+  - title: "Provability Interpretations of Modal Logic"
+    authors:
+      - "Robert M. Solovay"
+    id: "doi:10.1007/BF02757006"
+    relationship: formalizes
+  - title: "Provability Logic"
+    authors:
+      - "Sergei N. Artemov"
+      - "Lev D. Beklemishev"
+    id: "doi:10.1007/1-4020-3521-7_3"
+    relationship: adapts
+  - title: "On the Classification of Propositional Provability Logics"
+    authors:
+      - "Lev D. Beklemishev"
+    id: "doi:10.1070/IM1990v035n02ABEH000701"
+    relationship: formalizes
+
+related_formalizations:
+  - id: "https://github.com/leanprover-community/mathlib4"
+    relationship: builds-on
+  - id: "https://github.com/FormalizedFormalLogic/AlphaCentauri"
+    relationship: adapts
+
+classification:
+  arxiv:
+    - "math.LO"
+    - "cs.LO"
+  msc2020:
+    - "03B10"
+    - "03B45"
+    - "03E30"
+    - "03F05"
+    - "03F30"
+    - "03F40"
+    - "03F45"
+
+status:
+  scope: "The main results listed in README.md. Other references are in references.bib."
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms:
+    - "propext"
+    - "Classical.choice"
+    - "Quot.sound"
+  main_results:
+    - declaration: "FFL.FirstOrder.Theory.Proof.complete_iff"
+      file: "Foundation/FirstOrder/LK/Completeness/CounterModel.lean"
+    - declaration: "FFL.FirstOrder.LK.Derivation.Canonical.hauptsatz"
+      file: "Foundation/FirstOrder/LK/Hauptsatz.lean"
+    - declaration: "FFL.FirstOrder.Arithmetic.incomplete"
+      file: "Foundation/FirstOrder/Incompleteness/First.lean"
+    - declaration: "FFL.FirstOrder.Arithmetic.consistent_unprovable"
+      file: "Foundation/FirstOrder/Incompleteness/Second.lean"
+    - declaration: "FFL.FirstOrder.SetTheory.zfc_consistent"
+      file: "Foundation/FirstOrder/SetTheory/Universe.lean"
+    - declaration: "FFL.ProvabilityLogic.Logic.GL.arithmetical_completeness_iff"
+      file: "Foundation/ProvabilityLogic/GL/Arithmetic.lean"
+    - declaration: "FFL.ProvabilityLogic.provabilityLogic_classification"
+      file: "Foundation/ProvabilityLogic/Classification/General.lean"
+
+automation:
+  methods:
+    - method: manual
+    - method: agent
+      framework: "Claude Code"
+    - method: agent
+      framework: "Codex"
+  notes: "AI-assisted commits carry a Co-Authored-By trailer naming the agent."
+
+fidelity:
+  divergences: "The consistency of ZFC is relative to Lean's type theory."
+
+review:
+  status: "self-assessed"
