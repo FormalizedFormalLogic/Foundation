@@ -76,13 +76,18 @@ def CardEQ.dfn : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “a b. !CardLE.dfn.sigma a b ∧ !CardLE.dfn.sigma b a”)
   (.mkPi “a b. !CardLE.dfn.pi a b ∧ !CardLE.dfn.pi b a”)
 
+set_option linter.flexible false in
 lemma CardEQ.defined : 𝚫ᴬ₁-Relation[V] CardEQ via CardEQ.dfn :=
   ⟨fun v ↦ by
-    simp [CardLE.defined.iff]
-    sorry,
+    simp [CardEQ.dfn]
+    refine and_congr ?_ ?_
+    · exact CardLE.defined.proper ![v 0, v 1]
+    · exact CardLE.defined.proper ![v 1, v 0],
    fun v ↦ by
-    #check CardLE.defined.iff
-    sorry⟩
+    simp [CardEQ.dfn, CardEQ]
+    refine and_congr ?_ ?_
+    · exact CardLE.defined.iff (v := ![v 0, v 1])
+    · exact CardLE.defined.iff (v := ![v 1, v 0])⟩
 
 lemma CardEQ.definable : 𝚫ᴬ₁-Relation[V] CardEQ := CardEQ.defined.to_definable
 
