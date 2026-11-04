@@ -495,7 +495,7 @@ variable {Γ : Polarity} {s n : ℕ}
 private lemma isHierarchy_of_hierarchy {ψ : ArithmeticSemiproposition n}
     (h : ℬ[<, ℒₒᵣ].Hierarchy Γ s ψ) : IsHierarchy Γ s (⌜ψ⌝ : ℕ) := by
   induction h with
-  | bounded _ _ _ h => exact IsHierarchy.of_bounded ((isBounded_quote_iff_s _).mpr h);
+  | initial _ _ _ h => exact IsHierarchy.of_bounded ((isBounded_quote_iff_s _).mpr h);
   | and _ _ ihφ ihψ => simpa [Semiformula.quote_and] using ⟨ihφ, ihψ⟩;
   | or _ _ ihφ ihψ => simpa [Semiformula.quote_or] using ⟨ihφ, ihψ⟩;
   | ball hR ht _ ih =>
@@ -522,7 +522,7 @@ private lemma isHierarchy_of_hierarchy {ψ : ArithmeticSemiproposition n}
 private lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
     IsHierarchy Γ s (⌜ψ⌝ : ℕ) → ℬ[<, ℒₒᵣ].Hierarchy Γ s ψ := by
   induction s generalizing Γ n ψ with
-  | zero => exact fun h ↦ .bounded _ _ _ ((isBounded_quote_iff_s ψ).mp h);
+  | zero => exact fun h ↦ .initial _ _ _ ((isBounded_quote_iff_s ψ).mp h);
   | succ s ihs =>
     induction ψ using Semiformula.rec' with
     | hverum => simp;
@@ -545,7 +545,7 @@ private lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
       · exact (ih hφ).all;
       · obtain ⟨u, χ, rfl⟩ := exists_ball_of_quote_eq ht e;
         exact Bounding.Hierarchy.arithmetic_ball (Rew.positive_iff.mpr ⟨u, rfl⟩)
-          (Bounding.Hierarchy.imp_iff.mp (ih hφ)).2;
+          (Bounding.HierarchyOn.imp_iff.mp (ih hφ)).2;
     | hexs φ ih =>
       intro h;
       rw [Semiformula.quote_ex] at h;
@@ -554,7 +554,7 @@ private lemma hierarchy_of_isHierarchy (ψ : ArithmeticSemiproposition n) :
       · exact (ih hφ).exs;
       · obtain ⟨u, χ, rfl⟩ := exists_bex_of_quote_eq ht e;
         exact Bounding.Hierarchy.arithmetic_bexs (Rew.positive_iff.mpr ⟨u, rfl⟩)
-          (Bounding.Hierarchy.and_iff.mp (ih hφ)).2;
+          (Bounding.HierarchyOn.and_iff.mp (ih hφ)).2;
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 

@@ -376,7 +376,7 @@ theorem models_exists_prenex {Γ Γ' : Polarity} {s n : ℕ} {φ : ArithmeticSem
     have : V↓[ℒₒᵣ] ⊧* PrenexBase s := models_PrenexBase_of_models_CollectionOnPrenexHierarchy Γ' s;
     exact hφ' V e f;
   induction h with
-  | @bounded Γ s n φ h =>
+  | @initial Γ s n φ h =>
     use ofΔ₀ ⟨φ, h⟩ Γ s;
     intro V _ _ e f;
     exact (models_ofΔ₀ ⟨φ, h⟩ e).symm;
