@@ -109,7 +109,7 @@ exact ha_le_b_of_lt.trans hb_le_c_weaken
 
 All comments and docstrings are written in English.
 
-🤖 Keep comments minimal. A docstring explains only what the statement says — not the proof strategy. Do not annotate individual `have`s with comments restating them. An inline comment is justified only for what the code cannot express (an elaboration pitfall, why a natural alternative fails), in about one line. Long "Implementation notes" sections are unwanted; if the design needs that much explanation, restructure the proof instead.
+🤖 Keep comments minimal. A docstring explains only what the statement says — not the proof strategy, and a module docstring only what the file contains, not how it is proved. Do not annotate individual `have`s with comments restating them. An inline comment is justified only for what the code cannot express (an elaboration pitfall, why a natural alternative fails), in about one line. Long "Implementation notes" sections are unwanted; if the design needs that much explanation, restructure the proof instead.
 
 Module docstrings must be placed before `@[expose] public section`.
 
