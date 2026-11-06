@@ -341,28 +341,28 @@ def complexity : Semiformula L Ξ ξ N n → ℕ
 @[simp] lemma complexity_exs₂' (φ : Semiformula L Ξ ξ (N + 1) n) :
     φ.exs₂.complexity = φ.complexity + 1 := rfl
 
-/- ### Elementary Semiformulas -/
+/- ### Arithmetical Semiformulas -/
 
-inductive IsElementary : Semiformula L Ξ ξ N n → Prop
-| rel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsElementary (rel R v)
-| nrel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsElementary (nrel R v)
-| bvar : IsElementary (t ∈# X)
-| nbvar : IsElementary (t ∉# X)
-| fvar : IsElementary (t ∈& X)
-| nfvar : IsElementary (t ∉& X)
-| verum : IsElementary ⊤
-| falsum : IsElementary ⊥
-| and (φ ψ : Semiformula L Ξ ξ N n) : IsElementary φ → IsElementary ψ → IsElementary (φ ⋏ ψ)
-| or (φ ψ : Semiformula L Ξ ξ N n) : IsElementary φ → IsElementary ψ → IsElementary (φ ⋎ ψ)
-| all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsElementary φ → IsElementary (∀¹ φ)
-| exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsElementary φ → IsElementary (∃¹ φ)
+inductive IsArithmetical : Semiformula L Ξ ξ N n → Prop
+| rel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsArithmetical (rel R v)
+| nrel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsArithmetical (nrel R v)
+| bvar : IsArithmetical (t ∈# X)
+| nbvar : IsArithmetical (t ∉# X)
+| fvar : IsArithmetical (t ∈& X)
+| nfvar : IsArithmetical (t ∉& X)
+| verum : IsArithmetical ⊤
+| falsum : IsArithmetical ⊥
+| and (φ ψ : Semiformula L Ξ ξ N n) : IsArithmetical φ → IsArithmetical ψ → IsArithmetical (φ ⋏ ψ)
+| or (φ ψ : Semiformula L Ξ ξ N n) : IsArithmetical φ → IsArithmetical ψ → IsArithmetical (φ ⋎ ψ)
+| all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsArithmetical φ → IsArithmetical (∀¹ φ)
+| exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsArithmetical φ → IsArithmetical (∃¹ φ)
 
-namespace IsElementary
+namespace IsArithmetical
 
 attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
 
 @[simp] lemma and_iff {φ ψ : Semiformula L Ξ ξ N n} :
-    (φ ⋏ ψ).IsElementary ↔ φ.IsElementary ∧ ψ.IsElementary := by
+    (φ ⋏ ψ).IsArithmetical ↔ φ.IsArithmetical ∧ ψ.IsArithmetical := by
   constructor
   · intro h
     cases h with
@@ -371,7 +371,7 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
     exact .and _ _ hφ hψ
 
 @[simp] lemma or_iff {φ ψ : Semiformula L Ξ ξ N n} :
-    (φ ⋎ ψ).IsElementary ↔ φ.IsElementary ∧ ψ.IsElementary := by
+    (φ ⋎ ψ).IsArithmetical ↔ φ.IsArithmetical ∧ ψ.IsArithmetical := by
   constructor
   · intro h
     cases h with
@@ -380,7 +380,7 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
     exact .or _ _ hφ hψ
 
 @[simp] lemma all₁_iff {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∀¹ φ).IsElementary ↔ φ.IsElementary := by
+    (∀¹ φ).IsArithmetical ↔ φ.IsArithmetical := by
   constructor
   · intro h
     cases h with
@@ -388,7 +388,7 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
   · exact .all₁ _
 
 @[simp] lemma exs₁_iff {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∃¹ φ).IsElementary ↔ φ.IsElementary := by
+    (∃¹ φ).IsArithmetical ↔ φ.IsArithmetical := by
   constructor
   · intro h
     cases h with
@@ -396,16 +396,16 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
   · exact .exs₁ _
 
 @[simp] lemma not_all₂ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    ¬(∀² φ).IsElementary := by
+    ¬(∀² φ).IsArithmetical := by
   intro h
   cases h
 
 @[simp] lemma not_exs₂ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    ¬(∃² φ).IsElementary := by
+    ¬(∃² φ).IsArithmetical := by
   intro h
   cases h
 
-end IsElementary
+end IsArithmetical
 
 end Semiformula
 
@@ -447,7 +447,7 @@ lemma toSecondOrderAux_neg (φ : FirstOrder.Semiformula L ξ n) :
     change ∀¹ toSecondOrderAux Ξ N (∼φ) = ∀¹ ∼toSecondOrderAux Ξ N φ
     rw [ih]
 
-def toSecondOrder : FirstOrder.Semiformula L ξ n →ˡᶜ SecondOrder.Semiformula L Ξ ξ N n where
+@[coe] def toSecondOrder : FirstOrder.Semiformula L ξ n →ˡᶜ SecondOrder.Semiformula L Ξ ξ N n where
   toTr := toSecondOrderAux Ξ N
   map_top' := rfl
   map_bot' := rfl
@@ -470,9 +470,9 @@ end FirstOrder
 
 namespace SecondOrder.Semiformula
 
-lemma isElementary_toSecondOrder (φ : FirstOrder.Semiformula L ξ n) :
-    (φ.toSecondOrder Ξ N).IsElementary := by
-  change (FirstOrder.Semiformula.toSecondOrderAux Ξ N φ).IsElementary
+lemma isArithmetical_toSecondOrder (φ : FirstOrder.Semiformula L ξ n) :
+    (φ.toSecondOrder Ξ N).IsArithmetical := by
+  change (FirstOrder.Semiformula.toSecondOrderAux Ξ N φ).IsArithmetical
   induction φ with
   | verum => exact .verum
   | falsum => exact .falsum
