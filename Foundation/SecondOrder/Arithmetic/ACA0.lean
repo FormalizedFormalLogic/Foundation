@@ -16,7 +16,7 @@ namespace TheoryRestrictedComprehension
 /-! The fragment of second-order arithmetic with arithmetic comprehension. -/
 def ArithmeticalComprehensionAxiom : TheoryRestrictedComprehension ℒₒᵣ where
   theory := 𝗭₂
-  comprehension := Semiformula.IsArithmetical
+  comprehension := Semiformula.IsSecondOrderQuantifierFree
 
 notation "𝗔𝗖𝗔₀" => ArithmeticalComprehensionAxiom
 
