@@ -356,8 +356,10 @@ inductive IsSecondOrderQuantifierFree : Semiformula L Ξ ξ N n → Prop
     IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋏ ψ)
 | or (φ ψ : Semiformula L Ξ ξ N n) : IsSecondOrderQuantifierFree φ →
     IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋎ ψ)
-| all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree (∀¹ φ)
-| exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree (∃¹ φ)
+| all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ →
+    IsSecondOrderQuantifierFree (∀¹ φ)
+| exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ →
+    IsSecondOrderQuantifierFree (∃¹ φ)
 
 namespace IsSecondOrderQuantifierFree
 
