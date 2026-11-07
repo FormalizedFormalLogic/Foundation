@@ -343,26 +343,26 @@ def complexity : Semiformula L Ξ ξ N n → ℕ
 
 /- ### Arithmetical Semiformulas -/
 
-inductive IsArithmetical : Semiformula L Ξ ξ N n → Prop
-| rel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsArithmetical (rel R v)
-| nrel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsArithmetical (nrel R v)
-| bvar : IsArithmetical (t ∈# X)
-| nbvar : IsArithmetical (t ∉# X)
-| fvar : IsArithmetical (t ∈& X)
-| nfvar : IsArithmetical (t ∉& X)
-| verum : IsArithmetical ⊤
-| falsum : IsArithmetical ⊥
-| and (φ ψ : Semiformula L Ξ ξ N n) : IsArithmetical φ → IsArithmetical ψ → IsArithmetical (φ ⋏ ψ)
-| or (φ ψ : Semiformula L Ξ ξ N n) : IsArithmetical φ → IsArithmetical ψ → IsArithmetical (φ ⋎ ψ)
-| all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsArithmetical φ → IsArithmetical (∀¹ φ)
-| exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsArithmetical φ → IsArithmetical (∃¹ φ)
+inductive IsSecondOrderQuantifierFree : Semiformula L Ξ ξ N n → Prop
+| rel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsSecondOrderQuantifierFree (rel R v)
+| nrel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsSecondOrderQuantifierFree (nrel R v)
+| bvar : IsSecondOrderQuantifierFree (t ∈# X)
+| nbvar : IsSecondOrderQuantifierFree (t ∉# X)
+| fvar : IsSecondOrderQuantifierFree (t ∈& X)
+| nfvar : IsSecondOrderQuantifierFree (t ∉& X)
+| verum : IsSecondOrderQuantifierFree ⊤
+| falsum : IsSecondOrderQuantifierFree ⊥
+| and (φ ψ : Semiformula L Ξ ξ N n) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋏ ψ)
+| or (φ ψ : Semiformula L Ξ ξ N n) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋎ ψ)
+| all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree (∀¹ φ)
+| exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree (∃¹ φ)
 
-namespace IsArithmetical
+namespace IsSecondOrderQuantifierFree
 
 attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
 
 @[simp] lemma and_iff {φ ψ : Semiformula L Ξ ξ N n} :
-    (φ ⋏ ψ).IsArithmetical ↔ φ.IsArithmetical ∧ ψ.IsArithmetical := by
+    (φ ⋏ ψ).IsSecondOrderQuantifierFree ↔ φ.IsSecondOrderQuantifierFree ∧ ψ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
@@ -371,7 +371,7 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
     exact .and _ _ hφ hψ
 
 @[simp] lemma or_iff {φ ψ : Semiformula L Ξ ξ N n} :
-    (φ ⋎ ψ).IsArithmetical ↔ φ.IsArithmetical ∧ ψ.IsArithmetical := by
+    (φ ⋎ ψ).IsSecondOrderQuantifierFree ↔ φ.IsSecondOrderQuantifierFree ∧ ψ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
@@ -380,7 +380,7 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
     exact .or _ _ hφ hψ
 
 @[simp] lemma all₁_iff {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∀¹ φ).IsArithmetical ↔ φ.IsArithmetical := by
+    (∀¹ φ).IsSecondOrderQuantifierFree ↔ φ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
@@ -388,7 +388,7 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
   · exact .all₁ _
 
 @[simp] lemma exs₁_iff {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∃¹ φ).IsArithmetical ↔ φ.IsArithmetical := by
+    (∃¹ φ).IsSecondOrderQuantifierFree ↔ φ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
@@ -396,16 +396,16 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
   · exact .exs₁ _
 
 @[simp] lemma not_all₂ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    ¬(∀² φ).IsArithmetical := by
+    ¬(∀² φ).IsSecondOrderQuantifierFree := by
   intro h
   cases h
 
 @[simp] lemma not_exs₂ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    ¬(∃² φ).IsArithmetical := by
+    ¬(∃² φ).IsSecondOrderQuantifierFree := by
   intro h
   cases h
 
-end IsArithmetical
+end IsSecondOrderQuantifierFree
 
 end Semiformula
 
@@ -470,9 +470,9 @@ end FirstOrder
 
 namespace SecondOrder.Semiformula
 
-lemma isArithmetical_toSecondOrder (φ : FirstOrder.Semiformula L ξ n) :
-    (φ.toSecondOrder Ξ N).IsArithmetical := by
-  change (FirstOrder.Semiformula.toSecondOrderAux Ξ N φ).IsArithmetical
+lemma isSecondOrderQuantifierFree_toSecondOrder (φ : FirstOrder.Semiformula L ξ n) :
+    (φ.toSecondOrder Ξ N).IsSecondOrderQuantifierFree := by
+  change (FirstOrder.Semiformula.toSecondOrderAux Ξ N φ).IsSecondOrderQuantifierFree
   induction φ with
   | verum => exact .verum
   | falsum => exact .falsum
