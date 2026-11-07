@@ -341,7 +341,7 @@ def complexity : Semiformula L Ξ ξ N n → ℕ
 @[simp] lemma complexity_exs₂' (φ : Semiformula L Ξ ξ (N + 1) n) :
     φ.exs₂.complexity = φ.complexity + 1 := rfl
 
-/- ### Arithmetical Semiformulas -/
+/- ### Second-order-quantifier-free semiformulas -/
 
 inductive IsSecondOrderQuantifierFree : Semiformula L Ξ ξ N n → Prop
 | rel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsSecondOrderQuantifierFree (rel R v)
@@ -352,8 +352,10 @@ inductive IsSecondOrderQuantifierFree : Semiformula L Ξ ξ N n → Prop
 | nfvar : IsSecondOrderQuantifierFree (t ∉& X)
 | verum : IsSecondOrderQuantifierFree ⊤
 | falsum : IsSecondOrderQuantifierFree ⊥
-| and (φ ψ : Semiformula L Ξ ξ N n) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋏ ψ)
-| or (φ ψ : Semiformula L Ξ ξ N n) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋎ ψ)
+| and (φ ψ : Semiformula L Ξ ξ N n) : IsSecondOrderQuantifierFree φ →
+    IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋏ ψ)
+| or (φ ψ : Semiformula L Ξ ξ N n) : IsSecondOrderQuantifierFree φ →
+    IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋎ ψ)
 | all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree (∀¹ φ)
 | exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ → IsSecondOrderQuantifierFree (∃¹ φ)
 
@@ -362,7 +364,8 @@ namespace IsSecondOrderQuantifierFree
 attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
 
 @[simp] lemma and_iff {φ ψ : Semiformula L Ξ ξ N n} :
-    (φ ⋏ ψ).IsSecondOrderQuantifierFree ↔ φ.IsSecondOrderQuantifierFree ∧ ψ.IsSecondOrderQuantifierFree := by
+    (φ ⋏ ψ).IsSecondOrderQuantifierFree ↔
+    φ.IsSecondOrderQuantifierFree ∧ ψ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
@@ -371,7 +374,8 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
     exact .and _ _ hφ hψ
 
 @[simp] lemma or_iff {φ ψ : Semiformula L Ξ ξ N n} :
-    (φ ⋎ ψ).IsSecondOrderQuantifierFree ↔ φ.IsSecondOrderQuantifierFree ∧ ψ.IsSecondOrderQuantifierFree := by
+    (φ ⋎ ψ).IsSecondOrderQuantifierFree ↔
+    φ.IsSecondOrderQuantifierFree ∧ ψ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
