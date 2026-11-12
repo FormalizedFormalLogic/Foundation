@@ -277,7 +277,7 @@ instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝗢𝗽𝗲𝗻 :=
 
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗⁺ Γ s :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _ <|
-    InductionScheme_subset Bounding.Hierarchy.of_open
+    InductionScheme_subset Bounding.HierarchyOn.of_open
 
 instance InductionOnPrenexHierarchy_weakerThan_InductionOnHierarchy (Γ : Polarity) (s : ℕ) :
     𝗜𝗡𝗗 Γ s ⪯ 𝗜𝗡𝗗⁺ Γ s :=
@@ -469,7 +469,7 @@ lemma models_IOpen_of_models_InductionOnPrenexHierarchy [h : V↓[ℒₒᵣ] ⊧
   Semantics.ModelsSet.union_iff.mpr ⟨models_of_ss h Set.subset_union_left,
     InductionScheme.models_of_exists_eval_iff fun _ hφ ↦
       (Bounding.PrenexHierarchy.exists_eval_iff_of_deltaZero (ℬ := ℬ[<, ℒₒᵣ])
-        (Bounding.Hierarchy.of_open hφ) Γ s).imp fun _ h ↦ ⟨h.1, h.2 V⟩⟩
+        (Bounding.HierarchyOn.of_open hφ) Γ s).imp fun _ h ↦ ⟨h.1, h.2 V⟩⟩
 
 lemma models_LeastNumberOnPrenexHierarchy_of_le (hs : s ≤ s') [h : V↓[ℒₒᵣ] ⊧* 𝗟 Γ s'] :
     V↓[ℒₒᵣ] ⊧* 𝗟 Γ s :=
