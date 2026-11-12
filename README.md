@@ -133,6 +133,10 @@ This project is licensed under the [Apache License 2.0](./LICENSE).
 
 If you wish to cite this repository in academic papers, refer to [`CITATION.cff`](./CITATION.cff).
 
+Our official publications/preprints can be found below. See also [website](https://formalizedformallogic.org/#publications).
+
+1. Shogo Saitou, Mashū Noguchi, _"Mechanizing Gödel's Incompleteness Theorems and Provability Logic"_, 2026, [arXiv/2609.13780](https://arxiv.org/abs/2609.13780).
+
 ## Financial Supports
 
 Any financial support would be greatly appreciated.
