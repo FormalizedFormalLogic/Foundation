@@ -24,12 +24,17 @@ universe u v
 
 variable {ξ : Type*} {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N]
 
+/-- `M ⊆ₑ N`: an `ℒₒᵣ`-embedding `emb : M ↪ₛ[ℒₒᵣ] N` whose image is an initial segment of `N`.
+Unlike a set-theoretic end extension, where `M` is a transitive subset, "end" refers to the order
+`<`: every `b < emb a` already lies in the image of `emb`. -/
 structure EndExtension (M : Type u) (N : Type v) [ORingStructure M] [ORingStructure N] where
   emb : M ↪ₛ[ℒₒᵣ] N
   mem_range_of_lt {a : M} {b : N} : b < emb a → b ∈ Set.range emb
 
 @[inherit_doc] infix:50 " ⊆ₑ " => EndExtension
 
+/-- `M ⊂ₑ N`: an end extension `M ⊆ₑ N` whose embedding is not surjective, so that `N` has an
+element beyond (the image of) `M`. -/
 structure ProperEndExtension (M : Type u) (N : Type v) [ORingStructure M] [ORingStructure N]
     extends EndExtension M N where
   not_surjective : ¬Function.Surjective emb
@@ -74,6 +79,8 @@ instance : ℬ[<, ℒₒᵣ].IsInitial e.emb where
     exact e.mem_range_of_lt (by simpa using hb)
 
 include e in
+/-- `Π₁` theories are preserved downward along end extensions: if `N ⊧* T` and `M ⊆ₑ N`,
+then `M ⊧* T`. -/
 theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 σ)
     [N↓[ℒₒᵣ] ⊧* T] :
     M↓[ℒₒᵣ] ⊧* T :=
@@ -90,10 +97,12 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, ℬ[<, ℒₒ�
     exact notModels_iff.mpr h₁ (models_theory_iff.mp (inferInstance : N↓[ℒₒᵣ] ⊧* T) σ hσ)
 
 include e in
+/-- If `M ⊆ₑ N` and `N ⊧* 𝗣𝗔⁻`, then `M ⊧* 𝗣𝗔⁻`. -/
 theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
   e.models_of_Pi1 (T := 𝗣𝗔⁻) fun _ hσ ↦ PeanoMinus.hierarchy_pi_one hσ
 
 include e in
+/-- If `M ⊆ₑ N` and `N ⊧* 𝗜𝚺₀`, then `M ⊧* 𝗜𝚺₀`. -/
 lemma models_ISigma0 [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
   have := e.models_peanoMinus
   models_ISigmaZero_of_succ_induction fun φ hφ v h0 hs a ↦ by
@@ -120,6 +129,7 @@ namespace ProperEndExtension
 
 variable (e : M ⊂ₑ N)
 
+/-- A proper end extension `M ⊂ₑ N` has an element `c : N` outside the image of `M`. -/
 lemma exists_not_mem_range : ∃ c : N, c ∉ Set.range e.emb := by
   simpa [Function.Surjective, Set.range, not_forall] using e.not_surjective
 
@@ -129,6 +139,9 @@ section Overspill
 
 variable (e : M ⊂ₑ N)
 
+/-- Overspill: if `M ⊂ₑ N`, `N` satisfies induction for the `Γ`-formulas of level `m`, and a
+`Γ`-formula of level `m` holds of every element of `M`, then it also holds of all `x < c` for some
+`c : N` outside `M`. -/
 theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
     {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ m φ) (f : ℕ → N)
     (h : ∀ a : M, φ.Eval ![e a] f) :
@@ -149,11 +162,15 @@ theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 �
 
 end Overspill
 
+/-- A cut of `M`: a downward closed subset that is closed under successor. Like a cut of
+`ℕ` in a nonstandard model, it need not be closed under `+` or `*`. -/
 structure Cut (M : Type u) [ORingStructure M] where
   carrier : Set M
   succ_mem {a : M} : a ∈ carrier → a + 1 ∈ carrier
   downward {a b : M} : a < b → b ∈ carrier → a ∈ carrier
 
+/-- A cut of `M` that is closed under `+` and `*` and contains `0` and `1`, so it is itself an
+`ℒₒᵣ`-structure. -/
 structure ClosedCut (M : Type u) [ORingStructure M] extends Cut M where
   zero_mem : (0 : M) ∈ carrier
   one_mem : (1 : M) ∈ carrier
@@ -171,6 +188,7 @@ instance oringStructure : ORingStructure I.carrier where
   mul a b := ⟨a.1 * b.1, I.mul_mem a.2 b.2⟩
   lt a b := a.1 < b.1
 
+/-- A closed cut `I` is an end extension of itself inside `M`: `I.carrier ⊆ₑ M`. -/
 def endExtension : I.carrier ⊆ₑ M where
   emb := {
     toFun := Subtype.val,
