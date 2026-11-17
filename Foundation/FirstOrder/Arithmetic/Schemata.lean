@@ -413,6 +413,28 @@ lemma InductionScheme.models_of_exists_eval_iff [V↓[ℒₒᵣ] ⊧* InductionS
     Theory.models (T := InductionScheme _ C') V (mem_InductionScheme_of_mem hψ);
   simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs, H] using this;
 
+lemma InductionScheme.models_of_succ_induction
+    (h : ∀ φ, C φ → ∀ v : ℕ → V, φ.Eval ![0] v → (∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) →
+      ∀ a, φ.Eval ![a] v) :
+    V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ C := by
+  apply Semantics.modelsSet_iff.mpr
+  rintro _ ⟨φ, hφ, rfl⟩
+  simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs] using h φ hφ
+
+lemma models_InductionOnPrenexHierarchy_of_succ_induction (Γ : Polarity) (s : ℕ)
+    [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+    (h : ∀ φ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s φ → ∀ v : ℕ → V, φ.Eval ![0] v →
+      (∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) → ∀ a, φ.Eval ![a] v) :
+    V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s :=
+  Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, InductionScheme.models_of_succ_induction h⟩
+
+lemma models_ISigmaZero_of_succ_induction [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+    (h : ∀ φ, ℬ[<, ℒₒᵣ].Closure φ → ∀ v : ℕ → V, φ.Eval ![0] v →
+      (∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) → ∀ a, φ.Eval ![a] v) :
+    V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
+  models_InductionOnPrenexHierarchy_of_succ_induction 𝚺 0
+    fun φ hφ ↦ h φ (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
+
 lemma LeastNumberScheme.models_of_exists_eval_iff [V↓[ℒₒᵣ] ⊧* LeastNumberScheme C']
     (h : ∀ φ, C φ → ∃ ψ, C' ψ ∧
       ∀ (e : Fin 1 → V) (f : ℕ → V), Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ) :
