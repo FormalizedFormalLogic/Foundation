@@ -371,6 +371,8 @@ lemma compact_cumulative {T : ℕ → Set F} (hT : Cumulative T) :
       rcases hT.finset_mem hu with ⟨s, hs⟩
       exact (H s).of_subset hs ⟩
 
+alias ⟨satisfiable_of_satisfiable_iUnion, satisfiable_iUnion⟩ := compact_cumulative
+
 end Compact
 
 end FFL
