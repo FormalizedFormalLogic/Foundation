@@ -25,7 +25,7 @@ open FFL.Entailment Bootstrapping Bootstrapping.Arithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁]
 
-abbrev _root_.FFL.FirstOrder.Theory.Conω : ArithmeticTheory :=
+noncomputable abbrev _root_.FFL.FirstOrder.Theory.Conω : ArithmeticTheory :=
   Set.range T.standardProvability.conItr
 
 private noncomputable def notProvableIterateBot : 𝚷ᴬ₁.Semisentence 1 := .mkPi

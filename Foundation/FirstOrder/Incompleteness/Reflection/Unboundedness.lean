@@ -290,7 +290,7 @@ theorem exists_sentence_weakerThan_of_unprovable
 theorem inconsistent_of_provable_localReflectionOn_union
     (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
     (h : T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
-  by_contra! hC;
+  by_contra hC;
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_unprovable (Y := {⊥}) hΓ e <| by
     simpa [consistent_iff_unprovable_bot] using hC;
   apply hcon ⊥ rfl;

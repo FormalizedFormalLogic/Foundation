@@ -16,7 +16,7 @@ namespace FFL.FirstOrder.SetTheory
 /-! ### Basic set theory -/
 
 /-- Basic set theory (Zermelo minus separation). -/
-inductive BasicSetTheory : SetTheory
+inductive BasicSetTheory : SetTheorySentence → Prop
   /-- Axiom of equality. -/
   | equality       : ∀ φ ∈ 𝗘𝗤 ℒₛₑₜ, BasicSetTheory φ
   /-- Axiom of empty set. -/
@@ -35,7 +35,7 @@ inductive BasicSetTheory : SetTheory
   /-- Axiom of foundation. -/
   | foundation     : BasicSetTheory “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
 
-notation "𝗕𝗦𝗧" => BasicSetTheory
+notation "𝗕𝗦𝗧" => (Set.ofPred BasicSetTheory : SetTheory)
 
 instance : 𝗘𝗤 _ ⪯ 𝗕𝗦𝗧 := Entailment.WeakerThan.ofSubset BasicSetTheory.equality
 

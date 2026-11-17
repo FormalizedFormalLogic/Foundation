@@ -92,7 +92,7 @@ noncomputable def dest (x : Universe) : UniverseFunctor Universe := QPF.Fix.dest
 
 noncomputable def mkFun {ι : Type u} (f : ι → Universe.{u}) : Universe.{u} := mk (Set.range f)
 
-instance : SetLike Universe.{u} Universe.{u} where
+noncomputable instance : SetLike Universe.{u} Universe.{u} where
   coe x := x.dest.set
   coe_injective x y e := by
     have h (x : Universe.{u}) : mk x.dest.set = x := QPF.Fix.mk_dest _

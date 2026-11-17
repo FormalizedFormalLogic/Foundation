@@ -87,7 +87,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ.altᴬ_[s].DefinablePred P)
 lemma models_alt : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ.alt s := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s›;
   suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ.alt s) by
-    simpa [InductionOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨‹_›, this⟩;
+    exact Semantics.ModelsSet.union_iff.mpr ⟨‹V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻›, this⟩;
   simp only [InductionScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
@@ -106,7 +106,7 @@ lemma models_LeastNumberOnHierarchy_of_IBroadSigma (Γ : Polarity) (s : ℕ) [V�
     V↓[ℒₒᵣ] ⊧* 𝗟⁺ Γ s := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s›;
   suffices V↓[ℒₒᵣ] ⊧* LeastNumberScheme (ℬ[<, ℒₒᵣ].Hierarchy Γ s) by
-    simpa [LeastNumberOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨‹_›, this⟩;
+    exact Semantics.ModelsSet.union_iff.mpr ⟨‹V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻›, this⟩;
   simp only [LeastNumberScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;

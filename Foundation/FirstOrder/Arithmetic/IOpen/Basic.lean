@@ -566,7 +566,7 @@ instance pair_defined : 𝚺ᴬ₀-Function₂[V] pair via pairDef := .mk fun v 
 instance pair_definable : 𝚺ᴬ₀-Function₂[V] pair := pair_defined.to_definable
 
 instance : Bounded₂ (pair : V → V → V) :=
-  ⟨‘x y. (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> try simp [*]⟩
+  ⟨‘x y. (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> simp [*]⟩
 
 open scoped Classical in
 noncomputable def unpair (a : V) : V × V :=

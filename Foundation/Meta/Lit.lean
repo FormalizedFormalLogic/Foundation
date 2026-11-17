@@ -1,6 +1,10 @@
 module
 
 public import Foundation.Meta.Qq
+import Lean.Expr
+import Lean.MetavarContext
+import Lean.Meta.Basic
+import Qq.Typ
 public import Foundation.Logic.LogicSymbol
 
 public section

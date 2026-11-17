@@ -246,7 +246,7 @@ lemma generic_iff_not' {φ : Semiformula L ξ n} :
     (∀ q ≤ p, q ⊩ᶜ[bv|fv] φ → q ⊩ᶜ[bv|fv] ψ) by simpa [LogicalConnective.DeMorgan.imply]
   constructor
   · intro h q hqp Hqφ
-    by_contra! Hqψ
+    by_contra Hqψ
     rcases generic_iff_not.mp Hqψ with ⟨r, hrq, Hr⟩
     rcases h r (le_trans hrq hqp) with ⟨s, hsr, (H | H)⟩
     · exact H s (by rfl) (Hqφ.monotone s (le_trans hsr hrq))

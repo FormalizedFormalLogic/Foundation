@@ -207,7 +207,7 @@ lemma condition_le_iff {p q : 𝔭.Condition M} :
 variable [K.Relational]
 
 instance kripkeModel : Kripke.Model K (𝔭.Condition M) M where
-  Domain p x := 𝔭.domain.val ![↑p, x]
+  Domain p := Set.ofPred fun x ↦ 𝔭.domain.val ![↑p, x]
   Rel p k R v := (𝔭.rel R).val (↑p :> v)
   domain_nonempty p := by
     have h : ∀ p : M, 𝔭.IsCond p → ∃ x, 𝔭.domain.val ![p, x] := by

@@ -12,11 +12,11 @@ namespace FFL.FirstOrder.SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] (s : Set V)
 
-def Hull : Set V := Tarski.Structure.SkolemHull ℒₛₑₜ s
+noncomputable def Hull : Set V := Tarski.Structure.SkolemHull ℒₛₑₜ s
 
 variable (V)
 
-abbrev Collapse : Set V := Hull ∅
+noncomputable abbrev Collapse : Set V := Hull ∅
 
 variable {V}
 

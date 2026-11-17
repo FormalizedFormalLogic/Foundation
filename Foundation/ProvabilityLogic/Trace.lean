@@ -99,7 +99,7 @@ theorem trace_finite_or_compl_finite (A : Formula α) : A.trace.Finite ∨ A.tra
   have := RootedModel.rank_lt_height Rru;
   apply (Set.finite_Iio M.height).subset;
   intro n hn;
-  by_contra! hle;
+  by_contra hle;
   exact hn ⟨_, _, M.graft ⟨u, hne⟩ (Fin (n - u.rank - 1)), inferInstance, inferInstance,
     by grind [RootedModel.graft.height_eq],
     fun h ↦ hA <| ((RootedModel.graft.forces_iff (fun _ ↦ subfmls_trans)

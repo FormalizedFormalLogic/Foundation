@@ -253,7 +253,8 @@ lemma enumerateFVar_idxOfFVar [DecidableEq ξ] [Inhabited ξ] {t : Semiterm L ξ
 
 lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {t : Semiterm L ξ n} {x : ξ} :
     x ∈ t.fvarList ↔ t.FVar? x := by
-  induction t <;> { simp [fvarList, *]; try tauto }
+  induction t <;> simp [fvarList, *]
+  tauto
 
 end idxOfFVar
 

@@ -209,7 +209,7 @@ noncomputable abbrev InductionScheme.delta1_of {C : ArithmeticSemiproposition 1 
     Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
       fun V _ _ ↦ (InductionR.defined (hcond := hS V)).proper
 
-noncomputable instance InductionScheme.delta1_univ : (InductionScheme ℒₒᵣ Set.univ).Δ₁ :=
+noncomputable instance InductionScheme.delta1_univ : (InductionScheme ℒₒᵣ fun _ ↦ True).Δ₁ :=
   InductionScheme.delta1_of (cond := ⊤) (S := fun _ _ _ _ ↦ True)
     (fun _ _ _ ↦ ⟨by simp, by intro v; simp⟩) fun _ ↦ Iff.rfl
 
@@ -242,7 +242,7 @@ lemma _root_.FFL.FirstOrder.Theory.RE.of_delta1 (T : ArithmeticTheory) [T.Δ₁]
     rePred_iff_sigma1.mpr <| Bounding.HierarchySymbol.Definable.of_deltaOne Δ₁Class.definable
   exact (h.comp Computable.encode).of_eq fun σ ↦ by simp [← Sentence.quote_eq_encode_nat]⟩
 
-instance : (InductionScheme ℒₒᵣ Set.univ).RE := .of_delta1 _
+instance : (InductionScheme ℒₒᵣ fun _ ↦ True).RE := .of_delta1 _
 
 instance (Γ : Polarity) (s : ℕ) : (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ s)).RE :=
   .of_delta1 _

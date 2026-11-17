@@ -53,7 +53,7 @@ theorem ISigma_weakerThan_IDelta_succ (n : ℕ) : 𝗜𝚺n ⪯ 𝗜𝚫 (n + 1)
     have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_ss (U := 𝗜𝚫 (n + 1)) inferInstance Set.subset_union_left
     have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
     suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n) by
-      simpa [ISigma, InductionOnPrenexHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩
+      exact Semantics.ModelsSet.union_iff.mpr ⟨hPA, this⟩
     simp only [InductionScheme]
     apply Semantics.ModelsSet.setOf_iff.mpr
     rintro _ ⟨φ, hφ, rfl⟩

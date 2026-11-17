@@ -33,7 +33,8 @@ attribute [ext] mem_ext
   · exact hxy z
   · exact hyx z
 
-@[grind .] lemma subset_antisymm_iff {x y : V} : x ⊆ y ∧ y ⊆ x ↔ x = y := by aesop
+@[grind .] lemma subset_antisymm_iff {x y : V} : x ⊆ y ∧ y ⊆ x ↔ x = y :=
+  ⟨fun h ↦ subset_antisymm h.1 h.2, fun h ↦ ⟨h ▸ subset_refl x, h ▸ subset_refl y⟩⟩
 
 omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧] in
 lemma subset_of_eq {x y : V} (h : x = y) : x ⊆ y := h ▸ subset_refl x

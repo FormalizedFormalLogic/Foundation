@@ -12,13 +12,13 @@ noncomputable section
 
 namespace FFL.FirstOrder.Arithmetic
 
-inductive R0 : ArithmeticTheory
+inductive R0 : Sentence ℒₒᵣ → Prop
   | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, R0 φ
   | Ω₁ (n m : ℕ) : R0 “↑n + ↑m = ↑(n + m)”
   | Ω₂ (n m : ℕ) : R0 “↑n * ↑m = ↑(n * m)”
   | Ω₃ (n : ℕ) : R0 “∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i”
 
-notation "𝗥₀" => R0
+notation "𝗥₀" => (Set.ofPred R0 : ArithmeticTheory)
 
 namespace R0
 

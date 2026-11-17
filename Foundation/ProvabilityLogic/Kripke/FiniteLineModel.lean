@@ -27,9 +27,11 @@ instance : (finiteLineModel n α).IsFiniteGL where
 
 @[simp]
 lemma rank_eq (x : (finiteLineModel n α).World) : x.rank = x := by
+  have : IsConverseWellFounded (finiteLineModel n α).World (fun x y ↦ x ≺ y) :=
+    (inferInstance : (finiteLineModel n α).IsGL).toIsConverseWellFounded
   obtain ⟨k, hk⟩ := x;
   induction k using Nat.strong_induction_on with
-  | h k ih =>
+  | ind k ih =>
     apply le_antisymm;
     · apply cwfHeight_le;
       rintro ⟨l, hl⟩ (h : l < k);

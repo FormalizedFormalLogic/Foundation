@@ -68,7 +68,7 @@ end Semantics
 lemma collapse_mem (m : ℕ) : 𝐆𝐋 ⊢ hyp m 🡒 □hyp m 🡒 reflection m 🡒 #none := by
   rw [Logic.GL.iff_valid_finite];
   intro κ _ M _ w hH hbH hR;
-  by_contra! hq;
+  by_contra hq;
   have hs : ∀ k ≤ m + 1, w ⊮ seq (#none) k := by
     intro k hk;
     induction k with

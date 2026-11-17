@@ -69,9 +69,9 @@ variable {T}
 
 end
 
-abbrev _root_.FFL.FirstOrder.Theory.Con : ArithmeticTheory := {T.consistent.val}
+noncomputable abbrev _root_.FFL.FirstOrder.Theory.Con : ArithmeticTheory := {T.consistent.val}
 
-abbrev _root_.FFL.FirstOrder.Theory.Incon : ArithmeticTheory := {∼T.consistent.val}
+noncomputable abbrev _root_.FFL.FirstOrder.Theory.Incon : ArithmeticTheory := {∼T.consistent.val}
 
 noncomputable instance : T.Con.Δ₁ := Theory.Δ₁.singleton _
 

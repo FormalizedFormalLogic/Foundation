@@ -12,7 +12,7 @@ noncomputable section
 
 namespace FFL.FirstOrder.Arithmetic
 
-inductive RobinsonQ : ArithmeticTheory
+inductive RobinsonQ : Sentence ℒₒᵣ → Prop
   | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, RobinsonQ φ
   | succNeZero : RobinsonQ “∀ a, a + 1 ≠ 0”
   | succInj : RobinsonQ “∀ a b, a + 1 = b + 1 → a = b”
@@ -23,7 +23,7 @@ inductive RobinsonQ : ArithmeticTheory
   | mulSucc : RobinsonQ “∀ a b, a * (b + 1) = a * b + a”
   | ltDef : RobinsonQ “∀ a b, a < b ↔ ∃ c, a + (c + 1) = b”
 
-notation "𝗤" => RobinsonQ
+notation "𝗤" => (Set.ofPred RobinsonQ : ArithmeticTheory)
 
 namespace RobinsonQ
 
@@ -257,7 +257,7 @@ lemma numeral_ne_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ numeral m
     exact numeral_zero_succ_ne;
   | n + 1, m + 1 =>
     have := numeral_ne_of_ne (n := n) (m := m) (by omega);
-    contrapose! this;
+    contrapose this;
     apply numeral_succ_inj this;
 
 lemma numeral_lt_of_lt {n m : ℕ} (h : n < m) : (numeral n : M) < numeral m := by

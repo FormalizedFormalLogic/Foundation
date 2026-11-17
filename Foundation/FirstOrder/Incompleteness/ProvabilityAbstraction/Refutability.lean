@@ -120,7 +120,7 @@ Alternative formulation of Gödel's second incompleteness theorem.
 -/
 lemma unprovable_flon [consis : Consistent T] [𝔅.FormalizedCompleteOn 𝐉] : T ⊬ flon 𝔅 𝔚 := by
   classical
-  contrapose! consis;
+  contrapose consis;
   replace consis : T ⊢ ∀¹ safe 𝔅 𝔚 := by simpa [flon] using consis;
   have h₁ : T ⊢ ∼(𝔅 𝐉 ⋏ 𝔚 𝐉) := by
     simpa [safe] using! FirstOrder.Theory.Proof.specialize _ _ ⨀ consis;

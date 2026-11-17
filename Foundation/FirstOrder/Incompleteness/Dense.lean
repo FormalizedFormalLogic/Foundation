@@ -27,14 +27,14 @@ lemma dense_of_finite_extend_incomplete
     apply consistent_iff_exists_unprovable.mpr;
     use ⊥;
     apply deduction_iff.not.mpr;
-    contrapose! h₂;
+    contrapose h₂;
     cl_prover [h₂];
   use ⟦φ ⋎ (ψ ⋏ ∼ρ)⟧;
   refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩⟩;
   · apply le_def _ |>.mpr;
     cl_prover;
   · apply le_def _ |>.not.mpr;
-    by_contra! hC;
+    by_contra hC;
     apply hρ.1;
     apply deduction_iff.mpr;
     cl_prover [h₁, hC];

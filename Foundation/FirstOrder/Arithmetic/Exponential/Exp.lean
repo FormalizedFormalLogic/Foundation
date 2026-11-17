@@ -478,7 +478,7 @@ lemma bit_one {x y : V} : Exponential x y → Exponential (2 * x + 1) (2 * y ^ 2
           _              = 2 * ext i Y' ^ 2 := by rw [ext_append_of_lt ppi ppi.sq hiisq]
   have hseqₘ' : Seqₘ (2 * x + 1) (2 * y ^ 2) X' Y' :=
     ⟨i ^ 2, sq_le_sq.mpr (le_trans hi <| by simp), ppi.sq_ne_two, ppi.sq,
-     by rw [ext_append_last, ext_append_last] <;> try simp [hxsqi, hysqi]⟩
+     by rw [ext_append_last, ext_append_last] <;> simp [hxsqi, hysqi]⟩
   exact Or.inr <| ⟨X', bX', Y', bY', hseq₀', hseqₛ', hseqₘ'⟩
 
 lemma exponential_odd {x y : V} :
