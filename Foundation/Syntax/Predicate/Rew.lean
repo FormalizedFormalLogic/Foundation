@@ -170,9 +170,7 @@ variable (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L ξ�
 @[simp] lemma bind_bvar (n : Fin n₁) : bind b e (#n : Semiterm L ξ₁ n₁) = b n := rfl
 
 lemma eq_bind (ω : Rew L ξ₁ n₁ ξ₂ n₂) : ω = bind (ω ∘ bvar) (ω ∘ fvar) := by
-  ext t; induction t
-  · simp
-  · simp [*]
+  ext t <;> simp
 
 @[simp] lemma bind_eq_id_of_zero (f : Fin 0 → Semiterm L ξ₂ 0) : bind f fvar = Rew.id := by
   ext x <;> simp only [bind_bvar, bind_fvar, id_app]; exact Fin.elim0 x
@@ -836,7 +834,7 @@ def toEmpty [DecidableEq ξ] {n : ℕ} :
 
 @[simp] lemma emb_toEmpty [DecidableEq ξ] (t : Semiterm L ξ n) (ht : t.freeVariables = ∅) :
     Rew.emb (t.toEmpty ht) = t := by
-  induction t <;> try simp [toEmpty, Rew.func, *, Function.comp_def]
+  induction t <;> simp [toEmpty, Rew.func, *, Function.comp_def]
   case fvar => simp at ht
 
 @[simp] lemma toEmpty_emb [DecidableEq ξ] (t : ClosedSemiterm L n) :

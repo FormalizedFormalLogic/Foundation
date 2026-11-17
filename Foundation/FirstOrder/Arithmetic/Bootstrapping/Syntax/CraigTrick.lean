@@ -96,7 +96,7 @@ variable [L.Primcodable]
 -- `[T.RE]` is spelled out instead of taken from a `variable`: the body does not use it, so Lean
 -- would drop it from the signature and let the Craig companion be built for an arbitrary theory.
 noncomputable def reCh (T : Theory L) [T.RE] : 𝚺ᴬ₁.Semisentence 1 :=
-  .mkSigma (codeOfREPred (Encodable.encode '' T)) <| by simp [codeOfREPred, codeOfPartrec']
+  .mkSigma (codeOfREPred (· ∈ Encodable.encode '' T)) <| by simp [codeOfREPred, codeOfPartrec']
 
 variable (T : Theory L) [T.RE]
 
@@ -110,7 +110,7 @@ lemma reWitness_spec (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
     Semiformula.eval_ex
 
 @[simp, grind .]
-lemma rePred_codes_of_RE : REPred (Encodable.encode '' T) :=
+lemma rePred_codes_of_RE : REPred (· ∈ Encodable.encode '' T) :=
   ((Theory.RE.re.comp Computable.snd).and (PrimrecPred.computablePred
     (Primrec.eq.comp (Primrec.encode.comp Primrec.snd) Primrec.fst)).to_re).projection.of_eq
     fun _ ↦ Iff.rfl

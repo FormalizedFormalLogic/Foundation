@@ -49,12 +49,14 @@ abbrev Eq.relExt {k} (r : L.Rel k) : Sentence L :=
 
 variable (L)
 
-inductive eqAxiom : Theory L
-  | refl : eqAxiom (Eq.refl L)
-  | symm : eqAxiom (Eq.symm L)
-  | trans : eqAxiom (Eq.trans L)
-  | funcExt {k} (f : L.Func k) : eqAxiom (Eq.funcExt f)
-  | relExt {k} (r : L.Rel k) : eqAxiom (Eq.relExt r)
+inductive EqAxiom : Sentence L → Prop
+  | refl : EqAxiom (Eq.refl L)
+  | symm : EqAxiom (Eq.symm L)
+  | trans : EqAxiom (Eq.trans L)
+  | funcExt {k} (f : L.Func k) : EqAxiom (Eq.funcExt f)
+  | relExt {k} (r : L.Rel k) : EqAxiom (Eq.relExt r)
+
+def eqAxiom : Theory L := Set.ofPred (EqAxiom L)
 
 notation "𝗘𝗤" => eqAxiom
 
@@ -65,7 +67,7 @@ lemma Eq.defeq :
       ∪ Set.range (fun f : (k : ℕ) × L.Func k ↦ Eq.funcExt f.2)
       ∪ Set.range (fun f : (k : ℕ) × L.Rel k ↦ Eq.relExt f.2) := by
   ext φ; constructor
-  · rintro ⟨⟩
+  · rintro (⟨⟩ : EqAxiom L φ)
     case refl => simp
     case symm => simp
     case trans => simp
@@ -74,11 +76,11 @@ lemma Eq.defeq :
     case relExt k r =>
       right; exact ⟨⟨k, r⟩, rfl⟩
   · rintro (((rfl | rfl | rfl) | ⟨f, rfl⟩) | ⟨r, rfl⟩)
-    · exact eqAxiom.refl
-    · exact eqAxiom.symm
-    · exact eqAxiom.trans
-    · exact eqAxiom.funcExt _
-    · exact eqAxiom.relExt _
+    · exact EqAxiom.refl
+    · exact EqAxiom.symm
+    · exact EqAxiom.trans
+    · exact EqAxiom.funcExt _
+    · exact EqAxiom.relExt _
 
 @[simp] lemma EqAxiom.finite [L.Finite] : Set.Finite (𝗘𝗤 L) := by
   have : Fintype ((k : ℕ) × L.Func k) := Language.Finite.func

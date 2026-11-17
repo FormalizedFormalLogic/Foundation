@@ -360,9 +360,8 @@ def sound {Γ : LJ.Sequent L} {Ξ : LJ.Head L}
   decreasing_by
     all_goals simp [LJ.Derivation.height]
     all_goals try omega
-    all_goals
-      exact Nat.lt_succ_iff.mpr <| Nat.le_of_eq <|
-        (LJ.Derivation.height_cast _ _ _).trans (LJ.Derivation.height_rewrite (t :>ₙ fun x ↦ &x) d)
+    exact Nat.lt_succ_iff.mpr <| Nat.le_of_eq <|
+      (LJ.Derivation.height_cast _ _ _).trans (LJ.Derivation.height_rewrite (t :>ₙ fun x ↦ &x) d)
 
 def ljSound {φ : Propositionᵢ L} (d : LJ.Proof φ) : ⊩ φ :=
   fun p tp ↦ sound d p tp fun _ h ↦ by simp at h

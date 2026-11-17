@@ -34,7 +34,7 @@ abbrev ltTri : ArithmeticSentence := “∀ x y, x < y ∨ x = y ∨ x > y”
 
 end PeanoMinus.Axiom
 
-inductive PeanoMinus : ArithmeticTheory
+inductive PeanoMinus : Sentence ℒₒᵣ → Prop
   | equal         : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, PeanoMinus φ
   | addZero       : PeanoMinus PeanoMinus.Axiom.addZero
   | addAssoc      : PeanoMinus PeanoMinus.Axiom.addAssoc
@@ -54,7 +54,11 @@ inductive PeanoMinus : ArithmeticTheory
   | ltTrans       : PeanoMinus PeanoMinus.Axiom.ltTrans
   | ltTri         : PeanoMinus PeanoMinus.Axiom.ltTri
 
-notation "𝗣𝗔⁻" => PeanoMinus
+/-- The theory `𝗣𝗔⁻`. It is a definition rather than an abbreviation so that `simp` keeps
+`M ⊧* 𝗣𝗔⁻` folded. -/
+def PeanoMinus.theory : ArithmeticTheory := Set.ofPred PeanoMinus
+
+notation "𝗣𝗔⁻" => PeanoMinus.theory
 
 namespace PeanoMinus
 
@@ -150,7 +154,7 @@ lemma equiv_singleton_finiteConj :
         rcases hσ with rfl; exact hConj⟩
 
 set_option linter.flexible false in
-@[simp] instance : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ⟨by
+@[simp] instance models_PeanoMinus : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ⟨by
   intro σ h
   rcases h <;> simp [models_iff, Semiformula.eval_bexsLTSucc]
   case addAssoc => intros; exact add_assoc _ _ _
@@ -180,31 +184,31 @@ lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 protected lemma add_zero' : ∀ x : M, x + 0 = x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.addZero
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.addZero
 
 protected lemma add_assoc : ∀ x y z : M,  (x + y) + z = x + (y + z) := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.addAssoc
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.addAssoc
 
 protected lemma add_comm : ∀ x y : M,  x + y = y + x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.addComm
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.addComm
 
 lemma add_eq_of_lt_bounded : ∀ x y : M, x < y → ∃ z < y + 1, x + z = y := by
-  simpa [models_iff, Semiformula.eval_bexsLTSucc] using Theory.models M _ PeanoMinus.addEqOfLt
+  simpa [models_iff, Semiformula.eval_bexsLTSucc] using Theory.models M 𝗣𝗔⁻ PeanoMinus.addEqOfLt
 
 lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := fun x y h ↦
   have ⟨z, _, hz⟩ := add_eq_of_lt_bounded x y h
   ⟨z, hz⟩
 
 @[simp] protected lemma zero_le : ∀ x : M, 0 ≤ x := by
-  have h := Theory.models M _ PeanoMinus.zeroLe
+  have h := Theory.models M 𝗣𝗔⁻ PeanoMinus.zeroLe
   simp only [models_iff] at h
   exact h
 
 lemma zero_lt_one : (0 : M) < 1 := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.zeroLtOne
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.zeroLtOne
 
 lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
-  have h := Theory.models M _ PeanoMinus.oneLeOfZeroLt
+  have h := Theory.models M 𝗣𝗔⁻ PeanoMinus.oneLeOfZeroLt
   simp only [models_iff, Semiformula.eval_all, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.Fin1.eq_one,
     Fin.isValue, LogicalConnective.HomClass.map_imply, Semiformula.eval_operator, Matrix.comp₂,
     Semiterm.val_operator, Matrix.comp₀, Tarski.Structure.numeral_eq_numeral,
@@ -214,34 +218,34 @@ lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
   exact h
 
 lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.addLtAdd
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.addLtAdd
 
 protected lemma mul_zero' : ∀ x : M, x * 0 = 0 := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulZero
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.mulZero
 
 protected lemma mul_one : ∀ x : M, x * 1 = x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulOne
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.mulOne
 
 protected lemma mul_assoc : ∀ x y z : M, (x * y) * z = x * (y * z) := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulAssoc
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.mulAssoc
 
 protected lemma mul_comm : ∀ x y : M, x * y = y * x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulComm
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.mulComm
 
 lemma mul_lt_mul : ∀ x y z : M, x < y → 0 < z → x * z < y * z := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulLtMul
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.mulLtMul
 
 lemma mul_add_distr : ∀ x y z : M, x * (y + z) = x * y + x * z := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.distr
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.distr
 
 lemma lt_irrefl : ∀ x : M, ¬x < x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.ltIrrefl
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.ltIrrefl
 
 protected lemma lt_trans : ∀ x y z : M, x < y → y < z → x < z := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.ltTrans
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.ltTrans
 
 lemma lt_tri : ∀ x y : M, x < y ∨ x = y ∨ y < x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.ltTri
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ PeanoMinus.ltTri
 
 scoped instance : AddCommMonoid M where
   add_assoc := Arithmetic.add_assoc

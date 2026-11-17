@@ -43,7 +43,7 @@ instance (k) : DecidableEq (Set.Func k) := inferInstance
 
 instance (k) : DecidableEq (Set.Rel k) := fun a b => by
   rcases a <;> rcases b <;>
-  simp only [reduceCtorEq] <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+  simp only [reduceCtorEq] <;> try {exact instDecidableTrue} <;> {exact instDecidableFalse}
 
 instance (k) : Encodable (Set.Func k) := inferInstance
 

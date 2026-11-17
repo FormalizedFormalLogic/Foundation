@@ -127,7 +127,7 @@ instance : Consistent (𝐒 : Logic α) := by
   classical
   apply consistent_iff_exists_unprovable.mpr;
   use ⊥;
-  by_contra! h;
+  by_contra h;
   simpa [Formula.rflSubfmls, Formula.subfmls, forces_imp] using
     GL.sound (pointModel (α := α) fun _ ↦ False) (iff_provable_GL.mp h) 0;
 

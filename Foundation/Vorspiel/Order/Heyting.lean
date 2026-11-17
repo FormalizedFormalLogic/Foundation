@@ -32,10 +32,10 @@ lemma himp_himp_inf_himp_inf_le (a b c : α) : (a ⇨ b ⇨ c) ⊓ (a ⇨ b) ⊓
 @[simp, grind .]
 lemma himp_inf_himp_inf_sup_le (a b c : α) : (a ⇨ c) ⊓ (b ⇨ c) ⊓ (a ⊔ b) ≤ c := by
   have ha : a ≤ (a ⇨ c) ⊓ (b ⇨ c) ⇨ c := by
-    simp only [le_himp_iff, ← inf_assoc, inf_himp]
+    simp only [le_himp_iff, ← inf_assoc, inf_himp_self]
     refine inf_le_of_left_le (by simp)
   have hb : b ≤ (a ⇨ c) ⊓ (b ⇨ c) ⇨ c := by
-    simp only [le_himp_iff, inf_comm (a ⇨ c) (b ⇨ c), ← inf_assoc, inf_himp]
+    simp only [le_himp_iff, inf_comm (a ⇨ c) (b ⇨ c), ← inf_assoc, inf_himp_self]
     refine inf_le_of_left_le (by simp)
   have : a ⊔ b ≤ (a ⇨ c) ⊓ (b ⇨ c) ⇨ c := sup_le_iff.mpr ⟨ha, hb⟩
   simpa only [GeneralizedHeytingAlgebra.le_himp_iff, inf_comm (a ⊔ b)] using this

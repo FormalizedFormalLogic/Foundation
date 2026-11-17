@@ -18,10 +18,10 @@ open scoped FFL.FirstOrder.Arithmetic
 def _root_.FFL.Omega1.omega1 : ArithmeticSentence :=
   “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
 
-inductive _root_.FFL.Omega1 : ArithmeticTheory where
+inductive _root_.FFL.Omega1 : ArithmeticSentence → Prop where
   | omega : Omega1 Omega1.omega1
 
-notation "𝝮₁" => Omega1
+notation "𝝮₁" => (Set.ofPred Omega1 : ArithmeticTheory)
 
 @[simp] lemma _root_.FFL.FirstOrder.Theory.OmegaOne.mem_iff {σ} : σ ∈ 𝝮₁ ↔ σ = Omega1.omega1 :=
   ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Omega1.omega⟩

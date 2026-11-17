@@ -118,7 +118,7 @@ private lemma minProof_or_le_speedupProof (π : Sentence L) :
 
 - [EM71] -/
 theorem ehrenfeucht_mycielski_speedup [L.Primcodable]
-    (hU : ¬ComputablePred (insert (∼σ) T).theory) (f : ℕ → ℕ) (hf : Computable f) :
+    (hU : ¬ComputablePred (· ∈ (insert (∼σ) T).theory)) (f : ℕ → ℕ) (hf : Computable f) :
     ∃ π : Sentence L, T ⊢ π ∧ f ((insert σ T).minProof π) < T.minProof π := by
   contrapose! hU;
   apply ComputablePred.of_eq ?_ (fun π ↦ provable_insert_neg_iff_or.symm);
