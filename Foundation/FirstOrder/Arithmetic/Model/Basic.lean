@@ -46,22 +46,22 @@ instance : CoeFun (M ⊆ₑ N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
 
 lemma emb_injective : Function.Injective e.emb := EmbeddingClass.map_inj e.emb
 
-@[simp] lemma emb_zero : e 0 = 0 := by
+@[simp, grind =] lemma emb_zero : e 0 = 0 := by
   simpa [Function.comp_def] using HomClass.func e.emb Language.Zero.zero ![]
 
-@[simp] lemma emb_one : e 1 = 1 := by
+@[simp, grind =] lemma emb_one : e 1 = 1 := by
   simpa [Function.comp_def] using HomClass.func e.emb Language.One.one ![]
 
-@[simp] lemma emb_add (x y : M) : e (x + y) = e x + e y := by
+@[simp, grind =] lemma emb_add (x y : M) : e (x + y) = e x + e y := by
   simpa [Function.comp_def] using HomClass.func e.emb Language.Add.add ![x, y]
 
-@[simp] lemma emb_mul (x y : M) : e (x * y) = e x * e y := by
+@[simp, grind =] lemma emb_mul (x y : M) : e (x * y) = e x * e y := by
   simpa [Function.comp_def] using HomClass.func e.emb Language.Mul.mul ![x, y]
 
-@[simp] lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y := by
+@[simp, grind =] lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y := by
   simpa [Function.comp_def] using EmbeddingClass.rel e.emb Language.LT.lt ![x, y]
 
-lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
+@[grind =] lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
 
 instance : ℬ[<, ℒₒᵣ].IsInitial e.emb where
   operator_iff := by
