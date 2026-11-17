@@ -36,28 +36,32 @@ structure ProperEndExtension (M : Type u) (N : Type v) [ORingStructure M] [ORing
 
 @[inherit_doc] infix:50 " ⊂ₑ " => ProperEndExtension
 
+instance : CoeFun (M ⊂ₑ N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
+
 namespace EndExtension
 
 variable (e : M ⊆ₑ N)
 
+instance : CoeFun (M ⊆ₑ N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
+
 lemma emb_injective : Function.Injective e.emb := EmbeddingClass.map_inj e.emb
 
-@[simp] lemma emb_zero : e.emb 0 = 0 := by
+@[simp] lemma emb_zero : e 0 = 0 := by
   simpa [Function.comp_def] using HomClass.func e.emb Language.Zero.zero ![]
 
-@[simp] lemma emb_one : e.emb 1 = 1 := by
+@[simp] lemma emb_one : e 1 = 1 := by
   simpa [Function.comp_def] using HomClass.func e.emb Language.One.one ![]
 
-@[simp] lemma emb_add (x y : M) : e.emb (x + y) = e.emb x + e.emb y := by
+@[simp] lemma emb_add (x y : M) : e (x + y) = e x + e y := by
   simpa [Function.comp_def] using HomClass.func e.emb Language.Add.add ![x, y]
 
-@[simp] lemma emb_mul (x y : M) : e.emb (x * y) = e.emb x * e.emb y := by
+@[simp] lemma emb_mul (x y : M) : e (x * y) = e x * e y := by
   simpa [Function.comp_def] using HomClass.func e.emb Language.Mul.mul ![x, y]
 
-@[simp] lemma emb_lt_emb {x y : M} : e.emb x < e.emb y ↔ x < y := by
+@[simp] lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y := by
   simpa [Function.comp_def] using EmbeddingClass.rel e.emb Language.LT.lt ![x, y]
 
-lemma emb_eq_emb {x y : M} : e.emb x = e.emb y ↔ x = y := e.emb_injective.eq_iff
+lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
 
 instance : ℬ[<, ℒₒᵣ].IsInitial e.emb where
   operator_iff := by
@@ -93,22 +97,22 @@ include e in
 lemma models_ISigma0 [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
   have := e.models_peanoMinus
   models_ISigmaZero_of_succ_induction fun φ hφ v h0 hs a ↦ by
-    have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![e.emb x] (e.emb ∘ v) := by
+    have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![e x] (e.emb ∘ v) := by
       intro x
       simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
         Bounding.bounded_absolute e.emb hφ ![x] v
-    have h₂ : ∀ y : N, y < e.emb a + 1 → φ.Eval ![y] (e.emb ∘ v) := by
+    have h₂ : ∀ y : N, y < e a + 1 → φ.Eval ![y] (e.emb ∘ v) := by
       refine InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0)
-        ⟨(e.emb a + 1) :>ₙ fun j ↦ e.emb (v j),
+        ⟨(e a + 1) :>ₙ fun j ↦ e (v j),
           “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ),
           by simp [Bounding.Hierarchy.zero_iff_bounded.mpr hφ],
           by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
         (by intro _; simpa using (h₁ 0).mp h0) ?_
       intro y ih hy
-      have h₃ : y < e.emb a := lt_of_lt_of_le (lt_add_one y) (lt_succ_iff_le.mp hy)
+      have h₃ : y < e a := lt_of_lt_of_le (lt_add_one y) (lt_succ_iff_le.mp hy)
       obtain ⟨x, rfl⟩ := e.mem_range_of_lt h₃
       simpa using (h₁ (x + 1)).mp (hs x ((h₁ x).mpr (ih (lt_trans h₃ (lt_add_one _)))))
-    exact (h₁ a).mpr (h₂ (e.emb a) (by simp))
+    exact (h₁ a).mpr (h₂ (e a) (by simp))
 
 end EndExtension
 
@@ -127,7 +131,7 @@ variable (e : M ⊂ₑ N)
 
 theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
     {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ m φ) (f : ℕ → N)
-    (h : ∀ a : M, φ.Eval ![e.emb a] f) :
+    (h : ∀ a : M, φ.Eval ![e a] f) :
     ∃ c : N, c ∉ Set.range e.emb ∧ ∀ x < c, φ.Eval ![x] f := by
   have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m)
   by_contra! hc
@@ -178,7 +182,7 @@ def endExtension : I.carrier ⊆ₑ M where
   mem_range_of_lt {a b} h := ⟨⟨b, I.downward h a.2⟩, rfl⟩
 
 @[simp]
-lemma endExtension_emb (x : I.carrier) : I.endExtension.emb x = x.val := rfl
+lemma endExtension_emb (x : I.carrier) : I.endExtension x = x.val := rfl
 
 end ClosedCut
 
