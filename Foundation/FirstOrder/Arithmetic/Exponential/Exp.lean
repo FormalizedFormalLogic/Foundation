@@ -24,6 +24,9 @@ section ISigma0
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
+attribute [local aesop 9 (rule_sets := [Definability]) safe]
+  FFL.FirstOrder.Bounding.HierarchySymbol.Definable.equal'
+
 noncomputable def ext (u z : V) : V := z / u % u
 
 lemma ext_graph (a b c : V) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x % b := by

@@ -35,8 +35,11 @@ lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) :
   have : ℕ↓[ℒₒᵣ⋆] ⊧* starUnbounded c := by
     have : ∀ (i : Fin c), (↑i : ℕ) < Semiterm.Operator.Star.star.val (L := ℒₒᵣ⋆) ![] := Fin.prop
     simp [starUnbounded, models_iff, this]
+  have hEq : ∀ φ, Theory.IsEqAxiom ℒₒᵣ⋆ φ → ℕ↓[ℒₒᵣ⋆] ⊧ φ := by
+    intro φ hφ
+    exact Theory.models ℕ (𝗘𝗤 ℒₒᵣ⋆) hφ
   have : ℕ↓[ℒₒᵣ⋆] ⊧* trueArithWithStarUnbounded c := by
-    simpa [trueArithWithStarUnbounded, models_iff] using this
+    simpa [trueArithWithStarUnbounded, models_iff] using ⟨hEq, this⟩
   exact satisfiable_intro ℕ this
 
 lemma satisfiable_union_trueArithWithStarUnbounded :

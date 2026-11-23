@@ -16,27 +16,32 @@ namespace FFL.FirstOrder.SetTheory
 /-! ### Basic set theory -/
 
 /-- Basic set theory (Zermelo minus separation). -/
-inductive BasicSetTheory : SetTheorySentence → Prop
+inductive IsBasicSetTheoryAxiom : SetTheorySentence → Prop
   /-- Axiom of equality. -/
-  | equality       : ∀ φ ∈ 𝗘𝗤 ℒₛₑₜ, BasicSetTheory φ
+  | equality       : ∀ φ ∈ 𝗘𝗤 ℒₛₑₜ, IsBasicSetTheoryAxiom φ
   /-- Axiom of empty set. -/
-  | empty_set      : BasicSetTheory “∃ e, !isEmpty e”
+  | empty_set      : IsBasicSetTheoryAxiom “∃ e, !isEmpty e”
   /-- Axiom of extensionality. -/
-  | extensionality : BasicSetTheory “∀ x y, x = y ↔ ∀ z, z ∈ x ↔ z ∈ y”
+  | extensionality : IsBasicSetTheoryAxiom “∀ x y, x = y ↔ ∀ z, z ∈ x ↔ z ∈ y”
   /-- Axiom of pairing. -/
-  | pairing        : BasicSetTheory “∀ x y, ∃ z, ∀ w, w ∈ z ↔ w = x ∨ w = y”
+  | pairing        : IsBasicSetTheoryAxiom “∀ x y, ∃ z, ∀ w, w ∈ z ↔ w = x ∨ w = y”
   /-- Axiom of empty union. -/
-  | union          : BasicSetTheory “∀ x, ∃ y, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w”
+  | union          : IsBasicSetTheoryAxiom
+      “∀ x, ∃ y, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w”
   /-- Axiom of power set. -/
-  | power_set      : BasicSetTheory “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x”
+  | power_set      : IsBasicSetTheoryAxiom “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x”
   /-- Axiom of infinity. -/
-  | infinity       : BasicSetTheory “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧
+  | infinity       : IsBasicSetTheoryAxiom “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧
     (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
   /-- Axiom of foundation. -/
-  | foundation     : BasicSetTheory “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
+  | foundation     : IsBasicSetTheoryAxiom
+      “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
 
-notation "𝗕𝗦𝗧" => (Set.ofPred BasicSetTheory : SetTheory)
+abbrev BasicSetTheory : SetTheory := Set.ofPred IsBasicSetTheoryAxiom
 
-instance : 𝗘𝗤 _ ⪯ 𝗕𝗦𝗧 := Entailment.WeakerThan.ofSubset BasicSetTheory.equality
+notation "𝗕𝗦𝗧" => BasicSetTheory
+
+instance : 𝗘𝗤 _ ⪯ 𝗕𝗦𝗧 :=
+  Entailment.WeakerThan.ofSubset IsBasicSetTheoryAxiom.equality
 
 end FFL.FirstOrder.SetTheory

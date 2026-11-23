@@ -23,22 +23,26 @@ end Axiom
 
 /-! ### Axiom schema of separation -/
 
-inductive Separation : SetTheorySentence → Prop
+inductive IsSeparationAxiom : SetTheorySentence → Prop
   /-- Axiom schema of separation. -/
   | separation (φ : SetTheorySemiproposition 1) :
-      Separation (Axiom.separationSchema φ)
+      IsSeparationAxiom (Axiom.separationSchema φ)
+
+abbrev Separation : SetTheory := Set.ofPred IsSeparationAxiom
 
 /-- The axiom schema of separation. (This is a theory containing all its instances.) -/
-notation "𝗦𝗘𝗣" => (Set.ofPred Separation : SetTheory)
+notation "𝗦𝗘𝗣" => Separation
 
 /-! ### Axiom schema of replacement -/
 
-inductive Replacement : SetTheorySentence → Prop
+inductive IsReplacementAxiom : SetTheorySentence → Prop
   /-- Axiom schema of separation. -/
   | replacement (φ : SetTheorySemiproposition 2) :
-      Replacement (Axiom.replacementSchema φ)
+      IsReplacementAxiom (Axiom.replacementSchema φ)
+
+abbrev Replacement : SetTheory := Set.ofPred IsReplacementAxiom
 
 /-- The axiom schema of replacement. (This is a theory containing all its instances.) -/
-notation "𝗥𝗘𝗣𝗟" => (Set.ofPred Replacement : SetTheory)
+notation "𝗥𝗘𝗣𝗟" => Replacement
 
 end FFL.FirstOrder.SetTheory

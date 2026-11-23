@@ -12,17 +12,20 @@ noncomputable section
 
 namespace FFL.FirstOrder.Arithmetic
 
-inductive R0 : Sentence ℒₒᵣ → Prop
-  | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, R0 φ
-  | Ω₁ (n m : ℕ) : R0 “↑n + ↑m = ↑(n + m)”
-  | Ω₂ (n m : ℕ) : R0 “↑n * ↑m = ↑(n * m)”
-  | Ω₃ (n : ℕ) : R0 “∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i”
+inductive IsR0Axiom : Sentence ℒₒᵣ → Prop
+  | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, IsR0Axiom φ
+  | Ω₁ (n m : ℕ) : IsR0Axiom “↑n + ↑m = ↑(n + m)”
+  | Ω₂ (n m : ℕ) : IsR0Axiom “↑n * ↑m = ↑(n * m)”
+  | Ω₃ (n : ℕ) : IsR0Axiom “∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i”
 
-notation "𝗥₀" => (Set.ofPred R0 : ArithmeticTheory)
+abbrev R0 : ArithmeticTheory := Set.ofPred IsR0Axiom
+
+notation "𝗥₀" => R0
 
 namespace R0
 
-instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗥₀ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ R0.equal φ hp
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗥₀ :=
+  Entailment.WeakerThan.ofSubset <| fun φ hp ↦ IsR0Axiom.equal φ hp
 
 instance : ℕ↓[ℒₒᵣ] ⊧* 𝗥₀ := ⟨by
   intro σ h
@@ -40,13 +43,13 @@ variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗥₀]
 open Language ORingStructure
 
 lemma numeral_add_numeral (n m : ℕ) : (numeral n : M) + numeral m = numeral (n + m) := by
-  simpa [models_iff] using Theory.models M _ (R0.Ω₁ n m)
+  simpa [models_iff] using Theory.models M _ (IsR0Axiom.Ω₁ n m)
 
 lemma numeral_mul_numeral (n m : ℕ) : (numeral n : M) * numeral m = numeral (n * m) := by
-  simpa [models_iff] using Theory.models M _ (R0.Ω₂ n m)
+  simpa [models_iff] using Theory.models M _ (IsR0Axiom.Ω₂ n m)
 
 lemma lt_numeral_iff {x : M} {n : ℕ} : x < numeral n ↔ ∃ i : Fin n, x = numeral i := by
-  have := by simpa [models_iff] using Theory.models M _ (R0.Ω₃ n)
+  have := by simpa [models_iff] using Theory.models M _ (IsR0Axiom.Ω₃ n)
   constructor
   · intro hx
     rcases (this x).mp hx with ⟨i, hi, rfl⟩

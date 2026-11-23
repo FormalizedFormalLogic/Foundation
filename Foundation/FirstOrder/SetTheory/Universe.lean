@@ -243,33 +243,33 @@ instance models_bst : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧 := ⟨by
       have : Universe.{u}↓[ℒₛₑₜ] ⊧* (𝗘𝗤 _ : SetTheory) := inferInstance
       simpa [models_iff] using models_theory_iff.mp this _ h
     case empty_set =>
-      suffices ∃ x, ∀ y, y ∉ x by simpa [models_iff, BasicSetTheory.empty_set]
+      suffices ∃ x, ∀ y, y ∉ x by simpa [models_iff, IsBasicSetTheoryAxiom.empty_set]
       exact ⟨empty, by simp⟩
     case extensionality =>
       simp [models_iff, Universe.ext_iff]
     case pairing =>
       suffices
           ∀ x y : Universe.{u}, ∃ z, ∀ v, v ∈ z ↔ v = x ∨ v = y by
-        simpa [models_iff, BasicSetTheory.pairing]
+        simpa [models_iff, IsBasicSetTheoryAxiom.pairing]
       intro x y
       exact ⟨mk {x, y}, by simp⟩
     case union =>
       suffices
           ∀ x : Universe.{u}, ∃ y, ∀ z, z ∈ y ↔ ∃ v ∈ x, z ∈ v by
-        simpa [models_iff, BasicSetTheory.union]
+        simpa [models_iff, IsBasicSetTheoryAxiom.union]
       intro x
       exact ⟨mk (⋃ i : x, i), by simp⟩
     case power_set =>
       suffices
           ∀ x : Universe.{u}, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x by
-        simpa [models_iff, BasicSetTheory.power_set]
+        simpa [models_iff, IsBasicSetTheoryAxiom.power_set]
       intro x
       exact ⟨x.powerset, by simp⟩
     case infinity =>
       suffices
           ∃ ω, (empty ∈ ω) ∧
             ∀ x ∈ ω, ∀ y, (∀ z, z ∈ y ↔ z = x ∨ z ∈ x) → y ∈ ω by
-        simpa [models_iff, BasicSetTheory.infinity, val_isSucc_iff, isEmpty_iff_eq_empty]
+        simpa [models_iff, IsBasicSetTheoryAxiom.infinity, val_isSucc_iff, isEmpty_iff_eq_empty]
       refine ⟨omega, ?_, ?_⟩
       · simp
       · intro x hx y  hy
@@ -279,7 +279,7 @@ instance models_bst : Universe.{u}↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧 := ⟨by
     case foundation =>
       suffices
           ∀ x : Universe.{u}, IsNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y by
-        simpa [models_iff, BasicSetTheory.foundation]
+        simpa [models_iff, IsBasicSetTheoryAxiom.foundation]
       intro x hx
       exact minimal_exists_of_isNonempty hx⟩
 

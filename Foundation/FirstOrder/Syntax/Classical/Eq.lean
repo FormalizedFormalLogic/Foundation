@@ -49,16 +49,16 @@ abbrev Eq.relExt {k} (r : L.Rel k) : Sentence L :=
 
 variable (L)
 
-inductive EqAxiom : Sentence L → Prop
-  | refl : EqAxiom (Eq.refl L)
-  | symm : EqAxiom (Eq.symm L)
-  | trans : EqAxiom (Eq.trans L)
-  | funcExt {k} (f : L.Func k) : EqAxiom (Eq.funcExt f)
-  | relExt {k} (r : L.Rel k) : EqAxiom (Eq.relExt r)
+inductive IsEqAxiom : Sentence L → Prop
+  | refl : IsEqAxiom (Eq.refl L)
+  | symm : IsEqAxiom (Eq.symm L)
+  | trans : IsEqAxiom (Eq.trans L)
+  | funcExt {k} (f : L.Func k) : IsEqAxiom (Eq.funcExt f)
+  | relExt {k} (r : L.Rel k) : IsEqAxiom (Eq.relExt r)
 
-def eqAxiom : Theory L := Set.ofPred (EqAxiom L)
+abbrev Eq : Theory L := Set.ofPred (IsEqAxiom L)
 
-notation "𝗘𝗤" => eqAxiom
+notation "𝗘𝗤" => Eq
 
 variable {L}
 
@@ -67,7 +67,7 @@ lemma Eq.defeq :
       ∪ Set.range (fun f : (k : ℕ) × L.Func k ↦ Eq.funcExt f.2)
       ∪ Set.range (fun f : (k : ℕ) × L.Rel k ↦ Eq.relExt f.2) := by
   ext φ; constructor
-  · rintro (⟨⟩ : EqAxiom L φ)
+  · rintro (⟨⟩ : IsEqAxiom L φ)
     case refl => simp
     case symm => simp
     case trans => simp
@@ -76,13 +76,13 @@ lemma Eq.defeq :
     case relExt k r =>
       right; exact ⟨⟨k, r⟩, rfl⟩
   · rintro (((rfl | rfl | rfl) | ⟨f, rfl⟩) | ⟨r, rfl⟩)
-    · exact EqAxiom.refl
-    · exact EqAxiom.symm
-    · exact EqAxiom.trans
-    · exact EqAxiom.funcExt _
-    · exact EqAxiom.relExt _
+    · exact IsEqAxiom.refl
+    · exact IsEqAxiom.symm
+    · exact IsEqAxiom.trans
+    · exact IsEqAxiom.funcExt _
+    · exact IsEqAxiom.relExt _
 
-@[simp] lemma EqAxiom.finite [L.Finite] : Set.Finite (𝗘𝗤 L) := by
+@[simp] lemma Eq.finite [L.Finite] : Set.Finite (𝗘𝗤 L) := by
   have : Fintype ((k : ℕ) × L.Func k) := Language.Finite.func
   have : Fintype ((k : ℕ) × L.Rel k) := Language.Finite.rel
   rw [Eq.defeq]
