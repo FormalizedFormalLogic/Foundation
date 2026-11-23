@@ -97,7 +97,7 @@ notation "𝗜𝚷⁺₀" => IBroadPi 0
 
 notation "𝗜𝚷⁺₁" => IBroadPi 1
 
-abbrev Peano : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ Set.univ
+abbrev Peano : ArithmeticTheory := 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ fun _ ↦ True
 
 notation "𝗣𝗔" => Peano
 
@@ -137,8 +137,8 @@ prefix:max "𝗟𝚷⁺" => LBroadPi
 
 /-! ### Collection schemata -/
 
-def CollectionScheme (Γ : Set (ArithmeticSemiformula ℕ 2)) : Set ArithmeticSentence :=
-  (fun φ => .univCl (collectionAxiom φ)) '' Γ
+def CollectionScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : Set ArithmeticSentence :=
+  { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (collectionAxiom φ) }
 
 abbrev CollectionOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
   𝗜𝚺₀ ∪ CollectionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)
@@ -223,7 +223,8 @@ variable {C C' : ArithmeticSemiformula ℕ 1 → Prop}
 
 lemma LeastNumberScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 1}, C φ → C' φ) :
     LeastNumberScheme C ⊆ LeastNumberScheme C' := by
-  rintro _ ⟨φ, hφ, rfl⟩; exact ⟨φ, h hφ, rfl⟩;
+  intro _; simp only [LeastNumberScheme, Set.mem_ofPred_eq, forall_exists_index, and_imp]
+  rintro φ hφ rfl; exact ⟨φ, h hφ, rfl⟩;
 
 lemma mem_LeastNumberScheme_of_mem {φ : ArithmeticSemiformula ℕ 1} (hφ : C φ) :
     .univCl (leastNumber φ) ∈ LeastNumberScheme C := ⟨φ, hφ, rfl⟩
@@ -248,7 +249,8 @@ variable {C C' : ArithmeticSemiformula ℕ 2 → Prop}
 
 lemma CollectionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 2}, C φ → C' φ) :
     CollectionScheme C ⊆ CollectionScheme C' := by
-  rintro _ ⟨φ, hφ, rfl⟩; exact ⟨φ, h hφ, rfl⟩
+  intro _; simp only [CollectionScheme, Set.mem_ofPred_eq, forall_exists_index, and_imp]
+  rintro φ hφ rfl; exact ⟨φ, h hφ, rfl⟩
 
 lemma mem_CollectionScheme_of_mem {φ : ArithmeticSemiformula ℕ 2} (hφ : C φ) :
     .univCl (collectionAxiom φ) ∈ CollectionScheme C := ⟨φ, hφ, rfl⟩
@@ -848,13 +850,13 @@ lemma models_succInd (φ : ArithmeticSemiformula ℕ 1) : ℕ↓[ℒₒᵣ] ⊧ 
 
 instance models_ISigma (Γ s) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ s := by
   have : ∀ φ, ℕ↓[ℒₒᵣ] ⊧ (succInd φ).univCl := models_succInd
-  simp only [Semantics.ModelsSet.union_iff, PeanoMinus.instModelsSetStrucORingSentenceStrNat,
+  simp only [Semantics.ModelsSet.union_iff, PeanoMinus.models_PeanoMinus,
     true_and, InductionScheme]
   exact Semantics.ModelsSet.setOf_iff.mpr (fun ψ ⟨φ, _, hψ⟩ => hψ ▸ this φ)
 
 instance models_IBroadSigma (Γ s) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ s := by
   have : ∀ φ, ℕ↓[ℒₒᵣ] ⊧ (succInd φ).univCl := models_succInd
-  simp only [Semantics.ModelsSet.union_iff, PeanoMinus.instModelsSetStrucORingSentenceStrNat,
+  simp only [Semantics.ModelsSet.union_iff, PeanoMinus.models_PeanoMinus,
     true_and, InductionScheme]
   exact Semantics.ModelsSet.setOf_iff.mpr (fun ψ ⟨φ, _, hψ⟩ => hψ ▸ this φ)
 
@@ -866,9 +868,9 @@ instance models_IBroadSigmaOne : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := inferI
 
 instance models_Peano : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔 := by
   have : ∀ φ, ℕ↓[ℒₒᵣ] ⊧ (succInd φ).univCl := models_succInd
-  simp only [Peano, Semantics.ModelsSet.union_iff, PeanoMinus.instModelsSetStrucORingSentenceStrNat,
+  simp only [Peano, Semantics.ModelsSet.union_iff, PeanoMinus.models_PeanoMinus,
     true_and, InductionScheme]
-  exact Semantics.ModelsSet.setOf_iff.mpr (fun ψ ⟨φ, _, hψ⟩ => hψ ▸ this φ)
+  exact Semantics.ModelsSet.setOf_iff.mpr (fun ψ ⟨φ, hψ⟩ => hψ ▸ this φ)
 
 instance sigmaOneSound_IBroadSigmaOne : 𝗜𝚺⁺₁.SoundOnHierarchy 𝚺 1 := inferInstance
 

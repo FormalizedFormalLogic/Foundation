@@ -18,13 +18,15 @@ open scoped FFL.FirstOrder.Arithmetic
 def _root_.FFL.Omega1.omega1 : ArithmeticSentence :=
   “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
 
-inductive _root_.FFL.Omega1 : ArithmeticTheory where
-  | omega : Omega1 Omega1.omega1
+inductive _root_.FFL.IsOmega1Axiom : ArithmeticSentence → Prop where
+  | omega : IsOmega1Axiom Omega1.omega1
+
+abbrev _root_.FFL.Omega1 : ArithmeticTheory := Set.ofPred IsOmega1Axiom
 
 notation "𝝮₁" => Omega1
 
 @[simp] lemma _root_.FFL.FirstOrder.Theory.OmegaOne.mem_iff {σ} : σ ∈ 𝝮₁ ↔ σ = Omega1.omega1 :=
-  ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Omega1.omega⟩
+  ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact IsOmega1Axiom.omega⟩
 
 noncomputable section
 
@@ -52,7 +54,7 @@ instance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜�
 instance : V↓[ℒₒᵣ] ⊧* 𝝮₁ := ModelsTheory.of_add_right V 𝗜𝚺₀ 𝝮₁
 
 lemma exists_exponential_sq_length (x : V) : ∃ y, Exponential (‖x‖^2) y :=
-  models_Omega1_iff.mp (Theory.models _ _ Omega1.omega) x
+  models_Omega1_iff.mp (Theory.models _ _ IsOmega1Axiom.omega) x
 
 lemma exists_unique_exponential_sq_length (x : V) : ∃! y, Exponential (‖x‖^2) y := by
   rcases exists_exponential_sq_length x with ⟨y, h⟩

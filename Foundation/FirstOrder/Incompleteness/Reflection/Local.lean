@@ -20,7 +20,7 @@ namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment ProvabilityAbstraction
 
-abbrev _root_.FFL.FirstOrder.Theory.localReflectionOn
+noncomputable abbrev _root_.FFL.FirstOrder.Theory.localReflectionOn
     (T : ArithmeticTheory) [T.Δ₁] (Γ : ArithmeticSentence → Prop) : Set ArithmeticSentence :=
   T.standardProvability.reflOn Γ
 
@@ -30,7 +30,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 
 @[instance]
 lemma strictlyWeakerThan_localReflection [𝗜𝚺₁ ⪯ T] [Consistent T] :
-    T ⪱ T ∪ 𝗥𝗳𝗻[Set.univ] T :=
+    T ⪱ T ∪ 𝗥𝗳𝗻[fun _ ↦ True] T :=
   StrictlyWeakerThan.of_unprovable_provable (φ := T.consistent)
     (consistent_unprovable T)
     (Provability.con_of_localReflection _ trivial)
@@ -65,15 +65,15 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
 
 @[instance]
 lemma consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
-    Consistent (T ∪ 𝗥𝗳𝗻[Set.univ] T) :=
-  Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], models_localReflectionOn (Γ := Set.univ)⟩
+    Consistent (T ∪ 𝗥𝗳𝗻[fun _ ↦ True] T) :=
+  Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], models_localReflectionOn (Γ := fun _ ↦ True)⟩
 
 section Sigma1Sound
 
 variable [T.SoundOnHierarchy 𝚺 1]
 
 @[instance] theorem consistent_localReflection_of_Sigma1_sound :
-    Consistent (T ∪ 𝗥𝗳𝗻[Set.univ] T) := by
+    Consistent (T ∪ 𝗥𝗳𝗻[fun _ ↦ True] T) := by
   classical
   apply consistent_compact.mpr;
   intro F hF hFfin;
@@ -145,7 +145,7 @@ theorem not_provable_localReflectionOn_insert [𝗜𝚺n ⪯ T]
 
 theorem not_provable_localReflectionOn_univ_insert {π : ArithmeticSentence}
     (hC : Consistent (insert π T)) :
-    ¬ insert π T ⊢* 𝗥𝗳𝗻[Set.univ] T := fun h ↦
+    ¬ insert π T ⊢* 𝗥𝗳𝗻[fun _ ↦ True] T := fun h ↦
   (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
     (Γ := fun _ ↦ True) (fun _ _ ↦ trivial) trivial h).not_con hC
 

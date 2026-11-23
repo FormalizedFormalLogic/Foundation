@@ -18,7 +18,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
   ∃ φ : ArithmeticSemisentence 1, ∃ a : ℕ, T ⊬ φ/[a] ∧ T ⊬ ∼φ/[a] := by
   let φ := codeOfREPred P;
   use φ;
-  have hP : P = { n : ℕ | T ⊢ φ/[n] } := Set.ext fun x ↦ rePred_weak_representation hRE;
+  have hP : P = fun n : ℕ ↦ T ⊢ φ/[n] := funext fun x ↦ propext <| rePred_weak_representation hRE;
   have ⟨d, hd⟩ : ∃ d : ℕ, ¬(¬P d ↔ T ⊢ ∼φ/[d]) := by
     by_contra h;
     apply hC;

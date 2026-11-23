@@ -77,7 +77,8 @@ instance : CoeOut F.Domain C := ⟨fun x ↦ x.val⟩
 
 lemma finite_colimit {ι : Type*} [Finite ι] (p : ι → W) (hp : ∀ i, p i ∈ F) :
     ∃ q ∈ F, ∀ i, q ≤ p i :=
-  DirectedOn.fintype_colimit isTrans_ge (Order.PFilter.nonempty F) F.directed p hp
+  DirectedOn.fintype_colimit (r := (· ≥ ·)) ⟨fun _ _ _ h₁ h₂ ↦ le_trans h₂ h₁⟩
+    (Order.PFilter.nonempty F) F.directed p hp
 
 lemma finite_colimit_domain {ι : Type*} [Finite ι] (v : ι → F.Domain) :
     ∃ q ∈ F, ∀ i, q ⊩↓ ↑(v i) := by

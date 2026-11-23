@@ -171,7 +171,7 @@ private lemma models_IBroadSigma_succ_of_models_InductionOnPrenexHierarchy (Γ :
     models_of_ss (U := 𝗜𝗡𝗗 Γ (s + 1)) inferInstance Set.subset_union_left;
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := models_BPi_of_models_InductionOnPrenexHierarchy Γ;
   suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (s + 1)) by
-    simpa [InductionOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩;
+    exact Semantics.ModelsSet.union_iff.mpr ⟨hPA, this⟩;
   simp only [InductionScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;
@@ -291,7 +291,7 @@ lemma models_InductionOnPrenexHierarchy_of_models_LeastNumberOnPrenexHierarchy (
     (s : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟 Γ s] : V↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ.alt s := by
   have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_ss (U := 𝗟 Γ s) inferInstance Set.subset_union_left;
   suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ.alt s) by
-    simpa [InductionOnPrenexHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩;
+    exact Semantics.ModelsSet.union_iff.mpr ⟨hPA, this⟩;
   simp only [InductionScheme];
   apply Semantics.ModelsSet.setOf_iff.mpr;
   rintro _ ⟨φ, hφ, rfl⟩;

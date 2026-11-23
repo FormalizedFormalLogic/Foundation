@@ -40,24 +40,26 @@ variable [H : M↓[L] ⊧* 𝗘𝗤 L]
 open Semiterm Theory Semiformula
 
 lemma eqv_refl (a : M) : eqv L a a := by
-  have : M↓[L] ⊧ “∀ x, x = x” := H.models _ (Theory.eqAxiom.refl (L := L))
+  have : M↓[L] ⊧ “∀ x, x = x” := H.models _ (Theory.IsEqAxiom.refl (L := L))
   have : ∀ x : M, op(=)[L].val ![x, x] := by simpa [models_iff] using this
   exact this a
 
 lemma eqv_symm {a b : M} : eqv L a b → eqv L b a := by
-  have : M↓[L] ⊧ “∀ x y, x = y → y = x” := H.models _ (Theory.eqAxiom.symm (L := L))
+  have : M↓[L] ⊧ “∀ x y, x = y → y = x” :=
+    H.models _ (Theory.IsEqAxiom.symm (L := L))
   have : ∀ x y : M, op(=)[L].val ![x, y] → op(=)[L].val ![y, x] := by simpa [models_iff] using this
   exact this a b
 
 lemma eqv_trans {a b c : M} : eqv L a b → eqv L b c → eqv L a c := by
-  have : M↓[L] ⊧ “∀ x y z, x = y → y = z → x = z” := H.models _ (Theory.eqAxiom.trans (L := L))
+  have : M↓[L] ⊧ “∀ x y z, x = y → y = z → x = z” :=
+    H.models _ (Theory.IsEqAxiom.trans (L := L))
   have : ∀ x y z : M, op(=)[L].val ![x, y] → op(=)[L].val ![y, z] → op(=)[L].val ![x, z] := by
     simpa [models_iff] using this
   exact this a b c
 
 lemma eqv_funcExt {k} (f : L.Func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     eqv L (func f v) (func f w) := by
-  have : M↓[L] ⊧ Eq.funcExt f := H.models _ (eqAxiom.funcExt f)
+  have : M↓[L] ⊧ Eq.funcExt f := H.models _ (IsEqAxiom.funcExt f)
   have :
       ∀ m : Fin (k + k) → M,
       (∀ (i : Fin k), op(=)[L].val ![m (Fin.addCast k i), m (i.addNat k)]) →
@@ -69,7 +71,7 @@ lemma eqv_funcExt {k} (f : L.Func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i)
 
 lemma eqv_relExt_aux {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v → rel r w := by
-  have : M↓[L] ⊧ Eq.relExt r := H.models _ (eqAxiom.relExt r)
+  have : M↓[L] ⊧ Eq.relExt r := H.models _ (IsEqAxiom.relExt r)
   have :
       ∀ m : Fin (k + k) → M,
       (∀ (i : Fin k), op(=)[L].val ![m (Fin.addCast k i), m (i.addNat k)]) →

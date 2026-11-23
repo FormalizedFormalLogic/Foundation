@@ -203,7 +203,7 @@ variable [L.DecidableEq] [DecidableEq ξ]
 
 def hasDecEq {n} : (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ = ψ)
   | ⊥, ψ => by cases ψ using cases' <;>
-      { simp only [reduceCtorEq]; try { exact isFalse not_false }; try { exact isTrue trivial } }
+      { simp only [reduceCtorEq]; first | exact isFalse not_false | exact isTrue trivial }
   | rel r v, ψ => by
       cases ψ using cases' <;> try { simpa using isFalse not_false }
       case hRel k₁ k₂ r₂ v₂ =>

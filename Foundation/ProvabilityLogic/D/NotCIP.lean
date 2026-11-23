@@ -82,7 +82,7 @@ lemma S_modalize_iff_of_interpolant (hab : a ≠ b) (hac : a ≠ c)
 theorem not_CIP (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) :
     ¬∀ A B : Formula α, 𝐃 ⊢ A 🡒 B →
       ∃ C, 𝐃 ⊢ A 🡒 C ∧ 𝐃 ⊢ C 🡒 B ∧ C.atoms ⊆ A.atoms ∩ B.atoms := by
-  by_contra! h;
+  by_contra h;
   have : 𝐆𝐋 ⊢ □(□#b ⋎ #a) ⋏ □(#a 🡒 □#c) 🡒 □(□#b ⋎ □#c) :=
     C_trans normalOf.box_and (normalOf.box_mono (by cl_prover));
   obtain ⟨C, h₁, h₂, hC⟩ := h (∼(□(□#b ⋎ #a) 🡒 □#b)) (□(#a 🡒 □#c) 🡒 □#c)

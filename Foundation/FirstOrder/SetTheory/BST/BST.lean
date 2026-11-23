@@ -20,8 +20,8 @@ variable {V : Type*} [SetStructure V] [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗕
 
 lemma mem_ext_iff {x y : V} : x = y ↔ ∀ z, z ∈ x ↔ z ∈ y := by
   have := by
-    simpa [models_iff, BasicSetTheory.extensionality] using
-      Theory.models V 𝗕𝗦𝗧 BasicSetTheory.extensionality
+    simpa [models_iff, IsBasicSetTheoryAxiom.extensionality] using
+      Theory.models V 𝗕𝗦𝗧 IsBasicSetTheoryAxiom.extensionality
   exact this x y
 
 alias ⟨_, mem_ext⟩ := mem_ext_iff
@@ -33,7 +33,8 @@ attribute [ext] mem_ext
   · exact hxy z
   · exact hyx z
 
-@[grind .] lemma subset_antisymm_iff {x y : V} : x ⊆ y ∧ y ⊆ x ↔ x = y := by aesop
+@[grind .] lemma subset_antisymm_iff {x y : V} : x ⊆ y ∧ y ⊆ x ↔ x = y :=
+  ⟨fun h ↦ subset_antisymm h.1 h.2, fun h ↦ ⟨h ▸ subset_refl x, h ▸ subset_refl y⟩⟩
 
 omit [Nonempty V] [V↓[ℒₛₑₜ] ⊧* 𝗕𝗦𝗧] in
 lemma subset_of_eq {x y : V} (h : x = y) : x ⊆ y := h ▸ subset_refl x
@@ -59,7 +60,7 @@ lemma SSubset.of_subset_of_not_mem_of_mem {x y z : V} (ss : x ⊆ y) (hzx : z �
 /-! ## Axiom of empty set -/
 
 lemma empty_exists : ∃ e : V, IsEmpty e := by
-  simpa [models_iff] using! Theory.models V 𝗕𝗦𝗧 BasicSetTheory.empty_set
+  simpa [models_iff] using! Theory.models V 𝗕𝗦𝗧 IsBasicSetTheoryAxiom.empty_set
 
 lemma empty_existsUnique : ∃! e : V, IsEmpty e := by
   rcases empty_exists (V := V) with ⟨e, he⟩
@@ -94,7 +95,8 @@ lemma eq_empty_or_isNonempty (x : V) : x = ∅ ∨ IsNonempty x := by
 /-! ## Axiom of pairing -/
 
 lemma pairing_exists : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
-  simpa [models_iff, BasicSetTheory.pairing] using Theory.models V 𝗕𝗦𝗧 BasicSetTheory.pairing
+  simpa [models_iff, IsBasicSetTheoryAxiom.pairing] using
+    Theory.models V 𝗕𝗦𝗧 IsBasicSetTheoryAxiom.pairing
 
 lemma pairing_existsUnique (x y : V) : ∃! z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
   rcases pairing_exists x y with ⟨p, hp⟩
@@ -142,7 +144,8 @@ instance singleton.definable : ℒₛₑₜ-function₁[V] Singleton.singleton :
 /-! ## Axiom of union -/
 
 lemma union_exists : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w := by
-  simpa [models_iff, BasicSetTheory.union] using Theory.models V 𝗕𝗦𝗧 BasicSetTheory.union
+  simpa [models_iff, IsBasicSetTheoryAxiom.union] using
+    Theory.models V 𝗕𝗦𝗧 IsBasicSetTheoryAxiom.union
 
 lemma union_existsUnique (x : V) : ∃! y : V, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w := by
   rcases union_exists x with ⟨u, hu⟩
@@ -258,7 +261,8 @@ lemma pair_eq_doubleton (x y : V) : {x, y} = doubleton x y := by ext; simp
 /-! ## Axiom of power set -/
 
 lemma power_exists : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
-  simpa [models_iff, BasicSetTheory.power_set] using Theory.models V 𝗕𝗦𝗧 BasicSetTheory.power_set
+  simpa [models_iff, IsBasicSetTheoryAxiom.power_set] using
+    Theory.models V 𝗕𝗦𝗧 IsBasicSetTheoryAxiom.power_set
 
 lemma power_existsUnique (x : V) : ∃! y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
   rcases power_exists x with ⟨p, hp⟩

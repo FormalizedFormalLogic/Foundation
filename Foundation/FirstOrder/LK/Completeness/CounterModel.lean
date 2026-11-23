@@ -246,7 +246,7 @@ lemma satisfiable_iff_consistent :
 theorem Proof.complete :
     T ⊨[Tarski.Struc.{max u w} L] φ → T ⊢ φ := by
   classical
-  contrapose!
+  contrapose
   intro h
   have : Consistent (insert (∼φ) T) := unprovable_iff_consistent_adjoin.mp h
   have : Semantics.Satisfiable (Tarski.Struc.{max u w} L) (insert (∼φ) T) :=

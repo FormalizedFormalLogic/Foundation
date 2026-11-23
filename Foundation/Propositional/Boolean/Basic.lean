@@ -168,7 +168,7 @@ lemma tautology_of_letterless_of_not_neg_isTautology (hl : φ.Letterless) :
 @[grind =>]
 lemma neg_isTautology_of_letterless_of_isTautology (hl : φ.Letterless) :
     ¬φ.IsTautology → (∼φ).IsTautology := by
-  contrapose!;
+  contrapose;
   apply tautology_of_letterless_of_not_neg_isTautology hl;
 
 end Formula

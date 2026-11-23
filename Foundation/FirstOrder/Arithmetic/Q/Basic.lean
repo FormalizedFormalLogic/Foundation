@@ -12,16 +12,18 @@ noncomputable section
 
 namespace FFL.FirstOrder.Arithmetic
 
-inductive RobinsonQ : ArithmeticTheory
-  | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, RobinsonQ φ
-  | succNeZero : RobinsonQ “∀ a, a + 1 ≠ 0”
-  | succInj : RobinsonQ “∀ a b, a + 1 = b + 1 → a = b”
-  | zeroOrSucc : RobinsonQ “∀ a, a = 0 ∨ ∃ b, a = b + 1”
-  | addZero : RobinsonQ “∀ a, a + 0 = a”
-  | addSucc : RobinsonQ “∀ a b, a + (b + 1) = (a + b) + 1”
-  | mulZero : RobinsonQ “∀ a, a * 0 = 0”
-  | mulSucc : RobinsonQ “∀ a b, a * (b + 1) = a * b + a”
-  | ltDef : RobinsonQ “∀ a b, a < b ↔ ∃ c, a + (c + 1) = b”
+inductive IsRobinsonQAxiom : Sentence ℒₒᵣ → Prop
+  | equal : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, IsRobinsonQAxiom φ
+  | succNeZero : IsRobinsonQAxiom “∀ a, a + 1 ≠ 0”
+  | succInj : IsRobinsonQAxiom “∀ a b, a + 1 = b + 1 → a = b”
+  | zeroOrSucc : IsRobinsonQAxiom “∀ a, a = 0 ∨ ∃ b, a = b + 1”
+  | addZero : IsRobinsonQAxiom “∀ a, a + 0 = a”
+  | addSucc : IsRobinsonQAxiom “∀ a b, a + (b + 1) = (a + b) + 1”
+  | mulZero : IsRobinsonQAxiom “∀ a, a * 0 = 0”
+  | mulSucc : IsRobinsonQAxiom “∀ a b, a * (b + 1) = a * b + a”
+  | ltDef : IsRobinsonQAxiom “∀ a b, a < b ↔ ∃ c, a + (c + 1) = b”
+
+abbrev RobinsonQ : ArithmeticTheory := Set.ofPred IsRobinsonQAxiom
 
 notation "𝗤" => RobinsonQ
 
@@ -51,36 +53,37 @@ open ORingStructure
     exact models_theory_iff.mp this _ h
   repeat case _ => simp [models_iff, add_assoc, mul_add]⟩
 
-instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗤 := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ equal φ hp
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗤 :=
+  Entailment.WeakerThan.ofSubset <| fun φ hp ↦ IsRobinsonQAxiom.equal φ hp
 
 end RobinsonQ
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗤]
 
 @[simp] protected lemma succ_ne_zero : ∀ a : M, a + 1 ≠ 0 := by
-  simpa [models_iff] using Theory.models M _ RobinsonQ.succNeZero
+  simpa [models_iff] using Theory.models M _ IsRobinsonQAxiom.succNeZero
 
 lemma succ_inj {a b : M} : a + 1 = b + 1 → a = b := by
-  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.succInj
+  have := by simpa [models_iff] using Theory.models M _ IsRobinsonQAxiom.succInj
   exact this a b
 
 @[simp] protected lemma add_zero {a : M} : a + 0 = a := by
-  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.addZero
+  have := by simpa [models_iff] using Theory.models M _ IsRobinsonQAxiom.addZero
   exact this a
 
 protected lemma add_succ (a b : M) : a + (b + 1) = a + b + 1 := by
-  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.addSucc
+  have := by simpa [models_iff] using Theory.models M _ IsRobinsonQAxiom.addSucc
   exact this a b
 
 @[simp] protected lemma mul_zero (a : M) : a * 0 = 0 := by
-  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.mulZero
+  have := by simpa [models_iff] using Theory.models M _ IsRobinsonQAxiom.mulZero
   exact this a
 
 protected lemma mul_succ : ∀ a b : M, a * (b + 1) = a * b + a := by
-  simpa [models_iff] using Theory.models M _ RobinsonQ.mulSucc
+  simpa [models_iff] using Theory.models M _ IsRobinsonQAxiom.mulSucc
 
 lemma zero_or_succ (a : M) : a = 0 ∨ ∃ b : M, a = b + 1 := by
-  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.zeroOrSucc
+  have := by simpa [models_iff] using Theory.models M _ IsRobinsonQAxiom.zeroOrSucc
   exact this a
 
 lemma exists_succ_of_ne_zero {a : M} (ha : a ≠ 0) : ∃ b : M, a = b + 1 := by
@@ -92,7 +95,7 @@ lemma exists_succ_of_ne_zero' {a : M} (ha : a ≠ 0) : ∃ b : M, b + 1 = a := b
   use b;
 
 protected lemma lt_def {a b : M} : a < b ↔ ∃ c : M, a + (c + 1) = b := by
-  have := by simpa [models_iff] using Theory.models M _ RobinsonQ.ltDef
+  have := by simpa [models_iff] using Theory.models M _ IsRobinsonQAxiom.ltDef
   exact this a b
 
 @[simp]
@@ -257,7 +260,7 @@ lemma numeral_ne_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ numeral m
     exact numeral_zero_succ_ne;
   | n + 1, m + 1 =>
     have := numeral_ne_of_ne (n := n) (m := m) (by omega);
-    contrapose! this;
+    contrapose this;
     apply numeral_succ_inj this;
 
 lemma numeral_lt_of_lt {n m : ℕ} (h : n < m) : (numeral n : M) < numeral m := by
@@ -326,6 +329,6 @@ instance : 𝗥₀ ⪯ 𝗤 := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferI
 
 instance : 𝗥₀ ⪱ 𝗤 :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
-    R0.unprovable_addZero (Entailment.by_axm RobinsonQ.addZero)
+    R0.unprovable_addZero (Entailment.by_axm IsRobinsonQAxiom.addZero)
 
 end FFL.FirstOrder.Arithmetic
