@@ -1,7 +1,8 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.R0.Cobham
-public import Foundation.FirstOrder.Incompleteness.Church
+public import Foundation.FirstOrder.Incompleteness.Halting
+public import Mathlib.Computability.Reduce
 public import Foundation.Logic.Decidability
 
 /-!

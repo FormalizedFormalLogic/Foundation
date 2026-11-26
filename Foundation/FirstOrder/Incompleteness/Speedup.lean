@@ -137,7 +137,7 @@ theorem ehrenfeucht_mycielski_speedup_arithmetic (hσ : T ⊬ σ) (f : ℕ → �
   have : 𝗜𝚺₁ ⪯ (insert (∼σ) T) :=
     WeakerThan.trans ‹𝗜𝚺₁ ⪯ T› (Axiomatized.le_of_subset (Set.subset_insert _ T));
   have : Consistent (insert (∼σ) T) := unprovable_iff_consistent_adjoin.mp hσ;
-  ehrenfeucht_mycielski_speedup uncomputable_theory_of_consistent f hf
+  ehrenfeucht_mycielski_speedup (fun h ↦ R0.undecidable_of_consistent _ ⟨h⟩) f hf
 
 example (hσ : T ⊬ σ) :
   ∃ π : ArithmeticSentence, T ⊢ π ∧ (insert σ T).minProof π < Nat.log 2 (T.minProof π) := by
