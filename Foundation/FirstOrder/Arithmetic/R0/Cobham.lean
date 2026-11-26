@@ -6,12 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 /-!
 # Cobham's order and weak representability in $\mathsf{R}_0$
 
-Cobham's order `x ≤ᶜ y` holds if $x \le y$ or `y` is not regular, i.e. fails
-$0 \le y \wedge \forall v < y,\ v + 1 \le y$. In every model of $\mathsf{R}_0$ it compares every
-element with every numeral, and below a numeral it coincides with $\le$. Bounding the search for
-a witness by Cobham's order, every computable function `f` is weakly represented in
-$\mathsf{R}_0$ by `cobhamRepresentation f`: $\mathsf{R}_0 \vdash \forall y\,(\gamma(\bar n, y)
-\leftrightarrow y = \overline{f(n)})$ for every `n` (`cobhamRepresentation_spec`).
+Every computable function is weakly representable in $\mathsf{R}_0$ through Cobham's order.
 
 ## References
 

@@ -7,10 +7,6 @@ public import Foundation.Logic.Decidability
 /-!
 # Essential undecidability of $\mathsf{R}_0$
 
-Every consistent extension of $\mathsf{R}_0$ is undecidable (`R0.undecidable_of_consistent`), so
-$\mathsf{R}_0$ is essentially undecidable: diagonalizing against a decision procedure through the
-weak representation of computable functions by Cobham's order.
-
 ## References
 
 - [Sve08]
