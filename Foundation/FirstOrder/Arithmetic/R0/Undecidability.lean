@@ -18,25 +18,28 @@ public import Foundation.Logic.Decidability
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.R0
+namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping Bootstrapping.Arithmetic
 
-theorem undecidable_of_consistent (T : ArithmeticTheory) [𝗥₀ ⪯ T]
-    [Entailment.Consistent T] : Entailment.Undecidable T := by
-  rintro ⟨hC⟩
-  have hQuoteSubst :
-      Computable₂ fun σ π : ArithmeticSemisentence 1 ↦ (σ/[⌜π⌝] : ArithmeticSentence) :=
+lemma computablePred_provable_diag {T : ArithmeticTheory} (hT : Entailment.Decidable T) :
+    ComputablePred fun σ : ArithmeticSemisentence 1 ↦ T ⊢ σ/[⌜σ⌝] := by
+  have h : Computable₂ fun σ π : ArithmeticSemisentence 1 ↦ (σ/[⌜π⌝] : ArithmeticSentence) :=
     computable₂_iff_sigma1_simulate (f := substNumeral (V := ℕ)) (by definability)
       fun σ τ ↦ by simp [← Sentence.quote_eq_encode_nat, substNumeral_app_quote]
-  have hSubst : Computable fun σ : ArithmeticSemisentence 1 ↦ (σ/[⌜σ⌝] : ArithmeticSentence) :=
-    hQuoteSubst.comp Computable.id Computable.id
-  have hD : ComputablePred fun σ : ArithmeticSemisentence 1 ↦ T ⊢ σ/[⌜σ⌝] :=
-    ComputablePred.computable_of_manyOneReducible (ManyOneReducible.mk (fun σ ↦ T ⊢ σ) hSubst) hC
+  exact ComputablePred.computable_of_manyOneReducible
+    (ManyOneReducible.mk (fun σ ↦ T ⊢ σ) (h.comp .id .id)) hT.dec
+
+namespace R0
+
+theorem undecidable_of_consistent (T : ArithmeticTheory) [𝗥₀ ⪯ T]
+    [Entailment.Consistent T] : Entailment.Undecidable T := by
+  intro hT
   let D : ℕ → Prop :=
     fun n ↦ (Encodable.decode (α := ArithmeticSemisentence 1) n).elim False
       fun σ ↦ T ⊢ σ/[⌜σ⌝]
-  obtain ⟨_, hDdec⟩ : ComputablePred D := ComputablePred.iff_decoded_pred.mp hD
+  obtain ⟨_, hDdec⟩ : ComputablePred D := ComputablePred.iff_decoded_pred.mp
+    (computablePred_provable_diag hT)
   have hγ := cobhamRepresentation_spec
     (Computable.cond hDdec (Computable.const 0) (Computable.const 1))
   generalize cobhamRepresentation _ = γ at hγ
@@ -66,4 +69,6 @@ instance : Entailment.EssentiallyUndecidable 𝗥₀ where
 
 theorem undecidable : Entailment.Undecidable 𝗥₀ := undecidable_of_consistent 𝗥₀
 
-end FFL.FirstOrder.Arithmetic.R0
+end R0
+
+end FFL.FirstOrder.Arithmetic
