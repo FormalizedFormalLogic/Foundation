@@ -188,31 +188,37 @@ lemma eval_cobhamComparison_numeral_iff (n : ℕ) (y : M) :
 
 end
 
-lemma exists_deltaZero_graph (hf : Computable f) : ∃ φ : ArithmeticSemisentence 3,
-    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ ∧ ∀ n m, m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] φ := by
-  let F : List.Vector ℕ 1 →. ℕ := fun v ↦ Part.some (f (v.get 0))
-  have hF : Nat.Partrec' F := Nat.Partrec'.of_part <| hf.comp (Primrec.to_comp (by primrec))
-  have hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (codeOfPartrec' F) := by simp [codeOfPartrec']
-  obtain ⟨ψ, hψ⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hσ
-  use “x y v. !ψ.sigmaInv.val v y x”
-  and_intros
-  · simp
-  · intro n m
-    have := (codeOfPartrec'_spec hF (y := m) (v := ![n])).symm.trans
-      ((hψ ℕ (m :> ![n]) Empty.elim).trans (ψ.models_sigmaInv _))
-    simpa [F] using this
+lemma hierarchy_codeOfPartrec'_graph (f : ℕ → ℕ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1
+    (codeOfPartrec' fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0))) := by
+  simp [codeOfPartrec']
+
+noncomputable def deltaZeroGraph (f : ℕ → ℕ) : ArithmeticSemisentence 3 :=
+  “x y v. !(hierarchy_codeOfPartrec'_graph f).prenex.sigmaInv.val v y x”
+
+@[simp]
+lemma deltaZeroGraph_hierarchy (f : ℕ → ℕ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 (deltaZeroGraph f) := by
+  simp [deltaZeroGraph]
+
+lemma deltaZeroGraph_spec (hf : Computable f) (n m : ℕ) :
+    m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] (deltaZeroGraph f) := by
+  have hF : Nat.Partrec' fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0)) :=
+    Nat.Partrec'.of_part <| hf.comp (Primrec.to_comp (by primrec))
+  have h := hierarchy_codeOfPartrec'_graph f
+  have := (codeOfPartrec'_spec hF (y := m) (v := ![n])).symm.trans
+    (((Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) h).choose_spec ℕ (m :> ![n])
+      Empty.elim).trans (h.prenex.models_sigmaInv _))
+  simpa [deltaZeroGraph] using this
 
 noncomputable def cobhamRepresentation (f : ℕ → ℕ) : ArithmeticSemisentence 2 :=
-  cobhamComparison <| Classical.epsilon fun φ ↦
-    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ ∧ ∀ n m, m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] φ
+  cobhamComparison (deltaZeroGraph f)
 
 theorem cobhamRepresentation_spec (hf : Computable f) (n : ℕ) :
     𝗥₀ ⊢ “∀ y, !(cobhamRepresentation f) ↑n y ↔ y = ↑(f n)” := by
-  obtain ⟨hφ₀, hφ⟩ := Classical.epsilon_spec (exists_deltaZero_graph hf)
   apply complete.{0}
   intro M _ _
   simpa [models_iff, cobhamRepresentation, -eval_cobhamComparison]
-    using eval_cobhamComparison_numeral_iff (M := M) hφ₀ hφ n
+    using eval_cobhamComparison_numeral_iff (M := M) (deltaZeroGraph_hierarchy f)
+      (deltaZeroGraph_spec hf) n
 
 end representation
 
