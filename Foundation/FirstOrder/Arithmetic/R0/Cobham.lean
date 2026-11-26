@@ -23,55 +23,55 @@ open ORingStructure
 
 section order
 
-variable {M : Type*} [ORingStructure M] {x y : M}
+variable {V : Type*} [ORingStructure V] {x y : V}
 
 @[mk_iff]
-structure IsRegular (y : M) : Prop where
+structure IsRegular (y : V) : Prop where
   zero_le : 0 = y ∨ 0 < y
   add_one_le : ∀ v < y, v + 1 = y ∨ v + 1 < y
 
 def isRegularDef : 𝚺ᴬ₀.Semisentence 1 := .mkSigma “y. 0 ≤ y ∧ ∀ v < y, v + 1 ≤ y”
 
-instance isRegular_defined : 𝚺ᴬ₀-Predicate (IsRegular : M → Prop) via isRegularDef := .mk fun v ↦ by
+instance isRegular_defined : 𝚺ᴬ₀-Predicate[V] IsRegular via isRegularDef := .mk fun v ↦ by
   simp [isRegularDef, isRegular_iff, Semiformula.Operator.LE.sentence_eq,
     Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq,
     Semiformula.Operator.LT.sentence_eq]
 
-def CobhamLE (x y : M) : Prop := (x = y ∨ x < y) ∨ ¬IsRegular y
+def CobhamLE (x y : V) : Prop := (x = y ∨ x < y) ∨ ¬IsRegular y
 
 scoped infix:50 " ≤ᶜ " => CobhamLE
 
 def cobhamLEDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma “x y. x ≤ y ∨ ¬!isRegularDef y”
 
-instance cobhamLE_defined : 𝚺ᴬ₀-Relation (CobhamLE : M → M → Prop) via cobhamLEDef := .mk fun v ↦ by
+instance cobhamLE_defined : 𝚺ᴬ₀-Relation[V] CobhamLE via cobhamLEDef := .mk fun v ↦ by
   simp [cobhamLEDef, CobhamLE, Semiformula.Operator.LE.sentence_eq, Semiformula.Operator.val,
     Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
 
 @[simp, grind .]
-lemma cobhamLE_refl (x : M) : x ≤ᶜ x := Or.inl <| Or.inl rfl
+lemma cobhamLE_refl (x : V) : x ≤ᶜ x := Or.inl <| Or.inl rfl
 
-def CobhamLT (x y : M) : Prop := x ≤ᶜ y ∧ x ≠ y
+def CobhamLT (x y : V) : Prop := x ≤ᶜ y ∧ x ≠ y
 
 scoped infix:50 " <ᶜ " => CobhamLT
 
 def cobhamLTDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma “x y. !cobhamLEDef x y ∧ x ≠ y”
 
-instance cobhamLT_defined : 𝚺ᴬ₀-Relation (CobhamLT : M → M → Prop) via cobhamLTDef := .mk fun v ↦ by
+instance cobhamLT_defined : 𝚺ᴬ₀-Relation[V] CobhamLT via cobhamLTDef := .mk fun v ↦ by
   simp [cobhamLTDef, CobhamLT]
 
-variable [M↓[ℒₒᵣ] ⊧* 𝗥₀]
+variable [V↓[ℒₒᵣ] ⊧* 𝗥₀]
 
 @[simp, grind =]
-lemma numeral_add_one_of_R0 (n : ℕ) : (numeral n : M) + 1 = numeral (n + 1) := by
-  simpa using numeral_add_numeral (M := M) n 1
+lemma numeral_add_one_of_R0 (n : ℕ) : (numeral n : V) + 1 = numeral (n + 1) := by
+  simpa using numeral_add_numeral (M := V) n 1
 
 @[grind .]
-lemma isRegular_numeral (n : ℕ) : IsRegular (numeral n : M) := by
+lemma isRegular_numeral (n : ℕ) : IsRegular (numeral n : V) := by
   constructor
   · rcases Nat.eq_zero_or_pos n with rfl | hn
     · simp
     · right
-      simpa using (numeral_lt_numeral_iff (M := M)).mpr hn
+      simpa using (numeral_lt_numeral_iff (M := V)).mpr hn
   · intro v hv
     rcases lt_numeral_iff.mp hv with ⟨i, rfl⟩
     simp
@@ -103,7 +103,7 @@ lemma eq_numeral_of_cobhamLE_numeral {n : ℕ} (h : x ≤ᶜ numeral n) :
   · rcases lt_numeral_iff.mp h with ⟨i, rfl⟩
     use i, i.isLt.le
 
-lemma cobhamLE_numeral_of_le {k q : ℕ} {w : M} (hkq : k ≤ q) (h : numeral q ≤ᶜ w) :
+lemma cobhamLE_numeral_of_le {k q : ℕ} {w : V} (hkq : k ≤ q) (h : numeral q ≤ᶜ w) :
     numeral k ≤ᶜ w := by
   by_cases hw : IsRegular w
   · rcases exists_eq_numeral_or_numeral_le_of_isRegular hw k with ⟨i, hi, rfl⟩ | h'
@@ -113,13 +113,13 @@ lemma cobhamLE_numeral_of_le {k q : ℕ} {w : M} (hkq : k ≤ q) (h : numeral q 
   · exact Or.inr hw
 
 @[simp, grind =]
-lemma numeral_cobhamLE_numeral_iff {k n : ℕ} : (numeral k : M) ≤ᶜ numeral n ↔ k ≤ n := by
+lemma numeral_cobhamLE_numeral_iff {k n : ℕ} : (numeral k : V) ≤ᶜ numeral n ↔ k ≤ n := by
   simp [cobhamLE_numeral_iff]
   omega
 
 @[grind =]
 lemma cobhamLT_numeral_iff {n : ℕ} : x <ᶜ numeral n ↔ x < numeral n := by
-  have := not_numeral_lt_self (M := M) n
+  have := not_numeral_lt_self (M := V) n
   grind [CobhamLT]
 
 lemma cobhamLT_numeral_iff_exists {n : ℕ} : x <ᶜ numeral n ↔ ∃ i < n, x = numeral i := by
@@ -133,30 +133,30 @@ def cobhamComparison (φ : ArithmeticSemisentence 3) : ArithmeticSemisentence 2 
   “x y. ∃ w, !cobhamLEDef y w ∧ (∃ v, !cobhamLEDef v w ∧ !φ x y v) ∧
     ∀ z u, !cobhamLEDef z w → !cobhamLEDef u w → !φ x z u → y = z”
 
-variable {M : Type*} [ORingStructure M] {φ : ArithmeticSemisentence 3}
+variable {V : Type*} [ORingStructure V] {φ : ArithmeticSemisentence 3}
 
 @[simp]
-lemma eval_cobhamComparison {x y : M} :
-    M ⊧/![x, y] (cobhamComparison φ) ↔ ∃ w, y ≤ᶜ w ∧
-      (∃ v, v ≤ᶜ w ∧ M ⊧/![x, y, v] φ) ∧
-      ∀ z u, z ≤ᶜ w → u ≤ᶜ w → M ⊧/![x, z, u] φ → y = z := by
+lemma eval_cobhamComparison {x y : V} :
+    V ⊧/![x, y] (cobhamComparison φ) ↔ ∃ w, y ≤ᶜ w ∧
+      (∃ v, v ≤ᶜ w ∧ V ⊧/![x, y, v] φ) ∧
+      ∀ z u, z ≤ᶜ w → u ≤ᶜ w → V ⊧/![x, z, u] φ → y = z := by
   simp [cobhamComparison]
 
-variable [M↓[ℒₒᵣ] ⊧* 𝗥₀]
+variable [V↓[ℒₒᵣ] ⊧* 𝗥₀]
 
 lemma eval_numeral_iff_of_deltaZero (hφ₀ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ) (n i j : ℕ) :
-    M ⊧/![numeral n, numeral i, numeral j] φ ↔ ℕ ⊧/![n, i, j] φ := by
-  have e : (numeral ∘ ![n, i, j] : Fin 3 → M) = ![numeral n, numeral i, numeral j] := by
+    V ⊧/![numeral n, numeral i, numeral j] φ ↔ ℕ ⊧/![n, i, j] φ := by
+  have e : (numeral ∘ ![n, i, j] : Fin 3 → V) = ![numeral n, numeral i, numeral j] := by
     funext x
     match x with | 0 | 1 | 2 => rfl
   constructor
   · intro h
     by_contra h'
-    have := bold_sigma_one_completeness' (M := M) (σ := ∼φ) (by simpa using hφ₀.of_zero)
+    have := bold_sigma_one_completeness' (M := V) (σ := ∼φ) (by simpa using hφ₀.of_zero)
       (bv := ![n, i, j]) (by simpa using h')
     exact absurd h (by simpa [e] using this)
   · intro h
-    simpa [e] using bold_sigma_one_completeness' (M := M) hφ₀.of_zero h
+    simpa [e] using bold_sigma_one_completeness' (M := V) hφ₀.of_zero h
 
 variable {f : ℕ → ℕ}
 
@@ -165,12 +165,12 @@ section
 variable (hφ₀ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ) (hφ : ∀ n m, m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] φ)
 include hφ₀ hφ
 
-lemma eval_cobhamComparison_numeral_iff (n : ℕ) (y : M) :
-    M ⊧/![numeral n, y] (cobhamComparison φ) ↔ y = numeral (f n) := by
+lemma eval_cobhamComparison_numeral_iff (n : ℕ) (y : V) :
+    V ⊧/![numeral n, y] (cobhamComparison φ) ↔ y = numeral (f n) := by
   obtain ⟨k, hk⟩ := (hφ n (f n)).mp rfl
-  have key : ∀ i j, M ⊧/![numeral n, numeral i, numeral j] φ → i = f n := fun i j h ↦
+  have key : ∀ i j, V ⊧/![numeral n, numeral i, numeral j] φ → i = f n := fun i j h ↦
     (hφ n i).mpr ⟨j, (eval_numeral_iff_of_deltaZero hφ₀ n i j).mp h⟩
-  have hkM : M ⊧/![numeral n, numeral (f n), numeral k] φ :=
+  have hkM : V ⊧/![numeral n, numeral (f n), numeral k] φ :=
     (eval_numeral_iff_of_deltaZero hφ₀ n (f n) k).mpr hk
   rw [eval_cobhamComparison]
   constructor
@@ -215,9 +215,9 @@ noncomputable def cobhamRepresentation (f : ℕ → ℕ) : ArithmeticSemisentenc
 theorem cobhamRepresentation_spec (hf : Computable f) (n : ℕ) :
     𝗥₀ ⊢ “∀ y, !(cobhamRepresentation f) ↑n y ↔ y = ↑(f n)” := by
   apply complete.{0}
-  intro M _ _
+  intro V _ _
   simpa [models_iff, cobhamRepresentation, -eval_cobhamComparison]
-    using eval_cobhamComparison_numeral_iff (M := M) (deltaZeroGraph_hierarchy f)
+    using eval_cobhamComparison_numeral_iff (V := V) (deltaZeroGraph_hierarchy f)
       (deltaZeroGraph_spec hf) n
 
 end representation
