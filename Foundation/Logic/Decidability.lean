@@ -18,8 +18,8 @@ class Decidable where
 
 def Undecidable := ¬Decidable 𝓢
 
-class EssentiallyUndecidable [Tilde F] where
-  essentially_undec : ∀ 𝓣 : S, 𝓢 ⪯ 𝓣 → Incomplete 𝓣 → Undecidable 𝓣
+class EssentiallyUndecidable where
+  essentially_undec : ∀ 𝓣 : S, 𝓢 ⪯ 𝓣 → Consistent 𝓣 → Undecidable 𝓣
 
 variable {𝓢}
 
@@ -28,9 +28,7 @@ lemma decidable_of_incomplete : Inconsistent 𝓢 → Decidable 𝓢 :=
 
 namespace EssentiallyUndecidable
 
-variable [Tilde F]
-
-lemma undecidable (𝓢 : S) [EssentiallyUndecidable 𝓢] [Incomplete 𝓢] : Undecidable 𝓢 :=
+lemma undecidable (𝓢 : S) [EssentiallyUndecidable 𝓢] [Consistent 𝓢] : Undecidable 𝓢 :=
   essentially_undec 𝓢 (WeakerThan.refl 𝓢) inferInstance
 
 lemma of_weakerThan (𝓢 𝓣 : S) [EssentiallyUndecidable 𝓢] [𝓢 ⪯ 𝓣] :
