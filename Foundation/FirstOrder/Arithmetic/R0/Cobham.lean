@@ -15,6 +15,8 @@ Every computable function is weakly representable in $\mathsf{R}_0$ through Cobh
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic
 
 open ORingStructure
@@ -28,22 +30,21 @@ structure IsRegular (y : M) : Prop where
   zero_le : 0 = y ∨ 0 < y
   add_one_le : ∀ v < y, v + 1 = y ∨ v + 1 < y
 
-def isRegular : ArithmeticSemisentence 1 := “y. 0 ≤ y ∧ ∀ v < y, v + 1 ≤ y”
+def isRegularDef : 𝚺ᴬ₀.Semisentence 1 := .mkSigma “y. 0 ≤ y ∧ ∀ v < y, v + 1 ≤ y”
 
-@[simp]
-lemma eval_isRegular : M ⊧/![y] isRegular ↔ IsRegular y := by
-  simp [isRegular, isRegular_iff, Semiformula.Operator.LE.sentence_eq, Semiformula.Operator.val,
-    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
+instance isRegular_defined : 𝚺ᴬ₀-Predicate (IsRegular : M → Prop) via isRegularDef := .mk fun v ↦ by
+  simp [isRegularDef, isRegular_iff, Semiformula.Operator.LE.sentence_eq,
+    Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq,
+    Semiformula.Operator.LT.sentence_eq]
 
 def CobhamLE (x y : M) : Prop := (x = y ∨ x < y) ∨ ¬IsRegular y
 
 scoped infix:50 " ≤ᶜ " => CobhamLE
 
-def cobhamLE : ArithmeticSemisentence 2 := “x y. x ≤ y ∨ ¬!isRegular y”
+def cobhamLEDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma “x y. x ≤ y ∨ ¬!isRegularDef y”
 
-@[simp]
-lemma eval_cobhamLE : M ⊧/![x, y] cobhamLE ↔ x ≤ᶜ y := by
-  simp [cobhamLE, CobhamLE, Semiformula.Operator.LE.sentence_eq, Semiformula.Operator.val,
+instance cobhamLE_defined : 𝚺ᴬ₀-Relation (CobhamLE : M → M → Prop) via cobhamLEDef := .mk fun v ↦ by
+  simp [cobhamLEDef, CobhamLE, Semiformula.Operator.LE.sentence_eq, Semiformula.Operator.val,
     Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
 
 @[simp, grind .]
@@ -53,11 +54,10 @@ def CobhamLT (x y : M) : Prop := x ≤ᶜ y ∧ x ≠ y
 
 scoped infix:50 " <ᶜ " => CobhamLT
 
-def cobhamLT : ArithmeticSemisentence 2 := “x y. !cobhamLE x y ∧ x ≠ y”
+def cobhamLTDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma “x y. !cobhamLEDef x y ∧ x ≠ y”
 
-@[simp]
-lemma eval_cobhamLT : M ⊧/![x, y] cobhamLT ↔ x <ᶜ y := by
-  simp [cobhamLT, CobhamLT]
+instance cobhamLT_defined : 𝚺ᴬ₀-Relation (CobhamLT : M → M → Prop) via cobhamLTDef := .mk fun v ↦ by
+  simp [cobhamLTDef, CobhamLT]
 
 variable [M↓[ℒₒᵣ] ⊧* 𝗥₀]
 
@@ -130,8 +130,8 @@ end order
 section representation
 
 def cobhamComparison (φ : ArithmeticSemisentence 3) : ArithmeticSemisentence 2 :=
-  “x y. ∃ w, !cobhamLE y w ∧ (∃ v, !cobhamLE v w ∧ !φ x y v) ∧
-    ∀ z u, !cobhamLE z w → !cobhamLE u w → !φ x z u → y = z”
+  “x y. ∃ w, !cobhamLEDef y w ∧ (∃ v, !cobhamLEDef v w ∧ !φ x y v) ∧
+    ∀ z u, !cobhamLEDef z w → !cobhamLEDef u w → !φ x z u → y = z”
 
 variable {M : Type*} [ORingStructure M] {φ : ArithmeticSemisentence 3}
 
