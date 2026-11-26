@@ -7,10 +7,9 @@ public import Foundation.Logic.Decidability
 /-!
 # Essential undecidability of $\mathsf{R}_0$
 
-A first-order theory is essentially undecidable if every consistent extension of it in its
-language is undecidable. $\mathsf{R}_0$ is essentially undecidable
-(`R0.undecidable_of_consistent`): diagonalizing against a decision procedure through the weak
-representation of computable functions by Cobham's order.
+Every consistent extension of $\mathsf{R}_0$ is undecidable (`R0.undecidable_of_consistent`), so
+$\mathsf{R}_0$ is essentially undecidable: diagonalizing against a decision procedure through the
+weak representation of computable functions by Cobham's order.
 
 ## References
 
@@ -22,32 +21,7 @@ representation of computable functions by Cobham's order.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder
-
-variable {L : Language} [L.Encodable] [L.Primcodable]
-
-class Theory.EssentiallyUndecidable (T : Theory L) : Prop where
-  undecidable_of_consistent : ∀ U : Theory L, T ⪯ U → Entailment.Consistent U →
-    Entailment.Undecidable U
-
-namespace Theory.EssentiallyUndecidable
-
-theorem undecidable (T : Theory L) [T.EssentiallyUndecidable] [Entailment.Consistent T] :
-    Entailment.Undecidable T :=
-  undecidable_of_consistent (T := T) T (Entailment.WeakerThan.refl T) inferInstance
-
-lemma of_weakerThan (T U : Theory L) [T.EssentiallyUndecidable] [T ⪯ U] :
-    U.EssentiallyUndecidable where
-  undecidable_of_consistent V hUV hV :=
-    undecidable_of_consistent (T := T) V (Entailment.WeakerThan.trans inferInstance hUV) hV
-
-instance (T : Theory L) [T.EssentiallyUndecidable] : Entailment.EssentiallyUndecidable T where
-  essentially_undec U hTU hU := undecidable_of_consistent U hTU <|
-    Entailment.consistent_of_incomplete (h := hU)
-
-end Theory.EssentiallyUndecidable
-
-namespace Arithmetic.R0
+namespace FFL.FirstOrder.Arithmetic.R0
 
 open Bootstrapping Bootstrapping.Arithmetic
 
@@ -90,11 +64,9 @@ theorem undecidable_of_consistent (T : ArithmeticTheory) [𝗥₀ ⪯ T]
     simpa [models_iff, δ, Arithmetic.gödelNumber'_eq_coe_encode, h₁]
       using numeral_ne_numeral_of_ne (M := M) zero_ne_one
 
-instance : (𝗥₀ : ArithmeticTheory).EssentiallyUndecidable where
-  undecidable_of_consistent T _ _ := undecidable_of_consistent T
+instance : Entailment.EssentiallyUndecidable 𝗥₀ where
+  essentially_undec T _ _ := undecidable_of_consistent T
 
-theorem undecidable : Entailment.Undecidable 𝗥₀ := Theory.EssentiallyUndecidable.undecidable 𝗥₀
+theorem undecidable : Entailment.Undecidable 𝗥₀ := undecidable_of_consistent 𝗥₀
 
-end Arithmetic.R0
-
-end FFL.FirstOrder
+end FFL.FirstOrder.Arithmetic.R0

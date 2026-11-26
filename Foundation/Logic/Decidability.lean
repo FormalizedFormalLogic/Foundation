@@ -26,6 +26,20 @@ variable {𝓢}
 lemma decidable_of_incomplete : Inconsistent 𝓢 → Decidable 𝓢 :=
   fun h ↦ ⟨by rw [h.theory_eq]; exact ComputablePred.const _⟩
 
+namespace EssentiallyUndecidable
+
+variable [Tilde F]
+
+lemma undecidable (𝓢 : S) [EssentiallyUndecidable 𝓢] [Incomplete 𝓢] : Undecidable 𝓢 :=
+  essentially_undec 𝓢 (WeakerThan.refl 𝓢) inferInstance
+
+lemma of_weakerThan (𝓢 𝓣 : S) [EssentiallyUndecidable 𝓢] [𝓢 ⪯ 𝓣] :
+    EssentiallyUndecidable 𝓣 where
+  essentially_undec 𝓤 h₁ h₂ :=
+    essentially_undec (𝓢 := 𝓢) 𝓤 (WeakerThan.trans (𝓣 := 𝓣) inferInstance h₁) h₂
+
+end EssentiallyUndecidable
+
 end
 
 end FFL.Entailment
