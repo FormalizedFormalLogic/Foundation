@@ -32,10 +32,9 @@ theorem undecidability_first_order_logic :
   constructor
   apply (ComputablePred.computable_of_manyOneReducible (ManyOneReducible.mk _ hImpIntro) hC).of_eq
   intro σ
-  have h : 𝗣𝗔⁻ ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ PeanoMinus.finite.toFinset.conj 🡒 σ := by
-    rw [Entailment.Equiv.iff.mp PeanoMinus.equiv_singleton_finiteConj σ, ← insert_empty_eq]
-    exact Entailment.deduction_iff
-  exact h.symm
+  change (∅ : ArithmeticTheory) ⊢ _ ↔ 𝗣𝗔⁻ ⊢ σ
+  rw [Entailment.Equiv.iff.mp PeanoMinus.equiv_singleton_finiteConj σ, ← insert_empty_eq]
+  exact Entailment.deduction_iff.symm
 
 end PeanoMinusReduction
 
