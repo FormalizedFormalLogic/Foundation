@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
@@ -435,6 +436,31 @@ theorem codeOfComputablePred_provable_neg [𝗣𝗔⁻ ⪯ T] (hp : ComputablePr
   simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using hNotEval
 
 end codeOfComputablePred
+
+section deltaZeroGraph
+
+@[simp] lemma codeOfPartrec'_sigma1 {k} (f : List.Vector ℕ k →. ℕ) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (codeOfPartrec' f) := by
+  simp [codeOfPartrec']
+
+noncomputable def deltaZeroGraph (f : ℕ → ℕ) : ArithmeticSemisentence 3 :=
+  “x y v. !(codeOfPartrec'_sigma1 fun v ↦ Part.some (f (v.get 0))).prenex.sigmaInv.val v y x”
+
+@[simp]
+lemma deltaZeroGraph_hierarchy (f : ℕ → ℕ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 (deltaZeroGraph f) := by
+  simp [deltaZeroGraph]
+
+lemma deltaZeroGraph_spec {f : ℕ → ℕ} (hf : Computable f) (n m : ℕ) :
+    m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] (deltaZeroGraph f) := by
+  have hF : Nat.Partrec' fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0)) :=
+    Nat.Partrec'.of_part <| hf.comp (Primrec.to_comp (by primrec))
+  have h := codeOfPartrec'_sigma1 fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0))
+  have := (codeOfPartrec'_spec hF (y := m) (v := ![n])).symm.trans
+    (((Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) h).choose_spec ℕ (m :> ![n])
+      Empty.elim).trans (h.prenex.models_sigmaInv _))
+  simpa [deltaZeroGraph] using this
+
+end deltaZeroGraph
 
 section
 

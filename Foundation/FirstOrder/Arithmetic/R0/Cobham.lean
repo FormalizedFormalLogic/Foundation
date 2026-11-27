@@ -151,21 +151,27 @@ lemma eval_numeral_iff_of_deltaZero (hφ₀ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0
 
 variable {f : ℕ → ℕ}
 
-section
+noncomputable def cobhamRepresentation (f : ℕ → ℕ) : ArithmeticSemisentence 2 :=
+  cobhamComparison (deltaZeroGraph f)
 
-variable (hφ₀ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ) (hφ : ∀ n m, m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] φ)
-include hφ₀ hφ
-
-lemma eval_cobhamComparison_numeral_iff (n : ℕ) (y : V) :
-    V ⊧/![numeral n, y] (cobhamComparison φ) ↔ y = numeral (f n) := by
+theorem cobhamRepresentation_spec (hf : Computable f) (n : ℕ) :
+    𝗥₀ ⊢ “∀ y, !(cobhamRepresentation f) ↑n y ↔ y = ↑(f n)” := by
+  apply complete.{0}
+  intro V _ _
+  have hφ₀ := deltaZeroGraph_hierarchy f
+  have hφ := deltaZeroGraph_spec hf
   obtain ⟨k, hk⟩ := (hφ n (f n)).mp rfl
-  have key : ∀ i j, V ⊧/![numeral n, numeral i, numeral j] φ → i = f n := fun i j h ↦
-    (hφ n i).mpr ⟨j, (eval_numeral_iff_of_deltaZero hφ₀ n i j).mp h⟩
-  have hkM : V ⊧/![numeral n, numeral (f n), numeral k] φ :=
+  have key : ∀ i j, V ⊧/![numeral n, numeral i, numeral j] (deltaZeroGraph f) → i = f n :=
+    fun i j h ↦ (hφ n i).mpr ⟨j, (eval_numeral_iff_of_deltaZero hφ₀ n i j).mp h⟩
+  have hkM : V ⊧/![numeral n, numeral (f n), numeral k] (deltaZeroGraph f) :=
     (eval_numeral_iff_of_deltaZero hφ₀ n (f n) k).mpr hk
-  suffices (∃ w, y ≤ᶜ w ∧ (∃ v, v ≤ᶜ w ∧ V ⊧/![numeral n, y, v] φ) ∧
-      ∀ z u, z ≤ᶜ w → u ≤ᶜ w → V ⊧/![numeral n, z, u] φ → y = z) ↔ y = numeral (f n) by
-    simpa [cobhamComparison] using this
+  suffices ∀ y : V, V ⊧/![numeral n, y] (cobhamRepresentation f) ↔ y = numeral (f n) by
+    simpa [models_iff] using this
+  intro y
+  suffices (∃ w, y ≤ᶜ w ∧ (∃ v, v ≤ᶜ w ∧ V ⊧/![numeral n, y, v] (deltaZeroGraph f)) ∧
+      ∀ z u, z ≤ᶜ w → u ≤ᶜ w → V ⊧/![numeral n, z, u] (deltaZeroGraph f) → y = z) ↔
+        y = numeral (f n) by
+    simpa [cobhamRepresentation, cobhamComparison] using this
   constructor
   · rintro ⟨w, hyw, ⟨v, hvw, hv⟩, huniq⟩
     rcases cobhamLE_numeral_or (x := w) (max (f n) k) with hw | hw
@@ -178,40 +184,6 @@ lemma eval_cobhamComparison_numeral_iff (n : ℕ) (y : V) :
     · simp
     · use numeral k, by simp
     · grind [eq_numeral_of_cobhamLE_numeral]
-
-end
-
-lemma hierarchy_codeOfPartrec'_graph (f : ℕ → ℕ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1
-    (codeOfPartrec' fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0))) := by
-  simp [codeOfPartrec']
-
-noncomputable def deltaZeroGraph (f : ℕ → ℕ) : ArithmeticSemisentence 3 :=
-  “x y v. !(hierarchy_codeOfPartrec'_graph f).prenex.sigmaInv.val v y x”
-
-@[simp]
-lemma deltaZeroGraph_hierarchy (f : ℕ → ℕ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 (deltaZeroGraph f) := by
-  simp [deltaZeroGraph]
-
-lemma deltaZeroGraph_spec (hf : Computable f) (n m : ℕ) :
-    m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] (deltaZeroGraph f) := by
-  have hF : Nat.Partrec' fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0)) :=
-    Nat.Partrec'.of_part <| hf.comp (Primrec.to_comp (by primrec))
-  have h := hierarchy_codeOfPartrec'_graph f
-  have := (codeOfPartrec'_spec hF (y := m) (v := ![n])).symm.trans
-    (((Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) h).choose_spec ℕ (m :> ![n])
-      Empty.elim).trans (h.prenex.models_sigmaInv _))
-  simpa [deltaZeroGraph] using this
-
-noncomputable def cobhamRepresentation (f : ℕ → ℕ) : ArithmeticSemisentence 2 :=
-  cobhamComparison (deltaZeroGraph f)
-
-theorem cobhamRepresentation_spec (hf : Computable f) (n : ℕ) :
-    𝗥₀ ⊢ “∀ y, !(cobhamRepresentation f) ↑n y ↔ y = ↑(f n)” := by
-  apply complete.{0}
-  intro V _ _
-  simpa [models_iff, cobhamRepresentation]
-    using eval_cobhamComparison_numeral_iff (V := V) (deltaZeroGraph_hierarchy f)
-      (deltaZeroGraph_spec hf) n
 
 end representation
 
