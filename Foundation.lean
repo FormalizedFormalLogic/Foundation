@@ -18,6 +18,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.CraigTrick
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Bounded
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Coding
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Computable
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
@@ -84,6 +85,7 @@ public import Foundation.FirstOrder.Incompleteness.Church
 public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.Definability
 public import Foundation.FirstOrder.Incompleteness.Dense
+public import Foundation.FirstOrder.Incompleteness.Essentially
 public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.FirstOrder.Incompleteness.FGH
 public import Foundation.FirstOrder.Incompleteness.First

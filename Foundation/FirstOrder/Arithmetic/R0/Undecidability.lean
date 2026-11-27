@@ -61,8 +61,8 @@ theorem undecidable_of_consistent (T : ArithmeticTheory) [𝗥₀ ⪯ T]
     simpa [models_iff, δ, Arithmetic.gödelNumber'_eq_coe_encode, h₁]
       using numeral_ne_numeral_of_ne (M := M) zero_ne_one
 
-instance : Entailment.EssentiallyUndecidable 𝗥₀ where
-  essentially_undec T _ _ := undecidable_of_consistent T
+instance : Entailment.EssentiallyUndecidable 𝗥₀ fun _ ↦ True where
+  essentially_undec T _ _ _ := undecidable_of_consistent T
 
 theorem undecidable : Entailment.Undecidable 𝗥₀ := undecidable_of_consistent 𝗥₀
 
