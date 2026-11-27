@@ -71,6 +71,9 @@ instance : Entailment.Consistent 𝗥 :=
   let : ℕ↓[ℒₒᵣ] ⊧* 𝗥 := inferInstance
   Sound.consistent_of_satisfiable ⟨_, this⟩
 
+instance : 𝗥 ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ models_iff_models_R0.mpr
+  ⟨inferInstance, fun n x ↦ (lt_tri x (numeral n)).elim (Or.inr ∘ Or.inl) (Or.imp_right Or.inr)⟩
+
 end R
 
 section
