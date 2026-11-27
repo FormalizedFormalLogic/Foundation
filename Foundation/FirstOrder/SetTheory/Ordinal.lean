@@ -170,7 +170,7 @@ lemma mem_of_ssubset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊊ β → �
   have Hγα : γ ⊆ α := by
     intro ξ hξγ
     have hξβ : ξ ∈ β := hβ.transitive γ hγβ _ hξγ
-    by_contra! hξα
+    by_contra hξα
     have : ξ ∉ γ := Hγ ξ hξβ hξα
     contradiction
   have Hαγ : α ⊆ γ := by
@@ -297,7 +297,7 @@ protected lemma sInter {X : V} (h : ∀ α ∈ X, IsOrdinal α) : IsOrdinal (⋂
     exact of_mem this
 
 lemma sInter_mem {X : V} [IsNonempty X] (h : ∀ α ∈ X, IsOrdinal α) : ⋂ˢ X ∈ X := by
-  by_contra! hXX
+  by_contra hXX
   have : IsOrdinal (⋂ˢ X) := IsOrdinal.sInter h
   have : ⋂ˢ X ∈ ⋂ˢ X := mem_sInter_iff_of_nonempty.mpr fun α hαX ↦ by
     have : IsOrdinal α := h α hαX
@@ -457,7 +457,7 @@ lemma transfinite_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
     exists_minimal (fun x ↦ ¬P x) (by definability) exs
   rcases this with ⟨β, Pβ, H⟩
   have : P β := ih β fun ξ hξβ ↦ by
-    by_contra! Pξ
+    by_contra Pξ
     have : β ≤ ξ := H ξ Pξ
     exact not_lt_of_ge this hξβ
   contradiction

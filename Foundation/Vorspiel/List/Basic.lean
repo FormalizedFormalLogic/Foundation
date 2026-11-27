@@ -21,8 +21,8 @@ lemma getI_map_range [Inhabited α] (f : ℕ → α) {i n : ℕ} (h : i < n) :
     ((List.range n).map f).getI i = f i := by
   simpa [h] using List.getI_eq_getElem ((List.range n).map f) (n := i) (by simpa using h)
 
-def subsetSet (l : List α) (s : Set α) [DecidablePred s] : Bool :=
-  l.foldr (fun a ih => s a && ih) true
+def subsetSet (l : List α) (s : Set α) [DecidablePred (· ∈ s)] : Bool :=
+  l.foldr (fun a ih => decide (a ∈ s) && ih) true
 
 def upper : List ℕ → ℕ
   | []      => 0

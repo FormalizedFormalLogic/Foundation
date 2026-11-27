@@ -260,7 +260,7 @@ lemma CK_of_CC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImplyK �
 @[grind →]
 lemma unprovable_C_trans [HasAxiomImplyK 𝓢] [HasAxiomImplyS 𝓢] (hpq : 𝓢 ⊢ φ 🡒 ψ) :
     𝓢 ⊬ φ 🡒 χ → 𝓢 ⊬ ψ 🡒 χ := by
-  contrapose!;
+  contrapose;
   exact C_trans hpq;
 
 @[grind →]

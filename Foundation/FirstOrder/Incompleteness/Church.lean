@@ -52,7 +52,7 @@ lemma computable₂_iff_sigma1_simulate {α β γ : Type*} [Primcodable α] [Pri
 
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-theorem uncomputable_theory_of_sigma1Sound : ¬ComputablePred T.theory := by
+theorem uncomputable_theory_of_sigma1Sound : ¬ComputablePred (· ∈ T.theory) := by
   by_contra hC
   have hQuoteSubst :
       Computable₂ fun σ π : ArithmeticSemisentence 1 ↦ (σ/[⌜π⌝] : ArithmeticSentence) :=
@@ -80,7 +80,7 @@ section ConsistencyOnly
 
 variable {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 
-theorem uncomputable_theory_of_consistent : ¬ComputablePred T.theory := by
+theorem uncomputable_theory_of_consistent : ¬ComputablePred (· ∈ T.theory) := by
   by_contra hC
   let p : ℕ → Prop :=
     fun n ↦ (Encodable.decode (α := ArithmeticSentence) n).elim False (fun σ ↦ T ⊢ σ)
@@ -106,7 +106,7 @@ section PeanoMinusReduction
 
 /-- Provability in pure first-order logic, i.e. provability from the empty theory, is
 undecidable. -/
-theorem undecidability_first_order_logic : ¬ComputablePred ((∅ : ArithmeticTheory).theory) := by
+theorem undecidability_first_order_logic : ¬ComputablePred (· ∈ (∅ : ArithmeticTheory).theory) := by
   have hDeduction (σ : ArithmeticSentence) :
       𝗣𝗔⁻ ⊢ σ ↔ (∅ : ArithmeticTheory) ⊢ PeanoMinus.finite.toFinset.conj 🡒 σ := by
     rw [Entailment.Equiv.iff.mp PeanoMinus.equiv_singleton_finiteConj σ, ←insert_empty_eq]

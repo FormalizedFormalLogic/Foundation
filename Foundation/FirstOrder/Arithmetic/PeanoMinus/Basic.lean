@@ -34,25 +34,27 @@ abbrev ltTri : ArithmeticSentence := “∀ x y, x < y ∨ x = y ∨ x > y”
 
 end PeanoMinus.Axiom
 
-inductive PeanoMinus : ArithmeticTheory
-  | equal         : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, PeanoMinus φ
-  | addZero       : PeanoMinus PeanoMinus.Axiom.addZero
-  | addAssoc      : PeanoMinus PeanoMinus.Axiom.addAssoc
-  | addComm       : PeanoMinus PeanoMinus.Axiom.addComm
-  | addEqOfLt     : PeanoMinus PeanoMinus.Axiom.addEqOfLt
-  | zeroLe        : PeanoMinus PeanoMinus.Axiom.zeroLe
-  | zeroLtOne     : PeanoMinus PeanoMinus.Axiom.zeroLtOne
-  | oneLeOfZeroLt : PeanoMinus PeanoMinus.Axiom.oneLeOfZeroLt
-  | addLtAdd      : PeanoMinus PeanoMinus.Axiom.addLtAdd
-  | mulZero       : PeanoMinus PeanoMinus.Axiom.mulZero
-  | mulOne        : PeanoMinus PeanoMinus.Axiom.mulOne
-  | mulAssoc      : PeanoMinus PeanoMinus.Axiom.mulAssoc
-  | mulComm       : PeanoMinus PeanoMinus.Axiom.mulComm
-  | mulLtMul      : PeanoMinus PeanoMinus.Axiom.mulLtMul
-  | distr         : PeanoMinus PeanoMinus.Axiom.distr
-  | ltIrrefl      : PeanoMinus PeanoMinus.Axiom.ltIrrefl
-  | ltTrans       : PeanoMinus PeanoMinus.Axiom.ltTrans
-  | ltTri         : PeanoMinus PeanoMinus.Axiom.ltTri
+inductive IsPeanoMinusAxiom : Sentence ℒₒᵣ → Prop
+  | equal         : ∀ φ ∈ 𝗘𝗤 ℒₒᵣ, IsPeanoMinusAxiom φ
+  | addZero       : IsPeanoMinusAxiom PeanoMinus.Axiom.addZero
+  | addAssoc      : IsPeanoMinusAxiom PeanoMinus.Axiom.addAssoc
+  | addComm       : IsPeanoMinusAxiom PeanoMinus.Axiom.addComm
+  | addEqOfLt     : IsPeanoMinusAxiom PeanoMinus.Axiom.addEqOfLt
+  | zeroLe        : IsPeanoMinusAxiom PeanoMinus.Axiom.zeroLe
+  | zeroLtOne     : IsPeanoMinusAxiom PeanoMinus.Axiom.zeroLtOne
+  | oneLeOfZeroLt : IsPeanoMinusAxiom PeanoMinus.Axiom.oneLeOfZeroLt
+  | addLtAdd      : IsPeanoMinusAxiom PeanoMinus.Axiom.addLtAdd
+  | mulZero       : IsPeanoMinusAxiom PeanoMinus.Axiom.mulZero
+  | mulOne        : IsPeanoMinusAxiom PeanoMinus.Axiom.mulOne
+  | mulAssoc      : IsPeanoMinusAxiom PeanoMinus.Axiom.mulAssoc
+  | mulComm       : IsPeanoMinusAxiom PeanoMinus.Axiom.mulComm
+  | mulLtMul      : IsPeanoMinusAxiom PeanoMinus.Axiom.mulLtMul
+  | distr         : IsPeanoMinusAxiom PeanoMinus.Axiom.distr
+  | ltIrrefl      : IsPeanoMinusAxiom PeanoMinus.Axiom.ltIrrefl
+  | ltTrans       : IsPeanoMinusAxiom PeanoMinus.Axiom.ltTrans
+  | ltTri         : IsPeanoMinusAxiom PeanoMinus.Axiom.ltTri
+
+abbrev PeanoMinus : ArithmeticTheory := Set.ofPred IsPeanoMinusAxiom
 
 notation "𝗣𝗔⁻" => PeanoMinus
 
@@ -102,25 +104,25 @@ open FirstOrder Arithmetic Language
       case ltTri => tauto
     · rintro (h | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
         rfl | rfl | rfl | rfl)
-      · exact equal _ h
-      · exact addZero
-      · exact addAssoc
-      · exact addComm
-      · exact addEqOfLt
-      · exact zeroLe
-      · exact zeroLtOne
-      · exact oneLeOfZeroLt
-      · exact addLtAdd
-      · exact mulZero
-      · exact mulOne
-      · exact mulAssoc
-      · exact mulComm
-      · exact mulLtMul
-      · exact distr
-      · exact ltIrrefl
-      · exact ltTrans
-      · exact ltTri
-  rw [this]; simp only [Set.finite_union, FirstOrder.Theory.EqAxiom.finite, true_and]
+      · exact IsPeanoMinusAxiom.equal _ h
+      · exact IsPeanoMinusAxiom.addZero
+      · exact IsPeanoMinusAxiom.addAssoc
+      · exact IsPeanoMinusAxiom.addComm
+      · exact IsPeanoMinusAxiom.addEqOfLt
+      · exact IsPeanoMinusAxiom.zeroLe
+      · exact IsPeanoMinusAxiom.zeroLtOne
+      · exact IsPeanoMinusAxiom.oneLeOfZeroLt
+      · exact IsPeanoMinusAxiom.addLtAdd
+      · exact IsPeanoMinusAxiom.mulZero
+      · exact IsPeanoMinusAxiom.mulOne
+      · exact IsPeanoMinusAxiom.mulAssoc
+      · exact IsPeanoMinusAxiom.mulComm
+      · exact IsPeanoMinusAxiom.mulLtMul
+      · exact IsPeanoMinusAxiom.distr
+      · exact IsPeanoMinusAxiom.ltIrrefl
+      · exact IsPeanoMinusAxiom.ltTrans
+      · exact IsPeanoMinusAxiom.ltTri
+  rw [this]; simp only [Set.finite_union, FirstOrder.Theory.Eq.finite, true_and]
   apply Set.Finite.insert
   apply Set.Finite.insert
   apply Set.Finite.insert
@@ -150,7 +152,7 @@ lemma equiv_singleton_finiteConj :
         rcases hσ with rfl; exact hConj⟩
 
 set_option linter.flexible false in
-@[simp] instance : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ⟨by
+@[simp] instance models_PeanoMinus : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := ⟨by
   intro σ h
   rcases h <;> simp [models_iff, Semiformula.eval_bexsLTSucc]
   case addAssoc => intros; exact add_assoc _ _ _
@@ -167,7 +169,8 @@ set_option linter.flexible false in
     have : ℕ↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance
     exact models_theory_iff.mp this _ h⟩
 
-instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := Entailment.WeakerThan.ofSubset fun φ hp ↦ PeanoMinus.equal φ hp
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ :=
+  Entailment.WeakerThan.ofSubset fun φ hp ↦ IsPeanoMinusAxiom.equal φ hp
 
 end PeanoMinus
 
@@ -180,31 +183,32 @@ lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 protected lemma add_zero' : ∀ x : M, x + 0 = x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.addZero
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.addZero
 
 protected lemma add_assoc : ∀ x y z : M,  (x + y) + z = x + (y + z) := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.addAssoc
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.addAssoc
 
 protected lemma add_comm : ∀ x y : M,  x + y = y + x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.addComm
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.addComm
 
 lemma add_eq_of_lt_bounded : ∀ x y : M, x < y → ∃ z < y + 1, x + z = y := by
-  simpa [models_iff, Semiformula.eval_bexsLTSucc] using Theory.models M _ PeanoMinus.addEqOfLt
+  simpa [models_iff, Semiformula.eval_bexsLTSucc] using
+    Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.addEqOfLt
 
 lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := fun x y h ↦
   have ⟨z, _, hz⟩ := add_eq_of_lt_bounded x y h
   ⟨z, hz⟩
 
 @[simp] protected lemma zero_le : ∀ x : M, 0 ≤ x := by
-  have h := Theory.models M _ PeanoMinus.zeroLe
+  have h := Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.zeroLe
   simp only [models_iff] at h
   exact h
 
 lemma zero_lt_one : (0 : M) < 1 := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.zeroLtOne
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.zeroLtOne
 
 lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
-  have h := Theory.models M _ PeanoMinus.oneLeOfZeroLt
+  have h := Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.oneLeOfZeroLt
   simp only [models_iff, Semiformula.eval_all, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.Fin1.eq_one,
     Fin.isValue, LogicalConnective.HomClass.map_imply, Semiformula.eval_operator, Matrix.comp₂,
     Semiterm.val_operator, Matrix.comp₀, Tarski.Structure.numeral_eq_numeral,
@@ -214,34 +218,34 @@ lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
   exact h
 
 lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.addLtAdd
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.addLtAdd
 
 protected lemma mul_zero' : ∀ x : M, x * 0 = 0 := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulZero
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.mulZero
 
 protected lemma mul_one : ∀ x : M, x * 1 = x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulOne
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.mulOne
 
 protected lemma mul_assoc : ∀ x y z : M, (x * y) * z = x * (y * z) := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulAssoc
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.mulAssoc
 
 protected lemma mul_comm : ∀ x y : M, x * y = y * x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulComm
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.mulComm
 
 lemma mul_lt_mul : ∀ x y z : M, x < y → 0 < z → x * z < y * z := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.mulLtMul
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.mulLtMul
 
 lemma mul_add_distr : ∀ x y z : M, x * (y + z) = x * y + x * z := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.distr
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.distr
 
 lemma lt_irrefl : ∀ x : M, ¬x < x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.ltIrrefl
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.ltIrrefl
 
 protected lemma lt_trans : ∀ x y z : M, x < y → y < z → x < z := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.ltTrans
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.ltTrans
 
 lemma lt_tri : ∀ x y : M, x < y ∨ x = y ∨ y < x := by
-  simpa [models_iff] using Theory.models M _ PeanoMinus.ltTri
+  simpa [models_iff] using Theory.models M 𝗣𝗔⁻ IsPeanoMinusAxiom.ltTri
 
 scoped instance : AddCommMonoid M where
   add_assoc := Arithmetic.add_assoc
@@ -633,7 +637,7 @@ variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T]
 
 instance : 𝗥₀ ⪱ 𝗣𝗔⁻ :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
-    R0.unprovable_addZero (Entailment.by_axm PeanoMinus.addZero)
+    R0.unprovable_addZero (Entailment.by_axm IsPeanoMinusAxiom.addZero)
 
 instance (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗥₀ :=
   models_of_subtheory (U := 𝗣𝗔⁻) inferInstance

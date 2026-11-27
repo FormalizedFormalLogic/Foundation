@@ -341,28 +341,33 @@ def complexity : Semiformula L Ξ ξ N n → ℕ
 @[simp] lemma complexity_exs₂' (φ : Semiformula L Ξ ξ (N + 1) n) :
     φ.exs₂.complexity = φ.complexity + 1 := rfl
 
-/- ### Elementary Semiformulas -/
+/- ### Second-order-quantifier-free semiformulas -/
 
-inductive IsElementary : Semiformula L Ξ ξ N n → Prop
-| rel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsElementary (rel R v)
-| nrel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsElementary (nrel R v)
-| bvar : IsElementary (t ∈# X)
-| nbvar : IsElementary (t ∉# X)
-| fvar : IsElementary (t ∈& X)
-| nfvar : IsElementary (t ∉& X)
-| verum : IsElementary ⊤
-| falsum : IsElementary ⊥
-| and (φ ψ : Semiformula L Ξ ξ N n) : IsElementary φ → IsElementary ψ → IsElementary (φ ⋏ ψ)
-| or (φ ψ : Semiformula L Ξ ξ N n) : IsElementary φ → IsElementary ψ → IsElementary (φ ⋎ ψ)
-| all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsElementary φ → IsElementary (∀¹ φ)
-| exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsElementary φ → IsElementary (∃¹ φ)
+inductive IsSecondOrderQuantifierFree : Semiformula L Ξ ξ N n → Prop
+| rel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsSecondOrderQuantifierFree (rel R v)
+| nrel {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) : IsSecondOrderQuantifierFree (nrel R v)
+| bvar : IsSecondOrderQuantifierFree (t ∈# X)
+| nbvar : IsSecondOrderQuantifierFree (t ∉# X)
+| fvar : IsSecondOrderQuantifierFree (t ∈& X)
+| nfvar : IsSecondOrderQuantifierFree (t ∉& X)
+| verum : IsSecondOrderQuantifierFree ⊤
+| falsum : IsSecondOrderQuantifierFree ⊥
+| and (φ ψ : Semiformula L Ξ ξ N n) : IsSecondOrderQuantifierFree φ →
+    IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋏ ψ)
+| or (φ ψ : Semiformula L Ξ ξ N n) : IsSecondOrderQuantifierFree φ →
+    IsSecondOrderQuantifierFree ψ → IsSecondOrderQuantifierFree (φ ⋎ ψ)
+| all₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ →
+    IsSecondOrderQuantifierFree (∀¹ φ)
+| exs₁ (φ : Semiformula L Ξ ξ N (n + 1)) : IsSecondOrderQuantifierFree φ →
+    IsSecondOrderQuantifierFree (∃¹ φ)
 
-namespace IsElementary
+namespace IsSecondOrderQuantifierFree
 
 attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
 
 @[simp] lemma and_iff {φ ψ : Semiformula L Ξ ξ N n} :
-    (φ ⋏ ψ).IsElementary ↔ φ.IsElementary ∧ ψ.IsElementary := by
+    (φ ⋏ ψ).IsSecondOrderQuantifierFree ↔
+    φ.IsSecondOrderQuantifierFree ∧ ψ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
@@ -371,7 +376,8 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
     exact .and _ _ hφ hψ
 
 @[simp] lemma or_iff {φ ψ : Semiformula L Ξ ξ N n} :
-    (φ ⋎ ψ).IsElementary ↔ φ.IsElementary ∧ ψ.IsElementary := by
+    (φ ⋎ ψ).IsSecondOrderQuantifierFree ↔
+    φ.IsSecondOrderQuantifierFree ∧ ψ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
@@ -380,7 +386,7 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
     exact .or _ _ hφ hψ
 
 @[simp] lemma all₁_iff {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∀¹ φ).IsElementary ↔ φ.IsElementary := by
+    (∀¹ φ).IsSecondOrderQuantifierFree ↔ φ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
@@ -388,7 +394,7 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
   · exact .all₁ _
 
 @[simp] lemma exs₁_iff {φ : Semiformula L Ξ ξ N (n + 1)} :
-    (∃¹ φ).IsElementary ↔ φ.IsElementary := by
+    (∃¹ φ).IsSecondOrderQuantifierFree ↔ φ.IsSecondOrderQuantifierFree := by
   constructor
   · intro h
     cases h with
@@ -396,16 +402,16 @@ attribute [simp] rel nrel verum falsum bvar nbvar fvar nfvar
   · exact .exs₁ _
 
 @[simp] lemma not_all₂ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    ¬(∀² φ).IsElementary := by
+    ¬(∀² φ).IsSecondOrderQuantifierFree := by
   intro h
   cases h
 
 @[simp] lemma not_exs₂ {φ : Semiformula L Ξ ξ (N + 1) n} :
-    ¬(∃² φ).IsElementary := by
+    ¬(∃² φ).IsSecondOrderQuantifierFree := by
   intro h
   cases h
 
-end IsElementary
+end IsSecondOrderQuantifierFree
 
 end Semiformula
 
@@ -447,7 +453,7 @@ lemma toSecondOrderAux_neg (φ : FirstOrder.Semiformula L ξ n) :
     change ∀¹ toSecondOrderAux Ξ N (∼φ) = ∀¹ ∼toSecondOrderAux Ξ N φ
     rw [ih]
 
-def toSecondOrder : FirstOrder.Semiformula L ξ n →ˡᶜ SecondOrder.Semiformula L Ξ ξ N n where
+@[coe] def toSecondOrder : FirstOrder.Semiformula L ξ n →ˡᶜ SecondOrder.Semiformula L Ξ ξ N n where
   toTr := toSecondOrderAux Ξ N
   map_top' := rfl
   map_bot' := rfl
@@ -470,9 +476,9 @@ end FirstOrder
 
 namespace SecondOrder.Semiformula
 
-lemma isElementary_toSecondOrder (φ : FirstOrder.Semiformula L ξ n) :
-    (φ.toSecondOrder Ξ N).IsElementary := by
-  change (FirstOrder.Semiformula.toSecondOrderAux Ξ N φ).IsElementary
+lemma isSecondOrderQuantifierFree_toSecondOrder (φ : FirstOrder.Semiformula L ξ n) :
+    (φ.toSecondOrder Ξ N).IsSecondOrderQuantifierFree := by
+  change (FirstOrder.Semiformula.toSecondOrderAux Ξ N φ).IsSecondOrderQuantifierFree
   induction φ with
   | verum => exact .verum
   | falsum => exact .falsum

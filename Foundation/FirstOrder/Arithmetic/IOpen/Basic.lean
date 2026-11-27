@@ -566,7 +566,7 @@ instance pair_defined : 𝚺ᴬ₀-Function₂[V] pair via pairDef := .mk fun v 
 instance pair_definable : 𝚺ᴬ₀-Function₂[V] pair := pair_defined.to_definable
 
 instance : Bounded₂ (pair : V → V → V) :=
-  ⟨‘x y. (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> try simp [*]⟩
+  ⟨‘x y. (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> simp [*]⟩
 
 open scoped Classical in
 noncomputable def unpair (a : V) : V × V :=
@@ -701,7 +701,7 @@ lemma pair_lt_pair {a₁ a₂ b₁ b₂ : V} (ha : a₁ < a₂) (hb : b₁ < b�
     ⟪a₁, b₁⟫ < ⟪a₂, b₁⟫ := pair_lt_pair_left ha b₁
     _        < ⟪a₂, b₂⟫ := pair_lt_pair_right a₂ hb
 
-@[simp] lemma pair_polybound (a b : V) : ⟪a, b⟫ ≤ (a + b + 1)^2 := by
+@[simp] lemma pair_polybound (a b : V) : ⟪a, b⟫ ≤ (a + b + 1) ^ 2 := by
   by_cases h : a < b <;> simp [pair, h, sq, add_mul_self_eq, two_mul]
   · simp [←add_assoc, add_right_comm _ a]; simp [add_right_comm _ (b * b)]
   · simp [←add_assoc, add_right_comm _ b]; simp [add_right_comm _ a]; simp [add_assoc]
@@ -727,7 +727,7 @@ def _root_.FFL.FirstOrder.Arithmetic.pair₅Def : 𝚺ᴬ₀.Semisentence 6 :=
 def _root_.FFL.FirstOrder.Arithmetic.pair₆Def : 𝚺ᴬ₀.Semisentence 7 :=
   .mkSigma “p a b c d e f. ∃ bcdef <⁺ p, !pair₅Def bcdef b c d e f ∧ !pairDef p a bcdef”
 
-theorem fegergreg (v : Fin 4 → ℕ) : v (0 : Fin (Nat.succ 1)).succ.succ = v 2 := by {
+theorem fin2 (v : Fin 4 → ℕ) : v (0 : Fin (Nat.succ 1)).succ.succ = v 2 := by {
   simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Fin.succ_zero_eq_one,
     Fin.succ_one_eq_two] }
 

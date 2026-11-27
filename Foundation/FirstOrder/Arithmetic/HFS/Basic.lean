@@ -119,13 +119,13 @@ private lemma union_graph {u s t : V} : u = s ∪ t ↔ ∀ x < u + s + t, (x �
 def _root_.FFL.FirstOrder.Arithmetic.unionDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “∀¹[#0 < #1 + #2 + #3](#0 ∈ #1 ↔ #0 ∈ #2 ∨ #0 ∈ #3)”
 
-instance union_defined : 𝚺ᴬ₀-Function₂ ((· ∪ ·) : V → V → V) via unionDef := .mk fun v ↦ by
+instance union_defined : 𝚺ᴬ₀-Function₂[V] (· ∪ ·) via unionDef := .mk fun v ↦ by
   simp [unionDef, union_graph]
 
-instance union_definable : 𝚺ᴬ₀-Function₂ ((· ∪ ·) : V → V → V) := union_defined.to_definable
+instance union_definable : 𝚺ᴬ₀-Function₂[V] (· ∪ ·) := union_defined.to_definable
 
 instance union_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₂ ((· ∪ ·) : V → V → V) :=
+    ℌ-Function₂[V] (· ∪ ·) :=
   union_definable.of_zero
 
 lemma insert_eq_union_singleton (a s : V) : insert a s = {a} ∪ s := mem_ext (fun x ↦ by simp)
@@ -249,14 +249,46 @@ private lemma product_graph {u a b : V} : u = a ×ʰᶠ b ↔
 def _root_.FFL.FirstOrder.Arithmetic.productDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “u a b. ∀ x < u + (a + b + 1)², (x ∈ u ↔ ∃ y ∈' a, ∃ z ∈' b, !pairDef x y z)”
 
-instance product_defined : 𝚺ᴬ₀-Function₂ ((· ×ʰᶠ ·) : V → V → V) via productDef := .mk fun v ↦ by
+instance product_defined : 𝚺ᴬ₀-Function₂[V] (· ×ʰᶠ ·) via productDef := .mk fun v ↦ by
   simp [productDef, product_graph]
 
-instance product_definable : 𝚺ᴬ₀-Function₂ ((· ×ʰᶠ ·) : V → V → V) := product_defined.to_definable
+instance product_definable : 𝚺ᴬ₀-Function₂[V] (· ×ʰᶠ ·) := product_defined.to_definable
 
 instance product_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₂ ((· ×ʰᶠ ·) : V → V → V) :=
+    ℌ-Function₂[V] (· ×ʰᶠ ·) :=
   product_definable.of_zero
+
+@[simp] lemma zero_product {b : V} : ∅ ×ʰᶠ b = ∅ := by
+  refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
+
+@[simp] lemma product_zero {a : V} : a ×ʰᶠ ∅ = ∅ := by
+  refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
+
+lemma product_bound {a b : V} : a ×ʰᶠ b < Exp.exp ((log a + log b + 1) ^ 2 + 1) := by
+  unfold product
+  have : 𝚺ᴬ₁-Predicate fun x ↦ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫ := by definability
+  refine finite_comprehension₁!_bound (m := (log a + log b + 1) ^ 2 + 1) this ?_
+  rintro i ⟨y, hymem, z, hzmem, rfl⟩
+  apply le_log_of_mem at hymem
+  apply le_log_of_mem at hzmem
+  calc
+    ⟪y, z⟫ ≤ (y + z + 1) ^ 2 := pair_polybound y z
+    _ ≤ (log a + log b + 1) ^ 2 := sq_le_sq.mpr (add_le_add (add_le_add hymem hzmem) (le_refl 1))
+    _ < (log a + log b + 1) ^ 2 + 1 := by aesop
+
+/-- A weaker upper bound than `product_bound`. -/
+lemma product_bound' {a b : V} : a ×ʰᶠ b < Exp.exp ((a + b + 1) ^ 2) := by
+  by_cases hpos : 0 < a ∧ 0 < b
+  · have : (log a + log b + 1) ^ 2 + 1 ≤ (a + b + 1) ^ 2 :=
+      lt_iff_succ_le.mp (sq_lt_sq.mpr (add_lt_add_left (add_lt_add_of_lt_of_lt
+        (log_lt_self_of_pos hpos.1) (log_lt_self_of_pos hpos.2)) 1))
+    exact lt_of_lt_of_le (product_bound) (exp_monotone_le.mpr this)
+  · apply not_and_or.mp at hpos
+    rcases hpos with (ha | hb)
+    · simp only [(by aesop : a = 0), ← emptyset_def, zero_product]
+      exact exp_pos ((∅ + b + 1) ^ 2)
+    · simp only [(by aesop : b = 0), ← emptyset_def, product_zero]
+      exact exp_pos ((a + ∅ + 1) ^ 2)
 
 end product
 
@@ -298,13 +330,13 @@ private lemma domain_graph {u s : V} : u = domain s ↔
 def _root_.FFL.FirstOrder.Arithmetic.domainDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “u s. ∀ x < u + s, (x ∈ u ↔ ∃ y < s, ∃ z ∈' s, !pairDef z x y)”
 
-instance domain_defined : 𝚺ᴬ₀-Function₁ (domain : V → V) via domainDef :=
+instance domain_defined : 𝚺ᴬ₀-Function₁[V] domain via domainDef :=
   .mk fun v ↦ by simp [domainDef, domain_graph]
 
-instance domain_definable : 𝚺ᴬ₀-Function₁ (domain : V → V) := domain_defined.to_definable
+instance domain_definable : 𝚺ᴬ₀-Function₁[V] domain := domain_defined.to_definable
 
 instance domain_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₁ (domain : V → V) :=
+    ℌ-Function₁[V] domain :=
   domain_definable.of_zero
 
 @[simp] lemma domain_empty : domain (∅ : V) = ∅ := mem_ext (by simp [mem_domain_iff])
@@ -399,16 +431,25 @@ private lemma range_graph {s' s : V} : s' = range s ↔
 def _root_.FFL.FirstOrder.Arithmetic.rangeDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “s' s. ∀ y < s' + s, (y ∈ s' ↔ ∃ x < s, ∃ z ∈' s, !pairDef z x y)”
 
-instance range_defined : 𝚺ᴬ₀-Function₁ (range : V → V) via rangeDef :=
+instance range_defined : 𝚺ᴬ₀-Function₁[V] range via rangeDef :=
   .mk fun v ↦ by simp [rangeDef, range_graph]
 
-instance range_definable : 𝚺ᴬ₀-Function₁ (range : V → V) := range_defined.to_definable
+instance range_definable : 𝚺ᴬ₀-Function₁[V] range := range_defined.to_definable
 
 instance range_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₁ (range : V → V) :=
+    ℌ-Function₁[V] range :=
   range_definable.of_zero
 
 @[simp] lemma range_empty : range (∅ : V) = ∅ := mem_ext (by simp [mem_range_iff])
+
+@[simp] lemma range_bound (s : V) : range s ≤ 2 * s := le_iff_lt_succ.mpr
+  <| lt_of_lt_log (by simp) (by
+    simp only [mem_range_iff, forall_exists_index]
+    intro i x hix
+    exact lt_of_le_of_lt (le_trans (le_pair_right x i) (le_log_of_mem hix))
+      (by simp [log_two_mul_add_one_of_pos (pos_of_nonempty hix)]))
+
+instance : Bounded₁ (range : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp⟩
 
 end range
 
@@ -454,14 +495,14 @@ private lemma isMapping_iff {m : V} :
 def _root_.FFL.FirstOrder.Arithmetic.isMappingDef : 𝚺ᴬ₀.Semisentence 1 := .mkSigma
   “m. ∃ d <⁺ 2 * m, !domainDef d m ∧ ∀ x ∈' d, ∃ y < m, x ∼[m] y ∧ ∀ y' < m, x ∼[m] y' → y' = y”
 
-instance isMapping_defined : 𝚺ᴬ₀-Predicate (IsMapping : V → Prop) via isMappingDef := .mk <| by
+instance isMapping_defined : 𝚺ᴬ₀-Predicate[V] IsMapping via isMappingDef := .mk <| by
   intro v; simp [isMappingDef, isMapping_iff]
 
-instance isMapping_definable : 𝚺ᴬ₀-Predicate (IsMapping : V → Prop) :=
+instance isMapping_definable : 𝚺ᴬ₀-Predicate[V] IsMapping :=
   isMapping_defined.to_definable
 
 instance isMapping_definable'
-    (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) : ℌ-Predicate (IsMapping : V → Prop) :=
+    (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) : ℌ-Predicate[V] IsMapping :=
   isMapping_definable.of_zero
 
 end
@@ -516,6 +557,71 @@ lemma IsMapping.uniq {m x y₁ y₂ : V} (h : IsMapping m) :
     ⟪x, y₁⟫ ∈ m → ⟪x, y₂⟫ ∈ m → y₁ = y₂ := fun h₁ h₂ ↦
   h x (mem_domain_iff.mpr ⟨y₁, h₁⟩) |>.unique h₁ h₂
 
+/-! #### Properties of mappings -/
+
+def IsMapping.Injective (m : V) : Prop := ∀ x x' y, ⟪x, y⟫ ∈ m → ⟪x', y⟫ ∈ m → x = x'
+
+def _root_.FFL.FirstOrder.Arithmetic.IsMapping.injectiveDef : 𝚺ᴬ₀.Semisentence 1 :=
+  .mkSigma “m. ∀ x < m, ∀ x' < m, ∀ y < m, x ∼[m] y → x' ∼[m] y → x = x'”
+
+/-- An equivalent formulation of injectivity in which all quantifiers are bounded. -/
+lemma IsMapping.injective_iff_bounded {m : V} :
+    IsMapping.Injective m ↔
+    ∀ x < m, ∀ x_1 < m, ∀ x_2 < m, ⟪x, x_2⟫ ∈ m → ⟪x_1, x_2⟫ ∈ m → x = x_1 := by
+  constructor <;> intro h
+  · aesop
+  · intro x x' y hxy hx'y
+    have hxlt : x < m := lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hxy)
+    have hx'lt : x' < m := lt_of_le_of_lt (le_pair_left x' y) (lt_of_mem hx'y)
+    have hylt : y < m := lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hxy)
+    exact h x hxlt x' hx'lt y hylt hxy hx'y
+
+instance IsMapping.injective_defined :
+    𝚺ᴬ₀-Predicate[V] IsMapping.Injective via IsMapping.injectiveDef :=
+  .mk fun v ↦ by simp [IsMapping.injectiveDef, injective_iff_bounded]
+
+instance IsMapping.injective_definable : 𝚺ᴬ₀-Predicate[V] IsMapping.Injective :=
+  injective_defined.to_definable
+
+instance IsMapping.injective_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Predicate[V] IsMapping.Injective :=
+  injective_definable.of_zero
+
+@[simp] lemma IsMapping.injective_empty : IsMapping.Injective (∅ : V) := by intro x x' y; simp
+
+def IsMapping.Surjective (m : V) : Prop := ∀ y ∈ range m, ∃ x, ⟪x, y⟫ ∈ m
+
+def _root_.FFL.FirstOrder.Arithmetic.IsMapping.surjectiveDef : 𝚺ᴬ₀.Semisentence 1 :=
+  .mkSigma “m. ∃ r <⁺ 2 * m, !rangeDef r m ∧ ∀ y < m, y ∈ r → ∃ x < m, x ∼[m] y”
+
+/-- An equivalent formulation of surjectivity in which all quantifiers are bounded. -/
+lemma IsMapping.surjective_iff_bounded {m : V} :
+    IsMapping.Surjective m ↔
+    ∀ y < m, y ∈ range m → ∃ x < m, ⟪x, y⟫ ∈ m := by
+  constructor <;> intro h
+  · intro y _ hy
+    obtain ⟨x, hx⟩ := h y hy
+    have hxlt : x < m := lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hx)
+    exact ⟨x, hxlt, hx⟩
+  · intro y hy
+    have hylt : y < m :=
+      lt_of_le_of_lt (le_pair_right _ y) (lt_of_mem (Classical.choose_spec (mem_range_iff.mp hy)))
+    obtain ⟨x, _, hx⟩ := h y hylt hy
+    exact ⟨x, hx⟩
+
+instance IsMapping.surjective_defined :
+    𝚺ᴬ₀-Predicate[V] IsMapping.Surjective via IsMapping.surjectiveDef :=
+  .mk fun v ↦ by simp [IsMapping.surjectiveDef, surjective_iff_bounded]
+
+instance IsMapping.surjective_definable : 𝚺ᴬ₀-Predicate[V] IsMapping.Surjective :=
+  IsMapping.surjective_defined.to_definable
+
+instance IsMapping.surjective_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Predicate[V] IsMapping.Surjective :=
+  IsMapping.surjective_definable.of_zero
+
+@[simp] lemma IsMapping.surjective_empty : IsMapping.Surjective (∅ : V) := by intro y; simp
+
 end mapping
 
 /-! ### Restriction of mapping -/
@@ -553,6 +659,43 @@ lemma domain_restr_of_subset_domain {f s : V} (h : s ⊆ domain f) : domain (f �
   simp [domain_restr, inter_comm, inter_eq_self_of_subset h]
 
 end restriction
+
+section function
+
+def IsMapping.IsFunction (f : V) : Prop := IsMapping f ∧ f ⊆ domain f ×ʰᶠ range f
+
+def _root_.FFL.FirstOrder.Arithmetic.IsMapping.isFunctionDef : 𝚺ᴬ₀.Semisentence 1 :=
+  .mkSigma “f. !isMappingDef f ∧ ∀ p < f, p ∈ f → ∃ x < f, ∃ y < f, !pairDef p x y”
+
+set_option linter.flexible false in
+instance IsMapping.isFunction_defined :
+    𝚺ᴬ₀-Predicate[V] IsMapping.IsFunction via IsMapping.isFunctionDef :=
+  .mk fun v ↦ by
+    simp [IsMapping.isFunctionDef]
+    constructor <;> intro h
+    · refine ⟨h.1, ?_⟩
+      intro p hpmem
+      have hplt : p < v 0 := lt_of_mem hpmem
+      obtain ⟨x, hxlt, y, hylt, rfl⟩ := h.2 p hplt hpmem
+      refine mem_product_iff.mpr ?_
+      have hxmem : x ∈ domain (v 0) := mem_domain_iff.mpr ⟨y, hpmem⟩
+      have hymem : y ∈ range (v 0) := mem_range_iff.mpr ⟨x, hpmem⟩
+      refine ⟨x, hxmem, y, hymem, rfl⟩
+    · refine ⟨h.1, ?_⟩
+      intro p hplt hpmem
+      obtain ⟨x, hx, y, hy, rfl⟩ := mem_product_iff.mp (h.2 hpmem)
+      have hxlt : x < v 0 := lt_of_le_of_lt (le_pair_left x y) hplt
+      have hylt : y < v 0 := lt_of_le_of_lt (le_pair_right x y) hplt
+      exact ⟨x, hxlt, y, hylt, rfl⟩
+
+instance IsMapping.isFunction_definable : 𝚺ᴬ₀-Predicate[V] IsMapping.IsFunction :=
+  IsMapping.isFunction_defined.to_definable
+
+instance IsMapping.isFunction_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Predicate[V] IsMapping.IsFunction :=
+  IsMapping.isFunction_definable.of_zero
+
+end function
 
 theorem insert_induction {Γ} {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
@@ -708,13 +851,13 @@ noncomputable def fstIdx (p : V) : V := π₁ (p - 1)
 def _root_.FFL.FirstOrder.Arithmetic.fstIdxDef : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “n p. ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₁Def n p'”
 
-instance fstIdx_defined : 𝚺ᴬ₀-Function₁ (fstIdx : V → V) via fstIdxDef := .mk <| by
+instance fstIdx_defined : 𝚺ᴬ₀-Function₁[V] fstIdx via fstIdxDef := .mk <| by
   intro v; simp [fstIdxDef, fstIdx]
 
-instance fstIdx_definable : 𝚺ᴬ₀-Function₁ (fstIdx : V → V) := fstIdx_defined.to_definable
+instance fstIdx_definable : 𝚺ᴬ₀-Function₁[V] fstIdx := fstIdx_defined.to_definable
 
 instance fstIdx_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    Γ-Function₁ (fstIdx : V → V) := fstIdx_definable.of_zero
+    Γ-Function₁[V] fstIdx := fstIdx_definable.of_zero
 
 end fstIdx
 
@@ -728,13 +871,13 @@ noncomputable def sndIdx (p : V) : V := π₂ (p - 1)
 def _root_.FFL.FirstOrder.Arithmetic.sndIdxDef : 𝚺ᴬ₀.Semisentence 2 :=
   .mkSigma “n p. ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₂Def n p'”
 
-instance sndIdx_defined : 𝚺ᴬ₀-Function₁ (sndIdx : V → V) via sndIdxDef :=
+instance sndIdx_defined : 𝚺ᴬ₀-Function₁[V] sndIdx via sndIdxDef :=
   .mk fun v ↦ by simp [sndIdxDef, sndIdx]
 
-instance sndIdx_definable : 𝚺ᴬ₀-Function₁ (sndIdx : V → V) := sndIdx_defined.to_definable
+instance sndIdx_definable : 𝚺ᴬ₀-Function₁[V] sndIdx := sndIdx_defined.to_definable
 
 instance sndIdx_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    Γ-Function₁ (sndIdx : V → V) := sndIdx_definable.of_zero
+    Γ-Function₁[V] sndIdx := sndIdx_definable.of_zero
 
 end sndIdx
 

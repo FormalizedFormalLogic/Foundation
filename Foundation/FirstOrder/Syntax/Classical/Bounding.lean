@@ -168,7 +168,7 @@ end Closure
     ℬ[L].Closure φ ↔ φ.Open := by
   constructor
   · intro h
-    induction h <;> try simp_all [Bounding.strict]
+    induction h <;> simp_all [Bounding.strict]
     case ball R φ t hR ht hp ih =>
       change R ∈ (∅ : Set (Semiformula.Operator L 2)) at hR
       simp at hR

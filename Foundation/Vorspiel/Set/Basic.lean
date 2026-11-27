@@ -37,14 +37,6 @@ lemma iff_subset_insert_subset_diff : s ⊆ insert a t ↔ s \ {a} ⊆ t := by
     · assumption;
     · simpa;
 
-lemma ssubset_of_subset_ne (h : s ⊆ t) (hne : s ≠ t) : s ⊂ t := by
-  constructor;
-  · assumption;
-  · revert hne;
-    contrapose!;
-    intro _;
-    apply Set.eq_of_subset_of_subset <;> assumption;
-
 /-
   Thanks to @plp127
 

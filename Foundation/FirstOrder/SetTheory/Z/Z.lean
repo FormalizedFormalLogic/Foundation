@@ -30,7 +30,7 @@ lemma separation_exists_eval (x : V) (φ : SetTheorySemiformula V 1) :
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
   have := by
     simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema]
-      using Theory.models V 𝗦𝗘𝗣 (Separation.separation ψ)
+      using Theory.models V 𝗦𝗘𝗣 (IsSeparationAxiom.separation ψ)
   simpa [ψ, f, Semiformula.eval_rewriteMap, Matrix.constant_eq_singleton] using this f x
 
 lemma separation_exists (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) :
@@ -384,7 +384,8 @@ lemma IsInductive.zero {I : V} (hI : IsInductive I) : ∅ ∈ I := hI.1
 lemma IsInductive.succ {I : V} (hI : IsInductive I) {x : V} (hx : x ∈ I) : succ x ∈ I := hI.2 x hx
 
 lemma isInductive_exists : ∃ I : V, IsInductive I := by
-  simpa [models_iff, BasicSetTheory.infinity] using! Theory.models V 𝗕𝗦𝗧 BasicSetTheory.infinity
+  simpa [models_iff, IsBasicSetTheoryAxiom.infinity] using!
+    Theory.models V 𝗕𝗦𝗧 IsBasicSetTheoryAxiom.infinity
 
 lemma omega_existsUnique : ∃! ω : V, ∀ x, x ∈ ω ↔ ∀ I : V, IsInductive I → x ∈ I := by
   rcases isInductive_exists (V := V) with ⟨I, hI⟩
@@ -494,7 +495,8 @@ lemma naturalNumber_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
 /-! ## Axiom of foundation -/
 
 lemma foundation : ∀ x : V, [IsNonempty x] → ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
-  simpa [models_iff, BasicSetTheory.foundation] using Theory.models V 𝗕𝗦𝗧 BasicSetTheory.foundation
+  simpa [models_iff, IsBasicSetTheoryAxiom.foundation] using
+    Theory.models V 𝗕𝗦𝗧 IsBasicSetTheoryAxiom.foundation
 
 lemma foundation' (x : V) [IsNonempty x] : ∃ y ∈ x, x ∩ y = ∅ := by
   rcases foundation x with ⟨y, hyx, H⟩

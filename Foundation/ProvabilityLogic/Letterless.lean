@@ -130,7 +130,7 @@ lemma spectrum_finite_or_cofinite : A.spectrum.Finite ∨ A.spectrumᶜ.Finite :
   | falsum => simp;
   | imp A B ihA ihB =>
     rcases ihA with hA | hA <;> rcases ihB with hB | hB <;>
-    simp_all [Set.compl_union, Set.Finite.inter_of_left, Set.Finite.inter_of_right];
+    simp_all [Set.Finite.inter_of_left, Set.Finite.inter_of_right];
   | box A ih =>
     by_cases h : ∀ i, i ∈ spectrum A;
     · simp [h];
@@ -138,7 +138,7 @@ lemma spectrum_finite_or_cofinite : A.spectrum.Finite ∨ A.spectrumᶜ.Finite :
       left;
       apply (Set.finite_Iic k).subset;
       intro n hn;
-      by_contra! hkn;
+      by_contra hkn;
       exact hk (hn k (not_le.mp hkn));
 
 end LetterlessFormula

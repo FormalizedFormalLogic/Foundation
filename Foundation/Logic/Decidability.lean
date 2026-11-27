@@ -14,7 +14,7 @@ variable {F S : Type*} [Primcodable F] [Entailment S F]
 variable (𝓢 : S)
 
 class Decidable where
-  dec : ComputablePred (theory 𝓢)
+  dec : ComputablePred (· ∈ theory 𝓢)
 
 def Undecidable := ¬Decidable 𝓢
 

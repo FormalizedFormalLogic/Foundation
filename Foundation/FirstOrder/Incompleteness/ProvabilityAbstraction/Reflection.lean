@@ -22,7 +22,7 @@ variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provab
 
 abbrev refl (σ : Sentence L) : Sentence L := 𝔅 σ 🡒 σ
 
-def reflOn (Γ : Sentence L → Prop) : Set (Sentence L) := Set.image 𝔅.refl Γ
+def reflOn (Γ : Sentence L → Prop) : Set (Sentence L) := Set.image 𝔅.refl {σ | Γ σ}
 
 variable {Γ Γ' : Sentence L → Prop}
 
