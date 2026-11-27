@@ -1206,55 +1206,6 @@ lemma IsFormula.sigma1_structural_induction₂_ss {P : V → Prop} (hP : 𝚺ᴬ
       h₁.shift.shift.free1
     exact hexs _ h₁ this
 
-/-
-section fvfree
-
-variable (L)
-
-def Language.IsFVFree (n p : V) : Prop := IsSemiformula L n p ∧ shift L p = p
-
-section
-
-def _root_.FFL.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺ᴬ₁.Semisentence 2 :=
-  .mkSigma “n p | !(isSemiformula L).sigma n p ∧ !pshift LDef p p”
-
-lemma isFVFree_defined : 𝚺ᴬ₁-Relation L.IsFVFree via pL.isFVFreeDef := by
-  intro v; simp [LDef.isFVFreeDef, Bounding.HierarchySymbol.Semiformula.val_sigma,
-    (semiformula_defined L).df.iff, (shift_defined L).df.iff]
-  simp [Language.IsFVFree, eq_comm]
-
-end
-
-variable {L}
-
-@[simp] lemma Language.IsFVFree.verum (n : V) : L.IsFVFree n ^⊤[n] := by simp [Language.IsFVFree]
-
-@[simp] lemma Language.IsFVFree.falsum (n : V) : L.IsFVFree n ^⊥[n] := by simp [Language.IsFVFree]
-
-lemma Language.IsFVFree.and {n p q : V} (hp : L.IsFVFree n p) (hq : L.IsFVFree n q) :
-    L.IsFVFree n (p ^⋏[n] q) := by simp [Language.IsFVFree, hp.1, hq.1, hp.2, hq.2]
-
-lemma Language.IsFVFree.or {n p q : V} (hp : L.IsFVFree n p) (hq : L.IsFVFree n q) :
-    L.IsFVFree n (p ^⋎[n] q) := by simp [Language.IsFVFree, hp.1, hq.1, hp.2, hq.2]
-
-lemma Language.IsFVFree.all {n p : V} (hp : L.IsFVFree (n + 1) p) :
-    L.IsFVFree n (^∀¹[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
-
-lemma Language.IsFVFree.exs {n p : V} (hp : L.IsFVFree (n + 1) p) :
-    L.IsFVFree n (^∃¹[n] p) := by simp [Language.IsFVFree, hp.1, hp.2]
-
-@[simp] lemma Language.IsFVFree.neg_iff : L.IsFVFree n (neg L p) ↔ L.IsFVFree n p := by
-  constructor
-  · intro h
-    have hp : Semiformula L n p := IsSemiformula.neg_iff.mp h.1
-    have : shift L (neg L p) = neg L p := h.2
-    simp [shift_neg hp, neg_inj_iff hp.shift hp] at this
-    exact ⟨hp, this⟩
-  · intro h; exact ⟨by simp [h.1], by rw [shift_neg h.1, h.2]⟩
-
-end fvfree
--/
-
 namespace Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace
