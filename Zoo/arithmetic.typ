@@ -22,6 +22,7 @@
     labels: (
       "𝗘𝗤 ℒₒᵣ": $Theory("EQ")$,
       "𝗥₀": $Theory("R"_0)$,
+      "𝗥": $Theory("R")$,
       "𝗤": $Theory("Q")$,
       "𝗣𝗔⁻": $PA^-$,
       "𝗜𝗢𝗽𝗲𝗻": $Theory("IOpen")$,
