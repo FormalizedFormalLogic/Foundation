@@ -6,14 +6,6 @@ public import Foundation.Logic.Decidability
 /-!
 # Essential undecidability and essential incompleteness
 
-For first-order theories, essential undecidability (`Entailment.EssentiallyUndecidable`) and
-essential incompleteness (`Entailment.EssentiallyIncomplete`) coincide
-(`Theory.essentiallyUndecidable_iff_essentiallyIncomplete`).
-
-The nontrivial direction completes a decidable consistent theory `U` along an enumeration of
-sentences, adding each sentence or its negation; the resulting theory `U.completion` is
-consistent, complete and decidable.
-
 ## References
 
 - [Kur23, Theorem 2.7]
