@@ -138,10 +138,11 @@ end
 
 lemma termVal_termBShift (ht : IsUTerm ℒₒᵣ t) (x e : V) :
     termVal (x ∷ e) (termBShift ℒₒᵣ t) = termVal e t := by
-  apply IsUTerm.induction 𝚺 (by definability) ?_ ?_ ?_ t ht;
-  · simp;
-  · simp;
-  · intro k f v hf hv ih;
+  induction ht using IsUTerm.induction 𝚺 with
+  | definable => definability
+  | bvar z => simp
+  | fvar x => simp
+  | func k f v hf hv ih =>
     rw [termBShift_func hf hv];
     exact termVal_func_congr hf hv.isSemitermVec.termBShiftVec.isUTerm hv fun i hi ↦ by
       rw [nth_termBShiftVec hv hi, ih i hi];
