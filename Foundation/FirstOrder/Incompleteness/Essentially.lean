@@ -15,9 +15,9 @@ public import Foundation.Logic.Decidability
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-open Encodable FFL.Entailment FFL.FirstOrder.Arithmetic FFL.FirstOrder.Arithmetic.Bootstrapping
-
 namespace FFL.FirstOrder
+
+open Encodable FFL.Entailment Arithmetic Bootstrapping
 
 section computable
 
@@ -40,7 +40,7 @@ lemma Theory.rePred_provable [L.DecidableEq] (T : Theory L) [T.RE] :
 
 /-- A consistent, complete r.e. theory is decidable. -/
 lemma Theory.computablePred_theory_of_complete [L.DecidableEq] {T : Theory L} [T.RE]
-    [Consistent T] (h : FFL.Entailment.Complete T) : ComputablePred (· ∈ T.theory) := by
+    [Consistent T] (h : Entailment.Complete T) : ComputablePred (· ∈ T.theory) := by
   have hc : REPred fun σ : Sentence L ↦ T ⊬ σ :=
     (T.rePred_provable.comp Sentence.computable_neg).of_eq fun σ ↦ by
       have : ¬(T ⊢ σ ∧ T ⊢ ∼σ) := fun h ↦ not_consistent_iff_inconsistent.mpr
@@ -111,7 +111,7 @@ lemma completionChain_decides (σ : Sentence L) :
 instance : U ⪯ U.completion := WeakerThan.ofAxm! fun {σ} hσ ↦
   by_axm (show σ ∈ U.completion from (C_of_conseq (by_axm hσ) : U ⊢ _ 🡒 σ))
 
-instance [Consistent U] : FFL.Entailment.Complete U.completion :=
+instance [Consistent U] : Entailment.Complete U.completion :=
   complete_def.mpr fun σ ↦ by
     rcases completionChain_decides (U := U) σ with h | h
     · exact .inl (by_axm h)
