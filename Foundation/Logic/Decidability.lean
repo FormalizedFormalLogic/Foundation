@@ -20,20 +20,20 @@ def Undecidable := ¬Decidable 𝓢
 
 variable (P : S → Prop)
 
-/-- Every extension of `𝓢` satisfying `P` is undecidable.
+/-- Every consistent extension of `𝓢` satisfying `P` is undecidable.
 
 - [Kur23, Definition 2.5]
 -/
 class EssentiallyUndecidable where
-  essentially_undec : ∀ 𝓣 : S, 𝓢 ⪯ 𝓣 → P 𝓣 → Undecidable 𝓣
+  essentially_undec : ∀ 𝓣 : S, 𝓢 ⪯ 𝓣 → Consistent 𝓣 → P 𝓣 → Undecidable 𝓣
 
 omit [Primcodable F] in
-/-- Every extension of `𝓢` satisfying `P` is incomplete.
+/-- Every consistent extension of `𝓢` satisfying `P` is incomplete.
 
 - [Kur23, Definition 2.5]
 -/
 class EssentiallyIncomplete [Tilde F] where
-  essentially_incomplete : ∀ 𝓣 : S, 𝓢 ⪯ 𝓣 → P 𝓣 → Incomplete 𝓣
+  essentially_incomplete : ∀ 𝓣 : S, 𝓢 ⪯ 𝓣 → Consistent 𝓣 → P 𝓣 → Incomplete 𝓣
 
 variable {𝓢}
 

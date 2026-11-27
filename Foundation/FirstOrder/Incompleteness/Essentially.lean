@@ -164,19 +164,19 @@ variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable] [L.Decida
 - [Kur23, Theorem 2.7]
 -/
 theorem essentiallyUndecidable_iff_essentiallyIncomplete {T : Theory L} :
-    EssentiallyUndecidable T Consistent ↔
-    EssentiallyIncomplete T fun U : Theory L ↦ Consistent U ∧ U.RE := by
+    EssentiallyUndecidable T (fun _ ↦ True) ↔ EssentiallyIncomplete T Theory.RE := by
   constructor
   · rintro ⟨h⟩
     constructor
-    rintro U hTU ⟨hU, _⟩
+    intro U hTU hU _
     by_contra hc
-    exact h U hTU hU ⟨computablePred_theory_of_complete (not_incomplete_iff_complete.mp hc)⟩
+    exact h U hTU hU trivial
+      ⟨computablePred_theory_of_complete (not_incomplete_iff_complete.mp hc)⟩
   · rintro ⟨h⟩
     constructor
-    intro U hTU _ ⟨hd⟩
+    intro U hTU _ _ ⟨hd⟩
     exact not_complete_iff_incomplete.mpr
-      (h _ (hTU.trans inferInstance) ⟨inferInstance, ⟨(computablePred_completion hd).to_re⟩⟩)
+      (h _ (hTU.trans inferInstance) inferInstance ⟨(computablePred_completion hd).to_re⟩)
       inferInstance
 
 end essentially
