@@ -471,7 +471,7 @@ end Sentence
 
 namespace Semisentence
 
-@[simp] lemma shift_quote {n : ℕ} (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
+@[simp, grind =] lemma shift_quote {n : ℕ} (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
   have h : Rewriting.shift (Rewriting.emb σ : Semiproposition L n) = Rewriting.emb σ := by
     simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
   rw [Sentence.quote_def, ← Semiformula.quote_shift, h]

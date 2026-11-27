@@ -56,24 +56,24 @@ noncomputable def termFreeVariablesVecGraph : 𝚺ᴬ₁.Semisentence 3 := bluep
 
 variable {L}
 
-@[simp]
+@[simp, grind =]
 lemma termFreeVariables_bvar (z : V) :
     termFreeVariables L ^#z = ∅ := by simp [termFreeVariables, construction]
 
-@[simp]
+@[simp, grind =]
 lemma termFreeVariables_fvar (x : V) :
     termFreeVariables L ^&x = {x} := by simp [termFreeVariables, construction]
 
-@[simp]
+@[simp, grind =]
 lemma termFreeVariables_func (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     termFreeVariables L (^func k f v) = listUnion (termFreeVariablesVec L k v) := by
   simp [termFreeVariables, construction, hkf, hv]; rfl
 
-@[simp]
+@[simp, grind =]
 lemma len_termFreeVariablesVec (hv : IsUTermVec L k v) :
     len (termFreeVariablesVec L k v) = k := construction.resultVec_lh L _ hv
 
-@[simp]
+@[simp, grind =]
 lemma nth_termFreeVariablesVec (hv : IsUTermVec L k v) (hi : i < k) :
     (termFreeVariablesVec L k v).[i] = termFreeVariables L v.[i] :=
   construction.nth_resultVec L _ hv hi
@@ -146,12 +146,15 @@ def _root_.FFL.FirstOrder.Language.IsClosedSemiterm (n t : V) : Prop :=
 variable (L) in
 abbrev _root_.FFL.FirstOrder.Language.IsClosedTerm (t : V) : Prop := L.IsClosedSemiterm 0 t
 
+@[grind →]
 lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.isSemiterm (h : L.IsClosedSemiterm n t) :
     IsSemiterm L n t := h.1
 
+@[grind →]
 lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.termFreeVariables_eq
     (h : L.IsClosedSemiterm n t) : termFreeVariables L t = ∅ := h.2
 
+@[grind →]
 lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.termShift_eq (h : L.IsClosedSemiterm n t) :
     termShift L t = t :=
   (termShift_eq_self_iff h.isSemiterm.isUTerm).mpr h.termFreeVariables_eq
@@ -160,18 +163,18 @@ lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.of_termShift_eq
     (ht : IsSemiterm L n t) (h : termShift L t = t) : L.IsClosedSemiterm n t :=
   ⟨ht, (termShift_eq_self_iff ht.isUTerm).mp h⟩
 
-@[simp]
+@[simp, grind =]
 lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.bvar_iff {z : V} :
     L.IsClosedSemiterm n ^#z ↔ z < n := by
   simp [Language.IsClosedSemiterm]
 
-@[simp]
+@[simp, grind .]
 lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.not_fvar (x : V) :
     ¬L.IsClosedSemiterm n ^&x := by
   intro h
   simpa using h.termShift_eq
 
-@[simp]
+@[simp, grind .]
 lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.numeral (n x : V) :
     (ℒₒᵣ).IsClosedSemiterm n (Arithmetic.numeral x) :=
   .of_termShift_eq (Arithmetic.numeral_semiterm n x) (Arithmetic.numeral_shift x)
@@ -244,43 +247,43 @@ instance freeVariables.definable' : Γᴬ_[m + 1]-Function₁[V] freeVariables L
 
 end
 
-@[simp]
+@[simp, grind =]
 lemma freeVariables_rel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     freeVariables L (^rel k R v) = listUnion (termFreeVariablesVec L k v) := by
   simp [freeVariables, hR, hv, construction]
 
-@[simp]
+@[simp, grind =]
 lemma freeVariables_nrel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     freeVariables L (^nrel k R v) = listUnion (termFreeVariablesVec L k v) := by
   simp [freeVariables, hR, hv, construction]
 
-@[simp]
+@[simp, grind =]
 lemma freeVariables_verum : freeVariables L (^⊤ : V) = ∅ := by
   simp [freeVariables, construction]
 
-@[simp]
+@[simp, grind =]
 lemma freeVariables_falsum : freeVariables L (^⊥ : V) = ∅ := by
   simp [freeVariables, construction]
 
-@[simp]
+@[simp, grind =]
 lemma freeVariables_and (hp : IsUFormula L p) (hq : IsUFormula L q) :
     freeVariables L (p ^⋏ q) = freeVariables L p ∪ freeVariables L q := by
   simp [freeVariables, hp, hq, construction]
 
-@[simp]
+@[simp, grind =]
 lemma freeVariables_or (hp : IsUFormula L p) (hq : IsUFormula L q) :
     freeVariables L (p ^⋎ q) = freeVariables L p ∪ freeVariables L q := by
   simp [freeVariables, hp, hq, construction]
 
-@[simp]
+@[simp, grind =]
 lemma freeVariables_all (hp : IsUFormula L p) : freeVariables L (^∀ p) = freeVariables L p := by
   simp [freeVariables, hp, construction]
 
-@[simp]
+@[simp, grind =]
 lemma freeVariables_exs (hp : IsUFormula L p) : freeVariables L (^∃ p) = freeVariables L p := by
   simp [freeVariables, hp, construction]
 
-@[simp]
+@[simp, grind =]
 lemma freeVariables_neg (hp : IsUFormula L p) : freeVariables L (neg L p) = freeVariables L p := by
   apply IsUFormula.ISigma1.sigma1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
@@ -371,12 +374,15 @@ instance _root_.FFL.FirstOrder.Language.IsSentence.defined :
 lemma isSentence_sigma_iff (p : V) : V ⊧/![p] (isSentence L).sigma.val ↔ L.IsSentence p := by
   simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma]
 
+@[grind →]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.isSemiformula
     (h : L.IsSemisentence n p) : IsSemiformula L n p := h.1
 
+@[grind →]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.freeVariables_eq
     (h : L.IsSemisentence n p) : freeVariables L p = ∅ := h.2
 
+@[grind →]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.shift_eq (h : L.IsSemisentence n p) :
     shift L p = p :=
   (shift_eq_self_iff h.isSemiformula.isUFormula).mpr h.freeVariables_eq
@@ -385,7 +391,7 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.of_shift_eq
     (hp : IsSemiformula L n p) (h : shift L p = p) : L.IsSemisentence n p :=
   ⟨hp, (shift_eq_self_iff hp.isUFormula).mp h⟩
 
-@[simp]
+@[simp, grind .]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.quote {n : ℕ} (σ : Semisentence L n) :
     L.IsSemisentence (n : V) ⌜σ⌝ :=
   .of_shift_eq (Sentence.quote_isSemiformula σ) (Semisentence.shift_quote σ)
@@ -402,20 +408,20 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.sound_natCast {n p : ℕ}
   Language.IsSemisentence.sound <| (Defined.shigmaOne_absolute V (Language.IsSemisentence.defined L)
     (Language.IsSemisentence.defined L) ![n, p]).mpr h
 
-@[simp]
+@[simp, grind .]
 lemma _root_.FFL.FirstOrder.Language.IsSentence.quote (σ : Sentence L) :
     L.IsSentence (⌜σ⌝ : V) :=
   .of_shift_eq (Sentence.quote_isSemiformula₀ σ) (Semisentence.shift_quote σ)
 
-@[simp]
+@[simp, grind .]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.verum (n : V) : L.IsSemisentence n ^⊤ := by
   simp [Language.IsSemisentence]
 
-@[simp]
+@[simp, grind .]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.falsum (n : V) : L.IsSemisentence n ^⊥ := by
   simp [Language.IsSemisentence]
 
-@[simp]
+@[simp, grind =]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.and_iff :
     L.IsSemisentence n (p ^⋏ q) ↔ L.IsSemisentence n p ∧ L.IsSemisentence n q := by
   constructor
@@ -430,7 +436,7 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.and_iff :
     · rw [shift_and hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
         hp.shift_eq, hq.shift_eq]
 
-@[simp]
+@[simp, grind =]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.or_iff :
     L.IsSemisentence n (p ^⋎ q) ↔ L.IsSemisentence n p ∧ L.IsSemisentence n q := by
   constructor
@@ -445,7 +451,7 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.or_iff :
     · rw [shift_or hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
         hp.shift_eq, hq.shift_eq]
 
-@[simp]
+@[simp, grind =]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.all_iff :
     L.IsSemisentence n (^∀ p) ↔ L.IsSemisentence (n + 1) p := by
   simp only [Language.IsSemisentence, IsSemiformula.all]
@@ -453,7 +459,7 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.all_iff :
   intro hp
   rw [freeVariables_all hp.isUFormula]
 
-@[simp]
+@[simp, grind =]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.exs_iff :
     L.IsSemisentence n (^∃ p) ↔ L.IsSemisentence (n + 1) p := by
   simp only [Language.IsSemisentence, IsSemiformula.exs]
@@ -461,7 +467,7 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.exs_iff :
   intro hp
   rw [freeVariables_exs hp.isUFormula]
 
-@[simp]
+@[simp, grind =]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.neg_iff :
     L.IsSemisentence n (neg L p) ↔ L.IsSemisentence n p := by
   constructor

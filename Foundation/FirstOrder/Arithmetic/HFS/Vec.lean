@@ -1166,10 +1166,10 @@ variable {v x : V}
 
 noncomputable def listUnion (v : V) : V := construction.result ![] v
 
-@[simp]
+@[simp, grind =]
 lemma listUnion_nil : listUnion (0 : V) = ∅ := by simp [listUnion, construction]
 
-@[simp]
+@[simp, grind =]
 lemma listUnion_adjoin (x v : V) : listUnion (x ∷ v) = x ∪ listUnion v := by
   simp [listUnion, construction]
 
@@ -1188,7 +1188,7 @@ instance listUnion_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (listUnion : V 
 
 end
 
-@[simp]
+@[simp, grind =]
 lemma mem_listUnion_iff : x ∈ listUnion v ↔ ∃ i < len v, x ∈ v.[i] := by
   induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
@@ -1204,6 +1204,7 @@ lemma mem_listUnion_iff : x ∈ listUnion v ↔ ∃ i < len v, x ∈ v.[i] := by
       · left; simpa using h
       · right; exact ⟨i, by simpa using hi, by simpa using h⟩
 
+@[grind =]
 lemma listUnion_eq_empty_iff : listUnion v = ∅ ↔ ∀ i < len v, v.[i] = ∅ := by
   simp only [mem_ext_iff, mem_listUnion_iff, not_mem_empty, iff_false, not_exists, not_and]
   exact ⟨fun h i hi x hx ↦ h x i hi hx, fun h x i hi hx ↦ h i hi x hx⟩
