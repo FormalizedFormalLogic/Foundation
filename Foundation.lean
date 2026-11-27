@@ -69,7 +69,6 @@ public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 public import Foundation.FirstOrder.Arithmetic.PA.Prenex
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
-public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Q
 public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.Q.Basic
 public import Foundation.FirstOrder.Arithmetic.R.Basic

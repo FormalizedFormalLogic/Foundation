@@ -10,6 +10,15 @@ public import Mathlib.Data.ENat.Basic
 
 noncomputable section
 
+lemma Nat.iff_lt_exists_add_succ {n m : ℕ} : n < m ↔ ∃ k, m = n + (k + 1) := by
+  constructor;
+  · intro h;
+    use m - n - 1;
+    omega;
+  · rintro ⟨k, rfl⟩;
+    apply Nat.lt_add_of_pos_right;
+    omega;
+
 namespace FFL.FirstOrder.Arithmetic
 
 inductive IsRobinsonQAxiom : Sentence ℒₒᵣ → Prop
@@ -21,7 +30,7 @@ inductive IsRobinsonQAxiom : Sentence ℒₒᵣ → Prop
   | addSucc : IsRobinsonQAxiom “∀ a b, a + (b + 1) = (a + b) + 1”
   | mulZero : IsRobinsonQAxiom “∀ a, a * 0 = 0”
   | mulSucc : IsRobinsonQAxiom “∀ a b, a * (b + 1) = a * b + a”
-  | ltDef : IsRobinsonQAxiom “∀ a b, a < b ↔ ∃ c, a + (c + 1) = b”
+  | ltDef : IsRobinsonQAxiom “∀ a b, a < b ↔ ∃ c, c + (a + 1) = b”
 
 abbrev RobinsonQ : ArithmeticTheory := Set.ofPred IsRobinsonQAxiom
 
@@ -35,7 +44,7 @@ open ORingStructure
   intro σ h
   cases h
   case ltDef =>
-    suffices ∀ a b : ℕ, a < b ↔ ∃ c : ℕ, a + (c + 1) = b by
+    suffices ∀ a b : ℕ, a < b ↔ ∃ c : ℕ, c + (a + 1) = b by
       simpa [models_iff]
     intro a b
     constructor;
@@ -43,7 +52,7 @@ open ORingStructure
       use (b - a - 1);
       omega;
     · rintro ⟨c, hc⟩;
-      simp [←hc];
+      omega;
   case zeroOrSucc =>
     simp [models_iff]
     omega;
@@ -94,7 +103,7 @@ lemma exists_succ_of_ne_zero' {a : M} (ha : a ≠ 0) : ∃ b : M, b + 1 = a := b
   obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero ha;
   use b;
 
-protected lemma lt_def {a b : M} : a < b ↔ ∃ c : M, a + (c + 1) = b := by
+protected lemma lt_def {a b : M} : a < b ↔ ∃ c : M, c + (a + 1) = b := by
   have := by simpa [models_iff] using Theory.models M _ IsRobinsonQAxiom.ltDef
   exact this a b
 
@@ -158,20 +167,15 @@ lemma not_le_zero {a : M} : ¬a < 0 := by
   push Not;
   intro b;
   calc
-    a + (b + 1) = (a + b) + 1 := Arithmetic.add_succ _ _
+    b + (a + 1) = (b + a) + 1 := Arithmetic.add_succ _ _
     _           ≠ 0           := by simp;
-
-lemma lt_of_not_zero {a b : M} (ha : b ≠ 0) : a < a + b := by
-  apply Arithmetic.lt_def.mpr;
-  obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
-  use b;
 
 @[simp]
 lemma iff_le_one_eq_zero {a : M} : a < 1 ↔ a = 0 := by
   constructor;
   · rw [Arithmetic.lt_def];
     rintro ⟨b, hb⟩;
-    apply eq_zero_of_eq_add_zero (b := b) ?_ |>.1;
+    apply eq_zero_of_eq_add_zero (a := b) ?_ |>.2;
     apply succ_inj_zero;
     rwa [Arithmetic.add_succ] at hb;
   · rintro rfl;
@@ -265,12 +269,9 @@ lemma numeral_ne_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ numeral m
 
 lemma numeral_lt_of_lt {n m : ℕ} (h : n < m) : (numeral n : M) < numeral m := by
   apply Arithmetic.lt_def.mpr;
-  obtain ⟨k, rfl, hk⟩ := Arithmetic.lt_def.mp h;
+  obtain ⟨k, rfl⟩ := Arithmetic.lt_def.mp h;
   use (numeral k : M);
-  calc
-    (numeral n + (numeral k + 1) : M) = numeral n + (numeral k + numeral 1) := by simp;
-                                    _ = numeral n + (numeral (k + 1))       := by rw [numeral_add];
-                                    _ = numeral (n + (k + 1))               := by rw [numeral_add];
+  rw [numeral_add_one, numeral_add]
 
 lemma numeral_lt_add {n m : ℕ} (hm : m ≠ 0) : (numeral n : M) < numeral n + numeral m := by
   rw [numeral_add];
@@ -282,32 +283,20 @@ lemma numeral_lt_succ {n : ℕ} : (numeral n : M) < numeral n + numeral 1 :=
   numeral_lt_add <| by omega;
 
 lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m < n, x = numeral m := by
-  match n with
-  | 0 => simp;
-  | 1 => simp;
-  | n + 2 =>
-    constructor;
-    · intro h;
-      obtain ⟨a, ha⟩ := Arithmetic.lt_def.mp h;
-      by_cases ha0 : a = 0;
-      · subst ha0;
-        use n + 1;
-        constructor;
-        · omega;
-        · apply succ_inj;
-          have ha' : (x : M) + 1 = numeral (n + 2) := by simpa using ha
-          rw [ha', numeral_add_one];
-      · obtain ⟨m, hm, rfl⟩ := iff_lt_numeral_exists_numeral (x := x) (n := n + 1) |>.mp <| by
-          have ha : x + a = numeral (n + 1) := succ_inj <| by rwa [Arithmetic.add_succ] at ha;
-          rw [←ha];
-          apply lt_of_not_zero ha0;
-        use m;
-        constructor;
-        · omega;
-        · rfl;
-    · rintro ⟨m, hm, rfl⟩;
-      apply numeral_lt_of_lt;
-      exact hm;
+  constructor
+  · intro h
+    match n with
+    | 0 => simp at h
+    | n + 1 =>
+      obtain ⟨c, hc⟩ := Arithmetic.lt_def.mp h
+      have hc : c + x = numeral n := succ_inj <| by
+        rw [← Arithmetic.add_succ, hc, numeral_add_one]
+      rcases zero_or_succ x with rfl | ⟨y, rfl⟩
+      · exact ⟨0, by omega, rfl⟩
+      · obtain ⟨m, hm, rfl⟩ := iff_lt_numeral_exists_numeral.mp (Arithmetic.lt_def.mpr ⟨c, hc⟩)
+        exact ⟨m + 1, by omega, numeral_add_one m⟩
+  · rintro ⟨m, hm, rfl⟩
+    exact numeral_lt_of_lt hm
 
 namespace R0
 
@@ -330,5 +319,150 @@ instance : 𝗥₀ ⪯ 𝗤 := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferI
 instance : 𝗥₀ ⪱ 𝗤 :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
     R0.unprovable_addZero (Entailment.by_axm IsRobinsonQAxiom.addZero)
+
+namespace Countermodel
+
+def OmegaAddOne := Option ℕ
+
+namespace OmegaAddOne
+
+instance : NatCast OmegaAddOne := ⟨fun i ↦ .some i⟩
+
+instance (n : ℕ) : OfNat OmegaAddOne n := ⟨.some n⟩
+
+instance : Top OmegaAddOne := ⟨.none⟩
+
+instance : ORingStructure OmegaAddOne where
+  add a b :=
+    match a, b with
+    | .some n, .some m => n + m
+    |       ⊤,       _ => ⊤
+    |       _,       ⊤ => ⊤
+  mul a b :=
+    match a, b with
+    | .some n, .some m => n * m
+    | .some 0,       ⊤ => 0
+    |       ⊤, .some 0 => 0
+    |       _,       _ => ⊤
+  lt a b :=
+    match a, b with
+    | .some n, .some m => n < m
+    |       _,       ⊤ => True
+    |       ⊤, .some _ => False
+
+
+@[simp] lemma coe_zero : (↑(0 : ℕ) : OmegaAddOne) = 0 := rfl
+
+@[simp] lemma coe_one : (↑(1 : ℕ) : OmegaAddOne) = 1 := rfl
+
+@[simp] lemma coe_add (a b : ℕ) : ↑(a + b) = ((↑a + ↑b) : OmegaAddOne) := rfl
+
+-- @[simp] lemma coe_mul (a b : ℕ) : ↑(a * b) = ((↑a * ↑b) : OmegaAddOne) := sorry
+
+@[simp] lemma lt_coe_iff (n m : ℕ) : (n : OmegaAddOne) < (m : OmegaAddOne) ↔ n < m := by rfl
+
+@[simp] lemma not_top_lt (n : ℕ) : ¬⊤ < (n : OmegaAddOne) := by rintro ⟨⟩
+
+@[simp] lemma lt_top {n : ℕ} : (n : OmegaAddOne) < ⊤ := by trivial
+
+@[simp] lemma top_add_zero : (⊤ : OmegaAddOne) + 0 = ⊤ := by rfl
+
+@[simp] lemma top_lt_top : (⊤ : OmegaAddOne) < ⊤ := by trivial
+
+@[simp] lemma top_add {a : OmegaAddOne} : (⊤ : OmegaAddOne) + a = ⊤ := by
+  match a with | ⊤ | .some n => rfl
+
+@[simp] lemma add_top {a : OmegaAddOne} : a + (⊤ : OmegaAddOne) = ⊤ := by
+  match a with | ⊤ | .some n => rfl
+
+
+variable {a b : OmegaAddOne}
+
+@[simp] lemma add_zero : a + 0 = a := by match a with | ⊤ | .some n => trivial;
+
+@[simp] lemma add_succ : a + (b + 1) = a + b + 1 := by
+  match a, b with
+  | ⊤, ⊤ | ⊤, .some n | .some m, ⊤ | .some n, .some m => tauto;
+
+@[simp] lemma mul_zero : a * 0 = 0 := by match a with | ⊤ | .some 0 | .some (n + 1) => rfl;
+
+@[simp]
+lemma mul_succ : a * (b + 1) = a * b + a := by
+  match a, b with
+  | ⊤            , ⊤
+  | ⊤            , .some 0
+  | ⊤            , .some (n + 1)
+  | .some 0      , .some n
+  | .some 0      , ⊤
+  | .some (m + 1), .some n
+  | .some (m + 1), ⊤
+  => rfl
+
+lemma succ_inj : a + 1 = b + 1 → a = b := by
+  match a, b with
+  | ⊤, ⊤ | ⊤, .some m | .some n, ⊤ => simp;
+  | .some n, .some m =>
+    intro h;
+    apply Option.mem_some_iff.mpr;
+    simpa using Option.mem_some_iff.mp h;
+
+@[simp]
+lemma succ_ne_zero : a + 1 ≠ 0 := by
+  match a with
+  | ⊤       => simp;
+  | .some n => apply Option.mem_some_iff.not.mpr; simp;
+
+@[simp]
+lemma zero_or_succ : a = 0 ∨ ∃ b, a = b + 1 := by
+  match a with
+  | .some 0 => left; rfl;
+  | .some (n + 1) => right; use n; rfl;
+  | ⊤ => right; use ⊤; rfl;
+
+@[simp]
+lemma lt_def : a < b ↔ ∃ c, c + a + 1 = b := by
+  match a, b with
+  | ⊤, ⊤ => simp;
+  | ⊤, .some n => simp [(show ¬(⊤ : OmegaAddOne) < .some n by tauto)];
+  | .some m, ⊤ =>
+    simp only [(show .some m < (⊤ : OmegaAddOne) by tauto), true_iff];
+    use ⊤;
+    rfl;
+  | .some m, .some n =>
+    apply Iff.trans (show some m < some n ↔ m < n by rfl);
+    apply Iff.trans Nat.iff_lt_exists_add_succ;
+    constructor;
+    · rintro ⟨k, rfl⟩;
+      exact ⟨k, show some (k + m + 1) = some (m + (k + 1)) from congrArg some (by omega)⟩;
+    · rintro ⟨c, hc⟩;
+      match c with
+      | .none => simp at hc;
+      | .some c =>
+        change some (c + m + 1) = some n at hc;
+        exact ⟨c, by have := Option.some_inj.mp hc; omega⟩;
+
+lemma exists_add_one_eq_self : ∃ x : OmegaAddOne, x + 1 = x :=
+  ⟨⊤, rfl⟩
+
+end OmegaAddOne
+
+set_option linter.flexible false in
+instance : OmegaAddOne↓[ℒₒᵣ] ⊧* 𝗤 := ⟨by
+  intro σ h;
+  rcases h;
+  case equal h =>
+    have : OmegaAddOne↓[ℒₒᵣ] ⊧* 𝗘𝗤 ℒₒᵣ := inferInstance
+    exact models_theory_iff.mp this _ h
+  case succInj =>
+    suffices ∀ a b : OmegaAddOne, a + 1 = b + 1 → a = b by simpa [models_iff];
+    intro _; apply OmegaAddOne.succ_inj;
+  all_goals simp [models_iff];
+⟩
+
+end Countermodel
+
+lemma RobinsonQ.unprovable_neSucc : 𝗤 ⊬ “∀ x, x + 1 ≠ x” :=
+  unprovable_of_countermodel (M := Countermodel.OmegaAddOne) 𝗤 <| by
+    simpa [notModels_iff] using Countermodel.OmegaAddOne.exists_add_one_eq_self
 
 end FFL.FirstOrder.Arithmetic

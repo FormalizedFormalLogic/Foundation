@@ -71,8 +71,39 @@ instance : Entailment.Consistent 𝗥 :=
   let : ℕ↓[ℒₒᵣ] ⊧* 𝗥 := inferInstance
   Sound.consistent_of_satisfiable ⟨_, this⟩
 
-instance : 𝗥 ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ models_iff_models_R0.mpr
-  ⟨inferInstance, fun n x ↦ (lt_tri x (numeral n)).elim (Or.inr ∘ Or.inl) (Or.imp_right Or.inr)⟩
+instance : 𝗥 ⪯ 𝗤 := weakerThan_of_models.{0} _ _ fun M _ _ ↦ by
+  have succ_add (d : M) (n : ℕ) : d + 1 + numeral n = d + numeral n + 1 := by
+    induction n with
+    | zero => simp
+    | succ n ih => rw [← numeral_add_one, Arithmetic.add_succ, ih, Arithmetic.add_succ]
+  refine models_iff_models_R0.mpr ⟨inferInstance, fun n x ↦ ?_⟩
+  induction n with
+  | zero =>
+    rcases zero_or_succ x with rfl | ⟨y, rfl⟩
+    · exact Or.inl rfl
+    · exact Or.inr <| Or.inr <| Arithmetic.lt_def.mpr ⟨y, by simp⟩
+  | succ n ih =>
+    rcases ih with rfl | h | h
+    · exact Or.inr <| Or.inl <| numeral_lt_of_lt (by omega)
+    · obtain ⟨m, hm, rfl⟩ := iff_lt_numeral_exists_numeral.mp h
+      exact Or.inr <| Or.inl <| numeral_lt_of_lt (by omega)
+    · obtain ⟨c, rfl⟩ := Arithmetic.lt_def.mp h
+      rcases zero_or_succ c with rfl | ⟨d, rfl⟩
+      · exact Or.inl <| by rw [numeral_add_one, numeral_zero_add]
+      · refine Or.inr <| Or.inr <| Arithmetic.lt_def.mpr ⟨d, ?_⟩
+        rw [numeral_add_one n, succ_add, Arithmetic.add_succ]
+
+instance : R0.Countermodel.OmegaAddOne↓[ℒₒᵣ] ⊧* 𝗥 :=
+  models_iff_models_R0.mpr ⟨inferInstance, fun n x ↦ by
+    cases x using R0.Countermodel.OmegaAddOne.cases' <;> simp; omega⟩
+
+lemma unprovable_addZero : 𝗥 ⊬ “∀ x, x + 0 = x” :=
+  unprovable_of_countermodel _ (M := R0.Countermodel.OmegaAddOne) <| by
+    simpa [notModels_iff] using R0.Countermodel.OmegaAddOne.exists_add_zero_ne_self
+
+instance : 𝗥 ⪱ 𝗤 :=
+  Entailment.StrictlyWeakerThan.of_unprovable_provable
+    unprovable_addZero (Entailment.by_axm IsRobinsonQAxiom.addZero)
 
 end R
 
