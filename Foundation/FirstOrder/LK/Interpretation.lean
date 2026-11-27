@@ -390,6 +390,28 @@ variable [Nonempty M] [M↓[L₁] ⊧* T] [Tarski.Structure.Eq L₁ M]
 
 end semantics
 
+section models
+
+variable {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] [Tarski.Structure.Eq L₁ M]
+
+omit [L₁.Eq] [Tarski.Structure.Eq L₁ M] in
+lemma models_domainNonempty_iff (D : Semiformula.Operator L₁ 1) :
+    M↓[L₁] ⊧ “∃ x, %D x” ↔ ∃ x : M, D.val ![x] := by
+  simp [models_iff]
+
+lemma models_funcDefined_iff {k} (D : Semiformula.Operator L₁ 1)
+    (F : Semiformula.Operator L₁ (k + 1)) :
+    M↓[L₁] ⊧ ∀¹* “(⋀ i, %D #(i : Fin k)) → ∃! y, %D y ∧ %F y ⋯” ↔
+      ∀ e : Fin k → M, (∀ i, D.val ![e i]) → ∃! y : M, D.val ![y] ∧ F.val (y :> e) := by
+  simp [models_iff, Function.comp_def, Matrix.constant_eq_singleton]
+
+lemma models_preserveEq_iff (D : Semiformula.Operator L₁ 1) (E : Semiformula.Operator L₁ 2) :
+    M↓[L₁] ⊧ “∀ x y, %D x → %D y → (%E x y ↔ x = y)” ↔
+      ∀ x y : M, D.val ![x] → D.val ![y] → (E.val ![x, y] ↔ x = y) := by
+  simp [models_iff]
+
+end models
+
 end DirectTranslation
 
 class DirectInterpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq]

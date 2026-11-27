@@ -72,6 +72,7 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Q
 public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.Q.Basic
+public import Foundation.FirstOrder.Arithmetic.R.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.FirstOrder.Arithmetic.R0.Cobham
 public import Foundation.FirstOrder.Arithmetic.R0.Independence
