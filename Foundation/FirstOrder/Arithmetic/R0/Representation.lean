@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.R0.Basic
 public import Foundation.Vorspiel.Arithmetic
 public import Foundation.Vorspiel.Computability
@@ -436,6 +437,27 @@ theorem codeOfComputablePred_provable_neg [𝗣𝗔⁻ ⪯ T] (hp : ComputablePr
 
 end codeOfComputablePred
 
+section deltaZeroGraph
+
+@[simp] lemma codeOfPartrec'_sigma1 {k} (f : List.Vector ℕ k →. ℕ) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (codeOfPartrec' f) := by
+  simp [codeOfPartrec']
+
+noncomputable def deltaZeroGraph (f : ℕ → ℕ) : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
+  “x y v. !(codeOfPartrec'_sigma1 fun v ↦ Part.some (f (v.get 0))).prenex.sigmaInv.val v y x”
+
+lemma deltaZeroGraph_spec {f : ℕ → ℕ} (hf : Computable f) (n m : ℕ) :
+    m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] (deltaZeroGraph f).val := by
+  have hF : Nat.Partrec' fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0)) :=
+    Nat.Partrec'.of_part <| hf.comp (Primrec.to_comp (by primrec))
+  have h := codeOfPartrec'_sigma1 fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0))
+  have := (codeOfPartrec'_spec hF (y := m) (v := ![n])).symm.trans
+    (((Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) h).choose_spec ℕ (m :> ![n])
+      Empty.elim).trans (h.prenex.models_sigmaInv _))
+  simpa [deltaZeroGraph] using this
+
+end deltaZeroGraph
+
 section
 
 theorem rePred_iff_sigma1 {p : ℕ → Prop} : REPred p ↔ 𝚺ᴬ₁-Predicate p := by
@@ -504,6 +526,29 @@ theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔
     exact ComputablePred.of_graph_rePred <| hRe.of_eq <| by
       intro p
       simpa [List.Vector.cons_get] using hφ ![p.2, p.1.1, p.1.2]
+
+lemma computable_iff_sigma1_simulate {α β : Type*} [Primcodable α] [Primcodable β]
+    {f : ℕ → ℕ} (hf : 𝚺ᴬ₁-Function₁ f)
+    {F : α → β} (h : ∀ a, f (Encodable.encode a) = Encodable.encode (F a)) :
+    Computable F := by
+  have hCode : Computable fun a : α ↦ f (Encodable.encode a) :=
+    (computable_iff_sigma1.mpr hf).comp Computable.encode
+  have hDecode :=
+    Computable.ofOption ((Computable.decode (α := β)).comp hCode)
+  exact hDecode.of_eq_tot fun a ↦ by simp [h a]
+
+lemma computable₂_iff_sigma1_simulate {α β γ : Type*} [Primcodable α] [Primcodable β]
+    [Primcodable γ]
+    {f : ℕ → ℕ → ℕ} (hf : 𝚺ᴬ₁-Function₂ f)
+    {F : α → β → γ}
+    (h : ∀ a b, f (Encodable.encode a) (Encodable.encode b) = Encodable.encode (F a b)) :
+    Computable₂ F := by
+  have hCode : Computable fun p : α × β ↦ f (Encodable.encode p.1) (Encodable.encode p.2) :=
+    (computable₂_iff_sigma1.mpr hf).comp
+      (Computable.encode.comp Computable.fst) (Computable.encode.comp Computable.snd)
+  have hDecode :=
+    Computable.ofOption ((Computable.decode (α := γ)).comp hCode)
+  exact Computable₂.mk <| hDecode.of_eq_tot fun p ↦ by simp [h p.1 p.2]
 
 end
 
