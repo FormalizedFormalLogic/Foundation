@@ -133,22 +133,6 @@ def cobhamComparison (φ : 𝚺ᴬ₀.Semisentence 3) : ArithmeticSemisentence 2
   “x y. ∃ w, !cobhamLEDef y w ∧ (∃ v, !cobhamLEDef v w ∧ !φ x y v) ∧
     ∀ z u, !cobhamLEDef z w → !cobhamLEDef u w → !φ x z u → y = z”
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗥₀] {φ : 𝚺ᴬ₀.Semisentence 3}
-
-lemma eval_numeral_iff_of_deltaZero (n i j : ℕ) :
-    V ⊧/![numeral n, numeral i, numeral j] φ.val ↔ ℕ ⊧/![n, i, j] φ.val := by
-  have e : (numeral ∘ ![n, i, j] : Fin 3 → V) = ![numeral n, numeral i, numeral j] := by
-    funext x
-    match x with | 0 | 1 | 2 => rfl
-  constructor
-  · intro h
-    by_contra h'
-    have := bold_sigma_one_completeness' (M := V) (σ := ∼φ.val) (by simp)
-      (bv := ![n, i, j]) (by simpa using h')
-    exact absurd h (by simpa [e] using this)
-  · intro h
-    simpa [e] using bold_sigma_one_completeness' (M := V) φ.sigma_prop.of_zero h
-
 variable {f : ℕ → ℕ}
 
 noncomputable def cobhamRepresentation (f : ℕ → ℕ) : ArithmeticSemisentence 2 :=
@@ -161,9 +145,12 @@ theorem cobhamRepresentation_spec (hf : Computable f) (n : ℕ) :
   have hφ := deltaZeroGraph_spec hf
   obtain ⟨k, hk⟩ := (hφ n (f n)).mp rfl
   have key : ∀ i j, V ⊧/![numeral n, numeral i, numeral j] (deltaZeroGraph f).val → i = f n :=
-    fun i j h ↦ (hφ n i).mpr ⟨j, (eval_numeral_iff_of_deltaZero n i j).mp h⟩
-  have hkM : V ⊧/![numeral n, numeral (f n), numeral k] (deltaZeroGraph f).val :=
-    (eval_numeral_iff_of_deltaZero n (f n) k).mpr hk
+    fun i j h ↦ (hφ n i).mpr ⟨j, by
+      simpa using (R0.models_iff_of_Sigma0 (M := V) (by simp) (bv := ![n, i, j])).mp
+        (by simpa [Matrix.comp_vecCons''] using h)⟩
+  have hkM : V ⊧/![numeral n, numeral (f n), numeral k] (deltaZeroGraph f).val := by
+    simpa [Matrix.comp_vecCons''] using
+      (R0.models_iff_of_Sigma0 (M := V) (by simp) (bv := ![n, f n, k])).mpr hk
   suffices ∀ y : V, V ⊧/![numeral n, y] (cobhamRepresentation f) ↔ y = numeral (f n) by
     simpa [models_iff] using this
   intro y

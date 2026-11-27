@@ -146,6 +146,17 @@ lemma bold_sigma_one_completeness' {n} {σ : ArithmeticSemisentence n}
   simpa [Empty.eq_elim] using
     bold_sigma_one_completeness (M := M) (φ := σ) hσ (fv := Empty.elim) (bv := bv) h
 
+lemma R0.models_iff_of_Sigma0 {n} {σ : ArithmeticSemisentence n}
+    (hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 σ) {bv : Fin n → ℕ} :
+    σ.Evalb (M := M) (numeral ∘ bv) ↔ σ.Evalb (M := ℕ) bv := by
+  constructor
+  · intro h
+    by_contra h'
+    have := bold_sigma_one_completeness' (M := M) (σ := ∼σ) (by simpa using hσ.of_zero)
+      (bv := bv) (by simpa using h')
+    simp_all
+  · exact bold_sigma_one_completeness' hσ.of_zero
+
 instance consistent : Entailment.Consistent 𝗥₀ :=
   let : ℕ↓[ℒₒᵣ] ⊧* 𝗥₀ := inferInstance
   Sound.consistent_of_satisfiable ⟨_, this⟩
