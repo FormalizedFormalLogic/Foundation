@@ -26,13 +26,13 @@ namespace Theory
 lemma computablePred_theory_of_complete {L : Language} [L.Encodable] [L.LORDefinable]
     [L.Primcodable] [L.DecidableEq] {T : Theory L} [T.RE] [Consistent T]
     (h : Entailment.Complete T) : ComputablePred (· ∈ T.theory) := by
-  have hc : REPred fun σ : Sentence L ↦ T ⊬ σ :=
-    ((rePred_provable (T := T)).comp Sentence.computable_neg).of_eq fun σ ↦ by
+  have hc : REPred fun σ : Sentence L ↦ σ ∉ T.theory :=
+    ((rePred_theory (T := T)).comp Sentence.computable_neg).of_eq fun σ ↦ by
       have : ¬(T ⊢ σ ∧ T ⊢ ∼σ) := fun h ↦ not_consistent_iff_inconsistent.mpr
         (inconsistent_of_provable_of_unprovable h.1 h.2) inferInstance
       have := h.con σ
       tauto
-  exact ComputablePred.computable_iff_re_compl_re'.mpr ⟨rePred_provable, hc⟩
+  exact ComputablePred.computable_iff_re_compl_re'.mpr ⟨rePred_theory, hc⟩
 
 section completion
 
@@ -124,12 +124,12 @@ instance [L.DecidableEq] [Consistent U] : Consistent U.completion := by
 
 variable [L.LORDefinable] [L.Primcodable]
 
-lemma computable_completionChain (hU : ComputablePred fun σ : Sentence L ↦ U ⊢ σ) :
+lemma computable_completionChain (hU : ComputablePred (· ∈ U.theory)) :
     Computable U.completionChain := by
   obtain ⟨_, hD⟩ := hU
   have hStep : Computable₂ U.completionStep := by
     have : Computable₂ fun (p : Sentence L × ℕ) (φ : Sentence L) ↦
-        bif decide (U ⊢ p.1 🡒 ∼φ) then p.1 ⋏ ∼φ else p.1 ⋏ φ := by
+        bif decide (p.1 🡒 ∼φ ∈ U.theory) then p.1 ⋏ ∼φ else p.1 ⋏ φ := by
       have hc : Computable fun q : (Sentence L × ℕ) × Sentence L ↦ q.1.1 :=
         Computable.fst.comp Computable.fst
       have hn : Computable fun q : (Sentence L × ℕ) × Sentence L ↦ ∼q.2 :=
@@ -139,14 +139,15 @@ lemma computable_completionChain (hU : ComputablePred fun σ : Sentence L ↦ U 
         (Semiformula.primrec₂_and.to_comp.comp hc Computable.snd)
     exact (Computable.option_casesOn (Computable.decode.comp Computable.snd)
       Computable.fst this).of_eq fun p ↦ by
-        simp only [completionStep]
-        cases decode (α := Sentence L) p.2 <;> simp
+        rcases hp : decode (α := Sentence L) p.2 with _ | φ
+        · simp [completionStep, hp]
+        · by_cases h : U ⊢ p.1 🡒 ∼φ <;> simp [completionStep, hp, h]
   exact (Computable.nat_rec (f := id) (g := fun _ ↦ (⊤ : Sentence L))
     (h := fun _ p ↦ U.completionStep p.2 p.1) Computable.id (Computable.const _)
     (hStep.comp (Computable.snd.comp Computable.snd) (Computable.fst.comp Computable.snd))).of_eq
     fun n ↦ by induction n <;> simp_all [completionChain]
 
-lemma computablePred_completion (hU : ComputablePred fun σ : Sentence L ↦ U ⊢ σ) :
+lemma computablePred_completion (hU : ComputablePred (· ∈ U.theory)) :
     ComputablePred (· ∈ U.completion) := by
   obtain ⟨_, hD⟩ := hU
   exact ⟨Classical.decPred _, (hD.comp <| Sentence.computable₂_imp.comp

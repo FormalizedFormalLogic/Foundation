@@ -340,7 +340,7 @@ instance [Consistent T] : Consistent T.craig :=
   Consistent.of_le inferInstance (inferInstance : T.craig ⪯ T)
 
 /-- The theorems of an r.e. theory form an r.e. set. -/
-lemma rePred_provable : REPred fun σ : Sentence L ↦ T ⊢ σ := by
+lemma rePred_theory : REPred (· ∈ T.theory) := by
   have : REPred fun n : ℕ ↦ Arithmetic.Bootstrapping.Provable T.craig n :=
     Arithmetic.rePred_iff_sigma1.mpr (by definability)
   exact (this.comp Computable.encode).of_eq fun σ ↦ by
