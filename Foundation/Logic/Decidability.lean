@@ -35,10 +35,23 @@ omit [Primcodable F] in
 class EssentiallyIncomplete [Tilde F] where
   essentially_incomplete : ∀ 𝓣 : S, 𝓢 ⪯ 𝓣 → Consistent 𝓣 → P 𝓣 → Incomplete 𝓣
 
-variable {𝓢}
+variable {𝓢 P}
 
 lemma decidable_of_inconsistent : Inconsistent 𝓢 → Decidable 𝓢 :=
   fun h ↦ ⟨by rw [h.theory_eq]; exact ComputablePred.const _⟩
+
+namespace EssentiallyUndecidable
+
+lemma undecidable (𝓢 : S) [EssentiallyUndecidable 𝓢 P] [Consistent 𝓢] (h : P 𝓢) :
+    Undecidable 𝓢 :=
+  essentially_undec 𝓢 (WeakerThan.refl 𝓢) inferInstance h
+
+lemma of_weakerThan (𝓢 𝓣 : S) [EssentiallyUndecidable 𝓢 P] [𝓢 ⪯ 𝓣] :
+    EssentiallyUndecidable 𝓣 P where
+  essentially_undec 𝓤 h₁ :=
+    essentially_undec (𝓢 := 𝓢) 𝓤 (WeakerThan.trans (𝓣 := 𝓣) inferInstance h₁)
+
+end EssentiallyUndecidable
 
 end
 
