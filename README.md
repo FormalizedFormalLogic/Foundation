@@ -3,10 +3,15 @@
 
 # Foundation
 
-[![CI](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/ci.yml/badge.svg)](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/github/license/FormalizedFormalLogic/Foundation)](./LICENSE)
 
 Formalizing mathematical logic in Lean 4.
+
+## Status
+
+| Check | Status |
+| --- | --- |
+| Build and `lake check` | [![CI](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/ci.yml/badge.svg)](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/ci.yml) |
 
 ## Structure & Summary
 

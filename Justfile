@@ -14,13 +14,15 @@ cache:
 build:
     lake build Foundation --wfail
 
-forgive:
-    lake exe forgive Foundation
+# Rebuild and replay the project through the kernel in a sandbox, rejecting `sorry` and any axiom
+# outside `propext`, `Classical.choice`, `Quot.sound`.
+kernel-check:
+    lake check
 
 mk-all:
     lake exe mk_all --module --lib Foundation
 
-check: build forgive
+check: build kernel-check
     lake exe mk_all --module --lib Foundation --check
 
 format-references:
