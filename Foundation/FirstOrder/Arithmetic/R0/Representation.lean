@@ -443,15 +443,11 @@ section deltaZeroGraph
     ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (codeOfPartrec' f) := by
   simp [codeOfPartrec']
 
-noncomputable def deltaZeroGraph (f : ℕ → ℕ) : ArithmeticSemisentence 3 :=
+noncomputable def deltaZeroGraph (f : ℕ → ℕ) : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “x y v. !(codeOfPartrec'_sigma1 fun v ↦ Part.some (f (v.get 0))).prenex.sigmaInv.val v y x”
 
-@[simp]
-lemma deltaZeroGraph_hierarchy (f : ℕ → ℕ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 (deltaZeroGraph f) := by
-  simp [deltaZeroGraph]
-
 lemma deltaZeroGraph_spec {f : ℕ → ℕ} (hf : Computable f) (n m : ℕ) :
-    m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] (deltaZeroGraph f) := by
+    m = f n ↔ ∃ k, ℕ ⊧/![n, m, k] (deltaZeroGraph f).val := by
   have hF : Nat.Partrec' fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0)) :=
     Nat.Partrec'.of_part <| hf.comp (Primrec.to_comp (by primrec))
   have h := codeOfPartrec'_sigma1 fun v : List.Vector ℕ 1 ↦ Part.some (f (v.get 0))
