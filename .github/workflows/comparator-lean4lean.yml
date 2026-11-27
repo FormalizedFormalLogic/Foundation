@@ -1,0 +1,23 @@
+name: Comparator (lean4lean)
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+permissions:
+  contents: read
+
+jobs:
+  comparator:
+    uses: ./.github/workflows/comparator.yml
+    with:
+      kernel: lean4lean

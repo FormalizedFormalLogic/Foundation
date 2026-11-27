@@ -19,17 +19,14 @@ build:
 kernel-check:
     lake check
 
-# Export the project with its dependencies for the external kernels below.
+# Export the project with its dependencies for `comparator`.
 kernel-export:
     lake env leanexport Foundation > .lake/export.ndjson
 
-# Replay the export through lean4lean, a kernel written independently of Lean's own.
-lean4lean: kernel-export
-    lake env lean4lean --import .lake/export.ndjson
-
-# Replay the export through `leanchecker-paranoid`. Needs about 15 GB of memory.
-leanchecker-paranoid: kernel-export
-    lake env leanchecker-paranoid --silent --from-export .lake/export.ndjson
+# Replay the whole project through Lean's kernel and the one `comparator/<kernel>.json` names.
+comparator kernel: kernel-export
+    lake env lake comparator --config comparator/{{kernel}}.json \
+      --challenge-from-export .lake/export.ndjson --solution-from-export .lake/export.ndjson
 
 mk-all:
     lake exe mk_all --module --lib Foundation
