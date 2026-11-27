@@ -120,14 +120,14 @@ lemma termShiftVec_eq_self_iff_forall (hv : IsUTermVec L k v) :
     exact h i hi
 
 lemma termShift_eq_self_iff (ht : IsUTerm L t) : termShift L t = t ↔ termFreeVariables L t = ∅ := by
-  apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z
+  induction ht using IsUTerm.induction 𝚺 with
+  | definable => definability
+  | bvar z =>
     simp
-  · intro x
+  | fvar x =>
     rw [termShift_fvar, termFreeVariables_fvar]
     exact iff_of_false (by simp [qqFvar]) fun h ↦ by simpa using congrArg (x ∈ ·) h
-  · intro k f v hf hv ih
+  | func k f v hf hv ih =>
     rw [termShift_func hf hv, termFreeVariables_func hf hv, qqFunc_inj,
       termShiftVec_eq_self_iff_forall hv, termFreeVariablesVec_eq_empty_iff hv]
     simpa using forall₂_congr ih
@@ -285,43 +285,43 @@ lemma freeVariables_exs (hp : IsUFormula L p) : freeVariables L (^∃ p) = freeV
 
 @[simp, grind =]
 lemma freeVariables_neg (hp : IsUFormula L p) : freeVariables L (neg L p) = freeVariables L p := by
-  apply IsUFormula.ISigma1.sigma1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
-  · definability
-  · intro k R v hR hv
+  induction hp using IsUFormula.ISigma1.sigma1_succ_induction with
+  | definable => definability
+  | rel k R v hR hv =>
     simp [hR, hv]
-  · intro k R v hR hv
+  | nrel k R v hR hv =>
     simp [hR, hv]
-  · simp
-  · simp
-  · intro p q hp hq ihp ihq
+  | verum => simp
+  | falsum => simp
+  | and p q hp hq ihp ihq =>
     simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
-  · intro p q hp hq ihp ihq
+  | or p q hp hq ihp ihq =>
     simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
-  · intro p hp ih
+  | all p hp ih =>
     simp [hp, hp.neg, ih]
-  · intro p hp ih
+  | exs p hp ih =>
     simp [hp, hp.neg, ih]
 
 lemma shift_eq_self_iff (hp : IsUFormula L p) : shift L p = p ↔ freeVariables L p = ∅ := by
-  apply IsUFormula.ISigma1.sigma1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
-  · definability
-  · intro k R v hR hv
+  induction hp using IsUFormula.ISigma1.sigma1_succ_induction with
+  | definable => definability
+  | rel k R v hR hv =>
     rw [shift_rel hR hv, freeVariables_rel hR hv, qqRel_inj, termShiftVec_eq_self_iff hv]
     simp
-  · intro k R v hR hv
+  | nrel k R v hR hv =>
     rw [shift_nrel hR hv, freeVariables_nrel hR hv, qqNRel_inj, termShiftVec_eq_self_iff hv]
     simp
-  · simp
-  · simp
-  · intro p q hp hq ihp ihq
+  | verum => simp
+  | falsum => simp
+  | and p q hp hq ihp ihq =>
     rw [shift_and hp hq, freeVariables_and hp hq, qqAnd_inj, ihp, ihq]
     simp [mem_ext_iff, forall_and]
-  · intro p q hp hq ihp ihq
+  | or p q hp hq ihp ihq =>
     rw [shift_or hp hq, freeVariables_or hp hq, qqOr_inj, ihp, ihq]
     simp [mem_ext_iff, forall_and]
-  · intro p hp ih
+  | all p hp ih =>
     rw [shift_all hp, freeVariables_all hp, qqAll_inj, ih]
-  · intro p hp ih
+  | exs p hp ih =>
     rw [shift_exs hp, freeVariables_exs hp, qqExs_inj, ih]
 
 end freeVariables

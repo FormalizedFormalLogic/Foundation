@@ -108,11 +108,11 @@ lemma termSubstVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
 
 @[simp] lemma IsSemitermVec.termSubst {t} (hw : IsSemitermVec L n m w) (ht : IsSemiterm L n t) :
     IsSemiterm L m (termSubst L w t) := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz; simpa using hw.nth hz
-  · intro x; simp
-  · intro k f v hkf hv ih
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz => simpa using hw.nth hz
+  | fvar x => simp
+  | func k f v hkf hv ih =>
     simp only [hkf, hv.isUTerm, termSubst_func, IsSemiterm.func, true_and]
     exact IsSemitermVec.iff.mpr
       ⟨by simp [hv.isUTerm], fun i hi ↦ by rw [nth_termSubstVec hv.isUTerm hi]; exact ih i hi⟩
@@ -129,11 +129,11 @@ lemma termSubstVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
       rw [nth_termSubstVec hv.isUTerm hi]; exact hw.termSubst (hv.nth hi)⟩
 
 @[simp] lemma substs_nil {t : V} (ht : IsSemiterm L 0 t) : termSubst L 0 t = t := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z; simp
-  · intro x; simp
-  · intro k f v hf hv ih
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz => simp at hz
+  | fvar x => simp
+  | func k f v hf hv ih =>
     simp only [hf, hv.isUTerm, termSubst_func, qqFunc_inj, true_and]
     apply nth_ext' k (by simp [hv.isUTerm]) (by simp [hv.lh])
     intro i hi
@@ -141,12 +141,12 @@ lemma termSubstVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
 
 lemma termSubst_termSubst {l n w v t : V} (hv : IsSemitermVec L l n v) (ht : IsSemiterm L l t) :
     termSubst L w (termSubst L v t) = termSubst L (termSubstVec L l w v) t := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz =>
     rw [termSubst_bvar z, termSubst_bvar z, nth_termSubstVec hv.isUTerm hz]
-  · intro x; simp
-  · intro k f ts hf hts ih
+  | fvar x => simp
+  | func k f ts hf hts ih =>
     rw [termSubst_func hf hts.isUTerm,
       termSubst_func hf (hv.termSubstVec hts).isUTerm,
       termSubst_func hf hts.isUTerm]
@@ -159,11 +159,11 @@ lemma termSubst_termSubst {l n w v t : V} (hv : IsSemitermVec L l n v) (ht : IsS
 
 lemma termSubst_eq_self {n w t : V} (ht : IsSemiterm L n t) (H : ∀ i < n, w.[i] = ^#i) :
     termSubst L w t = t := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz; simp [hz, H]
-  · intro x; simp
-  · intro k f v hf hv ih
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz => simp [hz, H]
+  | fvar x => simp
+  | func k f v hf hv ih =>
     rw [termSubst_func hf hv.isUTerm]
     simp only [qqFunc_inj, true_and]
     apply nth_ext' k (by rw [len_termSubstVec hv.isUTerm]) (by simp [hv.lh])
@@ -260,21 +260,21 @@ lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
   rw [show (2 : V) = 0 + 1 + 1  by simp [one_add_one_eq_two], termShiftVec_cons] <;> simp [ht₁, ht₂]
 
 @[simp] lemma IsUTerm.termShift {t} (ht : IsUTerm L t) : IsUTerm L (termShift L t : V) := by
-  apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z; simp
-  · intro x; simp
-  · intro k f v hkf hv ih;
+  induction ht using IsUTerm.induction 𝚺 with
+  | definable => definability
+  | bvar z => simp
+  | fvar x => simp
+  | func k f v hkf hv ih =>
     simp only [hkf, hv, termShift_func, func_iff, true_and]
     exact ⟨by simp [hv], by intro i hi; rw [nth_termShiftVec hv hi]; exact ih i hi⟩
 
 @[simp] lemma IsSemiterm.termShift {t : V} (ht : IsSemiterm L n t) :
     IsSemiterm L n (termShift L t) := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz; simp [hz]
-  · intro x; simp
-  · intro k f v hkf hv ih;
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz => simp [hz]
+  | fvar x => simp
+  | func k f v hkf hv ih =>
     simp only [hkf, hv.isUTerm, termShift_func, func, true_and]
     refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
     · simp [termShiftVec, hv.isUTerm]
@@ -294,11 +294,11 @@ lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
 
 @[simp] lemma IsUTerm.termBVtermShift {t : V} (ht : IsUTerm L t) :
     termBV L (Bootstrapping.termShift L t) = termBV L t := by
-  apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · simp
-  · simp
-  · intro k f v hf hv ih
+  induction ht using IsUTerm.induction 𝚺 with
+  | definable => definability
+  | bvar => simp
+  | fvar => simp
+  | func k f v hf hv ih =>
     rw [termShift_func hf hv,
       termBV_func hf hv.termShiftVec,
       termBV_func hf hv]
@@ -404,11 +404,11 @@ lemma termBShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k t
 
 @[simp] lemma IsSemiterm.termBShift {n t : V} (ht : IsSemiterm L n t) :
     IsSemiterm L (n + 1) (termBShift L t) := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz; simp [hz]
-  · intro x; simp
-  · intro k f v hkf hv ih;
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz => simp [hz]
+  | fvar x => simp
+  | func k f v hkf hv ih =>
     simp only [hkf, hv.isUTerm, termBShift_func, func, true_and]
     refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
     · simp [hv.isUTerm]
@@ -424,11 +424,11 @@ lemma termBShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k t
 
 lemma termBShift_termShift {n t : V} (ht : IsSemiterm L n t) :
     termBShift L (termShift L t) = termShift L (termBShift L t) := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz; simp
-  · intro x; simp
-  · intro k f v hkf hv ih
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz => simp
+  | fvar x => simp
+  | func k f v hkf hv ih =>
     rw [termShift_func hkf hv.isUTerm,
       termBShift_func hkf hv.termShiftVec.isUTerm,
       termBShift_func hkf hv.isUTerm,
@@ -442,14 +442,14 @@ lemma termBShift_termShift {n t : V} (ht : IsSemiterm L n t) :
       nth_termShiftVec hv.termBShiftVec.isUTerm hi, nth_termBShiftVec hv.isUTerm hi, ih i hi]
 
 lemma le_termBShift {t : V} (ht : IsUTerm L t) : t ≤ termBShift L t := by
-  apply IsUTerm.induction 𝚺 (P := fun t ↦ t ≤ termBShift L t) ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z
+  induction ht using IsUTerm.induction 𝚺 with
+  | definable => definability
+  | bvar z =>
     rw [termBShift_bvar]
     simp only [qqBvar]
     exact add_le_add (pair_le_pair_right (0 : V) le_self_add) (le_refl 1)
-  · intro x; simp
-  · intro k f v hf hv ih
+  | fvar x => simp
+  | func k f v hf hv ih =>
     rw [termBShift_func hf hv]
     have hvle : v ≤ termBShiftVec L k v := by
       apply le_of_nth_le_nth
@@ -472,12 +472,11 @@ lemma IsUTermVec.termBShiftVec {k v : V} (hv : IsUTermVec L k v) :
 
 lemma termBV_termBShift_le {t : V} (ht : IsUTerm L t) (m : V) :
     termBV L (termBShift L t) ≤ m + 1 ↔ termBV L t ≤ m := by
-  apply IsUTerm.induction 𝚺 (P := fun t ↦ termBV L (termBShift L t) ≤ m + 1 ↔ termBV L t ≤ m)
-    ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z; simp only [termBShift_bvar, termBV_bvar]; exact add_le_add_iff_right 1
-  · intro x; simp only [termBShift_fvar, termBV_fvar]; exact iff_of_true zero_le zero_le
-  · intro k f v hf hv ih
+  induction ht using IsUTerm.induction 𝚺 with
+  | definable => definability
+  | bvar z => simp only [termBShift_bvar, termBV_bvar]; exact add_le_add_iff_right 1
+  | fvar x => simp only [termBShift_fvar, termBV_fvar]; exact iff_of_true zero_le zero_le
+  | func k f v hf hv ih =>
     rw [termBShift_func hf hv, termBV_func hf hv.termBShiftVec, termBV_func hf hv,
       listMaxss_le_iff, listMaxss_le_iff]
     constructor
@@ -589,11 +588,11 @@ lemma IsSemitermVec.qVec {k n w : V} (h : IsSemitermVec L k n w) :
 
 lemma substs_cons_bShift {n u t w : V} (ht : IsSemiterm L n t) :
     termSubst L (u ∷ w) (termBShift L t) = termSubst L w t := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz; simp
-  · intro x; simp
-  · intro k f v hf hv ih
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz => simp
+  | fvar x => simp
+  | func k f v hf hv ih =>
     rw [termBShift_func hf hv.isUTerm,
       termSubst_func hf hv.termBShiftVec.isUTerm,
       termSubst_func hf hv.isUTerm]
@@ -609,11 +608,11 @@ lemma substs_cons_bShift {n u t w : V} (ht : IsSemiterm L n t) :
 
 lemma termShift_termSubsts {n m w t : V} (ht : IsSemiterm L n t) (hw : IsSemitermVec L n m w) :
     termShift L (termSubst L w t) = termSubst L (termShiftVec L n w) (termShift L t) := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz; simp [nth_termShiftVec hw.isUTerm hz]
-  · intro x; simp
-  · intro k f v hf hv ih
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz => simp [nth_termShiftVec hw.isUTerm hz]
+  | fvar x => simp
+  | func k f v hf hv ih =>
     rw [termSubst_func hf hv.isUTerm,
       termShift_func hf (hw.termSubstVec hv).isUTerm,
       termShift_func hf hv.isUTerm,
@@ -630,11 +629,11 @@ lemma termShift_termSubsts {n m w t : V} (ht : IsSemiterm L n t) (hw : IsSemiter
 
 lemma bShift_substs {n m w t : V} (ht : IsSemiterm L n t) (hw : IsSemitermVec L n m w) :
     termBShift L (termSubst L w t) = termSubst L (termBShiftVec L n w) t := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz; simp [nth_termBShiftVec hw.isUTerm hz]
-  · intro x; simp
-  · intro k f v hf hv ih
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | bvar z hz => simp [nth_termBShiftVec hw.isUTerm hz]
+  | fvar x => simp
+  | func k f v hf hv ih =>
     rw [termSubst_func hf hv.isUTerm,
       termBShift_func hf (hw.termSubstVec hv).isUTerm,
       termSubst_func hf hv.isUTerm]
