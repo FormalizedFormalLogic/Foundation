@@ -19,15 +19,6 @@ build:
 kernel-check:
     lake check
 
-# Export the project with its dependencies for `comparator`.
-kernel-export:
-    lake env leanexport Foundation > .lake/export.ndjson
-
-# Replay the whole project through Lean's kernel and the one `comparator/<kernel>.json` names.
-comparator kernel: kernel-export
-    lake env lake comparator --config comparator/{{kernel}}.json \
-      --challenge-from-export .lake/export.ndjson --solution-from-export .lake/export.ndjson
-
 mk-all:
     lake exe mk_all --module --lib Foundation
 

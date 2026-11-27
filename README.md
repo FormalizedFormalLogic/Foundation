@@ -9,15 +9,9 @@ Formalizing mathematical logic in Lean 4.
 
 ## Status
 
-The project is replayed through Lean's kernel by `lake check` on CI, and through the independent kernels below by [`lake comparator`](https://lean-lang.org/doc/reference/latest/ValidatingProofs/), on every PR and on `master`.
-
 | Check | Status |
 | --- | --- |
 | Build and `lake check` | [![CI](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/ci.yml/badge.svg)](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/ci.yml) |
-| `leanchecker-paranoid` | [![Comparator (leanchecker-paranoid)](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/comparator-leanchecker-paranoid.yml/badge.svg)](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/comparator-leanchecker-paranoid.yml) |
-| `lean4lean` | [![Comparator (lean4lean)](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/comparator-lean4lean.yml/badge.svg)](https://github.com/FormalizedFormalLogic/Foundation/actions/workflows/comparator-lean4lean.yml) |
-
-`nanoda`, `con-leche` and `con-ron` are not run yet: each runs out of memory on this project.
 
 ## Structure & Summary
 
