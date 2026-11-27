@@ -82,6 +82,7 @@ public import Foundation.FirstOrder.Incompleteness.Church
 public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.Definability
 public import Foundation.FirstOrder.Incompleteness.Dense
+public import Foundation.FirstOrder.Incompleteness.Essentially
 public import Foundation.FirstOrder.Incompleteness.Examples
 public import Foundation.FirstOrder.Incompleteness.FGH
 public import Foundation.FirstOrder.Incompleteness.First

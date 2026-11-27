@@ -1,0 +1,227 @@
+module
+
+public import Foundation.FirstOrder.Incompleteness.Church
+
+/-!
+# Essential undecidability and essential incompleteness
+
+A theory is essentially undecidable if all of its consistent extensions are undecidable, and
+essentially incomplete if all of its consistent r.e. extensions are incomplete. The two notions
+coincide (`Theory.essentiallyUndecidable_iff_essentiallyIncomplete`).
+
+The nontrivial direction completes a decidable consistent theory `U` along an enumeration of
+sentences, adding each sentence or its negation; the resulting theory `U.completion` is
+consistent, complete and decidable.
+
+## References
+
+- [Kur23, Theorem 2.7]
+-/
+
+@[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+open Encodable FFL.Entailment FFL.FirstOrder.Arithmetic FFL.FirstOrder.Arithmetic.Bootstrapping
+
+namespace FFL.FirstOrder
+
+section computable
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable]
+
+lemma Sentence.computable_neg : Computable (fun σ : Sentence L ↦ ∼σ) :=
+  computable_iff_sigma1_simulate (f := neg (V := ℕ) L) (by definability)
+    fun σ ↦ by simp [← Sentence.quote_eq_encode_nat, Sentence.quote_def, Semiformula.quote_def]
+
+lemma Sentence.computable₂_imp : Computable₂ (fun σ τ : Sentence L ↦ σ 🡒 τ) :=
+  (Semiformula.primrec₂_or.to_comp.comp (computable_neg.comp Computable.fst) Computable.snd).of_eq
+    fun _ ↦ by simp [Semiformula.imp_eq]
+
+lemma Theory.rePred_provable [L.DecidableEq] (T : Theory L) [T.RE] :
+    REPred fun σ : Sentence L ↦ T ⊢ σ := by
+  have : REPred fun n : ℕ ↦ Provable T.craig n := rePred_iff_sigma1.mpr (by definability)
+  exact (this.comp Computable.encode).of_eq fun σ ↦ by
+    simpa [← Sentence.quote_eq_encode_nat] using
+      (Entailment.Equiv.iff.mp (inferInstance : T ≊ T.craig) σ).symm
+
+/-- A consistent, complete r.e. theory is decidable. -/
+lemma Theory.computablePred_theory_of_complete [L.DecidableEq] {T : Theory L} [T.RE]
+    [Consistent T] (h : FFL.Entailment.Complete T) : ComputablePred (· ∈ T.theory) := by
+  have hc : REPred fun σ : Sentence L ↦ T ⊬ σ :=
+    (T.rePred_provable.comp Sentence.computable_neg).of_eq fun σ ↦ by
+      have : ¬(T ⊢ σ ∧ T ⊢ ∼σ) := fun h ↦ not_consistent_iff_inconsistent.mpr
+        (inconsistent_of_provable_of_unprovable h.1 h.2) inferInstance
+      have := h.con σ
+      tauto
+  exact ComputablePred.computable_iff_re_compl_re'.mpr ⟨T.rePred_provable, hc⟩
+
+end computable
+
+namespace Theory
+
+section completion
+
+variable {L : Language} [L.Encodable] (U : Theory L)
+
+open Classical in
+/-- Extend `c` by the sentence coded by `n` or by its negation, whichever keeps `U + c`
+consistent. -/
+noncomputable def completionStep (c : Sentence L) (n : ℕ) : Sentence L :=
+  (decode (α := Sentence L) n).casesOn c fun φ ↦ if U ⊢ c 🡒 ∼φ then c ⋏ ∼φ else c ⋏ φ
+
+noncomputable def completionChain : ℕ → Sentence L
+  | 0 => ⊤
+  | n + 1 => U.completionStep (completionChain n) n
+
+/-- A complete extension of `U`, decidable whenever `U` is. -/
+def completion : Theory L := {σ | U ⊢ U.completionChain (encode σ + 1) 🡒 σ}
+
+variable {U}
+
+lemma completionChain_succ (n : ℕ) :
+    U.completionChain (n + 1) = U.completionStep (U.completionChain n) n := rfl
+
+lemma completionChain_imp_of_le {m n : ℕ} (h : m ≤ n) :
+    U ⊢ U.completionChain n 🡒 U.completionChain m := by
+  induction n, h using Nat.le_induction with
+  | base => cl_prover
+  | succ n _ ih =>
+    have : U ⊢ U.completionChain (n + 1) 🡒 U.completionChain n := by
+      rw [completionChain_succ, completionStep]
+      rcases decode (α := Sentence L) n with _ | φ
+      · cl_prover
+      · dsimp only
+        split <;> cl_prover
+    cl_prover [ih, this]
+
+lemma completionChain_unrefutable [Consistent U] (n : ℕ) : U ⊬ ∼U.completionChain n := by
+  induction n with
+  | zero => exact fun h ↦ Consistent.not_bot (𝓢 := U) (by cl_prover [h])
+  | succ n ih =>
+    rw [completionChain_succ, completionStep]
+    rcases decode (α := Sentence L) n with _ | φ
+    · exact ih
+    · dsimp only
+      split
+      next hφ => exact fun h ↦ ih (by cl_prover [h, hφ])
+      next hφ => exact fun h ↦ hφ (by cl_prover [h])
+
+lemma completionChain_decides (σ : Sentence L) :
+    U ⊢ U.completionChain (encode σ + 1) 🡒 σ ∨ U ⊢ U.completionChain (encode σ + 1) 🡒 ∼σ := by
+  rw [completionChain_succ, completionStep, encodek]
+  dsimp only
+  split
+  · right; cl_prover
+  · left; cl_prover
+
+lemma mem_completion_iff [Consistent U] {σ : Sentence L} :
+    σ ∈ U.completion ↔ ∃ n, U ⊢ U.completionChain n 🡒 σ := by
+  constructor
+  · exact fun h ↦ ⟨_, h⟩
+  · rintro ⟨n, hn⟩
+    rcases completionChain_decides (U := U) σ with h | h
+    · exact h
+    · have h₁ := completionChain_imp_of_le (U := U) (le_max_left n (encode σ + 1))
+      have h₂ := completionChain_imp_of_le (U := U) (le_max_right n (encode σ + 1))
+      have : U ⊢ ∼U.completionChain (max n (encode σ + 1)) := by cl_prover [h, hn, h₁, h₂]
+      exact absurd this (completionChain_unrefutable _)
+
+instance : U ⪯ U.completion := WeakerThan.ofAxm! fun {σ} hσ ↦
+  by_axm (show σ ∈ U.completion from (C_of_conseq (by_axm hσ) : U ⊢ _ 🡒 σ))
+
+instance [Consistent U] : FFL.Entailment.Complete U.completion :=
+  complete_def.mpr fun σ ↦ by
+    rcases completionChain_decides (U := U) σ with h | h
+    · exact .inl (by_axm h)
+    · exact .inr (by_axm (mem_completion_iff.mpr ⟨_, h⟩))
+
+instance [L.DecidableEq] [Consistent U] : Consistent U.completion := by
+  apply consistent_compact.mpr
+  intro 𝓕 h𝓕 hfin
+  obtain ⟨m, hm⟩ := (((Set.adjunctiveSet_finite_iff 𝓕).mp hfin).image
+    fun σ ↦ encode σ + 1).bddAbove
+  have : Consistent (adjoin (U.completionChain m) U) := consistent_iff_unprovable_bot.mpr
+    fun h ↦ by
+      have : U ⊢ U.completionChain m 🡒 ⊥ := deduction_iff.mp h
+      exact completionChain_unrefutable (U := U) m (by cl_prover [this])
+  apply Consistent.of_le this
+  apply WeakerThan.ofAxm!
+  intro σ hσ
+  have h₁ : U ⊢ U.completionChain (encode σ + 1) 🡒 σ := h𝓕 hσ
+  have h₂ := completionChain_imp_of_le (U := U) (hm ⟨σ, hσ, rfl⟩)
+  exact deduction_iff.mpr (by cl_prover [h₁, h₂])
+
+variable [L.LORDefinable] [L.Primcodable]
+
+lemma computable_completionChain (hU : ComputablePred fun σ : Sentence L ↦ U ⊢ σ) :
+    Computable U.completionChain := by
+  obtain ⟨_, hD⟩ := hU
+  have hStep : Computable₂ U.completionStep := by
+    have : Computable₂ fun (p : Sentence L × ℕ) (φ : Sentence L) ↦
+        bif decide (U ⊢ p.1 🡒 ∼φ) then p.1 ⋏ ∼φ else p.1 ⋏ φ := by
+      have hc : Computable fun q : (Sentence L × ℕ) × Sentence L ↦ q.1.1 :=
+        Computable.fst.comp Computable.fst
+      have hn : Computable fun q : (Sentence L × ℕ) × Sentence L ↦ ∼q.2 :=
+        Sentence.computable_neg.comp Computable.snd
+      exact Computable.cond (hD.comp (Sentence.computable₂_imp.comp hc hn))
+        (Semiformula.primrec₂_and.to_comp.comp hc hn)
+        (Semiformula.primrec₂_and.to_comp.comp hc Computable.snd)
+    exact (Computable.option_casesOn (Computable.decode.comp Computable.snd)
+      Computable.fst this).of_eq fun p ↦ by
+        simp only [completionStep]
+        cases decode (α := Sentence L) p.2 <;> simp
+  exact (Computable.nat_rec (f := id) (g := fun _ ↦ (⊤ : Sentence L))
+    (h := fun _ p ↦ U.completionStep p.2 p.1) Computable.id (Computable.const _)
+    (hStep.comp (Computable.snd.comp Computable.snd) (Computable.fst.comp Computable.snd))).of_eq
+    fun n ↦ by induction n <;> simp_all [completionChain]
+
+lemma computablePred_completion (hU : ComputablePred fun σ : Sentence L ↦ U ⊢ σ) :
+    ComputablePred (· ∈ U.completion) := by
+  obtain ⟨_, hD⟩ := hU
+  exact ⟨Classical.decPred _, (hD.comp <| Sentence.computable₂_imp.comp
+    ((computable_completionChain ⟨_, hD⟩).comp (Computable.succ.comp Computable.encode))
+    Computable.id).of_eq fun σ ↦ by simp only [completion, Set.mem_ofPred_eq]; congr⟩
+
+end completion
+
+section essentially
+
+variable {L : Language} [L.Encodable] [L.Primcodable]
+
+/-- `T` is essentially undecidable if every consistent extension of `T` is undecidable.
+
+- [Kur23, Definition 2.5]
+-/
+def EssentiallyUndecidable (T : Theory L) : Prop :=
+  ∀ U : Theory L, T ⪯ U → Consistent U → ¬ComputablePred (· ∈ U.theory)
+
+/-- `T` is essentially incomplete if every consistent r.e. extension of `T` is incomplete.
+
+- [Kur23, Definition 2.5]
+-/
+def EssentiallyIncomplete (T : Theory L) : Prop :=
+  ∀ U : Theory L, T ⪯ U → Consistent U → U.RE → Incomplete U
+
+variable [L.LORDefinable] [L.DecidableEq]
+
+/-- A theory is essentially undecidable if and only if it is essentially incomplete.
+
+- [Kur23, Theorem 2.7]
+-/
+theorem essentiallyUndecidable_iff_essentiallyIncomplete {T : Theory L} :
+    T.EssentiallyUndecidable ↔ T.EssentiallyIncomplete := by
+  constructor
+  · intro h U hTU hU _
+    by_contra hc
+    exact h U hTU hU (computablePred_theory_of_complete (not_incomplete_iff_complete.mp hc))
+  · intro h U hTU _ hd
+    have : U.completion.RE := ⟨(computablePred_completion hd).to_re⟩
+    exact not_complete_iff_incomplete.mpr
+      (h _ (hTU.trans inferInstance) inferInstance this) inferInstance
+
+end essentially
+
+end Theory
+
+end FFL.FirstOrder
