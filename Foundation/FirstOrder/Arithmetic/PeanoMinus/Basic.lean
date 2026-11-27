@@ -400,19 +400,19 @@ instance models_RobinsonQ_of_models_PeanoMinus : M↓[ℒₒᵣ] ⊧* 𝗤 := mo
     · right; apply eq_succ_of_pos h;
     · left; simpa using h;
   case ltDef h =>
-    suffices ∀ a b : M, a < b ↔ ∃ x, a + (x + 1) = b by simpa [models_iff];
+    suffices ∀ a b : M, a < b ↔ ∃ x, x + (a + 1) = b by simpa [models_iff];
     intro a b;
     apply Iff.trans lt_iff_exists_add;
     constructor;
     · rintro ⟨a, ha₁, ha₂⟩;
       obtain ⟨b, rfl⟩ : ∃ b, a = b + 1 := eq_succ_of_pos ha₁;
       use b;
-      tauto;
+      rw [ha₂, add_left_comm];
     · rintro ⟨a, ha⟩;
       use (a + 1);
       constructor;
       · simp;
-      · apply ha.symm;
+      · rw [← ha, add_left_comm];
   all_goals simp [models_iff];
 
 instance : 𝗤 ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
@@ -641,5 +641,9 @@ instance : 𝗥₀ ⪱ 𝗣𝗔⁻ :=
 
 instance (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗥₀ :=
   models_of_subtheory (U := 𝗣𝗔⁻) inferInstance
+
+instance : 𝗤 ⪱ 𝗣𝗔⁻ :=
+  Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc
+    <| complete.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
 
 end FFL.FirstOrder.Arithmetic
