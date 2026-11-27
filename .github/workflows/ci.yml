@@ -63,6 +63,20 @@ jobs:
             --service ffl-upload \
             --repo FormalizedFormalLogic/Foundation
 
+  # An independent kernel, so a bug in Lean's own cannot let a proof through. `lake check --paranoid`
+  # would also run nanoda, con-leche and con-ron, but each ran out of memory at 47 GB here.
+  lean4lean:
+    name: Check with lean4lean
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+
+      - run: lake build Foundation
+      - run: just lean4lean
+
   # The jobs below only produce what `deploy` publishes from `master`; `workflow_dispatch` lets a
   # branch try them out.
   import-graph:
