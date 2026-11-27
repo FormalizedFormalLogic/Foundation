@@ -1,13 +1,14 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.Church
+public import Foundation.Logic.Decidability
 
 /-!
 # Essential undecidability and essential incompleteness
 
-A theory is essentially undecidable if all of its consistent extensions are undecidable, and
-essentially incomplete if all of its consistent r.e. extensions are incomplete. The two notions
-coincide (`Theory.essentiallyUndecidable_iff_essentiallyIncomplete`).
+For first-order theories, essential undecidability (`Entailment.EssentiallyUndecidable`) and
+essential incompleteness (`Entailment.EssentiallyIncomplete`) coincide
+(`Theory.essentiallyUndecidable_iff_essentiallyIncomplete`).
 
 The nontrivial direction completes a decidable consistent theory `U` along an enumeration of
 sentences, adding each sentence or its negation; the resulting theory `U.completion` is
@@ -115,18 +116,6 @@ lemma completionChain_decides (σ : Sentence L) :
   · right; cl_prover
   · left; cl_prover
 
-lemma mem_completion_iff [Consistent U] {σ : Sentence L} :
-    σ ∈ U.completion ↔ ∃ n, U ⊢ U.completionChain n 🡒 σ := by
-  constructor
-  · exact fun h ↦ ⟨_, h⟩
-  · rintro ⟨n, hn⟩
-    rcases completionChain_decides (U := U) σ with h | h
-    · exact h
-    · have h₁ := completionChain_imp_of_le (U := U) (le_max_left n (encode σ + 1))
-      have h₂ := completionChain_imp_of_le (U := U) (le_max_right n (encode σ + 1))
-      have : U ⊢ ∼U.completionChain (max n (encode σ + 1)) := by cl_prover [h, hn, h₁, h₂]
-      exact absurd this (completionChain_unrefutable _)
-
 instance : U ⪯ U.completion := WeakerThan.ofAxm! fun {σ} hσ ↦
   by_axm (show σ ∈ U.completion from (C_of_conseq (by_axm hσ) : U ⊢ _ 🡒 σ))
 
@@ -134,7 +123,15 @@ instance [Consistent U] : FFL.Entailment.Complete U.completion :=
   complete_def.mpr fun σ ↦ by
     rcases completionChain_decides (U := U) σ with h | h
     · exact .inl (by_axm h)
-    · exact .inr (by_axm (mem_completion_iff.mpr ⟨_, h⟩))
+    · apply Or.inr ∘ by_axm
+      rcases completionChain_decides (U := U) (∼σ) with h' | h'
+      · exact h'
+      · obtain ⟨m, hm₁, hm₂⟩ : ∃ m, encode σ + 1 ≤ m ∧ encode (∼σ) + 1 ≤ m :=
+          ⟨_, le_max_left .., le_max_right ..⟩
+        have h₁ := completionChain_imp_of_le (U := U) hm₁
+        have h₂ := completionChain_imp_of_le (U := U) hm₂
+        have : U ⊢ ∼U.completionChain m := by cl_prover [h, h', h₁, h₂]
+        exact absurd this (completionChain_unrefutable _)
 
 instance [L.DecidableEq] [Consistent U] : Consistent U.completion := by
   apply consistent_compact.mpr
@@ -187,38 +184,27 @@ end completion
 
 section essentially
 
-variable {L : Language} [L.Encodable] [L.Primcodable]
-
-/-- `T` is essentially undecidable if every consistent extension of `T` is undecidable.
-
-- [Kur23, Definition 2.5]
--/
-def EssentiallyUndecidable (T : Theory L) : Prop :=
-  ∀ U : Theory L, T ⪯ U → Consistent U → ¬ComputablePred (· ∈ U.theory)
-
-/-- `T` is essentially incomplete if every consistent r.e. extension of `T` is incomplete.
-
-- [Kur23, Definition 2.5]
--/
-def EssentiallyIncomplete (T : Theory L) : Prop :=
-  ∀ U : Theory L, T ⪯ U → Consistent U → U.RE → Incomplete U
-
-variable [L.LORDefinable] [L.DecidableEq]
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable] [L.DecidableEq]
 
 /-- A theory is essentially undecidable if and only if it is essentially incomplete.
 
 - [Kur23, Theorem 2.7]
 -/
 theorem essentiallyUndecidable_iff_essentiallyIncomplete {T : Theory L} :
-    T.EssentiallyUndecidable ↔ T.EssentiallyIncomplete := by
+    EssentiallyUndecidable T ↔ EssentiallyIncomplete T := by
   constructor
-  · intro h U hTU hU _
+  · rintro ⟨h⟩
+    constructor
+    intro U hTU hU hre
+    have : U.RE := ⟨hre⟩
     by_contra hc
-    exact h U hTU hU (computablePred_theory_of_complete (not_incomplete_iff_complete.mp hc))
-  · intro h U hTU _ hd
-    have : U.completion.RE := ⟨(computablePred_completion hd).to_re⟩
+    exact h U hTU hU ⟨computablePred_theory_of_complete (not_incomplete_iff_complete.mp hc)⟩
+  · rintro ⟨h⟩
+    constructor
+    intro U hTU _ ⟨hd⟩
     exact not_complete_iff_incomplete.mpr
-      (h _ (hTU.trans inferInstance) inferInstance this) inferInstance
+      (h _ (hTU.trans inferInstance) inferInstance (computablePred_completion hd).to_re)
+      inferInstance
 
 end essentially
 
