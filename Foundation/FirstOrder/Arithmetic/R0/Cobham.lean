@@ -133,16 +133,7 @@ def cobhamComparison (φ : ArithmeticSemisentence 3) : ArithmeticSemisentence 2 
   “x y. ∃ w, !cobhamLEDef y w ∧ (∃ v, !cobhamLEDef v w ∧ !φ x y v) ∧
     ∀ z u, !cobhamLEDef z w → !cobhamLEDef u w → !φ x z u → y = z”
 
-variable {V : Type*} [ORingStructure V] {φ : ArithmeticSemisentence 3}
-
-@[simp]
-lemma eval_cobhamComparison {x y : V} :
-    V ⊧/![x, y] (cobhamComparison φ) ↔ ∃ w, y ≤ᶜ w ∧
-      (∃ v, v ≤ᶜ w ∧ V ⊧/![x, y, v] φ) ∧
-      ∀ z u, z ≤ᶜ w → u ≤ᶜ w → V ⊧/![x, z, u] φ → y = z := by
-  simp [cobhamComparison]
-
-variable [V↓[ℒₒᵣ] ⊧* 𝗥₀]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗥₀] {φ : ArithmeticSemisentence 3}
 
 lemma eval_numeral_iff_of_deltaZero (hφ₀ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ) (n i j : ℕ) :
     V ⊧/![numeral n, numeral i, numeral j] φ ↔ ℕ ⊧/![n, i, j] φ := by
@@ -172,7 +163,9 @@ lemma eval_cobhamComparison_numeral_iff (n : ℕ) (y : V) :
     (hφ n i).mpr ⟨j, (eval_numeral_iff_of_deltaZero hφ₀ n i j).mp h⟩
   have hkM : V ⊧/![numeral n, numeral (f n), numeral k] φ :=
     (eval_numeral_iff_of_deltaZero hφ₀ n (f n) k).mpr hk
-  rw [eval_cobhamComparison]
+  suffices (∃ w, y ≤ᶜ w ∧ (∃ v, v ≤ᶜ w ∧ V ⊧/![numeral n, y, v] φ) ∧
+      ∀ z u, z ≤ᶜ w → u ≤ᶜ w → V ⊧/![numeral n, z, u] φ → y = z) ↔ y = numeral (f n) by
+    simpa [cobhamComparison] using this
   constructor
   · rintro ⟨w, hyw, ⟨v, hvw, hv⟩, huniq⟩
     rcases cobhamLE_numeral_or (x := w) (max (f n) k) with hw | hw
@@ -216,7 +209,7 @@ theorem cobhamRepresentation_spec (hf : Computable f) (n : ℕ) :
     𝗥₀ ⊢ “∀ y, !(cobhamRepresentation f) ↑n y ↔ y = ↑(f n)” := by
   apply complete.{0}
   intro V _ _
-  simpa [models_iff, cobhamRepresentation, -eval_cobhamComparison]
+  simpa [models_iff, cobhamRepresentation]
     using eval_cobhamComparison_numeral_iff (V := V) (deltaZeroGraph_hierarchy f)
       (deltaZeroGraph_spec hf) n
 
