@@ -6,11 +6,13 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
 public import Foundation.FirstOrder.Syntax.Classical.Padding
 public import Foundation.FirstOrder.Syntax.Classical.PrimrecCoding
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 
 /-!
 # Craig's trick
 
 The Craig companion of a recursively enumerable theory is moreover primitive recursive.
+Consequently, the theorems of an r.e. theory form an r.e. set.
 -/
 
 @[expose] public section
@@ -336,6 +338,13 @@ instance : T ≊ T.craig :=
 
 instance [Consistent T] : Consistent T.craig :=
   Consistent.of_le inferInstance (inferInstance : T.craig ⪯ T)
+
+/-- The theorems of an r.e. theory form an r.e. set. -/
+lemma rePred_provable : REPred fun σ : Sentence L ↦ T ⊢ σ := by
+  have : REPred fun n : ℕ ↦ Arithmetic.Bootstrapping.Provable T.craig n :=
+    Arithmetic.rePred_iff_sigma1.mpr (by definability)
+  exact (this.comp Computable.encode).of_eq fun σ ↦ by
+    simpa [← Sentence.quote_eq_encode_nat] using (Equiv.iff.mp (inferInstance : T ≊ T.craig) σ).symm
 
 end
 

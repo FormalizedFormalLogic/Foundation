@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Church
 public import Foundation.Logic.Decidability
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Computable
 
 /-!
 # Essential undecidability and essential incompleteness
@@ -19,39 +20,19 @@ namespace FFL.FirstOrder
 
 open Encodable FFL.Entailment Arithmetic Bootstrapping
 
-section computable
-
-variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Primcodable]
-
-lemma Sentence.computable_neg : Computable (fun σ : Sentence L ↦ ∼σ) :=
-  computable_iff_sigma1_simulate (f := neg (V := ℕ) L) (by definability)
-    fun σ ↦ by simp [← Sentence.quote_eq_encode_nat, Sentence.quote_def, Semiformula.quote_def]
-
-lemma Sentence.computable₂_imp : Computable₂ (fun σ τ : Sentence L ↦ σ 🡒 τ) :=
-  (Semiformula.primrec₂_or.to_comp.comp (computable_neg.comp Computable.fst) Computable.snd).of_eq
-    fun _ ↦ by simp [Semiformula.imp_eq]
-
-lemma Theory.rePred_provable [L.DecidableEq] (T : Theory L) [T.RE] :
-    REPred fun σ : Sentence L ↦ T ⊢ σ := by
-  have : REPred fun n : ℕ ↦ Provable T.craig n := rePred_iff_sigma1.mpr (by definability)
-  exact (this.comp Computable.encode).of_eq fun σ ↦ by
-    simpa [← Sentence.quote_eq_encode_nat] using
-      (Entailment.Equiv.iff.mp (inferInstance : T ≊ T.craig) σ).symm
+namespace Theory
 
 /-- A consistent, complete r.e. theory is decidable. -/
-lemma Theory.computablePred_theory_of_complete [L.DecidableEq] {T : Theory L} [T.RE]
-    [Consistent T] (h : Entailment.Complete T) : ComputablePred (· ∈ T.theory) := by
+lemma computablePred_theory_of_complete {L : Language} [L.Encodable] [L.LORDefinable]
+    [L.Primcodable] [L.DecidableEq] {T : Theory L} [T.RE] [Consistent T]
+    (h : Entailment.Complete T) : ComputablePred (· ∈ T.theory) := by
   have hc : REPred fun σ : Sentence L ↦ T ⊬ σ :=
-    (T.rePred_provable.comp Sentence.computable_neg).of_eq fun σ ↦ by
+    ((rePred_provable (T := T)).comp Sentence.computable_neg).of_eq fun σ ↦ by
       have : ¬(T ⊢ σ ∧ T ⊢ ∼σ) := fun h ↦ not_consistent_iff_inconsistent.mpr
         (inconsistent_of_provable_of_unprovable h.1 h.2) inferInstance
       have := h.con σ
       tauto
-  exact ComputablePred.computable_iff_re_compl_re'.mpr ⟨T.rePred_provable, hc⟩
-
-end computable
-
-namespace Theory
+  exact ComputablePred.computable_iff_re_compl_re'.mpr ⟨rePred_provable, hc⟩
 
 section completion
 

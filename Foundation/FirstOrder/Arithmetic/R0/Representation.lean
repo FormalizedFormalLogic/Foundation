@@ -505,6 +505,29 @@ theorem computable₂_iff_sigma1 {f : ℕ → ℕ → ℕ} : Computable₂ f ↔
       intro p
       simpa [List.Vector.cons_get] using hφ ![p.2, p.1.1, p.1.2]
 
+lemma computable_iff_sigma1_simulate {α β : Type*} [Primcodable α] [Primcodable β]
+    {f : ℕ → ℕ} (hf : 𝚺ᴬ₁-Function₁ f)
+    {F : α → β} (h : ∀ a, f (Encodable.encode a) = Encodable.encode (F a)) :
+    Computable F := by
+  have hCode : Computable fun a : α ↦ f (Encodable.encode a) :=
+    (computable_iff_sigma1.mpr hf).comp Computable.encode
+  have hDecode :=
+    Computable.ofOption ((Computable.decode (α := β)).comp hCode)
+  exact hDecode.of_eq_tot fun a ↦ by simp [h a]
+
+lemma computable₂_iff_sigma1_simulate {α β γ : Type*} [Primcodable α] [Primcodable β]
+    [Primcodable γ]
+    {f : ℕ → ℕ → ℕ} (hf : 𝚺ᴬ₁-Function₂ f)
+    {F : α → β → γ}
+    (h : ∀ a b, f (Encodable.encode a) (Encodable.encode b) = Encodable.encode (F a b)) :
+    Computable₂ F := by
+  have hCode : Computable fun p : α × β ↦ f (Encodable.encode p.1) (Encodable.encode p.2) :=
+    (computable₂_iff_sigma1.mpr hf).comp
+      (Computable.encode.comp Computable.fst) (Computable.encode.comp Computable.snd)
+  have hDecode :=
+    Computable.ofOption ((Computable.decode (α := γ)).comp hCode)
+  exact Computable₂.mk <| hDecode.of_eq_tot fun p ↦ by simp [h p.1 p.2]
+
 end
 
 end FFL.FirstOrder.Arithmetic
