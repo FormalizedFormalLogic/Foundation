@@ -241,28 +241,6 @@ lemma IsHierarchy.succ_iff :
 
 alias ⟨IsHierarchy.succ_case, IsHierarchy.succ_mk⟩ := IsHierarchy.succ_iff
 
-lemma IsHierarchy.succ_induction (Γ' : Polarity) {P : V → Prop} (hP : Γ'ᴬ_[1]-Predicate P)
-    (hbase : ∀ p, IsHierarchy Γ.alt n p → P p)
-    (hand : ∀ p q, IsHierarchy Γ (n + 1) p → IsHierarchy Γ (n + 1) q → P p → P q →
-      P (p ^⋏ q))
-    (hor : ∀ p q, IsHierarchy Γ (n + 1) p → IsHierarchy Γ (n + 1) q → P p → P q →
-      P (p ^⋎ q))
-    (hball : ∀ t q, IsUTerm ℒₒᵣ t → IsHierarchy Γ (n + 1) q → P q →
-      P (qqBall (termBShift ℒₒᵣ t) q))
-    (hbex : ∀ t q, IsUTerm ℒₒᵣ t → IsHierarchy Γ (n + 1) q → P q →
-      P (qqBex (termBShift ℒₒᵣ t) q))
-    (hquant : ∀ q, IsHierarchy Γ (n + 1) q → P q → P (qqQuant Γ q)) :
-    ∀ p, IsHierarchy Γ (n + 1) p → P p :=
-  (IsHierarchyF.construction Γ (IsHierarchyF.pred Γ.alt n).2).induction (v := ![]) hP (by
-    rintro C hC x (hx | ⟨p, q, hp, hq, rfl⟩ | ⟨p, q, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩
-      | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨q, hq, rfl⟩);
-    · exact hbase x hx;
-    · exact hand p q (hC p hp).1 (hC q hq).1 (hC p hp).2 (hC q hq).2;
-    · exact hor p q (hC p hp).1 (hC q hq).1 (hC p hp).2 (hC q hq).2;
-    · exact hball t q ht (hC q hq).1 (hC q hq).2;
-    · exact hbex t q ht (hC q hq).1 (hC q hq).2;
-    · exact hquant q (hC q hq).1 (hC q hq).2)
-
 /-! ### Closure properties -/
 
 lemma IsHierarchy.of_alt (h : IsHierarchy Γ.alt n p) : IsHierarchy Γ (n + 1) p :=
@@ -326,6 +304,32 @@ lemma IsHierarchy.bex {t : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ n 
 lemma IsHierarchy.quant (h : IsHierarchy Γ (n + 1) p) : IsHierarchy Γ (n + 1) (qqQuant Γ p) :=
   IsHierarchy.succ_mk <| by disj 6; exact ⟨p, h, rfl⟩
 
+@[elab_as_elim]
+lemma IsHierarchy.succ_induction (Γ' : Polarity)
+    {motive : (p : V) → IsHierarchy Γ (n + 1) p → Prop}
+    (definable : Γ'ᴬ_[1]-Predicate fun p ↦ ∀ h : IsHierarchy Γ (n + 1) p, motive p h)
+    (base : ∀ p (hp : IsHierarchy Γ.alt n p), motive p (.of_alt hp))
+    (and : ∀ p q (hp : IsHierarchy Γ (n + 1) p) (hq : IsHierarchy Γ (n + 1) q),
+      motive p hp → motive q hq → motive (p ^⋏ q) (by simp [hp, hq]))
+    (or : ∀ p q (hp : IsHierarchy Γ (n + 1) p) (hq : IsHierarchy Γ (n + 1) q),
+      motive p hp → motive q hq → motive (p ^⋎ q) (by simp [hp, hq]))
+    (ball : ∀ t q (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ (n + 1) q),
+      motive q hq → motive (qqBall (termBShift ℒₒᵣ t) q) (.ball ht hq))
+    (bex : ∀ t q (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ (n + 1) q),
+      motive q hq → motive (qqBex (termBShift ℒₒᵣ t) q) (.bex ht hq))
+    (quant : ∀ q (hq : IsHierarchy Γ (n + 1) q), motive q hq → motive (qqQuant Γ q) (.quant hq))
+    {p : V} (hp : IsHierarchy Γ (n + 1) p) : motive p hp :=
+  (IsHierarchyF.construction Γ (IsHierarchyF.pred Γ.alt n).2).induction
+    (P := fun p ↦ ∀ h, motive p h) (v := ![]) definable (by
+    rintro C hC x (hx | ⟨p, q, hp, hq, rfl⟩ | ⟨p, q, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩
+      | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨q, hq, rfl⟩) _
+    · exact base x hx
+    · exact and p q (hC p hp).1 (hC q hq).1 ((hC p hp).2 _) ((hC q hq).2 _)
+    · exact or p q (hC p hp).1 (hC q hq).1 ((hC p hp).2 _) ((hC q hq).2 _)
+    · exact ball t q ht (hC q hq).1 ((hC q hq).2 _)
+    · exact bex t q ht (hC q hq).1 ((hC q hq).2 _)
+    · exact quant q (hC q hq).1 ((hC q hq).2 _)) p hp hp
+
 lemma IsSigma.ex (h : IsSigma (n + 1) p) : IsSigma (n + 1) (^∃ p) := IsHierarchy.quant h
 
 lemma IsPi.all (h : IsPi (n + 1) p) : IsPi (n + 1) (^∀ p) := IsHierarchy.quant h
@@ -340,11 +344,14 @@ lemma IsHierarchy.succ (h : IsHierarchy Γ n p) : IsHierarchy Γ (n + 1) p := by
   induction n generalizing Γ p with
   | zero => exact IsHierarchy.of_bounded h;
   | succ n ih =>
-    apply IsHierarchy.succ_induction 𝚺 (P := IsHierarchy Γ (n + 1 + 1)) (by definability)
-      (fun p hp ↦ (ih hp).of_alt) (fun p q _ _ hp hq ↦ IsHierarchy.and_iff.mpr ⟨hp, hq⟩)
-      (fun p q _ _ hp hq ↦ IsHierarchy.or_iff.mpr ⟨hp, hq⟩)
-      (fun t q ht _ hq ↦ IsHierarchy.ball ht hq) (fun t q ht _ hq ↦ IsHierarchy.bex ht hq)
-      (fun q _ hq ↦ IsHierarchy.quant hq) p h;
+    induction h using IsHierarchy.succ_induction 𝚺 with
+    | definable => definability
+    | base p hp => exact (ih hp).of_alt
+    | and p q _ _ hp hq => exact IsHierarchy.and_iff.mpr ⟨hp, hq⟩
+    | or p q _ _ hp hq => exact IsHierarchy.or_iff.mpr ⟨hp, hq⟩
+    | ball t q ht _ hq => exact IsHierarchy.ball ht hq
+    | bex t q ht _ hq => exact IsHierarchy.bex ht hq
+    | quant q _ hq => exact IsHierarchy.quant hq
 
 lemma IsHierarchy.accum (Γ' : Polarity) (h : IsHierarchy Γ n p) : IsHierarchy Γ' (n + 1) p := by
   cases Γ <;> cases Γ';
@@ -407,23 +414,19 @@ lemma IsHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsHierarchy Γ n p) :
   induction n generalizing Γ p with
   | zero => exact IsBounded.neg hp h;
   | succ n ih =>
-    suffices ∀ p : V, IsHierarchy Γ (n + 1) p →
-        IsUFormula ℒₒᵣ p → IsHierarchy Γ.alt (n + 1) (neg ℒₒᵣ p) from this p h hp;
-    apply IsHierarchy.succ_induction 𝚺
-      (P := fun p ↦ IsUFormula ℒₒᵣ p → IsHierarchy Γ.alt (n + 1) (neg ℒₒᵣ p)) (by definability);
-    · intro p h hp;
-      exact IsHierarchy.of_alt (Γ := Γ.alt) (by simpa using ih hp h);
-    · simp +contextual;
-    · simp +contextual;
-    · intro t q ht _ ih h;
-      have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBall];
-      simpa [neg_qqBall ht.termBShift hq] using IsHierarchy.bex ht (ih hq);
-    · intro t q ht _ ih h;
-      have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex];
-      simpa [neg_qqBex ht.termBShift hq] using IsHierarchy.ball ht (ih hq);
-    · intro q _ ih h;
-      have hq : IsUFormula ℒₒᵣ q := isUFormula_qqQuant.mp h;
-      simpa [neg_qqQuant hq] using IsHierarchy.quant (ih hq);
+    induction h using IsHierarchy.succ_induction 𝚺 with
+    | definable => definability
+    | base p h => exact IsHierarchy.of_alt (Γ := Γ.alt) (by simpa using ih hp h)
+    | and | or => simp_all
+    | ball t q ht _ ih =>
+      have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBall]
+      simpa [neg_qqBall ht.termBShift hq] using IsHierarchy.bex ht (ih hq)
+    | bex t q ht _ ih =>
+      have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex]
+      simpa [neg_qqBex ht.termBShift hq] using IsHierarchy.ball ht (ih hq)
+    | quant q _ ih =>
+      have hq : IsUFormula ℒₒᵣ q := isUFormula_qqQuant.mp hp
+      simpa [neg_qqQuant hq] using IsHierarchy.quant (ih hq)
 
 end isHierarchy
 

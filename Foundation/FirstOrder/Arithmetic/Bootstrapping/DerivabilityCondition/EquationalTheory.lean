@@ -135,10 +135,10 @@ lemma term_replace_aux (t : V) :
     IsSemiterm ℒₒᵣ 1 t →
     Provable T (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (termSubst ℒₒᵣ (^#1 ∷ 0) t ^= termSubst ℒₒᵣ (^#0 ∷ 0) t))
       := by
-  apply IsSemiterm.sigma1_induction
-  · definability
-  case hfunc =>
-    intro k F v hF hv ih
+  intro ht
+  induction ht using IsSemiterm.induction 𝚺 with
+  | definable => definability
+  | func k F v hF hv ih =>
     rcases isFunc_iff_LOR.mp hF with (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
     · rcases show v = 0 by simpa using hv
       suffices
@@ -222,8 +222,7 @@ lemma term_replace_aux (t : V) :
       have := subst_mul_eq_mul T (t⇞⇞.subst ![&'1]) (t⇞⇞.subst ![&'0])
         (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0])
       exact of' this ⨀ iht ⨀ ihu
-  case hbvar =>
-    intro z hz
+  | bvar z hz =>
     have : z = 0 := lt_one_iff_eq_zero.mp hz
     rcases this with rfl
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (#'1 ≐ #'0)) by
@@ -232,8 +231,7 @@ lemma term_replace_aux (t : V) :
     have : T ⊢ “∀ x y, (x = y → x = y)” :=
       complete.{0} T _ fun (M : Type) _ _ ↦ by simp [models_iff]
     simpa using internal_provable_of_outer_provable this (V := V)
-  case hfvar =>
-    intro x
+  | fvar x =>
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (&'x ≐ &'x)) by
       have := (tprovable_iff_provable (T := T)).mp this
       simpa [-substs_equals, val_all] using this
@@ -365,10 +363,10 @@ lemma replace_aux (φ : V) :
       (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (imp ℒₒᵣ (subst ℒₒᵣ (^#1 ∷ 0) φ) (subst ℒₒᵣ (^#0 ∷ 0) φ)))
       := by
   classical
-  apply IsFormula.sigma1_structural_induction₂_ss
-  · definability
-  case hand =>
-    intro p q hp hq ihp ihq
+  intro hφ
+  induction hφ using IsFormula.sigma1_structural_induction₂_ss with
+  | definable => definability
+  | and p q hp hq ihp ihq =>
     let φ : Semiformula V ℒₒᵣ 1 := ⟨p, by simpa using hp⟩
     let ψ : Semiformula V ℒₒᵣ 1 := ⟨q, by simpa using hq⟩
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (φ ⋏ ψ).subst ![#'1] 🡒 (φ ⋏ ψ).subst ![#'0]) by
@@ -396,8 +394,7 @@ lemma replace_aux (φ : V) :
       simpa [Semiformula.free, SemitermVec.q, Semiformula.shift_substs, Semiformula.substs_substs]
         using this
     cl_prover [ihφ, ihψ]
-  case hor =>
-    intro p q hp hq ihp ihq
+  | or p q hp hq ihp ihq =>
     let φ : Semiformula V ℒₒᵣ 1 := ⟨p, by simpa using hp⟩
     let ψ : Semiformula V ℒₒᵣ 1 := ⟨q, by simpa using hq⟩
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (φ ⋎ ψ).subst ![#'1] 🡒 (φ ⋎ ψ).subst ![#'0]) by
@@ -425,7 +422,7 @@ lemma replace_aux (φ : V) :
       simpa [Semiformula.free, SemitermVec.q, Semiformula.shift_substs, Semiformula.substs_substs]
         using this
     cl_prover [ihφ, ihψ]
-  case hverum =>
+  | verum =>
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 ⊤ 🡒 ⊤) by
       have := (tprovable_iff_provable (T := T)).mp this
       simpa [-substs_equals] using this
@@ -433,7 +430,7 @@ lemma replace_aux (φ : V) :
       apply TProof.all₂!
       simpa
     apply dhyp; exact CV
-  case hfalsum =>
+  | falsum =>
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 ⊥ 🡒 ⊥) by
       have := (tprovable_iff_provable (T := T)).mp this
       simpa [-substs_equals] using this
@@ -441,8 +438,7 @@ lemma replace_aux (φ : V) :
       apply TProof.all₂!
       simpa
     apply dhyp; exact efq
-  case hrel =>
-    intro k R v hR hv
+  | rel k R v hR hv =>
     rcases isRel_iff_LOR.mp hR with (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
     · let t : Semiterm V ℒₒᵣ 1 := ⟨v.[0], by simpa using hv.nth (by simp)⟩
       let u : Semiterm V ℒₒᵣ 1 := ⟨v.[1], by simpa using hv.nth (by simp)⟩
@@ -460,8 +456,7 @@ lemma replace_aux (φ : V) :
         have := (tprovable_iff_provable (T := T)).mp this
         simpa [-substs_lessThan, veq, val_all] using! this
       simpa using replace_lt T t u
-  case hnrel =>
-    intro k R v hR hv
+  | nrel k R v hR hv =>
     rcases isRel_iff_LOR.mp hR with (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
     · let t : Semiterm V ℒₒᵣ 1 := ⟨v.[0], by simpa using hv.nth (by simp)⟩
       let u : Semiterm V ℒₒᵣ 1 := ⟨v.[1], by simpa using hv.nth (by simp)⟩
@@ -479,8 +474,7 @@ lemma replace_aux (φ : V) :
         have := (tprovable_iff_provable (T := T)).mp this
         simpa [-substs_notLessThan, veq, val_all] using! this
       simpa using replace_nlt T t u
-  case hall =>
-    intro p hp ih
+  | all p hp ih =>
     let φ : Semiformula V ℒₒᵣ 2 := ⟨p, hp⟩
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (∀¹ φ).subst ![#'1] 🡒 (∀¹ φ).subst ![#'0]) by
       have := (tprovable_iff_provable (T := T)).mp this
@@ -502,8 +496,7 @@ lemma replace_aux (φ : V) :
     simpa [Semiformula.free1, Semiformula.free, SemitermVec.q,
       Semiformula.shift_substs, Semiformula.substs_substs, one_add_one_eq_two]
     using TProof.specialize₂! ih (&'1) (&'2)
-  case hexs =>
-    intro p hp ih
+  | exs p hp ih =>
     let φ : Semiformula V ℒₒᵣ 2 := ⟨p, hp⟩
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (∃¹ φ).subst ![#'1] 🡒 (∃¹ φ).subst ![#'0]) by
       have := (tprovable_iff_provable (T := T)).mp this
