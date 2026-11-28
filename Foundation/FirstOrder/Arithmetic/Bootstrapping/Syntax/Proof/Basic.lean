@@ -639,50 +639,6 @@ lemma case_iff {d : V} :
 
 alias ⟨case, _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Derivation.mk⟩ := case_iff
 
-lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
-    {d} (hd : Derivation T d)
-    (hAxL : ∀ s, IsFormulaSet L s → ∀ p ∈ s, neg L p ∈ s → P (axL s p))
-    (hVerumIntro : ∀ s, IsFormulaSet L s → ^⊤ ∈ s → P (verumIntro s))
-    (hAnd : ∀ s, IsFormulaSet L s → ∀ p q dp dq, p ^⋏ q ∈ s →
-      DerivationOf T dp (insert p s) → DerivationOf T dq (insert q s) →
-      P dp → P dq → P (andIntro s p q dp dq))
-    (hOr : ∀ s, IsFormulaSet L s → ∀ p q d, p ^⋎ q ∈ s → DerivationOf T d (insert p (insert q s)) →
-      P d → P (orIntro s p q d))
-    (hAll : ∀ s, IsFormulaSet L s → ∀ p d, ^∀ p ∈ s →
-      DerivationOf T d (insert (free L p) (setShift L s)) →
-      P d → P (allIntro s p d))
-    (hExs : ∀ s, IsFormulaSet L s → ∀ p t d, ^∃ p ∈ s → IsTerm L t →
-      DerivationOf T d (insert (substs1 L t p) s) →
-      P d → P (exsIntro s p t d))
-    (hWk : ∀ s, IsFormulaSet L s → ∀ d, fstIdx d ⊆ s → Derivation T d →
-      P d → P (wkRule s d))
-    (hShift : ∀ s, IsFormulaSet L s → ∀ d, s = setShift L (fstIdx d) → Derivation T d →
-      P d → P (shiftRule s d))
-    (hCut : ∀ s, IsFormulaSet L s → ∀ p d₁ d₂, DerivationOf T d₁ (insert p s) →
-      DerivationOf T d₂ (insert (neg L p) s) →
-      P d₁ → P d₂ → P (cutRule s p d₁ d₂))
-    (hRoot : ∀ s, IsFormulaSet L s → ∀ p, p ∈ s → p ∈ T.Δ₁Class → P (axm s p)) : P d :=
-  (construction T).induction (v := ![]) hP (by
-    intro C ih d hd
-    rcases hd with ⟨hds,
-      (⟨s, p, rfl, hps, hnps⟩ | ⟨s, rfl, hs⟩ |
-        ⟨s, p, q, dp, dq, rfl, hpq, h₁, h₂⟩ | ⟨s, p, q, d, rfl, hpq, h⟩ |
-        ⟨s, p, d, rfl, hp, h, hC⟩ | ⟨s, p, t, d, rfl, hp, ht, h, hC⟩ |
-        ⟨s, d, rfl, h, hC⟩ | ⟨s, d, rfl, h, hC⟩ |
-        ⟨s, p, d₁, d₂, rfl, ⟨h₁, hC₁⟩, ⟨h₂, hC₂⟩⟩ | ⟨s, p, rfl, hs, hT⟩)⟩
-    · exact hAxL s (by simpa using hds) p hps hnps
-    · exact hVerumIntro s (by simpa using hds) hs
-    · exact hAnd s (by simpa using hds) p q dp dq hpq ⟨h₁.1, (ih dp h₁.2).1⟩ ⟨h₂.1, (ih dq h₂.2).1⟩
-        (ih dp h₁.2).2 (ih dq h₂.2).2
-    · exact hOr s (by simpa using hds) p q d hpq ⟨h.1, (ih d h.2).1⟩ (ih d h.2).2
-    · exact hAll s (by simpa using hds) p d hp ⟨h, (ih d hC).1⟩ (ih d hC).2
-    · exact hExs s (by simpa using hds) p t d hp ht ⟨h, (ih d hC).1⟩ (ih d hC).2
-    · exact hWk s (by simpa using hds) d h (ih d hC).1 (ih d hC).2
-    · exact hShift s (by simpa using hds) d h (ih d hC).1 (ih d hC).2
-    · exact hCut s (by simpa using hds) p d₁ d₂ ⟨h₁, (ih d₁ hC₁).1⟩ ⟨h₂, (ih d₂ hC₂).1⟩
-        (ih d₁ hC₁).2 (ih d₂ hC₂).2
-    · exact hRoot s (by simpa using hds) p hs hT) d hd
-
 lemma isFormulaSet {d : V} (h : Derivation T d) : IsFormulaSet L (fstIdx d) :=
   (h : Derivation T d).case.1
 
@@ -751,30 +707,75 @@ lemma axm {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Cl
   Bootstrapping.Derivation.mk
     ⟨by simpa using hs, by disj 10; exact ⟨s, p, rfl, hp, hT⟩⟩
 
+@[elab_as_elim]
+lemma induction1 (Γ : Polarity) {motive : (d : V) → Derivation T d → Prop}
+    (definable : Γᴬ_[1]-Predicate fun d ↦ ∀ h : Derivation T d, motive d h)
+    (hAxL : ∀ s (hs : IsFormulaSet L s) p (hp : p ∈ s) (hn : neg L p ∈ s),
+      motive (Bootstrapping.axL s p) (.axL hs hp hn))
+    (hVerumIntro : ∀ s (hs : IsFormulaSet L s) (h : ^⊤ ∈ s),
+      motive (Bootstrapping.verumIntro s) (.verumIntro hs h))
+    (hAnd : ∀ s, IsFormulaSet L s → ∀ p q dp dq (h : p ^⋏ q ∈ s)
+      (hdp : DerivationOf T dp (insert p s)) (hdq : DerivationOf T dq (insert q s)),
+      motive dp hdp.2 → motive dq hdq.2 →
+        motive (Bootstrapping.andIntro s p q dp dq) (.andIntro h hdp hdq))
+    (hOr : ∀ s, IsFormulaSet L s → ∀ p q d (h : p ^⋎ q ∈ s)
+      (hd : DerivationOf T d (insert p (insert q s))),
+      motive d hd.2 → motive (Bootstrapping.orIntro s p q d) (.orIntro h hd))
+    (hAll : ∀ s, IsFormulaSet L s → ∀ p d (h : ^∀ p ∈ s)
+      (hd : DerivationOf T d (insert (free L p) (setShift L s))),
+      motive d hd.2 → motive (Bootstrapping.allIntro s p d) (.allIntro h hd))
+    (hExs : ∀ s, IsFormulaSet L s → ∀ p t d (h : ^∃ p ∈ s) (ht : IsTerm L t)
+      (hd : DerivationOf T d (insert (substs1 L t p) s)),
+      motive d hd.2 → motive (Bootstrapping.exsIntro s p t d) (.exsIntro h ht hd))
+    (hWk : ∀ s (hs : IsFormulaSet L s) d (h : fstIdx d ⊆ s) (hd : Derivation T d),
+      motive d hd → motive (Bootstrapping.wkRule s d) (.wkRule hs h ⟨rfl, hd⟩))
+    (hShift : ∀ s, IsFormulaSet L s → ∀ d (h : s = setShift L (fstIdx d)) (hd : Derivation T d),
+      motive d hd → motive (Bootstrapping.shiftRule s d) (by subst h; exact .shiftRule ⟨rfl, hd⟩))
+    (hCut : ∀ s, IsFormulaSet L s → ∀ p d₁ d₂ (hd₁ : DerivationOf T d₁ (insert p s))
+      (hd₂ : DerivationOf T d₂ (insert (neg L p) s)),
+      motive d₁ hd₁.2 → motive d₂ hd₂.2 →
+        motive (Bootstrapping.cutRule s p d₁ d₂) (.cutRule hd₁ hd₂))
+    (hRoot : ∀ s (hs : IsFormulaSet L s) p (hp : p ∈ s) (hT : p ∈ T.Δ₁Class),
+      motive (Bootstrapping.axm s p) (.axm hs hp hT))
+    {d : V} (hd : Derivation T d) : motive d hd :=
+  (construction T).induction (P := fun d ↦ ∀ h, motive d h) (v := ![]) definable (by
+    intro C ih d hd _
+    rcases hd with ⟨hds,
+      (⟨s, p, rfl, hps, hnps⟩ | ⟨s, rfl, hs⟩ |
+        ⟨s, p, q, dp, dq, rfl, hpq, h₁, h₂⟩ | ⟨s, p, q, d, rfl, hpq, h⟩ |
+        ⟨s, p, d, rfl, hp, h, hC⟩ | ⟨s, p, t, d, rfl, hp, ht, h, hC⟩ |
+        ⟨s, d, rfl, h, hC⟩ | ⟨s, d, rfl, h, hC⟩ |
+        ⟨s, p, d₁, d₂, rfl, ⟨h₁, hC₁⟩, ⟨h₂, hC₂⟩⟩ | ⟨s, p, rfl, hs, hT⟩)⟩
+    · exact hAxL s (by simpa using hds) p hps hnps
+    · exact hVerumIntro s (by simpa using hds) hs
+    · exact hAnd s (by simpa using hds) p q dp dq hpq ⟨h₁.1, (ih dp h₁.2).1⟩ ⟨h₂.1, (ih dq h₂.2).1⟩
+        ((ih dp h₁.2).2 _) ((ih dq h₂.2).2 _)
+    · exact hOr s (by simpa using hds) p q d hpq ⟨h.1, (ih d h.2).1⟩ ((ih d h.2).2 _)
+    · exact hAll s (by simpa using hds) p d hp ⟨h, (ih d hC).1⟩ ((ih d hC).2 _)
+    · exact hExs s (by simpa using hds) p t d hp ht ⟨h, (ih d hC).1⟩ ((ih d hC).2 _)
+    · exact hWk s (by simpa using hds) d h (ih d hC).1 ((ih d hC).2 _)
+    · exact hShift s (by simpa using hds) d h (ih d hC).1 ((ih d hC).2 _)
+    · exact hCut s (by simpa using hds) p d₁ d₂ ⟨h₁, (ih d₁ hC₁).1⟩ ⟨h₂, (ih d₂ hC₂).1⟩
+        ((ih d₁ hC₁).2 _) ((ih d₂ hC₂).2 _)
+    · exact hRoot s (by simpa using hds) p hs hT) d hd hd
+
 variable {U : Theory L} [U.Δ₁]
 
 lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {d : V} : Derivation T d → Derivation U d := by
   intro hd
-  apply Bootstrapping.Derivation.induction1 𝚺 ?_ hd
-  · intro s hs p hp hn; apply Derivation.axL hs hp hn
-  · intro s hs hv; apply Derivation.verumIntro hs hv
-  · intro s _ p q dp dq hpq hdp hdq ihp ihq
-    apply Derivation.andIntro hpq ⟨hdp.1, ihp⟩ ⟨hdq.1, ihq⟩
-  · intro s _ p q d hpq hd ih
-    apply Derivation.orIntro hpq ⟨hd.1, ih⟩
-  · intro s _ p d hp hd ih
-    apply Derivation.allIntro hp ⟨hd.1, ih⟩
-  · intro s _ p t d hp ht hd ih
-    apply Derivation.exsIntro hp ht ⟨hd.1, ih⟩
-  · intro s hs d h _ ih
-    apply Derivation.wkRule hs h ⟨rfl, ih⟩
-  · rintro s hs d rfl _ ih
-    apply Derivation.shiftRule ⟨rfl, ih⟩
-  · intro s _ p d₁ d₂ h₁ h₂ ih₁ ih₂
-    apply Derivation.cutRule ⟨h₁.1, ih₁⟩ ⟨h₂.1, ih₂⟩
-  · intro s hs p hps hpT
-    apply Derivation.axm hs hps (h hpT)
-  · definability
+  induction hd using Bootstrapping.Derivation.induction1 𝚺 with
+  | definable => definability
+  | hAxL s hs p hp hn => exact Derivation.axL hs hp hn
+  | hVerumIntro s hs hv => exact Derivation.verumIntro hs hv
+  | hAnd s _ p q dp dq hpq hdp hdq ihp ihq =>
+    exact Derivation.andIntro hpq ⟨hdp.1, ihp⟩ ⟨hdq.1, ihq⟩
+  | hOr s _ p q d hpq hd ih => exact Derivation.orIntro hpq ⟨hd.1, ih⟩
+  | hAll s _ p d hp hd ih => exact Derivation.allIntro hp ⟨hd.1, ih⟩
+  | hExs s _ p t d hp ht hd ih => exact Derivation.exsIntro hp ht ⟨hd.1, ih⟩
+  | hWk s hs d h _ ih => exact Derivation.wkRule hs h ⟨rfl, ih⟩
+  | hShift s hs d h _ ih => subst h; exact Derivation.shiftRule ⟨rfl, ih⟩
+  | hCut s _ p d₁ d₂ h₁ h₂ ih₁ ih₂ => exact Derivation.cutRule ⟨h₁.1, ih₁⟩ ⟨h₂.1, ih₂⟩
+  | hRoot s hs p hps hpT => exact Derivation.axm hs hps (h hpT)
 
 end Derivation
 

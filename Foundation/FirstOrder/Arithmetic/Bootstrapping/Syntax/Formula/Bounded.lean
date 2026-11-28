@@ -240,57 +240,59 @@ lemma IsBounded.of_qqBex {u p : V} (h : IsBounded (qqBex u p)) : IsBounded p := 
   obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq;
   exact hq';
 
-lemma IsBounded.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
-    (hverum : P ^⊤) (hfalsum : P ^⊥)
-    (hrel : ∀ k r v, P (^rel k r v)) (hnrel : ∀ k r v, P (^nrel k r v))
-    (hand : ∀ p q, IsBounded p → IsBounded q → P p → P q → P (p ^⋏ q))
-    (hor : ∀ p q, IsBounded p → IsBounded q → P p → P q → P (p ^⋎ q))
-    (hball : ∀ t q, IsUTerm ℒₒᵣ t → IsBounded q → P q → P (qqBall (termBShift ℒₒᵣ t) q))
-    (hbex : ∀ t q, IsUTerm ℒₒᵣ t → IsBounded q → P q → P (qqBex (termBShift ℒₒᵣ t) q)) :
-    ∀ p, IsBounded p → P p :=
-  IsBoundedF.construction.induction (v := ![]) hP (by
+@[elab_as_elim]
+lemma IsBounded.induction (Γ : Polarity) {motive : (p : V) → IsBounded p → Prop}
+    (definable : Γᴬ_[1]-Predicate fun p ↦ ∀ h : IsBounded p, motive p h)
+    (verum : motive ^⊤ .verum) (falsum : motive ^⊥ .falsum)
+    (rel : ∀ k r v, motive (^rel k r v) .rel) (nrel : ∀ k r v, motive (^nrel k r v) .nrel)
+    (and : ∀ p q (hp : IsBounded p) (hq : IsBounded q),
+      motive p hp → motive q hq → motive (p ^⋏ q) (by simp [hp, hq]))
+    (or : ∀ p q (hp : IsBounded p) (hq : IsBounded q),
+      motive p hp → motive q hq → motive (p ^⋎ q) (by simp [hp, hq]))
+    (ball : ∀ t q (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q),
+      motive q hq → motive (qqBall (termBShift ℒₒᵣ t) q) (.ball ht hq))
+    (bex : ∀ t q (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q),
+      motive q hq → motive (qqBex (termBShift ℒₒᵣ t) q) (.bex ht hq))
+    {p : V} (hp : IsBounded p) : motive p hp :=
+  IsBoundedF.construction.induction (P := fun p ↦ ∀ h, motive p h) (v := ![]) definable (by
     rintro C hC x (rfl | rfl | ⟨k, r, v, rfl⟩ | ⟨k, r, v, rfl⟩ | ⟨p, q, hp, hq, rfl⟩
-      | ⟨p, q, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩);
-    · exact hverum;
-    · exact hfalsum;
-    · exact hrel k r v;
-    · exact hnrel k r v;
-    · exact hand p q (hC p hp).1 (hC q hq).1 (hC p hp).2 (hC q hq).2;
-    · exact hor p q (hC p hp).1 (hC q hq).1 (hC p hp).2 (hC q hq).2;
-    · exact hball t q ht (hC q hq).1 (hC q hq).2;
-    · exact hbex t q ht (hC q hq).1 (hC q hq).2)
+      | ⟨p, q, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩) _
+    · exact verum
+    · exact falsum
+    · exact rel k r v
+    · exact nrel k r v
+    · exact and p q (hC p hp).1 (hC q hq).1 ((hC p hp).2 _) ((hC q hq).2 _)
+    · exact or p q (hC p hp).1 (hC q hq).1 ((hC p hp).2 _) ((hC q hq).2 _)
+    · exact ball t q ht (hC q hq).1 ((hC q hq).2 _)
+    · exact bex t q ht (hC q hq).1 ((hC q hq).2 _)) p hp hp
 
 lemma IsBounded.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     IsBounded (Bootstrapping.neg ℒₒᵣ p) := by
-  suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.neg ℒₒᵣ p) from
-    this p h hp;
-  apply IsBounded.induction 𝚺
-    (P := fun p ↦ IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.neg ℒₒᵣ p)) (by definability)
-    (by simp) (by simp) (by simp +contextual) (by simp +contextual) (by simp +contextual)
-    (by simp +contextual);
-  · intro t q ht _ ih h;
-    have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBall];
-    simpa [neg_qqBall ht.termBShift hq] using IsBounded.bex ht (ih hq);
-  · intro t q ht _ ih h;
-    have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex];
-    simpa [neg_qqBex ht.termBShift hq] using IsBounded.ball ht (ih hq);
+  induction h using IsBounded.induction 𝚺 with
+  | definable => definability
+  | verum | falsum | rel | nrel => simp_all
+  | and | or => simp_all
+  | ball t q ht _ ih =>
+    have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBall]
+    simpa [neg_qqBall ht.termBShift hq] using IsBounded.bex ht (ih hq)
+  | bex t q ht _ ih =>
+    have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex]
+    simpa [neg_qqBex ht.termBShift hq] using IsBounded.ball ht (ih hq)
 
 lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     IsBounded (Bootstrapping.shift ℒₒᵣ p) := by
-  suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.shift ℒₒᵣ p) from
-    this p h hp;
-  apply IsBounded.induction 𝚺
-    (P := fun p ↦ IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.shift ℒₒᵣ p)) (by definability)
-    (by simp) (by simp) (by simp +contextual) (by simp +contextual) (by simp +contextual)
-    (by simp +contextual);
-  · intro t q ht _ ih h;
-    have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBall];
+  induction h using IsBounded.induction 𝚺 with
+  | definable => definability
+  | verum | falsum | rel | nrel => simp_all
+  | and | or => simp_all
+  | ball t q ht _ ih =>
+    have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBall]
     simpa [shift_qqBall ht.termBShift hq, ← termBShift_termShift ht.isSemiterm]
-      using IsBounded.ball ht.termShift (ih hq);
-  · intro t q ht _ ih h;
-    have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex];
+      using IsBounded.ball ht.termShift (ih hq)
+  | bex t q ht _ ih =>
+    have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex]
     simpa [shift_qqBex ht.termBShift hq, ← termBShift_termShift ht.isSemiterm]
-      using IsBounded.bex ht.termShift (ih hq);
+      using IsBounded.bex ht.termShift (ih hq)
 
 end isBounded
 
