@@ -135,10 +135,10 @@ lemma term_replace_aux (t : V) :
     IsSemiterm ℒₒᵣ 1 t →
     Provable T (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (termSubst ℒₒᵣ (^#1 ∷ 0) t ^= termSubst ℒₒᵣ (^#0 ∷ 0) t))
       := by
-  intro ht
-  induction ht using IsSemiterm.induction 𝚺 with
-  | definable => definability
-  | func k F v hF hv ih =>
+  apply IsSemiterm.sigma1_induction
+  · definability
+  case hfunc =>
+    intro k F v hF hv ih
     rcases isFunc_iff_LOR.mp hF with (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
     · rcases show v = 0 by simpa using hv
       suffices
@@ -222,7 +222,8 @@ lemma term_replace_aux (t : V) :
       have := subst_mul_eq_mul T (t⇞⇞.subst ![&'1]) (t⇞⇞.subst ![&'0])
         (u⇞⇞.subst ![&'1]) (u⇞⇞.subst ![&'0])
       exact of' this ⨀ iht ⨀ ihu
-  | bvar z hz =>
+  case hbvar =>
+    intro z hz
     have : z = 0 := lt_one_iff_eq_zero.mp hz
     rcases this with rfl
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (#'1 ≐ #'0)) by
@@ -231,7 +232,8 @@ lemma term_replace_aux (t : V) :
     have : T ⊢ “∀ x y, (x = y → x = y)” :=
       complete.{0} T _ fun (M : Type) _ _ ↦ by simp [models_iff]
     simpa using internal_provable_of_outer_provable this (V := V)
-  | fvar x =>
+  case hfvar =>
+    intro x
     suffices T.internalize V ⊢ ∀¹ ∀¹ ((#'1 ≐ #'0) 🡒 (&'x ≐ &'x)) by
       have := (tprovable_iff_provable (T := T)).mp this
       simpa [-substs_equals, val_all] using this

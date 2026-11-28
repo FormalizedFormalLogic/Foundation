@@ -440,51 +440,29 @@ lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     · exact hall p (hC p hp).1 (hC p hp).2
     · exact hexs p (hC p hp).1 (hC p hp).2)
 
-@[elab_as_elim]
-lemma ISigma1.sigma1_succ_induction {motive : (p : V) → IsUFormula L p → Prop}
-    (definable : 𝚺ᴬ₁-Predicate fun p ↦ ∀ h : IsUFormula L p, motive p h)
-    (rel : ∀ k r v (hr : L.IsRel k r) (hv : IsUTermVec L k v),
-      motive (^rel k r v) (by simp [hr, hv]))
-    (nrel : ∀ k r v (hr : L.IsRel k r) (hv : IsUTermVec L k v),
-      motive (^nrel k r v) (by simp [hr, hv]))
-    (verum : motive ^⊤ (by simp))
-    (falsum : motive ^⊥ (by simp))
-    (and : ∀ p q (hp : IsUFormula L p) (hq : IsUFormula L q),
-      motive p hp → motive q hq → motive (p ^⋏ q) (by simp [hp, hq]))
-    (or : ∀ p q (hp : IsUFormula L p) (hq : IsUFormula L q),
-      motive p hp → motive q hq → motive (p ^⋎ q) (by simp [hp, hq]))
-    (all : ∀ p (hp : IsUFormula L p), motive p hp → motive (^∀ p) (by simp [hp]))
-    (exs : ∀ p (hp : IsUFormula L p), motive p hp → motive (^∃ p) (by simp [hp]))
-    {p : V} (hp : IsUFormula L p) : motive p hp :=
-  induction1 𝚺 (P := fun p ↦ ∀ h, motive p h) definable
-    (fun k r v hr hv _ ↦ rel k r v hr hv) (fun k r v hr hv _ ↦ nrel k r v hr hv)
-    (fun _ ↦ verum) (fun _ ↦ falsum)
-    (fun p q hp hq ihp ihq _ ↦ and p q hp hq (ihp hp) (ihq hq))
-    (fun p q hp hq ihp ihq _ ↦ or p q hp hq (ihp hp) (ihq hq))
-    (fun p hp ih _ ↦ all p hp (ih hp)) (fun p hp ih _ ↦ exs p hp (ih hp)) p hp hp
+lemma ISigma1.sigma1_succ_induction {P : V → Prop} (hP : 𝚺ᴬ₁-Predicate P)
+    (hrel : ∀ k r v, L.IsRel k r → IsUTermVec L k v → P (^rel k r v))
+    (hnrel : ∀ k r v, L.IsRel k r → IsUTermVec L k v → P (^nrel k r v))
+    (hverum : P ^⊤)
+    (hfalsum : P ^⊥)
+    (hand : ∀ p q, IsUFormula L p → IsUFormula L q → P p → P q → P (p ^⋏ q))
+    (hor : ∀ p q, IsUFormula L p → IsUFormula L q → P p → P q → P (p ^⋎ q))
+    (hall : ∀ p, IsUFormula L p → P p → P (^∀ p))
+    (hexs : ∀ p, IsUFormula L p → P p → P (^∃ p)) :
+    ∀ p, IsUFormula L p → P p :=
+  induction1 𝚺 hP hrel hnrel hverum hfalsum hand hor hall hexs
 
-@[elab_as_elim]
-lemma ISigma1.pi1_succ_induction {motive : (p : V) → IsUFormula L p → Prop}
-    (definable : 𝚷ᴬ₁-Predicate fun p ↦ ∀ h : IsUFormula L p, motive p h)
-    (rel : ∀ k r v (hr : L.IsRel k r) (hv : IsUTermVec L k v),
-      motive (^rel k r v) (by simp [hr, hv]))
-    (nrel : ∀ k r v (hr : L.IsRel k r) (hv : IsUTermVec L k v),
-      motive (^nrel k r v) (by simp [hr, hv]))
-    (verum : motive ^⊤ (by simp))
-    (falsum : motive ^⊥ (by simp))
-    (and : ∀ p q (hp : IsUFormula L p) (hq : IsUFormula L q),
-      motive p hp → motive q hq → motive (p ^⋏ q) (by simp [hp, hq]))
-    (or : ∀ p q (hp : IsUFormula L p) (hq : IsUFormula L q),
-      motive p hp → motive q hq → motive (p ^⋎ q) (by simp [hp, hq]))
-    (all : ∀ p (hp : IsUFormula L p), motive p hp → motive (^∀ p) (by simp [hp]))
-    (exs : ∀ p (hp : IsUFormula L p), motive p hp → motive (^∃ p) (by simp [hp]))
-    {p : V} (hp : IsUFormula L p) : motive p hp :=
-  induction1 𝚷 (P := fun p ↦ ∀ h, motive p h) definable
-    (fun k r v hr hv _ ↦ rel k r v hr hv) (fun k r v hr hv _ ↦ nrel k r v hr hv)
-    (fun _ ↦ verum) (fun _ ↦ falsum)
-    (fun p q hp hq ihp ihq _ ↦ and p q hp hq (ihp hp) (ihq hq))
-    (fun p q hp hq ihp ihq _ ↦ or p q hp hq (ihp hp) (ihq hq))
-    (fun p hp ih _ ↦ all p hp (ih hp)) (fun p hp ih _ ↦ exs p hp (ih hp)) p hp hp
+lemma ISigma1.pi1_succ_induction {P : V → Prop} (hP : 𝚷ᴬ₁-Predicate P)
+    (hrel : ∀ k r v, L.IsRel k r → IsUTermVec L k v → P (^rel k r v))
+    (hnrel : ∀ k r v, L.IsRel k r → IsUTermVec L k v → P (^nrel k r v))
+    (hverum : P ^⊤)
+    (hfalsum : P ^⊥)
+    (hand : ∀ p q, IsUFormula L p → IsUFormula L q → P p → P q → P (p ^⋏ q))
+    (hor : ∀ p q, IsUFormula L p → IsUFormula L q → P p → P q → P (p ^⋎ q))
+    (hall : ∀ p, IsUFormula L p → P p → P (^∀ p))
+    (hexs : ∀ p, IsUFormula L p → P p → P (^∃ p)) :
+    ∀ p, IsUFormula L p → P p :=
+  induction1 𝚷 hP hrel hnrel hverum hfalsum hand hor hall hexs
 
 /-
 lemma IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γᴬ_[1]-Relation P)
@@ -1076,31 +1054,38 @@ lemma graph_exists {p : V} : IsUFormula L p → ∃ y, c.Graph L param p y := by
         ih p₁ (by simp) _ (by simp [f, qqExs, c.exsChanges_monotone hi.le]) hp₁
     exact ⟨c.exs param p₁ ys, c.graph_ex hp₁ hl hys⟩
 
-lemma graph_unique {p : V} (hp : IsUFormula L p) :
-    ∀ {param r r'}, c.Graph L param p r → c.Graph L param p r' → r = r' := by
-  induction hp using IsUFormula.ISigma1.pi1_succ_induction with
-  | definable => definability
-  | rel k R v hkR hv => simp [c.graph_rel_iff hkR hv]
-  | nrel k R v hkR hv => simp [c.graph_nrel_iff hkR hv]
-  | verum => simp [c.graph_verum_iff]
-  | falsum => simp [c.graph_falsum_iff]
-  | and p₁ p₂ _ _ ih₁ ih₂ =>
-    intro param r r' hr hr'
+lemma graph_unique {p : V} : IsUFormula L p → ∀ {param r r'}, c.Graph L param p r → c.Graph L param
+  p r' → r = r' := by
+  apply IsUFormula.ISigma1.pi1_succ_induction (P := fun p ↦ ∀ {param r r'}, c.Graph L param p r →
+    c.Graph L param p r' → r = r')
+    (by definability)
+  case hrel =>
+    intro k R v hkR hv
+    simp [c.graph_rel_iff hkR hv]
+  case hnrel =>
+    intro k R v hkR hv
+    simp [c.graph_nrel_iff hkR hv]
+  case hverum =>
+    simp [c.graph_verum_iff]
+  case hfalsum =>
+    simp [c.graph_falsum_iff]
+  case hand =>
+    intro p₁ p₂ _ _ ih₁ ih₂ param r r' hr hr'
     rcases c.graph_and_inv hr with ⟨r₁, r₂, h₁, h₂, rfl⟩
     rcases c.graph_and_inv hr' with ⟨r₁', r₂', h₁', h₂', rfl⟩
     rcases ih₁ h₁ h₁'; rcases ih₂ h₂ h₂'; rfl
-  | or p₁ p₂ _ _ ih₁ ih₂ =>
-    intro param r r' hr hr'
+  case hor =>
+    intro p₁ p₂ _ _ ih₁ ih₂ param r r' hr hr'
     rcases c.graph_or_inv hr with ⟨r₁, r₂, h₁, h₂, rfl⟩
     rcases c.graph_or_inv hr' with ⟨r₁', r₂', h₁', h₂', rfl⟩
     rcases ih₁ h₁ h₁'; rcases ih₂ h₂ h₂'; rfl
-  | all p _ ih =>
-    intro param r r' hr hr'
+  case hall =>
+    intro p _ ih param r r' hr hr'
     rcases c.graph_all_inv hr with ⟨ys, ⟨hl, hys⟩, rfl⟩
     rcases c.graph_all_inv hr' with ⟨ys', ⟨hl', hys'⟩, rfl⟩
     rw [nth_ext (hl.trans hl'.symm) fun i hi ↦ ih (hys i (hl ▸ hi)) (hys' i (hl ▸ hi))]
-  | exs p _ ih =>
-    intro param r r' hr hr'
+  case hexs =>
+    intro p _ ih param r r' hr hr'
     rcases c.graph_ex_inv hr with ⟨ys, ⟨hl, hys⟩, rfl⟩
     rcases c.graph_ex_inv hr' with ⟨ys', ⟨hl', hys'⟩, rfl⟩
     rw [nth_ext (hl.trans hl'.symm) fun i hi ↦ ih (hys i (hl ▸ hi)) (hys' i (hl ▸ hi))]
@@ -1496,114 +1481,87 @@ lemma IsSemiformula.case {P : V → V → Prop} {n p} (hp : IsSemiformula L n p)
   · exact hall _ _ h₁
   · exact hexs _ _ h₁
 
-@[elab_as_elim]
-lemma IsSemiformula.sigma1_structural_induction
-    {motive : (n p : V) → IsSemiformula L n p → Prop}
-    (definable : 𝚺ᴬ₁-Relation fun n p ↦ ∀ h : IsSemiformula L n p, motive n p h)
-    (rel : ∀ n k r v (hr : L.IsRel k r) (hv : IsSemitermVec L k n v),
-      motive n (^rel k r v) (by simp [hr, hv]))
-    (nrel : ∀ n k r v (hr : L.IsRel k r) (hv : IsSemitermVec L k n v),
-      motive n (^nrel k r v) (by simp [hr, hv]))
-    (verum : ∀ n, motive n ^⊤ (by simp))
-    (falsum : ∀ n, motive n ^⊥ (by simp))
-    (and : ∀ n p q (hp : IsSemiformula L n p) (hq : IsSemiformula L n q),
-      motive n p hp → motive n q hq → motive n (p ^⋏ q) (by simp [hp, hq]))
-    (or : ∀ n p q (hp : IsSemiformula L n p) (hq : IsSemiformula L n q),
-      motive n p hp → motive n q hq → motive n (p ^⋎ q) (by simp [hp, hq]))
-    (all : ∀ n p (hp : IsSemiformula L (n + 1) p),
-      motive (n + 1) p hp → motive n (^∀ p) (by simp [hp]))
-    (exs : ∀ n p (hp : IsSemiformula L (n + 1) p),
-      motive (n + 1) p hp → motive n (^∃ p) (by simp [hp]))
-    {n p : V} (hp : IsSemiformula L n p) : motive n p hp := by
+lemma IsSemiformula.sigma1_structural_induction {P : V → V → Prop} (hP : 𝚺ᴬ₁-Relation P)
+    (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
+    (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
+    (hverum : ∀ n, P n ^⊤)
+    (hfalsum : ∀ n, P n ^⊥)
+    (hand : ∀ n p q, IsSemiformula L n p → IsSemiformula L n q → P n p → P n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, IsSemiformula L n p → IsSemiformula L n q → P n p → P n q → P n (p ^⋎ q))
+    (hall : ∀ n p, IsSemiformula L (n + 1) p → P (n + 1) p → P n (^∀ p))
+    (hexs : ∀ n p, IsSemiformula L (n + 1) p → P (n + 1) p → P n (^∃ p)) {n p} :
+    IsSemiformula L n p → P n p := by
   have : 𝚺ᴬ₁-Function₂ (fun _ (n : V) ↦ n + 1) := by definability
-  refine bounded_all_sigma1_order_induction this
-    (P := fun p n ↦ IsSemiformula L n p → ∀ h : IsSemiformula L n p, motive n p h) ?_ ?_ p n hp hp
-  · exact Bounding.HierarchySymbol.Definable.imp (by definability)
-      (definable.comp₂ (.var _) (.var _))
-  intro p n ih hp _
+  apply bounded_all_sigma1_order_induction this ?_ ?_ p n
+  · apply Bounding.HierarchySymbol.Definable.imp
+    · exact Bounding.HierarchySymbol.Definable.comp₂
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+    · exact Bounding.HierarchySymbol.Definable.comp₂
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+        (Bounding.HierarchySymbol.DefinableFunction.var _)
+  intro p n ih hp
   rcases IsSemiformula.case_iff.mp hp with
     (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂,
       h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩)
-  · exact rel _ _ _ _ hR hv
-  · exact nrel _ _ _ _ hR hv
-  · exact verum _
-  · exact falsum _
-  · exact and _ _ _ h₁ h₂ (ih p₁ (by simp) n (by simp) h₁ h₁) (ih p₂ (by simp) n (by simp) h₂ h₂)
-  · exact or _ _ _ h₁ h₂ (ih p₁ (by simp) n (by simp) h₁ h₁) (ih p₂ (by simp) n (by simp) h₂ h₂)
-  · exact all _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁ h₁)
-  · exact exs _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁ h₁)
+  · apply hrel _ _ _ _ hR hv
+  · apply hnrel _ _ _ _ hR hv
+  · apply hverum
+  · apply hfalsum
+  · apply hand _ _ _ h₁ h₂ (ih p₁ (by simp) n (by simp) h₁) (ih p₂ (by simp) n (by simp) h₂)
+  · apply hor _ _ _ h₁ h₂ (ih p₁ (by simp) n (by simp) h₁) (ih p₂ (by simp) n (by simp) h₂)
+  · apply hall _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁)
+  · apply hexs _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁)
 
-@[elab_as_elim]
-lemma IsSemiformula.pi1_structural_induction
-    {motive : (n p : V) → IsSemiformula L n p → Prop}
-    (definable : 𝚷ᴬ₁-Relation fun n p ↦ ∀ h : IsSemiformula L n p, motive n p h)
-    (rel : ∀ n k r v (hr : L.IsRel k r) (hv : IsSemitermVec L k n v),
-      motive n (^rel k r v) (by simp [hr, hv]))
-    (nrel : ∀ n k r v (hr : L.IsRel k r) (hv : IsSemitermVec L k n v),
-      motive n (^nrel k r v) (by simp [hr, hv]))
-    (verum : ∀ n, motive n ^⊤ (by simp))
-    (falsum : ∀ n, motive n ^⊥ (by simp))
-    (and : ∀ n p q (hp : IsSemiformula L n p) (hq : IsSemiformula L n q),
-      motive n p hp → motive n q hq → motive n (p ^⋏ q) (by simp [hp, hq]))
-    (or : ∀ n p q (hp : IsSemiformula L n p) (hq : IsSemiformula L n q),
-      motive n p hp → motive n q hq → motive n (p ^⋎ q) (by simp [hp, hq]))
-    (all : ∀ n p (hp : IsSemiformula L (n + 1) p),
-      motive (n + 1) p hp → motive n (^∀ p) (by simp [hp]))
-    (exs : ∀ n p (hp : IsSemiformula L (n + 1) p),
-      motive (n + 1) p hp → motive n (^∃ p) (by simp [hp]))
-    {n p : V} (hp : IsSemiformula L n p) : motive n p hp := by
-  have hu := hp.isUFormula
-  revert n
-  induction hu using IsUFormula.ISigma1.pi1_succ_induction with
-  | definable => definability
-  | rel k R v hR _ =>
-    intro n h
-    exact rel _ _ _ _ hR (by simpa [hR] using h)
-  | nrel k R v hR _ =>
-    intro n h
-    exact nrel _ _ _ _ hR (by simpa [hR] using h)
-  | verum => intro n _; exact verum n
-  | falsum => intro n _; exact falsum n
-  | and p q _ _ ihp ihq =>
-    intro n h
+lemma IsSemiformula.pi1_structural_induction {P : V → V → Prop} (hP : 𝚷ᴬ₁-Relation P)
+    (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
+    (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
+    (hverum : ∀ n, P n ^⊤)
+    (hfalsum : ∀ n, P n ^⊥)
+    (hand : ∀ n p q, IsSemiformula L n p → IsSemiformula L n q → P n p → P n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, IsSemiformula L n p → IsSemiformula L n q → P n p → P n q → P n (p ^⋎ q))
+    (hall : ∀ n p, IsSemiformula L (n + 1) p → P (n + 1) p → P n (^∀ p))
+    (hexs : ∀ n p, IsSemiformula L (n + 1) p → P (n + 1) p → P n (^∃ p)) {n p} :
+    IsSemiformula L n p → P n p := by
+  suffices IsUFormula L p → ∀ n, IsSemiformula L n p → P n p by intro h; exact this h.isUFormula n h
+  apply IsUFormula.ISigma1.pi1_succ_induction (P := fun p ↦ ∀ n, IsSemiformula L n p → P n p)
+  · definability
+  · intro k R v hR _ n h
+    have : L.IsRel k R ∧ IsSemitermVec L k n v := by simpa using h
+    exact hrel _ _ _ _ hR this.2
+  · intro k R v hR _ n h
+    have : L.IsRel k R ∧ IsSemitermVec L k n v := by simpa using h
+    exact hnrel _ _ _ _ hR this.2
+  · intro n _; apply hverum
+  · intro n _; apply hfalsum
+  · intro p q _ _ ihp ihq n h
     have : IsSemiformula L n p ∧ IsSemiformula L n q := by simpa using h
-    exact and _ _ _ this.1 this.2 (ihp this.1) (ihq this.2)
-  | or p q _ _ ihp ihq =>
-    intro n h
+    apply hand _ _ _ this.1 this.2 (ihp n this.1) (ihq n this.2)
+  · intro p q _ _ ihp ihq n h
     have : IsSemiformula L n p ∧ IsSemiformula L n q := by simpa using h
-    exact or _ _ _ this.1 this.2 (ihp this.1) (ihq this.2)
-  | all p _ ihp =>
-    intro n h
+    apply hor _ _ _ this.1 this.2 (ihp n this.1) (ihq n this.2)
+  · intro p _ ihp n h
     have : IsSemiformula L (n + 1) p := by simpa using h
-    exact all _ _ this (ihp this)
-  | exs p _ ihp =>
-    intro n h
+    apply hall _ _ this (ihp _ this)
+  · intro p _ ihp n h
     have : IsSemiformula L (n + 1) p := by simpa using h
-    exact exs _ _ this (ihp this)
+    apply hexs _ _ this (ihp _ this)
 
-@[elab_as_elim]
-lemma IsSemiformula.induction1 (Γ) {motive : (n p : V) → IsSemiformula L n p → Prop}
-    (definable : Γᴬ_[1]-Relation fun n p ↦ ∀ h : IsSemiformula L n p, motive n p h)
-    (rel : ∀ n k r v (hr : L.IsRel k r) (hv : IsSemitermVec L k n v),
-      motive n (^rel k r v) (by simp [hr, hv]))
-    (nrel : ∀ n k r v (hr : L.IsRel k r) (hv : IsSemitermVec L k n v),
-      motive n (^nrel k r v) (by simp [hr, hv]))
-    (verum : ∀ n, motive n ^⊤ (by simp))
-    (falsum : ∀ n, motive n ^⊥ (by simp))
-    (and : ∀ n p q (hp : IsSemiformula L n p) (hq : IsSemiformula L n q),
-      motive n p hp → motive n q hq → motive n (p ^⋏ q) (by simp [hp, hq]))
-    (or : ∀ n p q (hp : IsSemiformula L n p) (hq : IsSemiformula L n q),
-      motive n p hp → motive n q hq → motive n (p ^⋎ q) (by simp [hp, hq]))
-    (all : ∀ n p (hp : IsSemiformula L (n + 1) p),
-      motive (n + 1) p hp → motive n (^∀ p) (by simp [hp]))
-    (exs : ∀ n p (hp : IsSemiformula L (n + 1) p),
-      motive (n + 1) p hp → motive n (^∃ p) (by simp [hp]))
-    {n p : V} (hp : IsSemiformula L n p) : motive n p hp :=
+lemma IsSemiformula.induction1 (Γ) {P : V → V → Prop} (hP : Γᴬ_[1]-Relation P)
+    (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
+    (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
+    (hverum : ∀ n, P n ^⊤)
+    (hfalsum : ∀ n, P n ^⊥)
+    (hand : ∀ n p q, IsSemiformula L n p → IsSemiformula L n q → P n p → P n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, IsSemiformula L n p → IsSemiformula L n q → P n p → P n q → P n (p ^⋎ q))
+    (hall : ∀ n p, IsSemiformula L (n + 1) p → P (n + 1) p → P n (^∀ p))
+    (hexs : ∀ n p, IsSemiformula L (n + 1) p → P (n + 1) p → P n (^∃ p)) {n p} :
+    IsSemiformula L n p → P n p :=
   match Γ with
-  | 𝚺 => IsSemiformula.sigma1_structural_induction definable rel nrel verum falsum and or all exs hp
-  | 𝚷 => IsSemiformula.pi1_structural_induction definable rel nrel verum falsum and or all exs hp
-  | 𝚫 => IsSemiformula.sigma1_structural_induction definable.of_delta rel nrel verum falsum and or
-    all exs hp
+  | 𝚺 => IsSemiformula.sigma1_structural_induction hP hrel hnrel hverum hfalsum hand hor hall hexs
+  | 𝚷 => IsSemiformula.pi1_structural_induction hP hrel hnrel hverum hfalsum hand hor hall hexs
+  | 𝚫 => IsSemiformula.sigma1_structural_induction hP.of_delta hrel hnrel hverum hfalsum hand hor
+    hall hexs
 
 
 lemma IsSemiformula.pos {n p : V} (h : IsSemiformula L n p) : 0 < p := h.isUFormula.pos

@@ -272,19 +272,15 @@ alias ⟨case, mk⟩ := case_iff
 lemma func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     IsUTerm L (^func k f v) := func_iff.mpr ⟨hkf, hv⟩
 
-@[elab_as_elim]
-lemma induction (Γ : Polarity) {motive : (t : V) → IsUTerm L t → Prop}
-    (definable : Γᴬ_[1]-Predicate fun t ↦ ∀ h : IsUTerm L t, motive t h)
-    (bvar : ∀ z, motive (^#z) .bvar) (fvar : ∀ x, motive (^&x) (.fvar x))
-    (func : ∀ k f v (hf : L.IsFunc k f) (hv : IsUTermVec L k v),
-      (∀ i (hi : i < k), motive v.[i] (hv.nth hi)) → motive (^func k f v) (.func hf hv))
-    {t : V} (ht : IsUTerm L t) : motive t ht :=
-  (construction L).induction (P := fun t ↦ ∀ h, motive t h) (v := ![]) definable (by
-    rintro C hC x (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, hk, h, rfl⟩) _
-    · exact bvar z
-    · exact fvar x
-    · exact func k f v hkf ⟨hk, fun i hi ↦ hC _ (h i hi) |>.1⟩
-        (fun i hi ↦ (hC _ (h i hi)).2 _)) t ht ht
+lemma induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
+    (hbvar : ∀ z, P (^#z)) (hfvar : ∀ x, P (^&x))
+    (hfunc : ∀ k f v, L.IsFunc k f → IsUTermVec L k v → (∀ i < k, P v.[i]) → P (^func k f v)) :
+    ∀ t, IsUTerm L t → P t :=
+  (construction L).induction (v := ![]) hP (by
+    rintro C hC x (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, hk, h, rfl⟩)
+    · exact hbvar z
+    · exact hfvar x
+    · exact hfunc k f v hkf ⟨hk, fun i hi ↦ hC _ (h i hi) |>.1⟩ (fun i hi ↦ hC _ (h i hi) |>.2))
 
 end IsUTerm
 
@@ -508,12 +504,14 @@ lemma graph_func_inv {k f v y} :
 
 variable {c} (param n)
 
-lemma graph_exists {t : V} (ht : IsUTerm L t) : ∃ y, c.Graph L param t y := by
-  induction ht using IsUTerm.induction 𝚺 with
-  | definable => definability
-  | bvar z => exact ⟨c.bvar param z, by simp [c.graph_bvar_iff]⟩
-  | fvar x => exact ⟨c.fvar param x, by simp [c.graph_fvar_iff]⟩
-  | func k f v hkf hv ih =>
+lemma graph_exists {t : V} : IsUTerm L t → ∃ y, c.Graph L param t y := by
+  apply IsUTerm.induction 𝚺 (P := fun t ↦ ∃ y, c.Graph L param t y) (by definability)
+  case hbvar =>
+    intro z; exact ⟨c.bvar param z, by simp [c.graph_bvar_iff]⟩
+  case hfvar =>
+    intro x; exact ⟨c.fvar param x, by simp [c.graph_fvar_iff]⟩
+  case hfunc =>
+    intro k f v hkf hv ih
     have : ∃ w, len w = k ∧ ∀ i < k, c.Graph L param v.[i] w.[i] :=
       sigmaOne_skolem_vec (by definability) ih
     rcases this with ⟨w, hwk, hvw⟩
@@ -524,12 +522,11 @@ lemma graph_unique {t y₁ y₂ : V} : c.Graph L param t y₁ → c.Graph L para
   suffices IsUTerm L t → ∀ y₁ y₂, c.Graph L param t y₁ → c.Graph L param t y₂ → y₁ = y₂
   by intro u₁ u₂ h₁ h₂; exact this (c.graph_dom_isUTerm h₁) u₁ u₂ h₁ h₂
   intro ht
-  induction ht using IsUTerm.induction 𝚷 with
-  | definable => definability
-  | bvar z => simp [c.graph_bvar_iff]
-  | fvar x => simp [c.graph_fvar_iff]
-  | func k f v _ _ ih =>
-    intro y₁ y₂ h₁ h₂
+  apply IsUTerm.induction 𝚷 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z; simp [c.graph_bvar_iff]
+  · intro x; simp [c.graph_fvar_iff]
+  · intro k f v _ _ ih y₁ y₂ h₁ h₂
     rcases c.graph_func_inv h₁ with ⟨w₁, ⟨hk₁, hv₁⟩, rfl⟩
     rcases c.graph_func_inv h₂ with ⟨w₂, ⟨hk₂, hv₂⟩, rfl⟩
     have : w₁ = w₂ :=
@@ -912,24 +909,19 @@ lemma IsSemiterm.case_iff {n t : V} :
 
 alias ⟨IsSemiterm.case, IsSemiterm.mk'⟩ := IsSemiterm.case_iff
 
-@[elab_as_elim]
-lemma IsSemiterm.induction (Γ : Polarity) {motive : (t : V) → IsSemiterm L n t → Prop}
-    (definable : Γᴬ_[1]-Predicate fun t ↦ ∀ h : IsSemiterm L n t, motive t h)
-    (bvar : ∀ z (hz : z < n), motive (^#z) (by simpa))
-    (fvar : ∀ x, motive (^&x) (by simp))
-    (func : ∀ k f v (hf : L.IsFunc k f) (hv : IsSemitermVec L k n v),
-      (∀ i (hi : i < k), motive v.[i] (hv.nth hi)) → motive (^func k f v) (by simp [hf, hv]))
-    {t : V} (ht : IsSemiterm L n t) : motive t ht := by
-  have hu := ht.isUTerm
-  revert ht
-  induction hu using IsUTerm.induction Γ with
-  | definable => definability
-  | bvar z => intro h; exact bvar z (by simpa using h)
-  | fvar x => intro _; exact fvar x
-  | func k f v hf _ ih =>
-    intro h
+lemma IsSemiterm.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
+    (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
+    (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
+    ∀ t, IsSemiterm L n t → P t := by
+  intro t ht
+  suffices IsSemiterm L n t → P t by exact this ht
+  apply IsUTerm.induction Γ ?_ ?_ ?_ ?_ t ht.isUTerm
+  · definability
+  · intro z; simp only [bvar]; exact hbvar z
+  · intro x _; exact hfvar x
+  · intro k f v hf _ ih h
     have hv : IsSemitermVec L k n v := by simp_all
-    exact func k f v hf hv (fun i hi ↦ ih i hi (hv.nth hi))
+    exact hfunc k f v hf hv (fun i hi ↦ ih i hi (hv.nth hi))
 
 @[simp] lemma IsSemitermVec.nil (k : V) : IsSemitermVec L 0 k 0 := ⟨by simp, by simp⟩
 
@@ -940,6 +932,11 @@ lemma IsSemiterm.induction (Γ : Polarity) {motive : (t : V) → IsSemiterm L n 
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp [ht.bv]
     · simp [h.bv (by simpa using hi)]⟩
+
+lemma IsSemiterm.sigma1_induction {P : V → Prop} (hP : 𝚺ᴬ₁-Predicate P)
+    (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
+    (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
+    ∀ t, IsSemiterm L n t → P t := IsSemiterm.induction 𝚺 hP hbvar hfvar hfunc
 
 end isSemiterm
 

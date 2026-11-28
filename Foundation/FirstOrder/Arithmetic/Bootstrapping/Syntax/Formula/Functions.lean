@@ -100,45 +100,42 @@ lemma neg_not_uformula {x : V} (h : ¬IsUFormula L x) :
     neg L x = 0 := construction.result_prop_not _ h
 
 lemma IsUFormula.neg {p : V} : IsUFormula L p → IsUFormula L (neg L p) := by
-  intro h
-  induction h using IsUFormula.ISigma1.sigma1_succ_induction with
-  | definable => definability
-  | rel k r v hr hv => simp [hr, hv]
-  | nrel k r v hr hv => simp [hr, hv]
-  | verum => simp
-  | falsum => simp
-  | and p q hp hq ihp ihq => simp [hp, hq, ihp, ihq]
-  | or p q hp hq ihp ihq => simp [hp, hq, ihp, ihq]
-  | all p hp ihp => simp [hp, ihp]
-  | exs p hp ihp => simp [hp, ihp]
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
 
 @[simp] lemma IsUFormula.bv_neg {p : V} :
     IsUFormula L p → bv L (Bootstrapping.neg L p) = bv L p := by
-  intro h
-  induction h using IsUFormula.ISigma1.sigma1_succ_induction with
-  | definable => definability
-  | rel k R v hR hv => simp [*]
-  | nrel k R v hR hv => simp [*]
-  | verum => simp
-  | falsum => simp
-  | and p q hp hq ihp ihq => simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
-  | or p q hp hq ihp ihq => simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
-  | all p hp ihp => simp [hp, hp.neg, ihp]
-  | exs p hp ihp => simp [hp, hp.neg, ihp]
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k R v hR hv; simp [*]
+  · intro k R v hR hv; simp [*]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
 
 @[simp] lemma IsUFormula.neg_neg {p : V} :
     IsUFormula L p → Bootstrapping.neg L (Bootstrapping.neg L p) = p := by
-  intro h
-  induction h using IsUFormula.ISigma1.sigma1_succ_induction with
-  | definable => definability
-  | rel k r v hr hv => simp [hr, hv]
-  | nrel k r v hr hv => simp [hr, hv]
-  | verum => simp
-  | falsum => simp
-  | and p q hp hq ihp ihq => simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
-  | or p q hp hq ihp ihq => simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
-  | all p hp ihp => simp [hp, hp.neg, ihp]
-  | exs p hp ihp => simp [hp, hp.neg, ihp]
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
 
 @[simp] lemma IsUFormula.neg_iff {p : V} :
     IsUFormula L (Bootstrapping.neg L p) ↔ IsUFormula L p := by
@@ -322,43 +319,40 @@ lemma shift_not_uformula {x : V} (h : ¬IsUFormula L x) :
     shift L x = 0 := (construction L).result_prop_not _ h
 
 lemma IsUFormula.shift {p : V} : IsUFormula L p → IsUFormula L (shift L p) := by
-  intro h
-  induction h using IsUFormula.ISigma1.sigma1_succ_induction with
-  | definable => definability
-  | rel k r v hr hv => simp [hr, hv]
-  | nrel k r v hr hv => simp [hr, hv]
-  | verum => simp
-  | falsum => simp
-  | and p q hp hq ihp ihq => simp [hp, hq, ihp, ihq]
-  | or p q hp hq ihp ihq => simp [hp, hq, ihp, ihq]
-  | all p hp ihp => simp [hp, ihp]
-  | exs p hp ihp => simp [hp, ihp]
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
 
 lemma IsUFormula.bv_shift {p : V} : IsUFormula L p → bv L (Bootstrapping.shift L p) = bv L p := by
-  intro h
-  induction h using IsUFormula.ISigma1.sigma1_succ_induction with
-  | definable => definability
-  | rel k r v hr hv => simp [hr, hv]
-  | nrel k r v hr hv => simp [hr, hv]
-  | verum => simp
-  | falsum => simp
-  | and p q hp hq ihp ihq => simp [hp, hq, ihp, ihq, hp.shift, hq.shift]
-  | or p q hp hq ihp ihq => simp [hp, hq, ihp, ihq, hp.shift, hq.shift]
-  | all p hp ihp => simp [hp, ihp, hp.shift]
-  | exs p hp ihp => simp [hp, ihp, hp.shift]
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq, hp.shift, hq.shift]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq, hp.shift, hq.shift]
+  · intro p hp ihp; simp [hp, ihp, hp.shift]
+  · intro p hp ihp; simp [hp, ihp, hp.shift]
 
 lemma IsSemiformula.shift {p : V} : IsSemiformula L n p → IsSemiformula L n (shift L p) := by
-  intro h
-  induction h using IsSemiformula.sigma1_structural_induction with
-  | definable => definability
-  | rel n k r v hr hv => simp [hr, hv.isUTerm]
-  | nrel n k r v hr hv => simp [hr, hv.isUTerm]
-  | verum => simp
-  | falsum => simp
-  | and n p q hp hq ihp ihq => simp [hp.isUFormula, hq.isUFormula, ihp, ihq]
-  | or n p q hp hq ihp ihq => simp [hp.isUFormula, hq.isUFormula, ihp, ihq]
-  | all n p hp ihp => simp [hp.isUFormula, ihp]
-  | exs n p hp ihp => simp [hp.isUFormula, ihp]
+  apply IsSemiformula.sigma1_structural_induction
+  · definability
+  · intro n k r v hr hv; simp [hr, hv.isUTerm]
+  · intro n k r v hr hv; simp [hr, hv.isUTerm]
+  · simp
+  · simp
+  · intro n p q hp hq ihp ihq; simp [hp.isUFormula, hq.isUFormula, ihp, ihq]
+  · intro n p q hp hq ihp ihq; simp [hp.isUFormula, hq.isUFormula, ihp, ihq]
+  · intro n p hp ihp; simp [hp.isUFormula, ihp]
+  · intro n p hp ihp; simp [hp.isUFormula, ihp]
 
 @[simp] lemma IsUFormula.shift_iff {p : V} :
     IsUFormula L (Bootstrapping.shift L p) ↔ IsUFormula L p := by
@@ -376,18 +370,18 @@ lemma IsSemiformula.shift {p : V} : IsSemiformula L n p → IsSemiformula L n (s
     IsSemiformula.shift⟩
 
 lemma shift_neg {p : V} (hp : IsSemiformula L n p) : shift L (neg L p) = neg L (shift L p) := by
-  induction hp using IsSemiformula.sigma1_structural_induction with
-  | definable => definability
-  | rel n k R v hR hv => simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
-  | nrel n k R v hR hv => simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
-  | verum => simp
-  | falsum => simp
-  | and n p q hp hq ihp ihq =>
+  apply IsSemiformula.sigma1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R v hR hv; simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
+  · intro n k R v hR hv; simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
+  · simp
+  · simp
+  · intro n p q hp hq ihp ihq
     simp [hp.isUFormula, hq.isUFormula, hp.shift.isUFormula, hq.shift.isUFormula, ihp, ihq]
-  | or n p q hp hq ihp ihq =>
+  · intro n p q hp hq ihp ihq
     simp [hp.isUFormula, hq.isUFormula, hp.shift.isUFormula, hq.shift.isUFormula, ihp, ihq]
-  | all n p hp ih => simp [hp.isUFormula, hp.shift.isUFormula, ih]
-  | exs n p hp ih => simp [hp.isUFormula, hp.shift.isUFormula, ih]
+  · intro n p hp ih; simp [hp.isUFormula, hp.shift.isUFormula, ih]
+  · intro n p hp ih; simp [hp.isUFormula, hp.shift.isUFormula, ih]
 
 end shift
 
@@ -602,48 +596,41 @@ lemma substs_not_uformula {w x : V} (h : ¬IsUFormula L x) :
 lemma substs_neg {p} (hp : IsSemiformula L n p) :
     IsSemitermVec L n m w → subst L w (neg L p) = neg L (subst L w p) := by
   revert m w
-  induction hp using IsSemiformula.pi1_structural_induction with
-  | definable => definability
-  | rel n k R v hR hv =>
-    intro m w hw
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intros n k R v hR hv m w hw
     rw [neg_rel hR hv.isUTerm, substs_nrel hR hv.isUTerm, substs_rel hR hv.isUTerm,
         neg_rel hR (hw.termSubstVec hv).isUTerm]
-  | nrel n k R v hR hv =>
-    intro m w hw
+  · intros n k R v hR hv m w hw
     rw [neg_nrel hR hv.isUTerm, substs_rel hR hv.isUTerm, substs_nrel hR hv.isUTerm,
         neg_nrel hR (hw.termSubstVec hv).isUTerm]
-  | verum => intros; simp [*]
-  | falsum => intros; simp [*]
-  | and n p q hp hq ihp ihq =>
-    intro m w hw
+  · intros; simp [*]
+  · intros; simp [*]
+  · intro n p q hp hq ihp ihq m w hw
     rw [neg_and hp.isUFormula hq.isUFormula,
       substs_or hp.neg.isUFormula hq.neg.isUFormula,
       substs_and hp.isUFormula hq.isUFormula,
       neg_and (hp.subst hw).isUFormula (hq.subst hw).isUFormula,
       ihp hw, ihq hw]
-  | or n p q hp hq ihp ihq =>
-    intro m w hw
+  · intro n p q hp hq ihp ihq m w hw
     rw [neg_or hp.isUFormula hq.isUFormula,
       substs_and hp.neg.isUFormula hq.neg.isUFormula,
       substs_or hp.isUFormula hq.isUFormula,
       neg_or (hp.subst hw).isUFormula (hq.subst hw).isUFormula,
       ihp hw, ihq hw]
-  | all n p hp ih =>
-    intro m w hw
+  · intro n p hp ih m w hw
     rw [neg_all hp.isUFormula, substs_ex hp.neg.isUFormula,
       substs_all hp.isUFormula, neg_all (hp.subst hw.qVec).isUFormula, ih hw.qVec]
-  | exs n p hp ih =>
-    intro m w hw
+  · intro n p hp ih m w hw
     rw [neg_ex hp.isUFormula, substs_all hp.neg.isUFormula,
       substs_ex hp.isUFormula, neg_ex (hp.subst hw.qVec).isUFormula, ih hw.qVec]
 
 lemma shift_substs {p} (hp : IsSemiformula L n p) :
     IsSemitermVec L n m w → shift L (subst L w p) = subst L (termShiftVec L n w) (shift L p) := by
   revert m w
-  induction hp using IsSemiformula.pi1_structural_induction with
-  | definable => definability
-  | rel n k R v hR hv =>
-    intro m w hw
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R v hR hv m w hw
     rw [substs_rel hR hv.isUTerm,
       shift_rel hR (hw.termSubstVec hv).isUTerm,
       shift_rel hR hv.isUTerm,
@@ -658,8 +645,7 @@ lemma shift_substs {p} (hp : IsSemiformula L n p) :
       nth_termSubstVec hv.termShiftVec.isUTerm hi,
       nth_termShiftVec hv.isUTerm hi,
       termShift_termSubsts (hv.nth hi) hw]
-  | nrel n k R v hR hv =>
-    intro m w hw
+  · intro n k R v hR hv m w hw
     rw [substs_nrel hR hv.isUTerm,
       shift_nrel hR (hw.termSubstVec hv).isUTerm,
       shift_nrel hR hv.isUTerm,
@@ -674,32 +660,28 @@ lemma shift_substs {p} (hp : IsSemiformula L n p) :
       nth_termSubstVec hv.termShiftVec.isUTerm hi,
       nth_termShiftVec hv.isUTerm hi,
       termShift_termSubsts (hv.nth hi) hw]
-  | verum n => intro w hw; simp
-  | falsum n => intro w hw; simp
-  | and n p q hp hq ihp ihq =>
-    intro m w hw
+  · intro n w hw; simp
+  · intro n w hw; simp
+  · intro n p q hp hq ihp ihq m w hw
     rw [substs_and hp.isUFormula hq.isUFormula,
       shift_and (hp.subst hw).isUFormula (hq.subst hw).isUFormula,
       shift_and hp.isUFormula hq.isUFormula,
       substs_and hp.shift.isUFormula hq.shift.isUFormula,
       ihp hw, ihq hw]
-  | or n p q hp hq ihp ihq =>
-    intro m w hw
+  · intro n p q hp hq ihp ihq m w hw
     rw [substs_or hp.isUFormula hq.isUFormula,
       shift_or (hp.subst hw).isUFormula (hq.subst hw).isUFormula,
       shift_or hp.isUFormula hq.isUFormula,
       substs_or hp.shift.isUFormula hq.shift.isUFormula,
       ihp hw, ihq hw]
-  | all n p hp ih =>
-    intro m w hw
+  · intro n p hp ih m w hw
     rw [substs_all hp.isUFormula,
       shift_all (hp.subst hw.qVec).isUFormula,
       shift_all hp.isUFormula,
       substs_all hp.shift.isUFormula,
       ih hw.qVec,
       termShift_qVec hw]
-  | exs n p hp ih =>
-    intro m w hw
+  · intro n p hp ih m w hw
     rw [substs_ex hp.isUFormula,
       shift_exs (hp.subst hw.qVec).isUFormula,
       shift_exs hp.isUFormula,
@@ -711,10 +693,9 @@ lemma substs_substs {p} (hp : IsSemiformula L l p) :
     IsSemitermVec L n m w → IsSemitermVec L l n v → subst L w (subst L v p) =
         subst L (termSubstVec L l w v) p := by
   revert m w n v
-  induction hp using IsSemiformula.pi1_structural_induction with
-  | definable => definability
-  | rel l k R ts hR hts =>
-    intro m w n v _ hv
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro l k R ts hR hts m w n v _ hv
     rw [substs_rel hR hts.isUTerm,
       substs_rel hR (hv.termSubstVec hts).isUTerm,
       substs_rel hR hts.isUTerm]
@@ -726,8 +707,7 @@ lemma substs_substs {p} (hp : IsSemiformula L l p) :
       nth_termSubstVec hts.isUTerm hi,
       nth_termSubstVec hts.isUTerm hi,
       termSubst_termSubst hv (hts.nth hi)]
-  | nrel l k R ts hR hts =>
-    intro m w n v _ hv
+  · intro l k R ts hR hts m w n v _ hv
     rw [substs_nrel hR hts.isUTerm,
       substs_nrel hR (hv.termSubstVec hts).isUTerm,
       substs_nrel hR hts.isUTerm]
@@ -739,29 +719,25 @@ lemma substs_substs {p} (hp : IsSemiformula L l p) :
       nth_termSubstVec hts.isUTerm hi,
       nth_termSubstVec hts.isUTerm hi,
       termSubst_termSubst hv (hts.nth hi)]
-  | verum => intros; simp
-  | falsum => intros; simp
-  | and l p q hp hq ihp ihq =>
-    intro m w n v hw hv
+  · intros; simp
+  · intros; simp
+  · intro l p q hp hq ihp ihq m w n v hw hv
     rw [substs_and hp.isUFormula hq.isUFormula,
       substs_and (hp.subst hv).isUFormula (hq.subst hv).isUFormula,
       substs_and hp.isUFormula hq.isUFormula,
       ihp hw hv, ihq hw hv]
-  | or l p q hp hq ihp ihq =>
-    intro m w n v hw hv
+  · intro l p q hp hq ihp ihq m w n v hw hv
     rw [substs_or hp.isUFormula hq.isUFormula,
       substs_or (hp.subst hv).isUFormula (hq.subst hv).isUFormula,
       substs_or hp.isUFormula hq.isUFormula,
       ihp hw hv, ihq hw hv]
-  | all l p hp ih =>
-    intro m w n v hw hv
+  · intro l p hp ih m w n v hw hv
     rw [substs_all hp.isUFormula,
       substs_all (hp.subst hv.qVec).isUFormula,
       substs_all hp.isUFormula,
       ih hw.qVec hv.qVec,
       termSubstVec_qVec_qVec hv hw]
-  | exs l p hp ih =>
-    intro m w n v hw hv
+  · intro l p hp ih m w n v hw hv
     rw [substs_ex hp.isUFormula,
       substs_ex (hp.subst hv.qVec).isUFormula,
       substs_ex hp.isUFormula,
@@ -772,30 +748,25 @@ lemma subst_eq_self {n w : V} (hp : IsSemiformula L n p) (hw : IsSemitermVec L n
     (H : ∀ i < n, w.[i] = ^#i) :
     subst L w p = p := by
   revert w
-  induction hp using IsSemiformula.pi1_structural_induction with
-  | definable => definability
-  | rel n k R v hR hv =>
-    intro w _ H
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R v hR hv w _ H
     simp only [substs_rel, qqRel_inj, true_and, hR, hv.isUTerm]
     apply nth_ext' k (by simp [*, hv.isUTerm]) (by simp [hv.lh])
     intro i hi
     rw [nth_termSubstVec hv.isUTerm hi, termSubst_eq_self (hv.nth hi) H]
-  | nrel n k R v hR hv =>
-    intro w _ H
+  · intro n k R v hR hv w _ H
     simp only [substs_nrel, qqNRel_inj, true_and, hR, hv.isUTerm]
     apply nth_ext' k (by simp [*, hv.isUTerm]) (by simp [hv.lh])
     intro i hi
     rw [nth_termSubstVec hv.isUTerm hi, termSubst_eq_self (hv.nth hi) H]
-  | verum n => intro w _ _; simp
-  | falsum n => intro w _ _; simp
-  | and n p q hp hq ihp ihq =>
-    intro w hw H
+  · intro n w _ _; simp
+  · intro n w _ _; simp
+  · intro n p q hp hq ihp ihq w hw H
     simp [*, hp.isUFormula, hq.isUFormula, ihp hw H, ihq hw H]
-  | or n p q hp hq ihp ihq =>
-    intro w hw H
+  · intro n p q hp hq ihp ihq w hw H
     simp [*, hp.isUFormula, hq.isUFormula, ihp hw H, ihq hw H]
-  | all n p hp ih =>
-    intro w hw H
+  · intro n p hp ih w hw H
     have H : ∀ i < n + 1, (qVec L w).[i] = ^#i := by
       intro i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -805,8 +776,7 @@ lemma subst_eq_self {n w : V} (hp : IsSemiformula L n p) (hw : IsSemitermVec L n
         rw [nth_termBShiftVec (by simpa [hw.lh] using hw.isUTerm) (by simp [hw.lh, hi])]
         simp [H i hi]
     simp [*, hp.isUFormula, ih hw.qVec H]
-  | exs n p hp ih =>
-    intro w hw H
+  · intro n p hp ih w hw H
     have H : ∀ i < n + 1, (qVec L w).[i] = ^#i := by
       intro i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -990,72 +960,62 @@ lemma formulaComplexity_not_uformula {x : V} (h : ¬IsUFormula L x) :
 
 @[simp] lemma formulaComplexity_neg {p : V} :
     IsUFormula L p → formulaComplexity L (neg L p) = formulaComplexity L p := by
-  intro h
-  induction h using IsUFormula.ISigma1.sigma1_succ_induction with
-  | definable => definability
-  | rel k r v hr hv => simp [hr, hv]
-  | nrel k r v hr hv => simp [hr, hv]
-  | verum => simp
-  | falsum => simp
-  | and p q hp hq ihp ihq => simp [hp, hq, ihp, ihq]
-  | or p q hp hq ihp ihq => simp [hp, hq, ihp, ihq]
-  | all p hp ihp => simp [hp, ihp]
-  | exs p hp ihp => simp [hp, ihp]
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
 
 @[simp] lemma formulaComplexity_shift {p : V} :
     IsUFormula L p → formulaComplexity L (shift L p) = formulaComplexity L p := by
-  intro h
-  induction h using IsUFormula.ISigma1.sigma1_succ_induction with
-  | definable => definability
-  | rel k r v hr hv => simp [hr, hv]
-  | nrel k r v hr hv => simp [hr, hv]
-  | verum => simp
-  | falsum => simp
-  | and p q hp hq ihp ihq =>
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq
     simp [hp, hq, ihp, ihq]
-  | or p q hp hq ihp ihq => simp [hp, hq, ihp, ihq]
-  | all p hp ihp => simp [hp, ihp]
-  | exs p hp ihp => simp [hp, ihp]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
 
 lemma fomulaComplexity_substs {n p : V} (hp : IsSemiformula L n p) {m w : V} :
     IsSemitermVec L n m w → formulaComplexity L (subst L w p) = formulaComplexity L p := by
   revert m w
-  induction hp using IsSemiformula.pi1_structural_induction with
-  | definable => definability
-  | rel n k R v hR hv =>
-    intro m w hw
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R v hR hv m w hw
     rw [formulaComplexity_rel hR hv.isUTerm, substs_rel hR hv.isUTerm,
         formulaComplexity_rel hR (hw.termSubstVec hv).isUTerm]
-  | nrel n k R v hR hv =>
-    intro m w hw
+  · intro n k R v hR hv m w hw
     rw [formulaComplexity_nrel hR hv.isUTerm, substs_nrel hR hv.isUTerm,
         formulaComplexity_nrel hR (hw.termSubstVec hv).isUTerm]
-  | verum n =>
-    intro m w hw
+  · intro n m w hw
     rw [substs_verum]
-  | falsum n =>
-    intro m w hw
+  · intro n m w hw
     rw [substs_falsum]
-  | and n p q hp hq ihp ihq =>
-    intro m w hw
+  · intro n p q hp hq ihp ihq m w hw
     rw [substs_and hp.isUFormula hq.isUFormula,
       formulaComplexity_and (hp.subst hw).isUFormula (hq.subst hw).isUFormula,
       ihp hw, ihq hw,
       formulaComplexity_and hp.isUFormula hq.isUFormula]
-  | or n p q hp hq ihp ihq =>
-    intro m w hw
+  · intro n p q hp hq ihp ihq m w hw
     rw [substs_or hp.isUFormula hq.isUFormula,
       formulaComplexity_or (hp.subst hw).isUFormula (hq.subst hw).isUFormula,
       ihp hw, ihq hw,
       formulaComplexity_or hp.isUFormula hq.isUFormula]
-  | all n p hp ihp =>
-    intro m w hw
+  · intro n p hp ihp m w hw
     rw [substs_all hp.isUFormula,
      formulaComplexity_all (hp.subst hw.qVec).isUFormula,
      ihp (hw.qVec),
      formulaComplexity_all hp.isUFormula]
-  | exs n p hp ihp =>
-    intro m w hw
+  · intro n p hp ihp m w hw
     rw [substs_ex hp.isUFormula,
      formulaComplexity_ex (hp.subst hw.qVec).isUFormula,
      ihp (hw.qVec),
