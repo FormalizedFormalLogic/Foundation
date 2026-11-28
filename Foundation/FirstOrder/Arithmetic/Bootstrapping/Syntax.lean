@@ -10,6 +10,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Func
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Typed
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Coding
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.FreeVariables
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed

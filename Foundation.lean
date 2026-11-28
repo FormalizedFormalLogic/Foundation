@@ -23,6 +23,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Func
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Typed
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.FreeVariables
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Coding
